@@ -1,6 +1,7 @@
 User = require("../../models/User").User
 NewsletterManager = require "../../managers/NewsletterManager"
 ProjectDeleter = require("../Project/ProjectDeleter")
+SubscriptionHandler = require("../Subscription/SubscriptionHandler")
 logger = require("logger-sharelatex")
 
 module.exports =
@@ -19,4 +20,7 @@ module.exports =
 				ProjectDeleter.deleteUsersProjects user._id, (err)->
 					if err?
 						return callback(err)
-					user.remove callback
+					SubscriptionHandler.cancelSubscription user._id, (err)->
+						if err?
+							return callback(err)
+						user.remove callback
