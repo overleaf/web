@@ -201,7 +201,8 @@ module.exports =
 		dropboxHandler.getDropboxRegisterUrl user_id, (err, url)->
 			return callback(err) if err?
 			logger.log url:url, "redirecting user for dropbox auth"
-			res.redirect url
+			if url
+				res.redirect url
 
 	completeDropboxRegistration: (req, res)->
 		user_id = req.session.user._id
