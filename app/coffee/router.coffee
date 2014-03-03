@@ -1,52 +1,52 @@
-UserController = require('./controllers/UserController')
-AdminController = require('./controllers/AdminController')
-HomeController = require('./controllers/HomeController')
-ProjectController = require("./controllers/ProjectController")
-ProjectApiController = require("./Features/Project/ProjectApiController")
-InfoController = require('./controllers/InfoController')
-SpellingController = require('./Features/Spelling/SpellingController')
-CollaberationManager = require('./managers/CollaberationManager')
-SecutiryManager = require('./managers/SecurityManager')
-AuthorizationManager = require('./Features/Security/AuthorizationManager')
-versioningController =  require("./Features/Versioning/VersioningApiController")
-EditorController = require("./Features/Editor/EditorController")
-EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
-Settings = require('settings-sharelatex')
-TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
-ProjectHandler = require('./handlers/ProjectHandler')
-dropboxHandler = require('./Features/Dropbox/DropboxHandler')
-SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
-UploadsRouter = require './Features/Uploads/UploadsRouter'
-metrics = require('./infrastructure/Metrics')
-ReferalController = require('./Features/Referal/ReferalController')
-ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
-TemplatesController = require('./Features/Templates/TemplatesController')
-TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
-AuthenticationController = require('./Features/Authentication/AuthenticationController')
-TagsController = require("./Features/Tags/TagsController")
-CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
-PersonalInfoController = require('./Features/User/UserController')
-DocumentController = require('./Features/Documents/DocumentController')
-CompileManager = require("./Features/Compile/CompileManager")
-CompileController = require("./Features/Compile/CompileController")
-HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
-ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
-FileStoreController = require("./Features/FileStore/FileStoreController")
-logger = require("logger-sharelatex")
+UserController 				= require('./controllers/UserController')
+AdminController 			= require('./controllers/AdminController')
+HomeController 				= require('./controllers/HomeController')
+ProjectController 			= require('./controllers/ProjectController')
+InfoController 				= require('./controllers/InfoController')
+ProjectApiController 		= require('./Features/Project/ProjectApiController')
+SpellingController 			= require('./Features/Spelling/SpellingController')
+AuthorizationManager 		= require('./Features/Security/AuthorizationManager')
+VersioningController 		= require('./Features/Versioning/VersioningApiController')
+EditorController 			= require('./Features/Editor/EditorController')
+EditorUpdatesController 	= require('./Features/Editor/EditorUpdatesController')
+TpdsController 				= require('./Features/ThirdPartyDataStore/TpdsController')
+DropboxHandler 				= require('./Features/Dropbox/DropboxHandler')
+SubscriptionRouter 			= require('./Features/Subscription/SubscriptionRouter')
+UploadsRouter 				= require('./Features/Uploads/UploadsRouter')
+ReferalController 			= require('./Features/Referal/ReferalController')
+ReferalMiddleware 			= require('./Features/Referal/ReferalMiddleware')
+TemplatesController 		= require('./Features/Templates/TemplatesController')
+TemplatesMiddlewear 		= require('./Features/Templates/TemplatesMiddlewear')
+AuthenticationController	= require('./Features/Authentication/AuthenticationController')
+TagsController 				= require('./Features/Tags/TagsController')
+CollaboratorsController 	= require('./Features/Collaborators/CollaboratorsController')
+PersonalInfoController 		= require('./Features/User/UserController')
+DocumentController 			= require('./Features/Documents/DocumentController')
+CompileManager 				= require('./Features/Compile/CompileManager')
+CompileController 			= require('./Features/Compile/CompileController')
+HealthCheckController 		= require('./Features/HealthCheck/HealthCheckController')
+ProjectDownloadsController 	= require('./Features/Downloads/ProjectDownloadsController')
+FileStoreController 		= require('./Features/FileStore/FileStoreController')
+ProjectHandler 				= require('./handlers/ProjectHandler')
+Metrics 					= require('./infrastructure/Metrics')
+CollaborationManager 		= require('./managers/CollaborationManager')
+SecurityManager 			= require('./managers/SecurityManager')
+Logger 						= require('logger-sharelatex')
+Settings 					= require('settings-sharelatex')
 
 httpAuth = require('express').basicAuth (user, pass)->
 	isValid = Settings.httpAuthUsers[user] == pass
 	if !isValid
-		logger.err user:user, pass:pass, "invalid login details"
+		Logger.err user:user, pass:pass, "invalid login details"
 	return isValid
 
 module.exports = class Router
 	constructor: (app, io, socketSessions)->
 		app.use(app.router)
 
-		collaberationManager = new CollaberationManager(io)
+		collaborationManager = new CollaborationManager(io)
 
-		Project = new ProjectController(collaberationManager)
+		Project = new ProjectController(collaborationManager)
 		projectHandler = new ProjectHandler()
 
 		app.get  '/', HomeController.index
@@ -54,7 +54,7 @@ module.exports = class Router
 		app.get  '/login', UserController.loginForm
 		app.post '/login', AuthenticationController.login
 		app.get  '/logout', UserController.logout
-		app.get  '/restricted', SecutiryManager.restricted
+		app.get  '/restricted', SecurityManager.restricted
 
 		app.get '/resources', HomeController.resources
 		app.get '/comments', HomeController.comments
@@ -97,13 +97,13 @@ module.exports = class Router
 		app.post '/project/new', AuthenticationController.requireLogin(), Project.apiNewProject
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
-		app.get  '/Project/:Project_id', SecutiryManager.requestCanAccessProject, Project.loadEditor
-		app.get  '/Project/:Project_id/file/:File_id', SecutiryManager.requestCanAccessProject, FileStoreController.getFile
+		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, Project.loadEditor
+		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
 		# This is left for legacy reasons and can be removed once all editors have had a chance to refresh:
-		app.get  '/Project/:Project_id/download/pdf', SecutiryManager.requestCanAccessProject, CompileController.downloadPdf
+		app.get  '/Project/:Project_id/download/pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 
-		app.get  '/Project/:Project_id/output/output.pdf', SecutiryManager.requestCanAccessProject, CompileController.downloadPdf
+		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
@@ -111,21 +111,21 @@ module.exports = class Router
 					"file":       req.params[1]
 				req.params = params
 				next()
-			), SecutiryManager.requestCanAccessProject, CompileController.getFileFromClsi
+			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
 
-		app.del  '/Project/:Project_id',  SecutiryManager.requestIsOwner, Project.deleteProject
-		app.post  '/Project/:Project_id/clone', SecutiryManager.requestCanAccessProject, Project.cloneProject
+		app.del  '/Project/:Project_id',  SecurityManager.requestIsOwner, Project.deleteProject
+		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, Project.cloneProject
 
-		app.post '/Project/:Project_id/snapshot', SecutiryManager.requestCanModifyProject, versioningController.takeSnapshot
-		app.get  '/Project/:Project_id/version', SecutiryManager.requestCanAccessProject, versioningController.listVersions
-		app.get  '/Project/:Project_id/version/:Version_id', SecutiryManager.requestCanAccessProject, versioningController.getVersion
-		app.get  '/Project/:Project_id/version', SecutiryManager.requestCanAccessProject, versioningController.listVersions
-		app.get  '/Project/:Project_id/version/:Version_id', SecutiryManager.requestCanAccessProject, versioningController.getVersion
+		app.post '/Project/:Project_id/snapshot', SecurityManager.requestCanModifyProject, VersioningController.takeSnapshot
+		app.get  '/Project/:Project_id/version', SecurityManager.requestCanAccessProject, VersioningController.listVersions
+		app.get  '/Project/:Project_id/version/:Version_id', SecurityManager.requestCanAccessProject, VersioningController.getVersion
+		app.get  '/Project/:Project_id/version', SecurityManager.requestCanAccessProject, VersioningController.listVersions
+		app.get  '/Project/:Project_id/version/:Version_id', SecurityManager.requestCanAccessProject, VersioningController.getVersion
 
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
-		app.get  '/project/:Project_id/collaborators', SecutiryManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
+		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
 
-		app.get  '/Project/:Project_id/download/zip', SecutiryManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
+		app.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
 
 
 		app.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
@@ -147,7 +147,7 @@ module.exports = class Router
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
 
 		app.get	 '/enableversioning/:Project_id', (req, res)->
-			versioningController.enableVersioning req.params.Project_id, -> res.send()
+			VersioningController.enableVersioning req.params.Project_id, -> res.send()
 
 		app.get  /^\/project\/([^\/]*)\/version\/([^\/]*)\/file\/(.*)$/,
 			((req, res, next) ->
@@ -158,21 +158,21 @@ module.exports = class Router
 				req.params = params
 				next()
 			),
-			SecutiryManager.requestCanAccessProject, versioningController.getVersionFile
+			SecurityManager.requestCanAccessProject, VersioningController.getVersionFile
 
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
 		#Admin Stuff
-		app.get  '/admin', SecutiryManager.requestIsAdmin, AdminController.index
-		app.post '/admin/closeEditor', SecutiryManager.requestIsAdmin, AdminController.closeEditor
-		app.post '/admin/dissconectAllUsers', SecutiryManager.requestIsAdmin, AdminController.dissconectAllUsers
-		app.post '/admin/writeAllDocsToMongo', SecutiryManager.requestIsAdmin, AdminController.writeAllToMongo
-		app.post '/admin/addquote', SecutiryManager.requestIsAdmin, AdminController.addQuote
-		app.post '/admin/syncUserToSubscription', SecutiryManager.requestIsAdmin, AdminController.syncUserToSubscription
-		app.post '/admin/flushProjectToTpds', SecutiryManager.requestIsAdmin, AdminController.flushProjectToTpds
-		app.post '/admin/pollUsersWithDropbox', SecutiryManager.requestIsAdmin, AdminController.pollUsersWithDropbox
-		app.post '/admin/updateProjectCompiler', SecutiryManager.requestIsAdmin, AdminController.updateProjectCompiler
+		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
+		app.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
+		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
+		app.post '/admin/writeAllDocsToMongo', SecurityManager.requestIsAdmin, AdminController.writeAllToMongo
+		app.post '/admin/addquote', SecurityManager.requestIsAdmin, AdminController.addQuote
+		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
+		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
+		app.post '/admin/pollUsersWithDropbox', SecurityManager.requestIsAdmin, AdminController.pollUsersWithDropbox
+		app.post '/admin/updateProjectCompiler', SecurityManager.requestIsAdmin, AdminController.updateProjectCompiler
 
 		app.get '/perfTest', (req,res)->
 			res.send("hello")
@@ -184,7 +184,7 @@ module.exports = class Router
 
 		app.get '/health_check', HealthCheckController.check
 
-		app.get "/status/compiler/:Project_id", SecutiryManager.requestCanAccessProject, (req, res) ->
+		app.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
 			success = false
 			CompileManager.compile req.params.Project_id, "test-compile", {}, () ->
 				success = true
@@ -217,7 +217,7 @@ module.exports = class Router
 
 
 		socketSessions.on 'connection', (err, client, session)->
-			metrics.inc('socket-io.connection')
+			Metrics.inc('socket-io.connection')
 			# This is not ideal - we should come up with a better way of handling
 			# anonymous users, but various logging lines rely on user._id
 			if !session or !session.user?
@@ -229,7 +229,7 @@ module.exports = class Router
 				EditorController.joinProject(client, user, data.project_id, callback)
 
 			client.on 'disconnect', () ->
-				metrics.inc ('socket-io.disconnect')
+				Metrics.inc ('socket-io.disconnect')
 				EditorController.leaveProject client, user
 
 			client.on 'reportError', (error, callback) ->
@@ -285,15 +285,15 @@ module.exports = class Router
 
 			client.on 'renameEntity', (entity_id, entityType, newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.renameEntity(project_id, entity_id, entityType, newName, callback)
+					collaborationManager.renameEntity(project_id, entity_id, entityType, newName, callback)
 
 			client.on 'moveEntity', (entity_id, folder_id, entityType, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.moveEntity(project_id, entity_id, folder_id, entityType, callback)
+					collaborationManager.moveEntity(project_id, entity_id, folder_id, entityType, callback)
 
 			client.on 'setProjectName', (window_id, newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.renameProject(project_id, window_id, newName, callback)
+					collaborationManager.renameProject(project_id, window_id, newName, callback)
 
 			client.on 'getProject',(callback)->
 			 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
@@ -301,15 +301,15 @@ module.exports = class Router
 
 			client.on 'setRootDoc', (newRootDocID, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.setRootDoc(project_id, newRootDocID, callback)
+					collaborationManager.setRootDoc(project_id, newRootDocID, callback)
 
 			client.on 'deleteProject', (callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					collaberationManager.deleteProject(project_id, callback)
+					collaborationManager.deleteProject(project_id, callback)
 
 			client.on 'setPublicAccessLevel', (newAccessLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					collaberationManager.setPublicAccessLevel(project_id, newAccessLevel, callback)
+					collaborationManager.setPublicAccessLevel(project_id, newAccessLevel, callback)
 
 			client.on 'pdfProject', (opts, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
@@ -322,15 +322,15 @@ module.exports = class Router
 
 			client.on 'distributMessage', (message)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					collaberationManager.distributMessage project_id, client, message
+					collaborationManager.distributMessage project_id, client, message
 
 			client.on 'changeUsersPrivlageLevel', (user_id, newPrivalageLevel)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					projectHandler.changeUsersPrivlageLevel project_id, user_id, newPrivalageLevel
 
-			client.on 'enableversioningController', (callback)->
+			client.on 'enableVersioningController', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					versioningController.enableVersioning project_id, callback
+					VersioningController.enableVersioning project_id, callback
 
 			client.on 'getRootDocumentsList', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
@@ -342,7 +342,7 @@ module.exports = class Router
 
 			client.on 'getUserDropboxLinkStatus', (owner_id, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					dropboxHandler.getUserRegistrationStatus owner_id, callback
+					DropboxHandler.getUserRegistrationStatus owner_id, callback
 
 			client.on 'publishProjectAsTemplate', (user_id, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>

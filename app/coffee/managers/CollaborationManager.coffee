@@ -12,7 +12,7 @@ versioningApiHandler = require('../Features/Versioning/VersioningApiHandler')
 metrics = require('../infrastructure/Metrics')
 EditorRealTimeController = require('../Features/Editor/EditorRealTimeController')
 
-module.exports = class CollaberationManager
+module.exports = class CollaborationManager
 	constructor: (@io)->
 
 	deleteProject: (project_id, callback)->
