@@ -40,7 +40,7 @@ module.exports =
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
 		getProjectsUsersIds options.project_id, (err, user_id, allUserIds)->
 			return callback(err) if err?
-			logger.log project_id: options.project_id, user_id:user_id, path: options.path, rev:options.rev, uri:options.uri, project_name:options.project_name, docLines:options.docLines, sl_req_id:sl_req_id, "sending doc to third party data store"
+			logger.log project_id: options.project_id, user_id:user_id, path: options.path, rev:options.rev, uri:options.uri, project_name:options.project_name, sl_req_id:sl_req_id, "sending doc to third party data store"
 			postOptions =
 				method : "post"
 				headers: 

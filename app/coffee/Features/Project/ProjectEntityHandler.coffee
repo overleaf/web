@@ -97,7 +97,7 @@ module.exports = ProjectEntityHandler =
 			confirmFolder project, folder_id, (folder_id)=>
 				doc = new Doc name: docName, lines: docLines
 				Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
-					tpdsUpdateSender.addDoc {project_id:project._id, docLines:docLines, path:result.path.fileSystem, project_name:project.name, rev:doc.rev}, sl_req_id, ->
+					tpdsUpdateSender.addDoc {project_id:project._id, path:result.path.fileSystem, project_name:project.name, rev:doc.rev}, sl_req_id, ->
 						callback(err, doc, folder_id)
 
 	addFile: (project_or_id, folder_id, fileName, path, sl_req_id, callback = (error, fileRef, folder_id) ->)->
@@ -217,10 +217,10 @@ module.exports = ProjectEntityHandler =
 						logger.err "error putting doc #{doc_id} in project #{project_id} #{err}"
 						callback err
 					else if docComparitor.areSame docLines, doc.lines
-						logger.log sl_req_id: sl_req_id, docLines:docLines, project_id:project_id, doc_id:doc_id, rev:doc.rev, "old doc lines are same as the new doc lines, not updating them"
+						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, rev:doc.rev, "old doc lines are same as the new doc lines, not updating them"
 						callback()
 					else
-						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, docLines: docLines, oldDocLines: doc.lines, rev:doc.rev, "updating doc lines"
+						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, rev:doc.rev, "updating doc lines"
 						conditons = _id:project_id
 						update = {$set:{}, $inc:{}}
 						changeLines = {}
@@ -234,7 +234,7 @@ module.exports = ProjectEntityHandler =
 								logger.err(sl_req_id:sl_req_id, doc_id:doc_id, project_id:project_id, err:err, "error saving doc to mongo")
 								callback(err)
 							else
-								logger.log sl_req_id:sl_req_id, doc_id:doc_id, project_id:project_id, newDocLines:docLines, oldDocLines:doc.lines,	 "doc saved to mongo"
+								logger.log sl_req_id:sl_req_id, doc_id:doc_id, project_id:project_id, "doc saved to mongo"
 								rev = doc.rev+1
 								projectUpdateHandler.markAsUpdated project_id
 							tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, docLines:docLines, project_name:project.name, rev:rev}, sl_req_id, callback

@@ -52,7 +52,7 @@ module.exports =
 				if err?
 					logger.err project_id:project_id, doc_id:doc_id, fsPath:fsPath, "error reading file into text array for process doc update"
 					return callback(err)
-				logger.log docLines:docLines, doc_id:doc_id, project_id:project_id, sl_req_id:sl_req_id, "processing doc update from tpds"
+				logger.log doc_id:doc_id, project_id:project_id, sl_req_id:sl_req_id, "processing doc update from tpds"
 				if doc_id?
 					editorController.setDoc project_id, doc_id, docLines, sl_req_id, (err)->
 						callback()
