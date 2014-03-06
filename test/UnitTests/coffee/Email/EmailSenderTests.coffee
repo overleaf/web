@@ -43,7 +43,7 @@ describe "Email", ->
 
 			@sender.sendEmail @opts, =>
 				args = @sesClient.sendMail.args[0][0]
-				args.message.should.equal @opts.html
+				args.html.should.equal @opts.html
 				args.to.should.equal @opts.to
 				args.subject.should.equal @opts.subject
 				done()

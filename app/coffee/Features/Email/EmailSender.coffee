@@ -21,11 +21,19 @@ createSesClient = (settings) ->
 	else
 		logger.warn "AWS SES credentials are not configured. No emails will be sent."
 
+createSMTPClient = (settings) ->
+	if settings?
+		client = nodemailer.createTransport("SMTP",settings)
+	else
+		logger.warn "SMTP credentials are not configured. No emails will be sent."
+
 if Settings.email?
 	switch Settings.email.transport
 		when "ses"
-			createSesClient( Settings.email.ses)
-		# TODO direct, client
+			createSesClient( Settings.email.ses )
+		when "smtp"
+			createSMTPClient( Settings.email.smtp )
+		# TODO sendmail, direct?
 		when undefined,null,""
 			logger.warn "No Email transport defined. No emails will be sent."
 		else
@@ -39,7 +47,7 @@ module.exports =
 			to: options.to
 			from: defaultFromAddress
 			subject: options.subject
-			message: options.html
+			html: options.html
 			replyTo: options.replyTo || Settings.email.replyToAddress
 		client.sendMail options, (err, res)->
 			if err?
