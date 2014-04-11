@@ -46,11 +46,7 @@ templates.passwordReset =
 <p>
 Your password has been reset, the new password is <p> <%= newPassword %>
 <p>
-please <a href="https://www.sharelatex.com/login">login here</a> and then change your password <a href=#{Settings.siteUrl}/user/settings> in your user settings</a>
-
-</p>
-<p>Thank you</p>
-<p> <a href="https://www.sharelatex.com"> ShareLatex.com </a></p>
+please <a href="<%= siteUrl %>/login">login here</a> and then change your password <a href="<%= siteUrl %>/user/settings"> in your user settings</a>
 '''
 
 templates.projectSharedWithYou = 
@@ -71,8 +67,6 @@ templates.projectSharedWithYou =
 		</div>
 	</div>
 </center>
-<p> Thank you</p>
-<p> <a href="https://www.sharelatex.com"> ShareLatex.com </a></p>
 '''
 
 module.exports =

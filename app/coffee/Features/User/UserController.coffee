@@ -9,6 +9,8 @@ metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+Settings = require('settings-sharelatex')
+
 
 module.exports =
 
@@ -114,6 +116,7 @@ module.exports =
 					emailOpts =
 						newPassword: randomPassword
 						to: user.email
+						siteUrl: "#{Settings.siteUrl}"
 					EmailHandler.sendEmail "passwordReset", emailOpts, (err)->
 						if err?
 							logger.err err:err, emailOpts:emailOpts, "problem sending password reset email"
