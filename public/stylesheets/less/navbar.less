@@ -1,15 +1,28 @@
-.navbar.navbar-inverse .navbar-inner {  
-    background: #252528;    
+.navbar .navbar-inner {
+  background-color: white;
+  background-image: none;
+  box-shadow: none;
+  border-bottom: 1px solid #dadfe1;
+  padding: 1em 2em;
+
 }
-.navbar-inverse .brand {
-    color: #fff;
+.navbar .brand {
+  background-image: url('/img/logo.png');
+  background-repeat: no-repeat;
+  height: 16px;
+  margin-top: .375em;
+  padding: 0;
+  width: 128px;
 }
-.navbar-inverse .dropdown-menu {
-	background: #252528;
+.navbar .nav > li > a {
+  text-shadow: none;
 }
-.navbar-inverse .nav > li > .dropdown-menu::after {
-	border-bottom: 6px solid #252528;
+.navbar .nav > li > .highlight {
+  color: @linkColor;
+  margin-left: 1em;
 }
-.navbar-inverse .dropdown-menu li > a {
-	color: #fff;
+.navbar .nav > li > .btn,
+.navbar .nav > li > .btn:hover {
+  color: white;
+  margin-top: 0;
 }

@@ -1,10 +1,14 @@
 .masthead {
+	background-image: url('/img/splash.jpg');
 	position: relative;
-	height: 480px;
+	height: 32em;
+	h1, h2 { text-align: center; }
+	h1 { margin-bottom: .375rem; }
+	h2 { margin: 0; }
+	img { margin-top: -14px; }
 	.title {
 		margin-top: 10px;
 		img {
-			.box-shadow(0 0 12px #666);
 			margin-top: 20px;
 		}
 	}
@@ -20,16 +24,6 @@
 			color: rgb(189, 7, 7);
 			padding: 1px;
 		}
-	}
-	h1, h2 {
-		font-weight: 200;
-		color: #333;
-		text-shadow: 1px 1px 1px #ccc;
-		margin: 10px 0;
-	}
-	h2 {
-		font-size: 20pt;
-		line-height: 24pt;
 	}
 	overflow: hidden;
 }
@@ -53,30 +47,19 @@
 }
 
 .long-form-features {
-	p {
-		font-size: 16px;
-		line-height: 22px;
-	}
-	p.subdued {
-		font-size: 14px;
-		color: #666;
-	}
 	.row {
-		margin-bottom: 20px;
-		margin-top: 20px;
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+		.span7:first-child p {
+			margin-right: 2rem;
+		}
+		.span7:last-child p, .span7:last-child h2 {
+			margin-left: 2rem;
+		}
 	}
-	h2 {
-		margin-top: -5px;
-		margin-bottom: 8px;
-	}
+	h2 { margin-top: 0; }
 	img {
-		border: 1px solid black;
-	}
-	img.noborder {
-		border:none;
-	}
-	img.short_image {
-		margin-top:35px;
+		box-shadow: 0 0 1rem #999;
 	}
 }
 
@@ -92,7 +75,7 @@
 
 p.team-profile {
 	clear: both;
-	margin-top: 10px;	
+	margin-top: 10px;
 	img {
 		float: left;
 		padding: 10px;

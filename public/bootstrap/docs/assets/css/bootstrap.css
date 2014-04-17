@@ -1589,7 +1589,7 @@ table .span12 {
   white-space: nowrap;
 }
 .dropdown-menu li > a:hover, .dropdown-menu .active > a, .dropdown-menu .active > a:hover {
-  color: #ffffff;
+  color: #555;
   text-decoration: none;
   background-color: #0088cc;
 }
@@ -1597,9 +1597,9 @@ table .span12 {
   *z-index: 1000;
 }
 .dropdown.open .dropdown-toggle {
-  color: #ffffff;
   background: #ccc;
   background: rgba(0, 0, 0, 0.3);
+  color: #333;
 }
 .dropdown.open .dropdown-menu {
   display: block;

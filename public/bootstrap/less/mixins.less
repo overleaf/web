@@ -106,7 +106,7 @@
 #font {
   #family {
     .serif() {
-      font-family: Georgia, "Times New Roman", Times, serif;
+      font-family: "Vollkorn", Georgia, "Times New Roman", Times, serif;
     }
     .sans-serif() {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -154,7 +154,7 @@
   // Setup the mixins to be used
   .columns(@gridGutterWidth, @gridColumnWidth, @gridRowWidth, @columns) {
     width: (@gridColumnWidth * @columns) + (@gridGutterWidth * (@columns - 1));
-  } 
+  }
   .offset(@gridColumnWidth, @gridGutterWidth, @columns) {
     margin-left: (@gridColumnWidth * @columns) + (@gridGutterWidth * (@columns - 1)) + (@gridGutterWidth * 2);
   }
@@ -208,13 +208,13 @@
   // Setup the mixins to be used
   .columns(@fluidGridGutterWidth, @fluidGridColumnWidth, @columns) {
     width: 1% * (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1));
-  } 
+  }
   .gridColumn(@fluidGridGutterWidth) {
     float: left;
     margin-left: @fluidGridGutterWidth;
   }
   // Take these values and mixins, and make 'em do their thang
-  .generate(@gridColumns, @fluidGridColumnWidth, @fluidGridGutterWidth) {      
+  .generate(@gridColumns, @fluidGridColumnWidth, @fluidGridGutterWidth) {
     // Row surrounds the columns
     .row-fluid {
       width: 100%;
@@ -442,8 +442,8 @@
 // Gradient Bar Colors for buttons and alerts
 .gradientBar(@primaryColor, @secondaryColor) {
   #gradient > .vertical(@primaryColor, @secondaryColor);
-  border-color: @secondaryColor @secondaryColor darken(@secondaryColor, 15%);
-  border-color: rgba(0,0,0,.1) rgba(0,0,0,.1) fadein(rgba(0,0,0,.1), 15%);
+  border: 1px solid darken(@secondaryColor, 10%);
+  border-bottom: 3px solid darken(@secondaryColor, 15%);
 }
 
 // Gradients

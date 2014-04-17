@@ -20,7 +20,7 @@ block content
 			.span4.offset4.bonus-banner
 				.title
 					a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
-				
+
 		.row
 			.span4.offset4.bonus-banner
 				.title
@@ -30,7 +30,7 @@ block content
 			.span4.offset4.bonus-banner
 				.title
 					a(href="https://plus.google.com/share?url=#{encodeURIComponent(buildReferalUrl("gp"))}", onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus Share us on Google+
-				
+
 		.row
 			.span4.offset4.bonus-banner
 				.title
@@ -80,7 +80,7 @@ block content
 					p.thanks You've introduced <strong>#{refered_user_count}</strong> person to ShareLaTeX. Good job, but can you get some more?
 				- else
 					p.thanks You've introduced <strong>#{refered_user_count}</strong> people to ShareLaTeX. Good job!
-	
+
 	#link-modal.modal.hide
 		.modal-header
 			h3 Link to ShareLaTeX
@@ -93,7 +93,6 @@ block content
 		.modal-footer
 			button.btn(data-dismiss="modal") Close
 
-	include ../general/social-footer
 	include ../general/small-footer
 
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')

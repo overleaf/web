@@ -1,42 +1,83 @@
-body {
-    padding-top:@padding-top;
-}
-
 html, body{
-    background-color:#f4f4f4;
+	background-color: white;
+}
+body {
+  font-size: @baseFontSize;
+  line-height: @baseLineHeight;
+  margin: 0 auto;
+  padding-top: 4.5rem;
+	text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4, h5, h6 {
+	font-weight: 400;
+}
+h1 {
+  font-size: @h1-font-size;
+  line-height: @h1-line-height;
+  margin-top: @h1-margin-top;
+  margin-bottom: @h1-margin-bottom;
+}
+h2 {
+  font-size: @h2-font-size;
+  line-height: @h2-line-height;
+  margin-top: @h2-margin-top;
+  margin-bottom: @h2-margin-bottom;
+}
+h3 {
+  font-size: @h3-font-size;
+  line-height: @h3-line-height;
+  margin-top: @h3-margin-top;
+  margin-bottom: @h3-margin-bottom;
+}
+h4 {
+  font-size: @h4-font-size;
+  line-height: @h4-line-height;
+  margin-top: @h4-margin-top;
+  margin-bottom: @h4-margin-bottom;
+}
+p, ul, ol, pre, table, blockquote {
+  margin-top: @baseLineHeight;
+  margin-bottom: @baseLineHeight;
 }
 
-h1{
-    font-family: 'Chivo', sans-serif;
-    font-weight: 300;
-    font-size:3em;
+/* Sanitation */
+hr {
+  border: 1px solid;
+  margin: -1px 0;
 }
-
-h2{
-    font-family: 'Chivo', sans-serif;
-    font-weight: 300;
-    font-size:2.2em;
+ul ul, ol ol, ul ol, ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+b, strong, em, small, code {
+  line-height: 1;
+}
+sup, sub {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+}
+sub {
+  top: 0.4em;
 }
 
 a.plain{
-   color:#404040;
+   color: #333;
 }
-
-a.plain:hover { 
+a.plain:hover {
   text-decoration:  none;
 }
 
-
-.box{
-    .border-radius(10px);
-    margin-bottom:15px;
-    padding-top:15px;
-    padding-left:30px;
-    padding-right:30px;
-    padding-bottom:15px;
-    background-color:white;
-    border:1px solid #D9D9D9;
-    margin-top:18px;
+.box {
+	.border-radius(10px);
+	margin-bottom:15px;
+	padding-top:15px;
+	padding-left:30px;
+	padding-right:30px;
+	padding-bottom:15px;
+	background-color:white;
+	border:1px solid #D9D9D9;
+	margin-top:18px;
 	.page-header {
 		margin-top: 12px;
 	}
@@ -45,29 +86,28 @@ a.plain:hover {
 // This should be used when we want a .box applied to a .span[1-12] element.
 // It undoes the shift in position added by the padding
 .span-box {
-    .border-radius(10px);
-    margin-top:15px;
-    padding-top:15px;
-    padding-left:30px;
-    padding-right:30px;
-    padding-bottom:15px;
-    background-color:white;
-    border:1px solid #D9D9D9;
-    position: relative;
-    left: -30px;
+	.border-radius(10px);
+	margin-top:15px;
+	padding-top:15px;
+	padding-left:30px;
+	padding-right:30px;
+	padding-bottom:15px;
+	background-color:white;
+	border:1px solid #D9D9D9;
+	position: relative;
+	left: -30px;
 }
 
-
-.modal .modal-body form{
-    margin:0px;
+.modal .modal-body form {
+	margin:0px;
 }
 
-input.inputmodal{
-    margin-bottom: 0;
-    width:520px;
+input.inputmodal {
+	margin-bottom: 0;
+	width:520px;
 }
 
-.actions{
-    background:none;
-    border:none;
+.actions {
+	background:none;
+	border:none;
 }
