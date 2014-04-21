@@ -24,7 +24,7 @@ module.exports = SubscriptionController =
 		res.render viewName,
 			title: "Plans and Pricing"
 			plans: plans
-			gaExperimentCode: gaExperimentCode
+			#gaExperimentCode: gaExperimentCode
 
 
 	#get to show the recurly.js page
