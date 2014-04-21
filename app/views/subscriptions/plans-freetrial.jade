@@ -1,7 +1,7 @@
 extends ../layout
 
 mixin liSection(feature)
-	| #{feature.text} 
+	| #{feature.text}
 	-if(feature.comingSoon)
 		span.label.label-info coming soon
 	-if(feature.beta)
@@ -25,7 +25,7 @@ mixin plan(plan, cssClass, monthly)
 							| $#{plan.price/100}
 							if monthly
 								span.cents  /month
-							else 
+							else
 								span.cents  /year
 
 			- var odd = false
@@ -54,18 +54,18 @@ mixin plan(plan, cssClass, monthly)
 					- href = "/register"
 				-else if(userNotLoggedIn)
 					- href = "/register?redir="+href
-				a.btn.btn-success(href='#{href}').sign_up_now	
+				a.btn.btn-success(href='#{href}').sign_up_now
 					| Sign Up Now!
 
 
 block content
 	.container
 		.row
-			.span12.span-box
+			.span12
 				.page-header
 					h1 Choose your plan
 					blockquote.quote.pull-right
-						p 
+						p
 							| This is one of the most useful resources I have ever found on the Internet.
 							br
 							| Fantastic execution and thoughtful attention to detail make this product shine!
@@ -85,7 +85,7 @@ block content
 				.row
 					.span12
 						.page-header
-							h2 Individual Plans	
+							h2 Individual Plans
 
 				.pricing-steelblue.pricing-row
 					.tab-content
@@ -127,9 +127,9 @@ block content
 					.tab-content
 						.tab-pane.active.monthly-pricing
 							.page-header
-								h2 Group Plans	
+								h2 Group Plans
 							.row
-								.span12.tagline 
+								.span12.tagline
 									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
 							.row
 								.span4
@@ -140,9 +140,9 @@ block content
 									mixin plan(plans.groupMonthlyPlans[2], "", true)
 						.tab-pane.annual-pricing
 							.page-header
-								h2 Group Plans	
+								h2 Group Plans
 							.row
-								.span12.tagline 
+								.span12.tagline
 									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
 							.row
 								.span4
@@ -158,11 +158,11 @@ block content
 					.span6.offset3
 						.alert.alert-info(style="color: #333")
 							h3 Want to use ShareLaTeX for free?
-							p Tell your university or department about our 
-								a(href="/university") site licenses 
+							p Tell your university or department about our
+								a(href="/university") site licenses
 								| and use of all our
 								| features for free as a student or member of staff.
-								
+
 		include ../general/small-footer
-		link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))	
+		link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))
 

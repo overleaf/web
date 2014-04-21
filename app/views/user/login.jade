@@ -3,19 +3,17 @@ extends ../layout
 block content
 	.container
 		.row
-			span4.offset4
+			.span4.offset4
 				.page-header
 					h1 Login
 				.messageArea
-				form.validate#loginForm(enctype='multipart/form-data', method='post')
+				form.form-simple.validate#loginForm(enctype='multipart/form-data', method='post')
 					input(name='_csrf', type='hidden', value=csrfToken)
 					input(name='redir', type='hidden', value=redir)
 					.clearfix
-						label(for='xlInput') Email
 						.input
 							input.span4#email.email.required(type='email', autofocus="autofocus", name='email', placeholder='your@email.com')
 					.clearfix
-						label(for='xlInput') Password
 						.input
 							input.span4#password.required(type='password', name='password', placeholder='********')
 					.actions

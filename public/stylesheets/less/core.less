@@ -12,32 +12,32 @@ h1, h2, h3, h4, h5, h6 {
 	font-weight: 400;
 }
 h1 {
-  font-size: @h1-font-size;
-  line-height: @h1-line-height;
-  margin-top: @h1-margin-top;
-  margin-bottom: @h1-margin-bottom;
+  font-size: 4.25rem;
+  line-height: 5.5rem;
+  margin-top: 2.75rem;
+  margin-bottom: 1.375rem;
 }
 h2 {
-  font-size: @h2-font-size;
-  line-height: @h2-line-height;
-  margin-top: @h2-margin-top;
-  margin-bottom: @h2-margin-bottom;
+  font-size: 2.625rem;
+  line-height: 2.75rem;
+  margin-top: 2.75rem;
+  margin-bottom: 1.375rem;
 }
 h3 {
-  font-size: @h3-font-size;
-  line-height: @h3-line-height;
-  margin-top: @h3-margin-top;
-  margin-bottom: @h3-margin-bottom;
+  font-size: 1.625rem;
+  line-height: 2.75rem;
+  margin-top: 1.375rem;
+  margin-bottom: 1.375rem;
 }
 h4 {
-  font-size: @h4-font-size;
-  line-height: @h4-line-height;
-  margin-top: @h4-margin-top;
-  margin-bottom: @h4-margin-bottom;
+  font-size: 1rem;
+  line-height: 1.375rem;
+  margin-top: 1.375rem;
+  margin-bottom: 1.375rem;
 }
 p, ul, ol, pre, table, blockquote {
-  margin-top: @baseLineHeight;
-  margin-bottom: @baseLineHeight;
+  margin-top: 1.375rem;
+  margin-bottom: 1.375rem;
 }
 
 /* Sanitation */
@@ -60,6 +60,9 @@ sup, sub {
 sub {
   top: 0.4em;
 }
+footer {
+  margin-top: 2.75rem;
+}
 
 a.plain{
    color: #333;
@@ -68,38 +71,54 @@ a.plain:hover {
   text-decoration:  none;
 }
 
-.box {
-	.border-radius(10px);
-	margin-bottom:15px;
-	padding-top:15px;
-	padding-left:30px;
-	padding-right:30px;
-	padding-bottom:15px;
-	background-color:white;
-	border:1px solid #D9D9D9;
-	margin-top:18px;
-	.page-header {
-		margin-top: 12px;
-	}
-}
-
-// This should be used when we want a .box applied to a .span[1-12] element.
-// It undoes the shift in position added by the padding
-.span-box {
-	.border-radius(10px);
-	margin-top:15px;
-	padding-top:15px;
-	padding-left:30px;
-	padding-right:30px;
-	padding-bottom:15px;
-	background-color:white;
-	border:1px solid #D9D9D9;
-	position: relative;
-	left: -30px;
-}
-
 .modal .modal-body form {
 	margin:0px;
+}
+
+.form-simple {
+  input, button, select, textarea {
+    font-family: "Vollkorn", Georgia, serif;
+  }
+  input {
+    background-color: transparent;
+    border: 0 none;
+    border-bottom: 1px solid @grayLighter;
+    border-radius: 0;
+    box-shadow: none;
+    color: @grayDark;
+    font-style: italic;
+  }
+  ::-webkit-input-placeholder {
+    color: @grayDark;
+  }
+  :-moz-placeholder { /* Firefox 18- */
+    color: @grayDark;
+  }
+  ::-moz-placeholder {  /* Firefox 19+ */
+    color: @grayDark;
+  }
+  :-ms-input-placeholder {
+    color: @grayDark;
+  }
+}
+.form-inverse {
+  input {
+    background-color: rgba(128, 128, 128, 0.33);
+    border-bottom: 1px solid white;
+    color: white;
+  }
+  ::-webkit-input-placeholder {
+    color: white;
+  }
+  :-moz-placeholder { /* Firefox 18- */
+    color: white;
+  }
+  ::-moz-placeholder {  /* Firefox 19+ */
+    color: white;
+  }
+  :-ms-input-placeholder {
+    color: white;
+  }
 }
 
 input.inputmodal {
@@ -110,4 +129,9 @@ input.inputmodal {
 .actions {
 	background:none;
 	border:none;
+}
+
+.centered {
+  margin: 0 auto;
+  text-align: center;
 }

@@ -3,14 +3,14 @@ extends ../layout
 block content
 	.container
 		.row
-			.span12.span-box
+			.span12
 				.page-header
 					h1 ShareLaTeX - Online LaTeX Editor : #{title}
 						//- .btn-group#newProject
 						//- 	a.btn.btn-success(href='/project/#{project_id}') go to editor mode
 				-each doc in resources
 					h2 #{doc.path}
-					if (doc.url != null) 
+					if (doc.url != null)
 						img(src='/project/#{project_id}/file/#{doc.id}')
 					else
 						pre.prettyprint.lang-tex.linenums
@@ -20,8 +20,8 @@ block content
 									#{line}
 
 					hr
-				
-				
+
+
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'codeprettifyer.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-		
+

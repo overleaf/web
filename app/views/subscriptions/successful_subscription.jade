@@ -5,12 +5,12 @@ block content
 	.container
 		.row
 			div &nbsp;
-			.span8.offset2.span-box
+			.span8.offset2
 				.page-header
 					h2 Thanks for subscribing!
 				.alert.alert-success
 					p Your card will be charged soon.
-					p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>, if you do not want to be charged again 
+					p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>, if you do not want to be charged again
 						a(href="/user/subscription") click here to cancel.
 				div
 					p
@@ -19,14 +19,14 @@ block content
 				div.letter-from-founders
 					p Thank you for subscribing to the #{subscription.name} plan. It's support from people like yourself that allows ShareLaTeX to continue to grow and improve.
 
-					p If there is anything you ever need please feel free to contact us directly at 
-						a(href='mailto:team@sharelatex.com') team@sharelatex.com 
+					p If there is anything you ever need please feel free to contact us directly at
+						a(href='mailto:team@sharelatex.com') team@sharelatex.com
 						| - it goes straight to both our inboxes.
 					p Regards,
 						br
 						| Henry and James
 					.portraits
-						img(src="/img/about/henry_oswald.jpg") 
+						img(src="/img/about/henry_oswald.jpg")
 						&nbsp;
 						img(src="/img/about/james_allen.jpg")
 				div

@@ -1,10 +1,17 @@
 .masthead {
+	background-size: cover;
 	background-image: url('/img/splash.jpg');
 	position: relative;
-	height: 32em;
-	h1, h2 { text-align: center; }
-	h1 { margin-bottom: .375rem; }
-	h2 { margin: 0; }
+	height: 40em;
+	h1, h2, h3 {
+		color: white;
+		text-align: center;
+	}
+	h1 {
+		margin-bottom: .375rem;
+		margin-top: 6rem;
+	}
+	h2, h3 { margin: 0; line-height: 1.2; }
 	img { margin-top: -14px; }
 	.title {
 		margin-top: 10px;
@@ -13,12 +20,9 @@
 		}
 	}
 	.register {
-		margin-top: 10px;
-		input {
-			margin-bottom: 0
-		}
+		margin-top: 8rem;
 		.input {
-			margin-bottom: 10px;
+			margin-bottom: 1rem;
 		}
 		div.error {
 			color: rgb(189, 7, 7);
@@ -28,63 +32,55 @@
 	overflow: hidden;
 }
 
+.gray-container {
+	background-color: @grayBg;
+}
+
 .universities {
 	overflow: hidden;
-	height: 130px;
-	border: 1px solid #ccc;
+	height: 10rem;
 	border-left: none;
 	border-right: none;
-	padding: 10px;
+	padding: 1rem;
 	text-align: center;
-	background-color: white;
-	-webkit-box-shadow: inset 0 0 5px #888;
-	margin: 0 auto 20px auto;
-	p {
-		color: #999;
-		font-size: 16px;
-		margin-bottom: 12px;
-	}
+	margin: 0 auto;
 }
 
 .long-form-features {
 	.row {
-		margin-top: 2rem;
-		margin-bottom: 2rem;
+		margin-top: 4rem;
+		margin-bottom: 4rem;
 		.span7:first-child p {
-			margin-right: 2rem;
+			margin-right: 12rem;
 		}
-		.span7:last-child p, .span7:last-child h2 {
-			margin-left: 2rem;
+		.span7:last-child p, .span7:last-child h3 {
+			margin-left: 12rem;
 		}
 	}
-	h2 { margin-top: 0; }
-	img {
-		box-shadow: 0 0 1rem #999;
+	h3 {
+		color: @linkColor;
+		margin: 0;
+	}
+	p {
+		color: #7f8c8d;
 	}
 }
 
-.btn-huge {
-	font-size: 20px;
-	padding: 12px 18px;
-}
-
-.lower-signup-button {
-	text-align: center;
-	margin-bottom: 20px;
+.btn-hero {
+	margin: 0 auto 6rem auto;
 }
 
 p.team-profile {
 	clear: both;
-	margin-top: 10px;
+	margin-top: 1rem;
 	img {
 		float: left;
-		padding: 10px;
-		border: 1px solid #999;
-		margin-right:8px;
-		margin-bottom:10px;
+		padding: 1rem;
+		border: 1px solid @grayLight;
+		margin-right: 1rem;
+		margin-bottom: 1rem;
 	}
 }
-
 
 .registration_message {
 	padding-top: 30px;
