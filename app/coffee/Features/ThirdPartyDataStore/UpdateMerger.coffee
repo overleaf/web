@@ -94,17 +94,12 @@ module.exports =
 				logger.log project_id:project_id, file_id:file_id, dumpPath:dumpPath, "tpds update write stream finished"
 				callback null, dumpPath
 				
-			if stream.emitBufferedData?
-				stream.emitBufferedData()
-			stream.resume()
-
-
 readFileIntoTextArray = (path, callback)->
 	fs.readFile path, "utf8", (error, content = "") ->
 		if error?
 			logger.err path:path, "error reading file into text array"
 			return callback(err)
-		lines = content.split("\n")
+		lines = content.split(/\r\n|\n|\r/)
 		callback error, lines
 
 

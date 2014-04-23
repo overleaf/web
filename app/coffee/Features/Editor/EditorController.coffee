@@ -5,8 +5,9 @@ ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
+ProjectDeleter = require("../Project/ProjectDeleter")
 ProjectGetter = require('../Project/ProjectGetter')
-ProjectHandler = new (require('../../handlers/ProjectHandler'))()
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 LimitationsManager = require("../Subscription/LimitationsManager")
 AuthorizationManager = require("../Security/AuthorizationManager")
@@ -40,26 +41,24 @@ module.exports = EditorController =
 			return callback(error) if error?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->
 				return callback(error) if error?
-				VersioningApiHandler.enableVersioning project, (error) ->
-					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject project, user,
-						(error, canAccess, privilegeLevel) ->
-							if error? or !canAccess
-								callback new Error("Not authorized")
-							else
-								client.join(project_id)
-								client.set("project_id", project_id)
-								client.set("owner_id", project.owner_ref._id)
-								client.set("user_id", user._id)
-								client.set("first_name", user.first_name)
-								client.set("last_name", user.last_name)
-								client.set("email", user.email)
-								client.set("connected_time", new Date())
-								client.set("signup_date", user.signUpDate)
-								client.set("login_count", user.loginCount)
-								client.set("take_snapshots", project.existsInVersioningApi)
-								AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
-								callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
+				AuthorizationManager.getPrivilegeLevelForProject project, user,
+					(error, canAccess, privilegeLevel) ->
+						if error? or !canAccess
+							callback new Error("Not authorized")
+						else
+							client.join(project_id)
+							client.set("project_id", project_id)
+							client.set("owner_id", project.owner_ref._id)
+							client.set("user_id", user._id)
+							client.set("first_name", user.first_name)
+							client.set("last_name", user.last_name)
+							client.set("email", user.email)
+							client.set("connected_time", new Date())
+							client.set("signup_date", user.signUpDate)
+							client.set("login_count", user.loginCount)
+							client.set("take_snapshots", project.existsInVersioningApi)
+							AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
+							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 
 	leaveProject: (client, user) ->
 		self = @
@@ -123,7 +122,7 @@ module.exports = EditorController =
 						cursorData.name = "Anonymous"
 					EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
-	addUserToProject: (project_id, email, privlages, callback = (error, collaborator_added)->)->
+	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
 		email = email.toLowerCase()
 		LimitationsManager.isCollaboratorLimitReached project_id, (error, limit_reached) =>
 			if error?
@@ -133,12 +132,13 @@ module.exports = EditorController =
 			if limit_reached
 				callback null, false
 			else
-				ProjectHandler.addUserToProject project_id, email, privlages, (user)=>
-					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privlages)
+				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
+					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, "", ->
+					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
 					callback null, true
 
 	removeUserFromProject: (project_id, user_id, callback)->
-		ProjectHandler.removeUserFromProject project_id, user_id, =>
+		CollaboratorsHandler.removeUserFromProject project_id, user_id, =>
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			if callback?
 				callback()
@@ -240,13 +240,13 @@ module.exports = EditorController =
 	deleteProject: (project_id, callback)->
 		Metrics.inc "editor.delete-project"
 		logger.log project_id:project_id, "recived message to delete project"
-		ProjectHandler.deleteProject project_id, callback
+		ProjectDeleter.deleteProject project_id, callback
 
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->
 		newName = sanitize.escape(newName)
 		Metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
-		ProjectHandler.renameEntity project_id, entity_id, entityType, newName, =>
+		ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, =>
 			if newName.length > 0
 				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
 				callback?()
@@ -257,15 +257,15 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
 			callback?()
 
-	renameProject: (project_id, window_id, newName, callback)->
+	renameProject: (project_id, newName, callback)->
 		newName = sanitize.escape(newName)
-		ProjectHandler.renameProject project_id, window_id, newName, =>
+		ProjectDetailsHandler.renameProject project_id, newName, =>
 			newName = sanitize.escape(newName)
-			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
+			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', newName
 			callback?()
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
-		ProjectHandler.setPublicAccessLevel project_id, newAccessLevel, =>
+		ProjectDetailsHandler.setPublicAccessLevel project_id, newAccessLevel, =>
 			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
 			callback?()
 
