@@ -8,3 +8,7 @@ module.exports =
 	templateExamplePage: (req, res)->
 		res.render "templates/templatePage", 
 			title:"template"
+
+	templateCategory: (req, res)->
+		res.render "templates/category",
+			title:"template category page"

@@ -102,6 +102,7 @@ module.exports = class Router
 
 		app.get "/templates", TemplatesPageController.templatesIndexPath
 		app.get "/templates/example", TemplatesPageController.templateExamplePage
+		app.get "/templates/category", TemplatesPageController.templateCategory
 
 		app.get "/blog/post", BlogController.postExamplePage
 		app.get "/blog", BlogController.indexPage
