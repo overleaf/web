@@ -35,6 +35,7 @@ FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 RestoreController = require("./Features/Restore/RestoreController")
+BlogController = require("./Features/Blog/BlogController")
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
@@ -101,6 +102,9 @@ module.exports = class Router
 
 		app.get "/templates", TemplatesPageController.templatesIndexPath
 		app.get "/templates/example", TemplatesPageController.templateExamplePage
+
+		app.get "/blog/post", BlogController.postExamplePage
+		app.get "/blog", BlogController.indexPage
 
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
