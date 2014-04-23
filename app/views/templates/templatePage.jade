@@ -1,0 +1,46 @@
+extends ../layout
+
+block content	
+	.container
+		.page-header
+				h1 thebibliography LaTeX Template
+				a(href='/templates/bibliographies') ← Back to more Bibliographies LaTeX templates
+		.container.txt-lefty
+			.row-fluid
+				.span6
+					.entry
+						.row-fluid
+							.span12
+								a(href='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf')
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview')
+				.span6.ng-scope(ng-app='openInSl')
+					h3 About
+					div
+						p This document is an example of thebibliography using in bibliography management.
+					h3 Actions
+					span.ng-scope(ng-controller='openInSlController')
+						a.btn.btn-success.btn-large.open-in-sharelatex.ng-binding(href='/project/new/template?zipUrl=%2Ftemplates%2F52fb89a333621a613683ec95%2Fv%2F1%2Fzip&templateName=thebibliography&compiler=pdflatex', ng-click='open()', ng-disabled='isDisabled', rel='nofollow') Open in ShareLaTeX
+						a.btn.btn-large.download-zip(href='/templates/52fb89a333621a613683ec95/v/1/zip', rel='nofollow', ng-click='downloadZip()') Download Zip
+					.social_buttons
+						.addthis_toolbox.addthis_default_style.addthis_32x32_style
+							a.addthis_button_facebook.at300b(title='Facebook', href='#')
+								span.at300bs.at15nc.at15t_facebook
+									span.at_a11y Share on facebook
+							a.addthis_button_twitter.at300b(title='Tweet', href='#')
+								span.at300bs.at15nc.at15t_twitter
+									span.at_a11y Share on twitter
+							a.addthis_button_google_plusone_share.at300b(href='https://www.addthis.com/bookmark.php?v=300&winname=addthis&pub=ra-517c16586439faa7&source=tbx32-300&lng=en-US&s=google_plusone_share&url=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F52fb89a333621a613683ec95&title=thebibliography%20-%20LaTeX%20Template&ate=AT-ra-517c16586439faa7/-/-/53579a0bbe5257f9/2&frommenu=1&uid=53579a0bbceeb2e2&ct=1&pre=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F&tt=0&captcha_provider=nucaptcha', target='_blank', title='Google+')
+								span.at300bs.at15nc.at15t_google_plusone_share
+									span.at_a11y Share on google_plusone_share
+							a.addthis_button_compact.at300m(href='#')
+								span.at300bs.at15nc.at15t_compact
+									span.at_a11y More Sharing Services
+							.atclear
+						script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
+						#_atssh(style='visibility: hidden; height: 1px; width: 1px; position: absolute; z-index: 100000;')
+							iframe#_atssh154(title='AddThis utility frame', style='height: 1px; width: 1px; position: absolute; z-index: 100000; border: 0px; left: 0px; top: 0px;', src='//ct1.addthis.com/static/r07/sh156.html#iit=1398249996709&tmr=load%3D1398249994595%26core%3D1398249995127%26main%3D1398249996679%26ifr%3D1398249996752&cb=0&cdn=1&chr=UTF-8&kw=&ab=-&dh=www.sharelatex.com&dr=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F&du=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F52fb89a333621a613683ec95&dt=thebibliography%20-%20LaTeX%20Template&dbg=0&md=0&cap=tc%3D0%26ab%3D0&inst=1&vcl=1&jsl=1&prod=undefined&lng=en-US&ogt=&pc=men&pub=ra-517c16586439faa7&ssl=1&sid=53579a0bbe5257f9&srpl=1&srcs=1&srd=1&srf=1&srx=1&ver=300&xck=0&xtr=0&og=&aa=0&csi=undefined&rev=127363&ct=1&xld=1&xd=1')
+						script(type='text/javascript', src='https://ct1.addthis.com/static/r07/core129.js')
+					div
+						h3 Comment
+						#disqus_thread
+
