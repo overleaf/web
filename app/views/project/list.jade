@@ -26,15 +26,17 @@ block content
 						span.caret
 					ul.dropdown-menu.pull-right(role="menu")
 						li
-							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone Project
-						-if (project.accessLevel == "owner")
-							li
-								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete Project
-						-else
-							li
-								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave Project
+							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone
 						li
 							a(href='/project/'+project._id+'/download/zip').downloadZip Download Zip
+						-if (project.accessLevel == "owner")
+							li
+								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename
+							li
+								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete
+						-else
+							li
+								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave
 				a.projectName(href="/project/#{project._id}") #{project.name}
 				.projectDetails
 					span Last modified on 
@@ -59,14 +61,6 @@ block content
 
 	.content-with-navigation-sidebar
 		.box#projectListArea
-						
-			.row-fluid
-				.span12
-					.alert.alert-info
-						p Due to unforeseen issues with our database, some projects which were changed or created on the 12th of April may have been rolled back 24 hours to Saturday morning (6am UTC on 12th April).
-						p If any or your projects are missing, or have been rolled-back to a previous version, then you can <strong> <a href="/restore">restore them from our latest back ups</a></strong>.
-						p We are very sorry about this. More details on what happened will follow as soon as possible.
-
 			.row-fluid
 				.span12
 					.page-header
