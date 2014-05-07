@@ -9,15 +9,14 @@
 				a(href='#exportSettings', data-toggle="tab") Export & Copy
 			li
 				a(href='#deleteProjectTab', data-toggle="tab") Delete Project
-			- if(userCanSeeDropbox)
-				li#manageDropboxSettiingsTabLink
-					a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox
-						span.label.label-warning beta
+		- if(userCanSeeDropbox)
+			li#manageDropboxSettiingsTabLink
+				a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox
+					span.label.label-warning beta
 
 		.tab-content.form-horizontal
 			.tab-pane#generalProjectSettings.form.form-horizontal.active
-				if privlageLevel == 'owner' || privlageLevel == 'readAndWrite'
-					h3 Project
+				if privilegeLevel == 'owner' || privilegeLevel == 'readAndWrite'
 					.control-group
 						label(for='xlInput').control-label Project Name
 						.controls
@@ -142,7 +141,7 @@
 				else
 					span You do not have permission to modify these settings.
 
-				if privlageLevel == 'owner'
+				if privilegeLevel == 'owner'
 					.control-group
 						label(for='select').control-label Public Access
 						.controls
@@ -157,7 +156,7 @@
 				a.btn(href='/project/'+project._id+'/clone').cloneProject Clone Project
 
 			.tab-pane#deleteProjectTab
-				if privlageLevel == 'owner'
+				if privilegeLevel == 'owner'
 					button#deleteProject.btn.btn-danger Delete Project
 				else
 					span You do not have permission to modify these settings.

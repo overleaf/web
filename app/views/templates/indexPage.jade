@@ -1,0 +1,103 @@
+extends ../layout
+
+block content
+
+	.container
+			.row
+				#searchArea.span12.ng-scope(ng-app='templatesSearchApp')
+					.ng-scope(ng-controller='SearchController')
+						.row-fluid
+							.span6.offset3.search-field
+								i.icon-search
+								input#searchField.span12.ng-pristine.ng-valid(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder='Search')
+						ul.unstyled
+							// ngRepeat: hit in hits
+			.row
+				.page-header.span12
+					h2
+						a(href='/templates/bibliographies') Bibliographies
+				.span12
+					.row-fluid
+						.span3
+							a(href='/templates/bibliographies/notes2bib---integrating-notes-into-the-bibliography')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/533619d910f91d4e6b15f6e8/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle notes2bib - Integrating notes into the bibliography
+						.span3
+							a(href='/templates/bibliographies/ieee-bibtex-style')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fe152934a287a85245b4f8/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle IEEE BibTeX style
+						.span3
+							a(href='/templates/bibliographies/thebibliography')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle thebibliography
+						.span3
+							a(href='/templates/bibliographies/bibtex-template')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb871233621a613683ec7a/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle bibtex-template
+					.row-fluid
+						.span6.offset3.more-templates
+							a(href='/templates/bibliographies') View all 8 Bibliographies templates
+				.page-header.span12
+					h2
+						a(href='/templates/books') Books
+				.span12
+					.row-fluid
+						.span3
+							a(href='/templates/books/simple-book-template---5.5-x-8.5')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb8b9a33621a613683eca6/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Simple Book template - 5.5 x 8.5
+						.span3
+							a(href='/templates/books/wiley-book-style-(6x9-book)')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb8b8633621a613683eca5/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Wiley Book Style (6x9 book)
+						.span3
+							a(href='/templates/books/tufte-style-book')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb888033621a613683ec8c/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Tufte-Style Book
+						.span3
+							a(href='/templates/books/wiley-book-style-(7x10-book)')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb8b8e34a287a85245b488/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Wiley Book Style (7x10 book)
+					.row-fluid
+						.span6.offset3.more-templates
+							a(href='/templates/books') View all 14 Books templates
+				.page-header.span12
+					h2
+						a(href='/templates/cv-or-resume') CV or Resume
+				.span12
+					.row-fluid
+						.span3
+							a(href='/templates/cv-or-resume/cv-us')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fdff7634a287a85245b4ca/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle CV US
+						.span3
+							a(href='/templates/cv-or-resume/fancy-cv')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c1f33621a613683ecad/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Fancy CV
+						.span3
+							a(href='/templates/cv-or-resume/curve')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fdf58f34a287a85245b4b8/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle curve
+						.span3
+							a(href='/templates/cv-or-resume/cies-breijs-resume')
+								.template-thumbnail.thumbnail
+									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fe035634a287a85245b4d2/v/0/pdf-converted-cache/style-thumbnail')
+									h3.txt-middle Cies Breijs Resume
+					.row-fluid
+						.span6.offset3.more-templates
+							a(href='/templates/cv-or-resume') View all 20 CV or Resume templates
+				.page-header.span12
+					h2
+						a(href='/templates/cover-letters') Cover Letters
+		

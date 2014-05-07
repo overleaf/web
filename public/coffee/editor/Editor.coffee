@@ -50,7 +50,7 @@ define [
 					@openDoc doc_id, options
 
 		initSplitView: () ->
-			splitter = @editorPanel.find("#editorSplitter")
+			@$splitter = splitter = @editorPanel.find("#editorSplitter")
 			options =
 				spacing_open: 8
 				spacing_closed: 16
@@ -210,11 +210,6 @@ define [
 				callback null, @document
 
 		_bindToDocumentEvents: (document) ->
-			document.on "op:sent", () =>
-				@ide.savingAreaManager.saving()
-			document.on "op:acknowledged", () =>
-				@ide.savingAreaManager.saved()
-
 			document.on "remoteop", () =>
 				@undoManager.nextUpdateIsRemote = true
 
@@ -291,6 +286,7 @@ define [
 				$.localStorage("doc.position.#{@current_doc_id}", docPosition)
 			
 		onCursorChange: (event) ->
+			@trigger "cursor:change", event
 			if !@ignoreCursorPositionChanges
 				docPosition = $.localStorage("doc.position.#{@current_doc_id}") || {}
 				docPosition.cursorPosition = @getCursorPosition()
@@ -308,6 +304,12 @@ define [
 
 		gotoLine: (line) ->
 			@aceEditor.gotoLine(line)
+
+		getCurrentLine: () ->
+			@aceEditor.selection?.getCursor()?.row
+
+		getCurrentColumn: () ->
+			@aceEditor.selection?.getCursor()?.column
 
 		getLines: (from, to) ->
 			if from? and to?
@@ -340,6 +342,9 @@ define [
 		getContainerElement: () ->
 			$(@aceEditor.renderer.getContainerElement())
 
+		getCursorElement: () ->
+			@getContainerElement().find(".ace_cursor")
+
 		textToEditorCoordinates: (x, y) ->
 			editorAreaOffset = @getContainerElement().offset()
 			{pageX, pageY} = @aceEditor.renderer.textToScreenCoordinates(x, y)
@@ -364,3 +369,6 @@ define [
 
 		disable: () ->
 			@enabled = false
+
+		hasUnsavedChanges: () ->
+			Document.hasUnsavedChanges()

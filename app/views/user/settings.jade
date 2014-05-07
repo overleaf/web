@@ -2,60 +2,49 @@ extends ../layout
 
 block content
 	.container
-		.row
+		.row-fluid
 			.span12
 				.page-header
-					h1 Settings
+					h1 Account Settings
 				.messageArea
-				h3 Personal Info
-				form#userSettings
-					input(type="hidden", name="_csrf", value=csrfToken)
-					.clearfix
-						label(for='firstName').control-label First Name
-						.input
-							input#firstName(type='text', name='first_name', value=user.first_name)
-					.clearfix
-						label(for='lastName').control-label Last Name
-						.input
-							input#lastName(type='text', name='last_name', value=user.last_name)
-					button.btn.btn-primary.large(type='submit') Update
 
-				h3 Change Password
-				form#changePasswordForm(method="post", action="/user/password/update")
-					input(type="hidden", name="_csrf", value=csrfToken)
-					.clearfix
-						label(for='xlinput') Current Password
-						.input
-							input#currentPassword(type='password', name='currentPassword', placeholder='*********')
-					.clearfix
-						label(for='xlinput') New Password
-						.input
-							input#newPassword1(type='password', name='newPassword1', placeholder='************')
-					.clearfix
-						label(for='xlinput') Confirm Password
-						.input
-							input#newPassword2(type='password', name='newPassword2', placeholder='************')
-					button(type="submit").btn.btn-primary#confirmPasswordChange Change
+			h3 Change Password
+			form#changePasswordForm(method="post", action="/user/password/update")
+				input(type="hidden", name="_csrf", value=csrfToken)
+				.clearfix
+					label(for='xlinput') Current Password
+					.input
+						input#currentPassword(type='password', name='currentPassword', placeholder='*********')
+				.clearfix
+					label(for='xlinput') New Password
+					.input
+						input#newPassword1(type='password', name='newPassword1', placeholder='************')
+				.clearfix
+					label(for='xlinput') Confirm Password
+					.input
+						input#newPassword2(type='password', name='newPassword2', placeholder='************')
+				button(type="submit").btn.btn-primary#confirmPasswordChange Change
 
-				h3 Dropbox Integration
-					small
-						a(href='/help/kb/dropbox-2')  &nbsp; Read how dropbox works
-				- if(!userHasDropboxFeature)
-					.alert.alert-info Dropbox sync is a premium feature &nbsp; &nbsp;
-						a.btn.btn-info(href='/user/subscription/plans') Upgrade
-				- else if(userIsRegisteredWithDropbox)
-					.alert.alert-success Account is linked!
-						a(href='/dropbox/unlink').btn Unlink Dropbox
-				- else
-					a.btn.btn-info(href='/dropbox/beginAuth') Link to dropbox
+			h3 Dropbox Integration &nbsp;
+				small
+					a(href='/help/kb/dropbox-2') Read how dropbox works
+			- if(!userHasDropboxFeature)
+				.alert.alert-info Dropbox sync is a premium feature &nbsp; &nbsp;
+					a.btn.btn-info(href='/user/subscription/plans') Upgrade
+			- else if(userIsRegisteredWithDropbox)
+				.alert.alert-success Account is linked!
+					a(href='/dropbox/unlink').btn Unlink Dropbox
+			- else
+				a.btn.btn-info(href='/dropbox/beginAuth') Link to dropbox
 
-				p
-					small Every few months we send a news letter out summarizing the new features available, if you would prefer to not receive this email then you are free to unsubscribe below at any time
-				p
-					a#unsubscribeFromNewsletter.btn.btn-primary(data-csrf=csrfToken) Unsubscribe
+			p
+				small
+					| Every few months we send a news letter out summarizing the new features available.<br>
+					| If you would prefer to not receive this email then you are free to unsubscribe below at any time.&nbsp;
+					a#unsubscribeFromNewsletter(data-csrf=csrfToken) Click here to Unsubscribe
 
-				p
-					strong Need to leave?
-					a#deleteUserAccount(data-csrf=csrfToken)  Delete your account
+			p
+				strong Need to leave?
+				a#deleteUserAccount(data-csrf=csrfToken)  Delete your account
 
 	include ../general/small-footer

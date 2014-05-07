@@ -19,22 +19,27 @@ module.exports =
 		dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
 		writeStream = fs.createWriteStream(dumpPath)
 		zipUrl = req.session.templateData.zipUrl
-		if zipUrl.indexOf("www") == -1
-			zipUrl = "www.sharelatex.com#{zipUrl}"
-		request("http://#{zipUrl}").pipe(writeStream)
+		if zipUrl.slice(0,12).indexOf("templates") == -1
+			zipUrl = "#{settings.apis.web.url}#{zipUrl}"
+		else
+			zipUrl = "#{settings.apis.templates_api.url}#{zipUrl}"
+		request(zipUrl).pipe(writeStream)
 		writeStream.on 'close', ->
 			ProjectUploadManager.createProjectFromZipArchive req.session.user._id, req.session.templateData.templateName, dumpPath, (err, project)->
+				if err?
+					logger.err err:err, zipUrl:zipUrl, "problem building project from zip"
+					return res.send 500
 				setCompiler project._id, req.session.templateData.compiler, ->
 					fs.unlink dumpPath, ->
 					delete req.session.templateData
 					res.redirect "/project/#{project._id}"
 
 	publishProject: (user_id, project_id, callback)->
-		logger.log user_id:user_id, project_id:project_id, "reciving request to publish project as template"
+		logger.log user_id:user_id, project_id:project_id, "receiving request to publish project as template"
 		TemplatesPublisher.publish user_id, project_id, callback
 
 	unPublishProject: (user_id, project_id, callback)->
-		logger.log user_id:user_id, project_id:project_id, "reciving request to unpublish project as template"
+		logger.log user_id:user_id, project_id:project_id, "receiving request to unpublish project as template"
 		TemplatesPublisher.unpublish user_id, project_id, callback
 
 	getTemplateDetails: (user_id, project_id, callback)->

@@ -523,8 +523,16 @@
   .reset-filter();
 
   // in these cases the gradient won't cover the background, so we override
-  &:hover, &:active, &.active, &.disabled, &[disabled] {
+  &:hover, &.disabled, &[disabled] {
     background-color: @endColor;
+    background-image: -webkit-linear-gradient(top, lighten(@startColor, 5%), lighten(@endColor, 5%));
+    background-image:         linear-gradient(to bottom, lighten(@startColor, 5%), lighten(@endColor, 5%));
+  }
+
+  &:active, &.active {
+    background-color: @endColor;
+    background-image: -webkit-linear-gradient(top, darken(@endColor, 5%), darken(@startColor, 5%));
+    background-image:         linear-gradient(to bottom, darken(@endColor, 5%), darken(@startColor, 5%));
   }
 
   // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves

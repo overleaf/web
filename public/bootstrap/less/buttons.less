@@ -7,6 +7,7 @@
 
 // Core
 .btn {
+  .buttonBackground(#eee, #ddd);
   display: inline-block;
   padding: 4px 8px 4px;
   margin-bottom: 0; // For input.btn
@@ -112,7 +113,8 @@
 // Set the backgrounds
 // -------------------------
 .btn-primary {
-  .buttonBackground(@linkColor, @linkColor);
+  .buttonBackground(@linkColor, darken(@linkColor, 15%));
+  text-shadow: 0 1px 1px darken(@linkColor, 20%);
 }
 // Warning appears are orange
 .btn-warning {

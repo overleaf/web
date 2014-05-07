@@ -12,7 +12,7 @@ p {
   font-size: @baseFontSize;
   line-height: @baseLineHeight;
   small {
-    font-size: @baseFontSize - 2;
+    font-size: @baseFontSize * .8;
     color: @grayLight;
   }
 }
@@ -25,10 +25,7 @@ p {
 
 // HEADINGS
 // --------
-
 h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  font-weight: bold;
   color: @grayDark;
   text-rendering: optimizelegibility; // Fix the character spacing for headings
   small {
@@ -36,56 +33,92 @@ h1, h2, h3, h4, h5, h6 {
     color: @grayLight;
   }
 }
+h1, h2, h3, h4, h5, h6, header, footer, input, button, a.btn, select, textarea {
+  font-family: @baseHeadingFamily;
+  font-weight: 400;
+}
 h1 {
-  font-size: 30px;
+  font-size: 1.9375rem;
   line-height: @baseLineHeight * 2;
+  margin-top: @baseLineHeight * 2;
+  margin-bottom: @baseLineHeight;
   small {
-    font-size: 18px;
+    font-size: @baseLineHeight;
   }
 }
 h2 {
-  font-size: 24px;
-  line-height: @baseLineHeight * 2;
-  small {
-    font-size: 18px;
-  }
-}
-h3 {
-  line-height: @baseLineHeight * 1.5;
-  font-size: 18px;
-  small {
-    font-size: 14px;
-  }
-}
-h4, h5, h6 {
+  font-size: @baseLineHeight;
   line-height: @baseLineHeight;
-}
-h4 {
-  font-size: 14px;
+  margin-top: @baseLineHeight * 2;
+  margin-bottom: @baseLineHeight;
   small {
-    font-size: 12px;
+    font-size: @baseScaleFactor;
   }
 }
-h5 {
-  font-size: 12px;
+h3, h4 {
+  font-size: @baseScaleFactor;
+  line-height: @baseLineHeight;
+  margin-top: @baseLineHeight;
+  margin-bottom: @baseLineHeight;
+  small {
+    font-size: @baseFontSize;
+  }
 }
-h6 {
-  font-size: 11px;
-  color: @grayLight;
-  text-transform: uppercase;
+p, ul, ol, pre, table, blockquote {
+  margin-top: @baseLineHeight;
+  margin-bottom: @baseLineHeight;
+}
+
+/* Sanitation */
+hr {
+  border: 1px solid;
+  margin: -1px 0;
+}
+b, strong, em, small, code {
+  line-height: 1;
+}
+sup, sub {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+}
+sub {
+  top: 0.4em;
 }
 
 // Page header
 .page-header {
-  padding-bottom: @baseLineHeight - 1;
   margin: @baseLineHeight 0;
   border-bottom: 1px solid @grayLighter;
 }
-.page-header h1 {
-  line-height: 1;
+.project-header {
+  h1 {
+    margin-top: 0;
+    margin-right: @baseLineHeight * 5;
+    line-height: 1;
+  }
+  .search {
+    position: relative;
+    input {
+      &:focus .icon-search {
+        background-image: url("/img/glyphicons-halflings-white.png")
+      }
+    }
+    .icon-search {
+      position: absolute;
+      top: 3px;
+      left: 1rem;
+    }
+    .icon-remove {
+      position: absolute;
+      top: 3px;
+      right: 1rem;
+    }
+  }
+  .search .search-query:focus, .search .search-query.focused {
+    padding-left: @baseLineHeight;
+  }
 }
-
-
 
 // LISTS
 // -----
@@ -99,6 +132,7 @@ ul ul,
 ul ol,
 ol ol,
 ol ul {
+  margin-top: 0;
   margin-bottom: 0;
 }
 ul {
@@ -196,7 +230,7 @@ blockquote {
 // Quotes
 q:before,
 q:after,
-blockquote:before, 
+blockquote:before,
 blockquote:after {
   content: "";
 }

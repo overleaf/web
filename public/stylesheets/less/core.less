@@ -8,61 +8,6 @@ body {
   padding-top: 4.5rem;
 	text-rendering: optimizeLegibility;
 }
-h1, h2, h3, h4, h5, h6 {
-	font-weight: 400;
-}
-h1 {
-  font-size: 4.25rem;
-  line-height: 5.5rem;
-  margin-top: 2.75rem;
-  margin-bottom: 1.375rem;
-}
-h2 {
-  font-size: 2.625rem;
-  line-height: 2.75rem;
-  margin-top: 2.75rem;
-  margin-bottom: 1.375rem;
-}
-h3 {
-  font-size: 1.625rem;
-  line-height: 2.75rem;
-  margin-top: 1.375rem;
-  margin-bottom: 1.375rem;
-}
-h4 {
-  font-size: 1rem;
-  line-height: 1.375rem;
-  margin-top: 1.375rem;
-  margin-bottom: 1.375rem;
-}
-p, ul, ol, pre, table, blockquote {
-  margin-top: 1.375rem;
-  margin-bottom: 1.375rem;
-}
-
-/* Sanitation */
-hr {
-  border: 1px solid;
-  margin: -1px 0;
-}
-ul ul, ol ol, ul ol, ol ul {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-b, strong, em, small, code {
-  line-height: 1;
-}
-sup, sub {
-  vertical-align: baseline;
-  position: relative;
-  top: -0.4em;
-}
-sub {
-  top: 0.4em;
-}
-footer {
-  margin-top: 2.75rem;
-}
 
 a.plain{
    color: #333;
@@ -75,63 +20,27 @@ a.plain:hover {
 	margin:0px;
 }
 
-form {
-  input, button, select, textarea {
-    font-family: "Vollkorn", Georgia, serif;
-  }
+.gray-container {
+  background-color: @grayBg;
 }
 
-.form-simple {
-  input {
-    background-color: transparent;
-    border: 0 none;
-    border-bottom: 1px solid @grayLighter;
-    border-radius: 0;
-    box-shadow: none;
-    color: @grayDark;
-    font-style: italic;
-  }
-  ::-webkit-input-placeholder {
-    color: @grayDark;
-  }
-  :-moz-placeholder { /* Firefox 18- */
-    color: @grayDark;
-  }
-  ::-moz-placeholder {  /* Firefox 19+ */
-    color: @grayDark;
-  }
-  :-ms-input-placeholder {
-    color: @grayDark;
-  }
-}
-.form-inverse {
-  input {
-    background-color: rgba(128, 128, 128, 0.5);
-    border-bottom: 1px solid white;
-    color: white;
-  }
-  ::-webkit-input-placeholder {
-    color: white;
-  }
-  :-moz-placeholder { /* Firefox 18- */
-    color: white;
-  }
-  ::-moz-placeholder {  /* Firefox 19+ */
-    color: white;
-  }
-  :-ms-input-placeholder {
-    color: white;
-  }
+.card {
+  background-color: white;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: @baseLineHeight 0;
+  padding: @baseLineHeight;
 }
 
 input.inputmodal {
 	margin-bottom: 0;
-	width:520px;
+	width: 520px;
 }
 
 .actions {
-	background:none;
-	border:none;
+	background: none;
+	border: none;
 }
 
 .centered {

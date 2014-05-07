@@ -1,0 +1,108 @@
+extends ../layout
+
+block content
+
+	.container
+		.row.header
+				.span4.offset1.logo-header
+					img(src='https://www.sharelatex.com/blog/images/logo.png')
+					h1.logo
+						a(href='/blog') ShareLaTeX Blog
+		.row
+			.span7.offset1
+				.post
+					.page-header
+						h2
+							a(href='/blog/2014/04/10/forward-and-reverse-search-in-sharelatex.html') Forward and Reverse Search in ShareLaTeX
+					p
+						| You can now quickly jump forwards and backwards between your code and the same place in the output PDF. We’ve introducted two new buttons between the code and PDF panels:
+					ul
+						li
+							| To go from your code to the corresponding place in the PDF, click the top button with the right arrow.
+						li To go from the PDF to your code, click the bottom button with the left arrow.
+					p
+						| Simple! You can also
+						strong double-click anywhere in the PDF
+						| to jump to that place in the code.
+					p
+						img(alt='Forward and reverse search', src='https://www.sharelatex.com/blog/images/screenshot-forward-and-reverse-search.png')
+					p.author_details Posted by James Allen on 10 Apr 2014
+				.follow-us.alert.alert-success
+					p
+						| Subscribe to our feeds:
+						a(href='/blog/rss.xml')
+							img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+							| RSS
+						| or
+						a(href='/blog/atom.xml')
+							img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+							| Atom
+				#disqus_thread
+					iframe#dsq-2(data-disqus-uid='2', allowtransparency='true', frameborder='0', tabindex='0', title='Disqus', width='100%', src='https://disqus.com/embed/comments/?base=default&disqus_version=a68c4f47&f=sharelatexblog&t_i=Forward%20and%20Reverse%20Search%20in%20ShareLaTeX&t_u=https%3A%2F%2Fwww.sharelatex.com%2Fblog%2F2014%2F04%2F10%2Fforward-and-reverse-search-in-sharelatex.html&t_d=Forward%20and%20Reverse%20Search%20in%20ShareLaTeX%20-%20ShareLaTeX%20Blog&t_t=Forward%20and%20Reverse%20Search%20in%20ShareLaTeX%20-%20ShareLaTeX%20Blog&s_o=default#2', scrolling='no', horizontalscrolling='no', verticalscrolling='no', style='width: 100% !important; border: none !important; overflow: hidden !important; height: 777px !important;')
+			.span3.blurb
+				.info-box
+					p
+						a(href='/') ShareLaTeX
+						| is an online LaTeX editor that
+						| allows real-time collaboration in your browser
+					p
+						a.btn.btn-success.blog_goto_sharelatex_button(href='/') Try ShareLaTeX Now
+				div
+					.follow-us.alert.alert-success
+						p
+							| Subscribe to our feeds:
+						p
+							a(href='/blog/rss.xml')
+								img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+								| RSS
+							| or
+							a(href='/blog/atom.xml')
+								img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+								| Atom
+						p
+				.side-post-list
+					h2 Recent Posts
+					ul
+						li
+							a(href='/blog/2014/04/14/incident-report-14th-april-2014.html') Incident Report - 14th April 2014
+							span.date 14 Apr 2014
+							div(style='clear: both;')
+						li
+							a(href='/blog/2014/04/10/forward-and-reverse-search-in-sharelatex.html') Forward and Reverse Search in ShareLaTeX
+							span.date 10 Apr 2014
+							div(style='clear: both;')
+						li
+							a(href='/blog/2014/03/31/track-changes-in-your-latex-documents.html') Track changes in your LaTeX documents
+							span.date 31 Mar 2014
+							div(style='clear: both;')
+						li
+							a(href='/blog/2014/03/05/improved-autocomplete-with-snippets.html') Improved Auto-complete, now with Snippets
+							span.date 05 Mar 2014
+							div(style='clear: both;')
+						li
+							a(href='/blog/2014/02/21/sharelatex-is-now-open-source.html') ShareLaTeX is now open-source!
+							span.date 21 Feb 2014
+							div(style='clear: both;')
+						li
+							a(href='/blog/2014/01/27/preview-eps-and-pdf-in-browser.html') Preview EPS and PDF in browser
+							span.date 27 Jan 2014
+							div(style='clear: both;')
+					a.view-all(href='/blog/all.html') View All
+				.side-post-list
+					h2 Video Guides
+					ul
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/your-first-latex-document.html') Creating your first LaTeX document
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/paragraphs-and-sections-in-latex.html') Paragraphs and Sections in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/mathematics-in-latex.html') Mathematics in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/images-in-latex.html') Images in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/bibliographies-in-latex.html') Bibliographies and Natbib
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/tables-and-matrices-in-latex.html') Tables and Matrices in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/longer-documents-in-latex.html') Longer Documents in LaTeX
+						a.view-all(href='/blog/latex-guides/beginners-tutorial.html') View All

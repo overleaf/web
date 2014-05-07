@@ -8,98 +8,198 @@ events = require "events"
 MockResponse = require "../helpers/MockResponse"
 MockRequest = require "../helpers/MockRequest"
 ObjectId = require("mongojs").ObjectId
+assert = require("assert")
 
 describe "UserController", ->
 	beforeEach ->
+		@user_id = "323123"
+
+		@user =
+			_id:@user_id
+			save:sinon.stub().callsArgWith(0)
+			ace:{}
+
+		@UserDeleter = 
+			deleteUser: sinon.stub().callsArgWith(1)
+		@UserLocator = 
+			findById: sinon.stub().callsArgWith(1, null, @user)
+		@User =
+			findById: sinon.stub().callsArgWith(1, null, @user)
+		@NewsLetterManager =
+			unsubscribe: sinon.stub().callsArgWith(1)
+		@UserRegistrationHandler =
+			registerNewUser: sinon.stub()
+		@AuthenticationController = {}
+		@AuthenticationManager =
+			authenticate: sinon.stub()
+			setUserPassword: sinon.stub()
+		@ReferalAllocator =
+			allocate:sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
-			"./UserGetter": @UserGetter = {}
-		@req = new MockRequest()
-		@res = new MockResponse()
+			"./UserLocator": @UserLocator
+			"./UserDeleter": @UserDeleter
+			"../../models/User": User:@User
+			'../Newsletter/NewsletterManager':@NewsLetterManager
+			"./UserRegistrationHandler":@UserRegistrationHandler
+			"../Authentication/AuthenticationController": @AuthenticationController
+			"../Authentication/AuthenticationManager": @AuthenticationManager
+			"../Referal/ReferalAllocator":@ReferalAllocator
+			"logger-sharelatex": {log:->}
+
+
+		@req = 
+			session: 
+				destroy:->
+				user :
+					_id : @user_id
+			body:{}
+		@res = {}
 		@next = sinon.stub()
+	describe "deleteUser", ->
 
-	describe "getLoggedInUsersPersonalInfo", ->
-		beforeEach ->
-			@user =
-				_id: ObjectId()
-			@req.user = @user
-			@UserController.sendFormattedPersonalInfo = sinon.stub()
-			@UserController.getLoggedInUsersPersonalInfo(@req, @res, @next)
+		it "should delete the user", (done)->
 
-		it "should call sendFormattedPersonalInfo", ->
-			@UserController.sendFormattedPersonalInfo
-				.calledWith(@user, @res, @next)
-				.should.equal true
+			@res.send = (code)=>
+				@UserDeleter.deleteUser.calledWith(@user_id)
+				code.should.equal 200
+				done()
+			@UserController.deleteUser @req, @res
 
-	describe "getPersonalInfo", ->
-		beforeEach ->
-			@user_id = ObjectId().toString()
-			@user =
-				_id: ObjectId(@user_id)
-			@req.params = user_id: @user_id
+	describe "unsubscribe", ->
 
-		describe "when the user exists", ->
-			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
-				@UserController.sendFormattedPersonalInfo = sinon.stub()
-				@UserController.getPersonalInfo(@req, @res, @next)
+		it "should send the user to unsubscribe", (done)->
+			@res.send = (code)=>
+				@NewsLetterManager.unsubscribe.calledWith(@user).should.equal true
+				done()
+			@UserController.unsubscribe @req, @res
 
-			it "should look up the user in the database", ->
-				@UserGetter.getUser
-					.calledWith(@user_id, { _id: true, first_name: true, last_name: true, email: true })
-					.should.equal true
+	describe "updateUserSettings", ->
+
+		it "should call save", (done)->
+			@req.body = {}
+			@res.send = (code)=>
+				@user.save.called.should.equal true
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should set the first name", (done)->
+			@req.body =
+				first_name: "bobby  "
+			@res.send = (code)=>
+				@user.first_name.should.equal "bobby"
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should set some props on ace", (done)->
+			@req.body =
+				theme: "something  "
+			@res.send = (code)=>
+				@user.ace.theme.should.equal "something"
+				done()
+			@UserController.updateUserSettings @req, @res
+
+
+	describe "logout", ->
+
+		it "should destroy the session", (done)->
+
+			@req.session.destroy = sinon.stub().callsArgWith(0)
+			@res.redirect = (url)=>
+				url.should.equal "/login"
+				@req.session.destroy.called.should.equal true
+				done()
+
+			@UserController.logout @req, @res
+
+
+	describe "register", ->
+
+		it "should ask the UserRegistrationHandler to register user", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = =>
+				@UserRegistrationHandler.registerNewUser.calledWith(@req.body).should.equal true
+				done()
+			@UserController.register @req, @res
+
+		it "should try and log the user in if there is an EmailAlreadyRegisterd error", (done)->
+
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, "EmailAlreadyRegisterd")
+			@AuthenticationController.login = (req, res)=>
+				assert.deepEqual req, @req
+				assert.deepEqual res, @res
+				done()
+			@UserController.register @req, @res
+
+		it "should put the user on the session and mark them as justRegistered", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = =>
+				assert.deepEqual @user, @req.session.user
+				assert.equal @req.session.justRegistered, true
+				done()
+			@UserController.register @req, @res
+
+		it "should redirect to project page", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = (opts)=>
+				opts.redir.should.equal "/project"
+				done()
+			@UserController.register @req, @res			
+
+
+		it "should redirect passed redir if it exists", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@req.body.redir = "/somewhere"
+			@res.send = (opts)=>
+				opts.redir.should.equal "/somewhere"
+				done()
+			@UserController.register @req, @res
+
+		it "should allocate the referals", (done)->
+			@req.session =
+				referal_id : "23123"
+				referal_source : "email"
+				referal_medium : "bob"
 				
-			it "should send the formatted details back to the client", ->
-				@UserController.sendFormattedPersonalInfo
-					.calledWith(@user, @res, @next)
-					.should.equal true
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@req.body.redir = "/somewhere"
+			@res.send = (opts)=>
+				@ReferalAllocator.allocate.calledWith(@req.session.referal_id, @user._id, @req.session.referal_source, @req.session.referal_medium).should.equal true
+				done()
+			@UserController.register @req, @res			
+			
 
-		describe "when the user does not exist", ->
-			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-				@UserController.sendFormattedPersonalInfo = sinon.stub()
-				@UserController.getPersonalInfo(@req, @res, @next)
 
-			it "should return 404 to the client", ->
-				@res.statusCode.should.equal 404
+	describe "changePassword", ->
 
-	describe "sendFormattedPersonalInfo", ->
-		beforeEach ->
-			@user =
-				_id: ObjectId()
-				first_name: "Douglas"
-				last_name: "Adams"
-				email: "doug@sharelatex.com"
-			@formattedInfo =
-				id: @user._id.toString()
-				first_name: @user.first_name
-				last_name: @user.last_name
-				email: @user.email
-			@UserController._formatPersonalInfo = sinon.stub().callsArgWith(1, null, @formattedInfo)
-			@UserController.sendFormattedPersonalInfo @user, @res
+		it "should check the old password is the current one at the moment", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2)
+			@req.body =
+				currentPassword: "oldpasshere"
+			@res.send = =>
+				@AuthenticationManager.authenticate.calledWith(_id:@user._id, "oldpasshere").should.equal true
+				@AuthenticationManager.setUserPassword.called.should.equal false
+				done()
+			@UserController.changePassword @req, @res
 
-		it "should format the user details for the response", ->
-			@UserController._formatPersonalInfo
-				.calledWith(@user)
-				.should.equal true
 
-		it "should send the formatted details back to the client", ->
-			@res.body.should.equal JSON.stringify(@formattedInfo)
+		it "it should not set the new password if they do not match", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2, null, {})
+			@req.body =
+				newPassword1: "1"
+				newPassword2: "2"
+			@res.send = =>
+				@AuthenticationManager.setUserPassword.called.should.equal false
+				done()
+			@UserController.changePassword @req, @res			
 
-	describe "_formatPersonalInfo", ->
-		it "should return the correctly formatted data", ->
-			@user =
-				_id: ObjectId()
-				first_name: "Douglas"
-				last_name: "Adams"
-				email: "doug@sharelatex.com"
-				password: "should-not-get-included"
-				signUpDate: new Date()
-			@UserController._formatPersonalInfo @user, (error, info) =>
-				expect(info).to.deep.equal {
-					id: @user._id.toString()
-					first_name: @user.first_name
-					last_name: @user.last_name
-					email: @user.email
-					signUpDate: @user.signUpDate
-				}
+		it "should set the new password if they do match", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2, null, @user)
+			@AuthenticationManager.setUserPassword.callsArgWith(2)
+			@req.body =
+				newPassword1: "newpass"
+				newPassword2: "newpass"
+			@res.send = =>
+				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
+				done()
+			@UserController.changePassword @req, @res		
 

@@ -144,6 +144,8 @@ RenderController.prototype = {
     finishedRendering: function(pageView) {
         var idx = this.renderList.indexOf(pageView);
 
+        pageView.callAfterRenderedCallbacks();
+
         // If the finished pageView is in the list of pages to render,
         // then remove it from the list and render start rendering the
         // next page.
@@ -215,6 +217,16 @@ ListView.prototype = {
         // per pageContainer.
         this.pdfDoc.pages.map(function(page) {
             var pageView = new PageView(page, this);
+
+            // TODO: Switch over to a proper event handler
+            var that = this;
+            var index = that.pageViews.length;
+            pageView.ondblclick = function(e) {
+                e.page = index;
+                if (that.ondblclick) {
+                    that.ondblclick.call(that, e);
+                }
+            }
             this.pageViews.push(pageView);
 
             var container = new PageContainerView(this);
@@ -359,12 +371,15 @@ ListView.prototype = {
         this.setPdfPosition(this.pdfPosition);
     },
 
-    getPdfPosition: function() {
+    getPdfPosition: function(fromTop) {
         var pdfPosition = null;
         for (var i = 0; i < this.pageViews.length; i++) {
             var pageView = this.pageViews[i];
             var pdfOffset = pageView.getUppermostVisiblePdfOffset();
             if (pdfOffset !== null) {
+                if (fromTop) {
+                    pdfOffset = pageView.normalHeight - pdfOffset;
+                }
                 pdfPosition = {
                     page: i,
                     offset: {
@@ -378,13 +393,34 @@ ListView.prototype = {
         return pdfPosition;
     },
 
-    setPdfPosition: function(pdfPosition) {
+    setPdfPosition: function(pdfPosition, fromTop) {
         if (typeof pdfPosition !== "undefined" && pdfPosition != null) {
             var offset = pdfPosition.offset;
             var page_index = pdfPosition.page;
             var pageView = this.pageViews[page_index];
+            if (fromTop) {
+                offset.top = pageView.normalHeight - offset.top;
+            }
             var position = pageView.getPdfPositionInViewer(offset.left, offset.top);
             this.dom.scrollTop = position.top;
+        }
+    },
+
+    setHighlights: function(highlights, fromTop) {
+        for (i = 0; i < highlights.length; i++) {
+            var pageIndex = highlights[i].page;
+            var pageView = this.pageViews[pageIndex];
+            (function(pageView, highlight) {
+                pageView.doWhenRendered(function() {
+                    pageView.addHighlight(highlight.highlight, fromTop);
+                });
+            })(pageView, highlights[i]);
+        }
+    },
+
+    clearHighlights: function() {
+        for (var i = 0; i < this.pageViews.length; i++) {
+            var pageView = this.pageViews[i].clearHighlights();
         }
     }
 };
@@ -459,9 +495,31 @@ function PageView(page, listView) {
 
     this.isRendered = false;
     this.renderState = RenderingStates.INITIAL;
+    this.afterRenderCallbacks = [];
 
     var dom = this.dom = document.createElement('div');
     dom.className = "plv-page-view page-view";
+    var that = this;
+    dom.ondblclick = function(e) {
+        var layerX = e.layerX;
+        var layerY = e.layerY;
+        var element = e.target;
+        while (element.offsetParent && element.offsetParent !== dom) {
+            layerX = layerX + element.offsetLeft;
+            layerY = layerY + element.offsetTop;
+            element = element.offsetParent;
+        }
+
+        var pdfPoint = that.viewport.convertToPdfPoint(layerX, layerY);
+        var event = {
+            x: pdfPoint[0],
+            y: that.normalHeight - pdfPoint[1]
+        };
+
+        if (that.ondblclick) {
+            that.ondblclick.call(that.listView, event)
+        }
+    }
     this.createNewCanvas();
 }
 
@@ -560,6 +618,7 @@ PageView.prototype = {
             scaled: pixelRatio != 1
         };
     },
+
     createNewCanvas: function() {
         if (this.canvas) {
             this.dom.removeChild(this.canvas);
@@ -628,6 +687,41 @@ PageView.prototype = {
         }
         var pdfOffset = this.viewport.convertToPdfPoint(0, canvasOffset);
         return pdfOffset[1];
+    },
+
+    clearHighlights: function() {
+        if (this.highlightsLayer) {
+            this.highlightsLayer.clearHighlights();
+        }
+    },
+
+    addHighlight: function(highlight, fromTop) {
+        if (this.highlightsLayer) {
+            var top = highlight.top;
+            var left = highlight.left;
+            var width = highlight.width;
+            var height = highlight.height;
+            if (fromTop) {
+                top = this.normalHeight - top;
+            }
+            this.highlightsLayer.addHighlight(left, top, width, height);
+        }
+    },
+
+    doWhenRendered: function(callback) {
+        if (this.isRendered) {
+            callback()
+        } else {
+            this.afterRenderCallbacks.push(callback);
+        }
+    },
+
+    callAfterRenderedCallbacks: function () {
+        var callbacks = this.afterRenderCallbacks;
+        for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i]();
+        }
+        this.afterRenderCallbacks = [];
     }
 };
 
@@ -716,6 +810,14 @@ Page.prototype = {
                 );
             }
 
+            var highlightsLayerBuilder = pageView.listView.options.highlightsLayerBuilder;
+            if (highlightsLayerBuilder) {
+                var highlightsLayerDiv = pageView.highlightsLayerDiv = document.createElement("div");
+                highlightsLayerDiv.className = 'plv-highlights-layer highlights-layer';
+                pageView.dom.appendChild(highlightsLayerDiv);
+                pageView.highlightsLayer = new highlightsLayerBuilder(pageView, highlightsLayerDiv);
+            }
+
             renderContext = {
               canvasContext: pageView.getCanvasContext(),
               viewport: viewport,
@@ -766,13 +868,19 @@ function PDFListView(mainDiv, options) {
     }
     logger.logLevel = options.logLevel;
 
+    var self = this;
+
     this.listView = new ListView(mainDiv, options);
+    this.listView.ondblclick = function(e) {
+        if (options.ondblclick) {
+            options.ondblclick.call(self, e);
+        }
+    }
 
     this.renderController = new RenderController();
     this.renderController.addListView(this.listView);
     this.renderController.updateRenderList();
 
-    var self = this;
 
     mainDiv.addEventListener('scroll', function() {
         // This will update the list AND start rendering if needed.
@@ -840,12 +948,20 @@ PDFListView.prototype = {
         this.renderController.onResize();
     },
 
-    getPdfPosition: function() {
-        return this.listView.getPdfPosition();
+    getPdfPosition: function(fromTop) {
+        return this.listView.getPdfPosition(fromTop);
     },
 
-    setPdfPosition: function(pdfPosition) {
-        this.listView.setPdfPosition(pdfPosition)
+    setPdfPosition: function(pdfPosition, fromTop) {
+        this.listView.setPdfPosition(pdfPosition, fromTop);
+    },
+
+    setHighlights: function(highlights, fromTop) {
+        this.listView.setHighlights(highlights, fromTop);
+    },
+
+    clearHighlights: function() {
+        this.listView.clearHighlights();
     }
 };
 PDFListView.Logger = Logger;

@@ -1,29 +1,31 @@
 extends ../layout
 
 block content
-	.container
-		.row
-			.span4.offset4
-				.page-header
-					h1 Register
-				if sharedProjectData.user_first_name !== undefined
-					h3 #{sharedProjectData.user_first_name} would like you to view '#{sharedProjectData.project_name}'
-					div Join ShareLaTeX to view this project
-				else if newTemplateData.templateName !== undefined
-					h3 Please register to edit the '#{newTemplateData.templateName}' template
-					div Already have a ShareLaTeX account?
-						a(href="/login") Login here
-				.messageArea
-				form.form-simple#registerFormShort(method="post")
-					input(name='_csrf', type='hidden', value=csrfToken)
-					input(name='redir', type='hidden', value=redir)
-					.clearfix
-						.input
-							input#email.span4.email.required(type='email', placeholder='Email Address',  name='email', value='#{new_email}')
-					.clearfix
-						.input
-							input#password.span4.required(type='password', placeholder='Password', name='password')
-					.actions
-						button#registerButton.btn-primary.btn.btn-large(type='submit') Register
+	.gray-container
+		.container
+			.row
+				.span4.offset4
+					.card
+						.page-header
+							h1 Register
+						if sharedProjectData.user_first_name !== undefined
+							h3 #{sharedProjectData.user_first_name} would like you to view '#{sharedProjectData.project_name}'
+							div Join ShareLaTeX to view this project
+						else if newTemplateData.templateName !== undefined
+							h3 Please register to edit the '#{newTemplateData.templateName}' template
+							div Already have a ShareLaTeX account?
+								a(href="/login") Login here
+						.messageArea
+						form#registerFormShort(method="post")
+							input(name='_csrf', type='hidden', value=csrfToken)
+							input(name='redir', type='hidden', value=redir)
+							.clearfix
+								.input
+									input#email.span4.email.required(type='email', placeholder='Email Address',  name='email', value='#{new_email}')
+							.clearfix
+								.input
+									input#password.span4.required(type='password', placeholder='Password', name='password')
+							.actions
+								button#registerButton.btn-primary.btn.btn-large(type='submit') Register
 
 	include ../general/small-footer
