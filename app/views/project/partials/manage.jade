@@ -1,5 +1,5 @@
 .box
-	.page-header      
+	.page-header
 		h2 Project Settings
 	.tabbable
 		ul.nav.nav-tabs
@@ -11,14 +11,15 @@
 				a(href='#deleteProjectTab', data-toggle="tab") Delete Project
 			- if(userCanSeeDropbox)
 				li#manageDropboxSettiingsTabLink
-					a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox 
+					a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox
 						span.label.label-warning beta
 
 		.tab-content.form-horizontal
 			.tab-pane#generalProjectSettings.form.form-horizontal.active
 				if privlageLevel == 'owner' || privlageLevel == 'readAndWrite'
+					h3 Project
 					.control-group
-						label(for='xlInput').control-label Project Name 
+						label(for='xlInput').control-label Project Name
 						.controls
 							.input
 								input.projectName(type='text', value=project.name)
@@ -51,12 +52,99 @@
 									option(value='pdflatex') pdfLaTeX
 									option(value='xelatex') XeLaTeX
 									option(value='lualatex') LuaLaTeX
+
+					h3 Global
+					//- form#userSettings
+					//- 	.control-group
+					//- 		label(for='theme').control-label Theme &nbsp;
+					//- 			a(href='/themes') (preview)
+					//- 		.controls
+					//- 			select(name='theme')#theme
+					//- 				each theme in themes
+					//- 					if(theme.name == user.ace.theme)
+					//- 						option(value=theme.name, selected='selected')= theme.name
+					//- 					else
+					//- 						option(value=theme.name)= theme.name
+					//- 	.control-group
+					//- 		label(for='mode').control-label Key Binding
+					//- 		.controls
+					//- 			select(name='mode')#mode
+					//- 				each mode in editors
+					//- 					if(mode == user.ace.mode)
+					//- 						option(value=mode, selected='selected')= mode
+					//- 					else
+					//- 						option(value=mode)= mode
+					//- 	.control-group
+					//- 		label(for='fontSize').control-label Font Size
+					//- 		.controls
+					//- 			select(name='fontSize')#fontSize
+					//- 				each fontSize in fontSizes
+					//- 					if(fontSize == user.ace.fontSize)
+					//- 						option(value=fontSize, selected='selected')= fontSize
+					//- 					else
+					//- 						option(value=fontSize)= fontSize
+
+					//- 	.control-group
+					//- 		label(for='autoComplete').control-label
+					//- 			| Auto complete
+					//- 		.controls
+					//- 			if (user.ace.autoComplete)
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='autoComplete', value='true', checked)
+					//- 					| On
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='autoComplete', value='false')
+					//- 					| Off
+					//- 			else
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='autoComplete', value='true')
+					//- 					| On
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='autoComplete', value='false', checked)
+					//- 					| Off
+
+					//- 	.control-group
+					//- 		label(for='spellCheck').control-label
+					//- 			| Default Spell check language
+					//- 		.controls
+					//- 			select(name="spellCheckLanguage")
+					//- 				option(value="",selected=(user.ace.spellCheckLanguage == "")) Off
+					//- 				optgroup(label="Language")
+					//- 					for language in languages
+					//- 						option(
+					//- 							value=language.code,
+					//- 							selected=(language.code == user.ace.spellCheckLanguage)
+					//- 						)= language.name
+
+					//- 	.control-group
+					//- 		label(for="pdfViewer").control-label
+					//- 			| PDF Viewer
+					//- 		.controls
+					//- 			if (user.ace.pdfViewer == "native")
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='pdfViewer', value='native', checked)
+					//- 					| Native (Best image quality)
+					//- 				br
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='pdfViewer', value='pdfjs')
+					//- 					| Built in (Pdf page stays the same after recompile)
+					//- 			else
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='pdfViewer', value='native')
+					//- 					| Native (Best image quality)
+					//- 				br
+					//- 				label.radio.inline
+					//- 					input(type='radio', name='pdfViewer', value='pdfjs', checked)
+					//- 					| Built in (Pdf page stays the same after recompile)
+
+					//- 	.form-actions
+					//- 		button.btn.btn-primary.large(type='submit') Update
 				else
 					span You do not have permission to modify these settings.
 
 				if privlageLevel == 'owner'
 					.control-group
-						label(for='select').control-label Public Access 
+						label(for='select').control-label Public Access
 						.controls
 							select#publicAccessLevel
 								option(value='private') Private
