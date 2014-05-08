@@ -2,165 +2,150 @@ extends ../layout
 
 block content
 
-
-		.container
-			.row.header
-					.span4.offset1.logo-header
-						img(src='https://www.sharelatex.com/blog/images/logo.png')
-						h1.logo
-							a(href='/blog') ShareLaTeX Blog
-			.row
-				.span7.offset1
-					.post
-						.page-header
-							h2
-								a(href='/blog/2014/03/05/improved-autocomplete-with-snippets.html') Improved Auto-complete, now with Snippets
+	.container
+		.row.header
+			.span12.logo-header
+				a(href='/blog')
+					img(src='https://www.sharelatex.com/blog/images/logo.png')
+				h4 Tips and tricks for using LaTeX online.
+		.row
+			.span6.offset2
+				.post
+					.page-header
+						h2
+							a(href='/blog/2014/03/05/improved-autocomplete-with-snippets.html') Improved Auto-complete, now with Snippets
+					p
+						| We’ve just rolled out an update to our auto-complete feature which should feel a lot more polished. It also now has ‘snippets’ built in, which are short sections of commonly used LaTeX code.
+					p Just start typing a command and the menu will pop up with possible selections.
+					p
+						img(alt='Auto complete version 2', src='https://www.sharelatex.com/blog/images/autocomplete-v2.png')
+					h3#fuzzy_matching Fuzzy Matching
+					p
+						| The new auto-complete uses fuzzy matching, so you can type shorthand like
+						code \fig
+						| then
+						code TAB
+						| to quickly create a figure environment, or
+						code \tab
+						| for a table.
+					h3#thank_you Thank you
+					p
+						| We’d like to say a huge thank you to the team and contributors behind the
+						a(href='https://github.com/ajaxorg/ace') Ace Editor
+						| who wrote most of this functionality in the first place.
+					p.author_details Posted by James Allen on 05 Mar 2014
+				.post
+					.page-header
+						h2
+							a(href='/blog/2014/02/21/sharelatex-is-now-open-source.html') ShareLaTeX is now open-source!
+					p
+						| We’re pleased to announce that ShareLaTeX is now open source, and you can grab the code on
+						a(href='https://github.com/sharelatex/sharelatex') Github
+						| ! ShareLaTeX is a web-based real-time collaborative LaTeX editor, and you can now run your own local version where you can host, edit, share and compile your LaTeX documents. We’re still 100% focused on running the hosted version at
+						a(href='http://www.sharelatex.com') http://www.sharelatex.com
+						| , but we want to be more flexible in how you can use ShareLaTeX, and give something back to our wonderful community.
+					p
+						img(alt='ShareLaTeX editor', src='https://s3.amazonaws.com/sharelatex-emails-images/screenshot-open-source-editor.png')
+					p
+						| We’re starting by open-sourcing the core parts of ShareLaTeX, including the editor, the project and document storage systems, and the backend LaTeX compiler that we use. This is only the beginning of our open-source journey though, and we will be open sourcing much more soon. (We still need to review our back-end code and write documentation for the other parts.)
+					h2#motivation Motivation
+					p
+						| Our main motivation for ShareLaTeX has always been to improve the efficiency of scientists and students around the world. Open sourcing our code base is a natural way to make sure that we can help as many people as possible.
+					p
+						| As a small team, we’re constantly receiving feature requests that we’d love to implement but don’t have the time. We’ve also had a lot of offers from willing volunteers who we’ve had to turn away because we didn’t have a framework for people to contribute. I hope that by open-sourcing ShareLaTeX we can empower our brilliant community to help improve ShareLaTeX in the ways that you want, without having to wait for the two of us to work down our todo list.
+					p
+						| A lot of people have asked to host ShareLaTeX internally due to company guidelines or data privacy concerns. We don’t have the resources to support licensed installs at the moment, but we also hate having to say no. With an open-source version of ShareLaTeX, now anyone who wants to run it locally can.
+					p
+						| We are still continuing to work on ShareLaTeX full time, and we expect that the time we have to work on new features will only increase in the coming year. (We are starting to look for a front end developer/designer to join our distributed team. If that sounds interesting then please get in touch at team@sharelatex.com.)
+					h2#contributing Contributing
+					p
+						| If you run into any problems with downloading and setting up ShareLaTeX, please let us know on our
+						a(href='https://github.com/sharelatex/sharelatex/issues') issue page
+						| .
+					p
+						| ShareLaTeX is written in CoffeeScript (and occasionally JavaScript), and our back-end runs on Node.js. Regardless of your experience, we would love to help you get to know the ShareLaTeX code base, and help you contribute your first patch. The code can be found on
+						a(href='https://github.com/sharelatex/sharelatex') Github
+						| , and an overview of all open issues can be found
+						a(href='https://github.com/orgs/sharelatex/dashboard/issues') here
+						| . We’ve got some issues marked as ‘good for beginners’, but don’t let that constrain you! We also have an
+						a(href='https://www.hipchat.com/g1nJMcj7b') open chat room
+						| for discussing development. Please drop in if you have any questions, or just say hi.
+					p
+						| There are also ways to help that aren’t all about coding. The whole site could do with the caring touch of a
+						strong designer
+						| , or if you speak a language other than English, then you could help to
+						strong translate
+						| ShareLaTeX. There is LaTeX
+						strong
+							a(href='http://www.sharelatex.com/learn') documentation
+						| that needs improving, and we’re always keen for
+						strong
+							a(href='http://github.com/sharelatex/sharelatex') bug reports
+						| from anyone using the site.
+					p.author_details Posted by James Allen on 21 Feb 2014
+				.post
+					.page-header
+						h2
+							a(href='/blog/2014/01/27/preview-eps-and-pdf-in-browser.html') Preview EPS and PDF in browser
+					p
+						| We have just deployed a new update that allows you to preview eps and pdf files inside your browser, previously you had to download them and view them locally. Enjoy!
+						img(alt='eps circle preview', src='https://www.sharelatex.com/blog/images/preview-eps-and-pdf-in-browser/eps-preview.png')
+					p.author_details Posted by Henry Oswald on 27 Jan 2014
+				ul.pager
+					li.previous
+						a.previous(href='/blog') ← Newer Posts
+					li.next
+						a.next(href='/blog/page3') Older Posts →
+			.span3.blurb
+				h2 About Us
+				.info-box
+					p
+						a(href='/') ShareLaTeX &nbsp;
+						| is an online LaTeX editor that
+						| allows real-time collaboration in your browser.
+					p
+						a.btn.btn-success.blog_goto_sharelatex_button(href='/') Try ShareLaTeX Now
+				div
+					.follow-us
 						p
-							| We’ve just rolled out an update to our auto-complete feature which should feel a lot more polished. It also now has ‘snippets’ built in, which are short sections of commonly used LaTeX code.
-						p Just start typing a command and the menu will pop up with possible selections.
-						p
-							img(alt='Auto complete version 2', src='https://www.sharelatex.com/blog/images/autocomplete-v2.png')
-						h3#fuzzy_matching Fuzzy Matching
-						p
-							| The new auto-complete uses fuzzy matching, so you can type shorthand like
-							code \fig
-							| then
-							code TAB
-							| to quickly create a figure environment, or
-							code \tab
-							| for a table.
-						h3#thank_you Thank you
-						p
-							| We’d like to say a huge thank you to the team and contributors behind the
-							a(href='https://github.com/ajaxorg/ace') Ace Editor
-							| who wrote most of this functionality in the first place.
-						p.author_details Posted by James Allen on 05 Mar 2014
-					.post
-						.page-header
-							h2
-								a(href='/blog/2014/02/21/sharelatex-is-now-open-source.html') ShareLaTeX is now open-source!
-						p
-							| We’re pleased to announce that ShareLaTeX is now open source, and you can grab the code on
-							a(href='https://github.com/sharelatex/sharelatex') Github
-							| ! ShareLaTeX is a web-based real-time collaborative LaTeX editor, and you can now run your own local version where you can host, edit, share and compile your LaTeX documents. We’re still 100% focused on running the hosted version at
-							a(href='http://www.sharelatex.com') http://www.sharelatex.com
-							| , but we want to be more flexible in how you can use ShareLaTeX, and give something back to our wonderful community.
-						p
-							img(alt='ShareLaTeX editor', src='https://s3.amazonaws.com/sharelatex-emails-images/screenshot-open-source-editor.png')
-						p
-							| We’re starting by open-sourcing the core parts of ShareLaTeX, including the editor, the project and document storage systems, and the backend LaTeX compiler that we use. This is only the beginning of our open-source journey though, and we will be open sourcing much more soon. (We still need to review our back-end code and write documentation for the other parts.)
-						h2#motivation Motivation
-						p
-							| Our main motivation for ShareLaTeX has always been to improve the efficiency of scientists and students around the world. Open sourcing our code base is a natural way to make sure that we can help as many people as possible.
-						p
-							| As a small team, we’re constantly receiving feature requests that we’d love to implement but don’t have the time. We’ve also had a lot of offers from willing volunteers who we’ve had to turn away because we didn’t have a framework for people to contribute. I hope that by open-sourcing ShareLaTeX we can empower our brilliant community to help improve ShareLaTeX in the ways that you want, without having to wait for the two of us to work down our todo list.
-						p
-							| A lot of people have asked to host ShareLaTeX internally due to company guidelines or data privacy concerns. We don’t have the resources to support licensed installs at the moment, but we also hate having to say no. With an open-source version of ShareLaTeX, now anyone who wants to run it locally can.
-						p
-							| We are still continuing to work on ShareLaTeX full time, and we expect that the time we have to work on new features will only increase in the coming year. (We are starting to look for a front end developer/designer to join our distributed team. If that sounds interesting then please get in touch at team@sharelatex.com.)
-						h2#contributing Contributing
-						p
-							| If you run into any problems with downloading and setting up ShareLaTeX, please let us know on our
-							a(href='https://github.com/sharelatex/sharelatex/issues') issue page
-							| .
-						p
-							| ShareLaTeX is written in CoffeeScript (and occasionally JavaScript), and our back-end runs on Node.js. Regardless of your experience, we would love to help you get to know the ShareLaTeX code base, and help you contribute your first patch. The code can be found on
-							a(href='https://github.com/sharelatex/sharelatex') Github
-							| , and an overview of all open issues can be found
-							a(href='https://github.com/orgs/sharelatex/dashboard/issues') here
-							| . We’ve got some issues marked as ‘good for beginners’, but don’t let that constrain you! We also have an
-							a(href='https://www.hipchat.com/g1nJMcj7b') open chat room
-							| for discussing development. Please drop in if you have any questions, or just say hi.
-						p
-							| There are also ways to help that aren’t all about coding. The whole site could do with the caring touch of a
-							strong designer
-							| , or if you speak a language other than English, then you could help to
-							strong translate
-							| ShareLaTeX. There is LaTeX
-							strong
-								a(href='http://www.sharelatex.com/learn') documentation
-							| that needs improving, and we’re always keen for
-							strong
-								a(href='http://github.com/sharelatex/sharelatex') bug reports
-							| from anyone using the site.
-						p.author_details Posted by James Allen on 21 Feb 2014
-					.post
-						.page-header
-							h2
-								a(href='/blog/2014/01/27/preview-eps-and-pdf-in-browser.html') Preview EPS and PDF in browser
-						p
-							| We have just deployed a new update that allows you to preview eps and pdf files inside your browser, previously you had to download them and view them locally. Enjoy!
-							img(alt='eps circle preview', src='https://www.sharelatex.com/blog/images/preview-eps-and-pdf-in-browser/eps-preview.png')
-						p.author_details Posted by Henry Oswald on 27 Jan 2014
-					ul.pager
-						li.previous
-							a.previous(href='/blog') ← Newer Posts
-						li.next
-							a.next(href='/blog/page3') Older Posts →
-				.span3.blurb
-					.info-box
-						p
-							a(href='/') ShareLaTeX
-							| is an online LaTeX editor that
-							| allows real-time collaboration in your browser
-						p
-							a.btn.btn-success.blog_goto_sharelatex_button(href='/') Try ShareLaTeX Now
-					div
-						.follow-us.alert.alert-success
-							p
-								| Subscribe to our feeds:
-							p
-								a(href='/blog/rss.xml')
-									img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
-									| RSS
-								| or
-								a(href='/blog/atom.xml')
-									img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
-									| Atom
-							p
-					.side-post-list
-						h2 Recent Posts
-						ul
-							li
-								a(href='/blog/2014/04/14/incident-report-14th-april-2014.html') Incident Report - 14th April 2014
-								span.date 14 Apr 2014
-								div(style='clear: both;')
-							li
-								a(href='/blog/2014/04/10/forward-and-reverse-search-in-sharelatex.html') Forward and Reverse Search in ShareLaTeX
-								span.date 10 Apr 2014
-								div(style='clear: both;')
-							li
-								a(href='/blog/2014/03/31/track-changes-in-your-latex-documents.html') Track changes in your LaTeX documents
-								span.date 31 Mar 2014
-								div(style='clear: both;')
-							li
-								a(href='/blog/2014/03/05/improved-autocomplete-with-snippets.html') Improved Auto-complete, now with Snippets
-								span.date 05 Mar 2014
-								div(style='clear: both;')
-							li
-								a(href='/blog/2014/02/21/sharelatex-is-now-open-source.html') ShareLaTeX is now open-source!
-								span.date 21 Feb 2014
-								div(style='clear: both;')
-							li
-								a(href='/blog/2014/01/27/preview-eps-and-pdf-in-browser.html') Preview EPS and PDF in browser
-								span.date 27 Jan 2014
-								div(style='clear: both;')
-						a.view-all(href='/blog/all.html') View All
-					.side-post-list
-						h2 Video Guides
-						ul
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/your-first-latex-document.html') Creating your first LaTeX document
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/paragraphs-and-sections-in-latex.html') Paragraphs and Sections in LaTeX
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/mathematics-in-latex.html') Mathematics in LaTeX
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/images-in-latex.html') Images in LaTeX
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/bibliographies-in-latex.html') Bibliographies and Natbib
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/tables-and-matrices-in-latex.html') Tables and Matrices in LaTeX
-							li
-								a(href='/blog/latex-guides/beginners-tutorial/longer-documents-in-latex.html') Longer Documents in LaTeX
-							a.view-all(href='/blog/latex-guides/beginners-tutorial.html') View All
+							a(href='/blog/rss.xml')
+								img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+								|  Subscribe
+							|  /&nbsp;
+							a(href='/blog/atom.xml')
+								img(src='https://www.sharelatex.com/blog/images/icons/feed.png')
+								|  Atom
+				.side-post-list
+					h2 Recent Posts
+					ul.unstyled
+						li
+							a(href='/blog/2014/04/14/incident-report-14th-april-2014.html') Incident Report - 14th April 2014
+						li
+							a(href='/blog/2014/04/10/forward-and-reverse-search-in-sharelatex.html') Forward and Reverse Search in ShareLaTeX
+						li
+							a(href='/blog/2014/03/31/track-changes-in-your-latex-documents.html') Track changes in your LaTeX documents
+						li
+							a(href='/blog/2014/03/05/improved-autocomplete-with-snippets.html') Improved Auto-complete, now with Snippets
+						li
+							a(href='/blog/2014/02/21/sharelatex-is-now-open-source.html') ShareLaTeX is now open-source!
+						li
+							a(href='/blog/2014/01/27/preview-eps-and-pdf-in-browser.html') Preview EPS and PDF in browser
+					a.view-all(href='/blog/all.html') View All
+				.side-post-list
+					h2 Video Guides
+					ul.unstyled
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/your-first-latex-document.html') Creating your first LaTeX document
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/paragraphs-and-sections-in-latex.html') Paragraphs and Sections in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/mathematics-in-latex.html') Mathematics in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/images-in-latex.html') Images in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/bibliographies-in-latex.html') Bibliographies and Natbib
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/tables-and-matrices-in-latex.html') Tables and Matrices in LaTeX
+						li
+							a(href='/blog/latex-guides/beginners-tutorial/longer-documents-in-latex.html') Longer Documents in LaTeX
+					a.view-all(href='/blog/latex-guides/beginners-tutorial.html') View All
