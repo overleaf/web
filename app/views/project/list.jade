@@ -51,12 +51,12 @@ block content
 						//- i.icon-remove
 						.btn-toolbar
 							.btn-group
-								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip").btn.downloadZip
+								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File").btn.downloadZip
 									i.icon-cloud-download
 								-if ("owner" == "owner")
 									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
 										i.icon-trash
-								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#")
+								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add Tags")
 									i.icon-tags
 									span.caret
 								ul.dropdown-menu.pull-right(role="menu")
