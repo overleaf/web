@@ -6,12 +6,15 @@ require [
 	"libs/underscore"
 	"libs/fineuploader"
 	"libs/jquery.storage"
+	"libs/bootstrap"
 ], (tagsManager, moment)->
+
+	$('.tooltip').tooltip()
 
 	$('.isoDate').each (i, d)->
 		html = $(d)
 		unparsedDate = html.text().trim()
-		formatedDate = moment(unparsedDate).format("Do MMM YYYY, h:mm:ss a")
+		formatedDate = moment(unparsedDate).format("MMM D, h:mm a")
 		html.text(formatedDate)
 
 	refreshProjectFilter = ->
@@ -192,7 +195,7 @@ require [
 			$confirm.off 'click'
 		$modal.find('.cancel').click (e)->
 			$modal.modal('hide')
-		
+
 
 	$('#blankNewProject').click (event)->
 		newProject.call(@, 'none')
@@ -205,7 +208,7 @@ require [
 
 	$('#uploadNewProject').click (event)->
 		event.preventDefault()
-		
+
 		$modal = $('#projectUploadModal')
 		$modal.modal({backdrop:true, show:true, keyboard:true})
 
@@ -243,7 +246,7 @@ require [
 
 		$modal.find('.cancel').click (e)->
 			$modal.modal('hide')
-			
+
 	sysMsgKey = "dismiss-system-message-090114"
 	if $.localStorage(sysMsgKey)
 		$("#systemMessage").hide()

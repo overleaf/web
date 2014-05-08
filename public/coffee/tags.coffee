@@ -65,16 +65,14 @@ define [
 				tagName    = $(@).data("tag")
 				project_id = $(@).data("project-id")
 				tagManager.deleteTagFromProject(project_id, tagName)
-				
+
 		_showTagInputForm: (project_id) ->
 			$("input.tags-input[data-project-id=#{project_id}]").show()
-			$(".addTagButton[data-project-id=#{project_id}]").hide()
 			@._initTagInput(project_id)
-				
+
 		_hideTagInputForm: (project_id) ->
 			@_tearDownTagInput(project_id)
 			$("input.tags-input[data-project-id=#{project_id}]").hide()
-			$(".addTagButton[data-project-id=#{project_id}]").show()
 
 		_initTagInput: (project_id) ->
 			input = $("input.tags-input[data-project-id=#{project_id}]")
@@ -91,7 +89,7 @@ define [
 
 			input.on 'keypress', (e) =>
 				if(e.keyCode == 13)
-					tagName = input.val()	
+					tagName = input.val()
 
 					if tagName.length > 0
 						@createTagForProject project_id, tagName

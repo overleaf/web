@@ -11,50 +11,33 @@ block content
 		-else
 			span Unknown?
 
+	mixin formatOwnerText(level, publicLevel)
+		-if (level == "owner")
+			span Me
+		-else
+			span #{formatProjectPublicAccessLevel()} &nbsp;
+				mixin formatAccessLevel(project.accessLevel)
+
 	mixin tag(project_id, tagName, showDeleteIcon)
 		span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
-			span.text #{tagName}
+			span.text #{tagName} &nbsp;
 			- if (showDeleteIcon)
 				i.icon-remove.icon-white.delete-tag(data-project-id=project_id, data-tag=tagName)
 
 	mixin projectList(projects)
 		-each project in projects
 			- project_id = project._id.toString()
-			.project_entry(id=project_id)
-				.btn-group.project-actions
-					a.btn.dropdown-toggle(data-toggle="dropdown", href="#") Actions
-						span.caret
-					ul.dropdown-menu.pull-right(role="menu")
-						li
-							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone
-						li
-							a(href='/project/'+project._id+'/download/zip').downloadZip Download Zip
-						-if (project.accessLevel == "owner")
-							li
-								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename
-							li
-								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete
-						-else
-							li
-								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave
-				a.projectName(href="/project/#{project._id}") #{project.name}
-				.projectDetails
-					span Last modified on
-					span.isoDate #{project.lastUpdated.toISOString()}
-					span &nbsp; - &nbsp;
-					span #{formatProjectPublicAccessLevel(project.publicAccesLevel)}
-					span &nbsp; - &nbsp;
-					mixin formatAccessLevel(project.accessLevel)
-				.project-tags(data-project-id=project_id)
-					- each tag in project.tags
-						mixin tag(project_id, tag.name, true)
-					span.new-tags
-						span.newTagLocation
-						span.label.addTagButton(data-project-id=project_id) Add Tag
-							i.icon-plus.icon-white
-
-						div
-							input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id=project_id).tags-input
+			li.project_entry(id=project_id)
+				label.checkbox.select-item
+					input(type="checkbox")
+				span.title
+					a.projectName(href="/project/#{project._id}") #{project.name}
+					span.project-tags(data-project-id=project_id)
+						- each tag in project.tags
+							mixin tag(project_id, tag.name, true)
+				span.owner
+					mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
+				span.last-modified.isoDate #{project.lastUpdated.toISOString()}
 
 	.page-header.project-header
 		.container
@@ -62,16 +45,41 @@ block content
 				.span2
 					h1 Projects
 				.span10
-					form.search
-						input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span9.projectSearch.search-query
+					form.form-inline.search
+						input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span6.projectSearch.search-query
 						i.icon-search
-						i.icon-remove
+						//- i.icon-remove
+						.btn-toolbar
+							.btn-group
+								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip").btn.downloadZip
+									i.icon-cloud-download
+								-if ("owner" == "owner")
+									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
+										i.icon-trash
+								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#")
+									i.icon-tags
+									span.caret
+								ul.dropdown-menu.pull-right(role="menu")
+									li
+										input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id=project_id).tags-input
+							.btn-group.project-actions
+								a.btn.dropdown-toggle(data-toggle="dropdown", href="#") More
+									span.caret
+								ul.dropdown-menu.pull-right(role="menu")
+									li
+										a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Clone...
+									-if ("owner" == "owner")
+										li
+											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
+									-else
+										li
+											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
 
 	.container
 		.row-fluid
 			.span2
 				.btn-group#newProject
-					a.btn.btn-success.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+					a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
 						span.caret
 					ul.dropdown-menu.pull-right(role="menu")
 						li
@@ -80,43 +88,44 @@ block content
 							a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
 						li
 							a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
-						li.divider
-						li
-							.normalText.menu-header From Template
-						li
-							a.normalText.menu-indent(href="/templates/cv") CV or Resume
-						li
-							a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
-						li
-							a.normalText.menu-indent(href="/templates/journals") Journal Article
-						li
-							a.normalText.menu-indent(href="/templates/presentations") Presentation
-						li
-							a.normalText.menu-indent(href="/templates/thesis") Thesis
-						li
-							a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+				br
+				ul.unstyled.menu
+					li Templates
+					li
+						a.normalText.menu-indent(href="/templates/cv") CV or Resume
+					li
+						a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
+					li
+						a.normalText.menu-indent(href="/templates/journals") Journal Article
+					li
+						a.normalText.menu-indent(href="/templates/presentations") Presentation
+					li
+						a.normalText.menu-indent(href="/templates/thesis") Thesis
+					li
+						a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+				-if (tags.length > 0)
+					hr.soften
+					ul#allProjectTagsArea.unstyled.menu
+						li Tags
+						- each tag in tags
+							-if (tag.project_ids.length > 0)
+								li
+									mixin tag("", tag.name, false)
+									span.number x #{tag.project_ids.length}
 
 				include ../general/sidebar
 			.span10
 				- if (projects.length > 0)
-					.row-fluid
-						.span9
-							ul#projectList
-								mixin projectList(projects)
-
-						.span3
-							.tag-list
-								h2 Tags
-								#allProjectTagsArea
-									ul
-										- each tag in tags
-											-if (tag.project_ids.length > 0)
-												li
-													mixin tag("", tag.name, false)
-													span.number x #{tag.project_ids.length}
-
+					ul#projectList
+						li
+							label.checkbox.select-all
+								input(type="checkbox")
+							span.title TITLE
+							span.owner OWNER
+							span.last-modified LAST MODIFIED
+						mixin projectList(projects)
 				- else
-					.row-fluid
+					.row
 						.span12
 							.sharelatex-intro
 								.create-project-arrow Create your first project

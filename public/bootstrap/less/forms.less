@@ -413,10 +413,41 @@ select:focus:required:invalid {
   padding-left: 14px;
   padding-right: 14px;
   margin-bottom: 0; // remove the default margin on all inputs
-  .border-radius(14px);
+  .border-radius(3px);
 }
 
-
+.search {
+  margin-bottom: 0;
+  position: relative;
+  input {
+    margin-right: @baseLineHeight;
+    &:focus .icon-search {
+      background-image: url("/img/glyphicons-halflings-white.png")
+    }
+  }
+  .btn-toolbar {
+    display: inline-block;
+    margin: 0;
+    vertical-align: top;
+    .btn {
+      padding-top: @baseLineHeight / 8;
+      padding-bottom: @baseLineHeight / 8;
+    }
+  }
+  .icon-search, .icon-remove {
+    position: absolute;
+    top: .5rem;
+  }
+  .icon-search {
+    left: 1rem;
+  }
+  .icon-remove {
+    right: 1rem;
+  }
+  .search-query {
+    padding-left: 2.5rem;
+  }
+}
 
 // HORIZONTAL & VERTICAL FORMS
 // ---------------------------

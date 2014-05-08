@@ -8,8 +8,9 @@
 // Core
 .btn {
   .buttonBackground(#eee, #ddd);
+  text-shadow: 0 1px 1px white;
   display: inline-block;
-  padding: 4px 8px 4px;
+  padding: (@baseLineHeight / 4) (@baseLineHeight / 2) (@baseLineHeight / 4);
   margin-bottom: 0; // For input.btn
   font-size: @baseFontSize;
   line-height: @baseLineHeight;
@@ -28,7 +29,7 @@
 .btn:hover {
   color: @grayDark;
   text-decoration: none;
-  background-color: darken(@grayDark, 10%);
+  background-color: darken(#ddd, 10%);
 }
 
 // Focus state for keyboard and accessibility
@@ -113,24 +114,28 @@
 // Set the backgrounds
 // -------------------------
 .btn-primary {
-  .buttonBackground(@linkColor, darken(@linkColor, 15%));
+  .buttonBackground(@linkColor, darken(@linkColor, 10%));
   text-shadow: 0 1px 1px darken(@linkColor, 20%);
 }
 // Warning appears are orange
 .btn-warning {
-  .buttonBackground(lighten(@orange, 15%), @orange);
+  .buttonBackground(lighten(@orange, 10%), @orange);
+  text-shadow: 0 1px 1px darken(@orange, 20%);
 }
 // Danger and error appear as red
 .btn-danger {
   .buttonBackground(#ee5f5b, #bd362f);
+  text-shadow: 0 1px 1px darken(#ee5f5b, 20%);
 }
 // Success appears as green
 .btn-success {
   .buttonBackground(#62c462, #51a351);
+  text-shadow: 0 1px 1px darken(#62c462, 20%);
 }
 // Info appears as a neutral blue
 .btn-info {
   .buttonBackground(#5bc0de, #2f96b4);
+  text-shadow: 0 1px 1px darken(#5bc0de, 20%);
 }
 
 

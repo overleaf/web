@@ -1,35 +1,47 @@
-
 #projectList {
+	font-family: @baseInteractionFamily;
 	list-style-type: none;
 	margin: 0;
-
-	.project_entry {
+	li {
+		border-bottom: 1px solid @grayLighter;
+		padding: (@baseLineHeight / 4) 0;
+		&:first-child {
+			.last-modified, .owner {
+				font-size: 1rem;
+			}
+		}
+		&:last-child {
+			border-bottom: 0 none;
+		}
 		&:hover {
-			background-color: #eaeaea;
+			background-color: @grayBg;
 		}
-
-		padding-left: 10px;
-		padding-top: 10px;
-		padding-bottom: 5px;
-		padding-right: 5px;
-
-		.project-actions{
-			float: right;
+		&:first-child:hover {
+			background-color: white;
 		}
-
-		.projectDetails {
-			padding-top: 5px;
-			padding-bottom: 5px;
-			color: #999;
-			font-size: 12px;
+		.select-item, .select-all, .title, .last-modified, .owner {
+			display: inline-block;
+			vertical-align: top;
+			margin-right: @baseLineHeight;
 		}
-
+		.select-item, .select-all {
+			margin-left: @baseLineHeight / 4;
+		}
+		.title {
+			width: 50%;
+		}
+		.last-modified, .owner {
+			font-size: .8rem;
+			width: 15%;
+		}
+		.owner {
+			margin-right: 0;
+		}
 		.projectName {
-			font-family: 'Chivo',sans-serif;
-			font-weight: bold;
-			font-size: 22px;
+			margin-right: @baseLineHeight;
 		}
-
+	}
+	.project_entry {
 		.tag-label {
 			margin-right: 5px;
 			font-size: 12px;
@@ -40,28 +52,12 @@
 			}
 			margin-bottom: 5px;
 		}
-
-		.addTagButton {
-			font-size: 12px;
-			cursor: pointer;
-			&:hover {
-				background-color: #468847;
-			}
-		}
 	}
 }
 
 #newProject{
 	.dropdown-menu {
 		right: 0;
-		left: auto;
-	}
-}
-
-.project-actions {
-	float: right;
-	.dropdown-menu {
-		right:0;
 		left: auto;
 	}
 }
@@ -74,7 +70,6 @@
 	cursor: pointer;
 	cursor: hand;
 }
-
 
 .tag-list {
 	border-left: 1px solid #D9D9D9;
@@ -94,9 +89,6 @@
 		}
 	}
 }
-
-
-
 
 .twitter-typeahead .tt-query,
 .twitter-typeahead .tt-hint {

@@ -21,7 +21,7 @@ require [
 	$('#projectFilter').on 'keydown', (e)->
 		ga 'send', 'event', 'project-list-page-interaction', 'project-search', 'keydown'
 
-	$('#projectList .project-actions li a').on 'click', (e)->
+	$('.project-actions li a').on 'click', (e)->
 		ga 'send', 'event', 'project-list-page-interaction', 'project action', $(@).text().trim()
 
 

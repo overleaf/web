@@ -1,19 +1,14 @@
-ul.unstyled
-	li(class = typeof projectTabActive != "undefined" ? "active" : "")
-		a(href="/project").tab-link.project-list-tab
-			.content Projects
-	li(class = typeof accountSettingsTabActive != "undefined" ? "active" : "")
-		a(href="/user/settings").tab-link.account-settings-tab
-			.content Account Settings
-	- if (settings.enableSubscriptions)
-		li(class = typeof subscriptionTabActive != "undefined" ? "active" : "")
-			a(href="/user/subscription").tab-link.subscription-tab
-				.content Subscription
-
 - if (settings.enableSubscriptions)
+	hr.soften
+	ul.unstyled.menu
+		- if (settings.enableSubscriptions)
+			li(class = typeof subscriptionTabActive != "undefined" ? "active" : "")
+				a(href="/user/subscription").tab-link.subscription-tab
+					.content Subscription
+
 	.bonus-advert.ab-bonus-sidebar
 		.speech-bubble
-			h3
+			h4
 				a(href="/user/bonus").plain-link Get free stuff!
 			p
 				a(href="/user/bonus").plain-link Recommend ShareLaTeX to your friends and we'll upgrade your account for free.
