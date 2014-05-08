@@ -61,7 +61,7 @@ block content
 									span.caret
 								ul.dropdown-menu.pull-right(role="menu")
 									li
-										input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id=project_id).tags-input
+										input(placeholder='Tag Name', name='tags', style="display: none;").tags-input
 							.btn-group.project-actions
 								a.btn.dropdown-toggle(data-toggle="dropdown", href="#") More
 									span.caret
@@ -89,6 +89,23 @@ block content
 						li
 							a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
 				br
+				ul.unstyled.menu
+					li Folders
+					li
+						a.normalText.menu-indent(href="#")
+							i.icon.icon-folder-close 
+							| PhD work
+						.normalText 5 projects
+					li
+						a.normalText.menu-indent(href="#")
+							i.icon.icon-folder-close 
+							|  Notes
+						.normalText 2 projects
+					li
+						a.normalText.menu-indent(href="#")
+							i.icon.icon-folder-close 
+							|  Papers
+						.normalText 1 project
 				ul.unstyled.menu
 					li Templates
 					li
