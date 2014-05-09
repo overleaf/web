@@ -30,7 +30,7 @@ module.exports =
 	# Databases
 	# ---------
 	mongo:
-		url : 'mongodb://127.0.0.1/sharelatexTesting'
+		url : 'mongodb://127.0.0.1/sharelatex'
 
 	redis:
 		web:
@@ -72,6 +72,10 @@ module.exports =
 			url :"http://localhost:3012"
 		spelling:
 			url : "http://localhost:3005"
+		trackchanges:
+			url : "http://localhost:3015"
+		docstore:
+			url : "http://localhost:3016"
 		versioning:
 			snapshotwaitms:3000
 			url: "http://localhost:4000"
