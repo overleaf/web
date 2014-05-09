@@ -17,6 +17,17 @@
   border: 1px solid #ddd;
   .border-radius(4px);
   .box-shadow(0 1px 1px rgba(0,0,0,.075));
+  cite {
+    margin: 0 -@baseLineHeight -@baseLineHeight;
+    padding: @baseLineHeight;
+    background-color: #f8f7f6;
+    display: block;
+    border-top: 1px solid #ddd;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
+  }
 }
 // Add a hover state for linked versions only
 a.thumbnail:hover {

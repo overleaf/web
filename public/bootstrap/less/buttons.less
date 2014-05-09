@@ -7,17 +7,18 @@
 
 // Core
 .btn {
-  .buttonBackground(#eee, #ddd);
+  .buttonBackground(#eed, #ddc);
   text-shadow: 0 1px 1px white;
   display: inline-block;
-  padding: (@baseLineHeight / 4) (@baseLineHeight / 2) (@baseLineHeight / 4);
+  padding: (@baseLineHeight / 4) @baseLineHeight;
   margin-bottom: 0; // For input.btn
   font-size: @baseFontSize;
+  font-weight: 500;
   line-height: @baseLineHeight;
-  color: @grayDark;
+  color: @gray;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 3px solid #bbb;
+  border-bottom: 3px solid #c9c9ad;
   border-radius: 5px;
   cursor: pointer;
 
@@ -29,7 +30,7 @@
 .btn:hover {
   color: @grayDark;
   text-decoration: none;
-  background-color: darken(#ddd, 10%);
+  background-color: darken(#ddc, 10%);
 }
 
 // Focus state for keyboard and accessibility

@@ -1,40 +1,45 @@
 extends ../layout
 
-block content	
+block content
 	.container
 		.page-header
-				h1 thebibliography LaTeX Template
-				a(href='/templates/bibliographies') ← Back to more Bibliographies LaTeX templates
+				h2
+					a(href='/templates') Templates
+					|  ›
+					a(href='/templates/bibliographies')  Bibliographies
+					|  › thebibliography
 		.container.txt-lefty
 			.row-fluid
 				.span6
-					.entry
-						.row-fluid
-							.span12
-								a(href='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf')
-									img(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview')
+					a(href='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf')
+						img.sample-template(src='https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview')
 				.span6.ng-scope(ng-app='openInSl')
 					h3 About
 					div
 						p This document is an example of thebibliography using in bibliography management.
-					h3 Actions
 					span.ng-scope(ng-controller='openInSlController')
-						a.btn.btn-success.btn-large.open-in-sharelatex.ng-binding(href='/project/new/template?zipUrl=%2Ftemplates%2F52fb89a333621a613683ec95%2Fv%2F1%2Fzip&templateName=thebibliography&compiler=pdflatex', ng-click='open()', ng-disabled='isDisabled', rel='nofollow') Open in ShareLaTeX
-						a.btn.btn-large.download-zip(href='/templates/52fb89a333621a613683ec95/v/1/zip', rel='nofollow', ng-click='downloadZip()') Download Zip
+						p
+							a.btn.btn-primary.btn-large.open-in-sharelatex.ng-binding(href='/project/new/template?zipUrl=%2Ftemplates%2F52fb89a333621a613683ec95%2Fv%2F1%2Fzip&templateName=thebibliography&compiler=pdflatex', ng-click='open()', ng-disabled='isDisabled', rel='nofollow') Open in ShareLaTeX
+							| &nbsp;
+							a.btn.btn-large.download-zip(href='/templates/52fb89a333621a613683ec95/v/1/zip', rel='nofollow', ng-click='downloadZip()', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File")
+								i.icon-cloud-download
 					.social_buttons
 						.addthis_toolbox.addthis_default_style.addthis_32x32_style
 							a.addthis_button_facebook.at300b(title='Facebook', href='#')
 								span.at300bs.at15nc.at15t_facebook
-									span.at_a11y Share on facebook
+									span.at_a11y
+										i.icon-facebook-sign.icon-2x &nbsp;
 							a.addthis_button_twitter.at300b(title='Tweet', href='#')
 								span.at300bs.at15nc.at15t_twitter
-									span.at_a11y Share on twitter
+									span.at_a11y
+										i.icon-twitter-sign.icon-2x &nbsp;
 							a.addthis_button_google_plusone_share.at300b(href='https://www.addthis.com/bookmark.php?v=300&winname=addthis&pub=ra-517c16586439faa7&source=tbx32-300&lng=en-US&s=google_plusone_share&url=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F52fb89a333621a613683ec95&title=thebibliography%20-%20LaTeX%20Template&ate=AT-ra-517c16586439faa7/-/-/53579a0bbe5257f9/2&frommenu=1&uid=53579a0bbceeb2e2&ct=1&pre=https%3A%2F%2Fwww.sharelatex.com%2Ftemplates%2F&tt=0&captcha_provider=nucaptcha', target='_blank', title='Google+')
 								span.at300bs.at15nc.at15t_google_plusone_share
-									span.at_a11y Share on google_plusone_share
+									span.at_a11y
+										i.icon-google-plus-sign.icon-2x &nbsp;
 							a.addthis_button_compact.at300m(href='#')
 								span.at300bs.at15nc.at15t_compact
-									span.at_a11y More Sharing Services
+									span.at_a11y  More...
 							.atclear
 						script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
 						#_atssh(style='visibility: hidden; height: 1px; width: 1px; position: absolute; z-index: 100000;')

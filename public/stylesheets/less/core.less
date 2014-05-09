@@ -15,13 +15,16 @@ a.plain{
 a.plain:hover {
   text-decoration:  none;
 }
+a.highlight {
+  text-decoration: underline;
+}
 
 .modal .modal-body form {
 	margin:0px;
 }
 
-.gray-container {
-  background-color: @grayBg;
+.alt-container {
+  background-color: @beige;
 }
 
 .card {
@@ -46,4 +49,17 @@ input.inputmodal {
 .centered {
   margin: 0 auto;
   text-align: center;
+}
+
+.templates {
+  .page-header:first-child > h2 {
+    margin-top: 0;
+  }
+}
+
+.sample-template {
+  border: 1px solid @grayLighter;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }

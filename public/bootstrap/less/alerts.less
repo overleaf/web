@@ -8,11 +8,18 @@
   text-shadow: 0 1px 0 rgba(255,255,255,.5);
   background-color: @warningBackground;
   border: 1px solid @warningBorder;
+  font-family: @baseInteractionFamily;
   .border-radius(4px);
+  p {
+    font-family: @baseInteractionFamily;
+  }
 }
 .alert,
 .alert-heading {
   color: @warningText;
+  h1, h2, h3, h4, h5, h6 {
+    color: @warningText;
+  }
 }
 
 // Adjust close link position
@@ -28,11 +35,14 @@
 
 .alert-success {
   background-color: @successBackground;
-  border-color: @successBorder;  
+  border-color: @successBorder;
 }
 .alert-success,
 .alert-success .alert-heading {
   color: @successText;
+  h1, h2, h3, h4, h5, h6 {
+    color: @successText;
+  }
 }
 .alert-danger,
 .alert-error {
@@ -44,6 +54,9 @@
 .alert-danger .alert-heading,
 .alert-error .alert-heading {
   color: @errorText;
+  h1, h2, h3, h4, h5, h6 {
+    color: @errorText;
+  }
 }
 .alert-info {
   background-color: @infoBackground;
@@ -52,6 +65,9 @@
 .alert-info,
 .alert-info .alert-heading {
   color: @infoText;
+  h1, h2, h3, h4, h5, h6 {
+    color: @infoText;
+  }
 }
 
 

@@ -5,10 +5,17 @@ header.navbar.navbar-fixed-top
 				ul.nav.pull-right
 					-if(session && session.user)
 						li
-							a(href='/project') Projects
+							-if(true)
+								a(href='/project').highlight Projects
+							-else
+								a(href='/project') Projects
 						li.dropdown
-							a.dropdown-toggle(href="#",data-toggle="dropdown") My Account
-								b.caret
+							-if(false)
+								a.dropdown-toggle.highlight(href="#",data-toggle="dropdown") My Account
+									b.caret
+							-else
+								a.dropdown-toggle(href="#",data-toggle="dropdown") My Account
+									b.caret
 							ul.dropdown-menu
 								li
 									a(href='/user/settings').userSettingsLink Account Settings
@@ -30,6 +37,6 @@ header.navbar.navbar-fixed-top
 							a(href='/templates')#templatesLink Templates
 						li
 							a(href='/user/subscription/plans')#plansLink Pricing
-						li
-							a(href='/login'+getRedirAsQueryString()).highlight Login
-
+						ul.nav.pull-right
+							li
+								a(href='/login'+getRedirAsQueryString()) Login

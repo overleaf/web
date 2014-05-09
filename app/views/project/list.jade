@@ -46,7 +46,7 @@ block content
 					h1 Projects
 				.span10
 					form.form-inline.search
-						input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span6.projectSearch.search-query
+						input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span6.projectSearch.search-query
 						i.icon-search
 						//- i.icon-remove
 						.btn-toolbar
@@ -67,7 +67,7 @@ block content
 									span.caret
 								ul.dropdown-menu.pull-right(role="menu")
 									li
-										a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Clone...
+										a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
 									-if ("owner" == "owner")
 										li
 											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
@@ -103,6 +103,8 @@ block content
 						a.normalText.menu-indent(href="/templates/thesis") Thesis
 					li
 						a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+					li
+						a.normalText.menu-indent(href="/templates") View All »
 				-if (tags.length > 0)
 					hr.soften
 					ul#allProjectTagsArea.unstyled.menu
@@ -127,28 +129,29 @@ block content
 				- else
 					.row
 						.span12
-							.sharelatex-intro
-								.create-project-arrow Create your first project
-								.welcome
-									h2 Welcome to ShareLaTeX!
-									p New to LaTeX? Then have a look at our
-										a(href="/templates") templates
-										| or
-										a(href="/learn") help guides
-										| .
+							.welcome
+								h1
+									i.icon-arrow-left
+									| Welcome! Follow the arrow to get started
+								h3 New to LaTeX? Start by having a look at our
+									a(href="/templates")  templates
+									|  or
+									a(href="/learn")  help guides
+									| .
 
-				if freeTrial && freeTrial.expired == false
+				if freeTrial && !freeTrial.expired
 					.row-fluid
 						.span12
 							.alert.alert-info.alert-free-trial
-								p You are currently using a free trial which expires on #{freeTrial.expiresAt}.
+								h2 You are currently using a free trial which expires on #{freeTrial.expiresAt}.
 								p
 									a(href="/user/subscription").btn.btn-primary Upgrade now
-				if freeTrial && freeTrial.expired == true
+				if freeTrial && freeTrial.expired
 					.row-fluid
 						.span12
 							.alert.alert-danger.alert-free-trial
-								p Your free trial has expired! Upgrade now to continue using ShareLaTeX uninterrupted.
+								h2 Your free trial has expired!
+								p Upgrade now to continue using ShareLaTeX uninterrupted.
 								p
 									a(href="/user/subscription").btn.btn-danger Upgrade now
 

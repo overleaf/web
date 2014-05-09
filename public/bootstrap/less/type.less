@@ -87,6 +87,8 @@ sub {
 }
 input, button, a.btn, select, textarea, .menu, .dropdown-menu {
   font-family: @baseInteractionFamily;
+}
+.menu, .dropdown-menu {
   font-weight: 700;
 }
 
@@ -102,7 +104,13 @@ input, button, a.btn, select, textarea, .menu, .dropdown-menu {
   }
 }
 .project-header {
+  background-color: lighten(@beige, 5%);
+  border-top: 1px solid darken(@beige, 10%);
+  border-bottom: 1px solid darken(@beige, 10%);
+  margin-top: 0;
+  padding-top: @baseLineHeight;
   h1 {
+    color: @red;
     margin-top: 0;
     margin-right: @baseLineHeight * 5;
     line-height: 1;

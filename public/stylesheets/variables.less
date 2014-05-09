@@ -6,28 +6,28 @@
 // --------------------------------------------------
 
 // Links
-@linkColor:             #a90041;
-@linkColorHover:        darken(@linkColor, 15%);
+@linkColor:             #a93629;
+@linkColorHover:        #e24b3b;
 
 // Grays
 @black:                 #000;
-@grayDarker:            #222;
-@grayDark:              #333;
-@gray:                  #555;
+@grayDarker:            #2c280f;
+@grayDark:              #393313;
+@gray:                  #5f5620;
 @grayLight:             #999;
-@grayLighter:           #dadfe1;
-@grayBg:                #f7f8f8;
+@grayLighter:           #dadfd0;
 @white:                 #fff;
 
 // Accent colors
 @blue:                  #049cdb;
 @blueDark:              #0064cd;
 @green:                 #46a546;
-@red:                   #9d261d;
-@yellow:                #ffc40d;
+@red:                   @linkColor;
+@yellow:                #dbd192;
 @orange:                #f89406;
 @pink:                  #c3325f;
 @purple:                #7a43b6;
+@beige:                 #f4f1de;
 
 // Typography
 @baseFontSize:          1rem;
@@ -75,12 +75,12 @@
 @navbarLinkColorHover:            @gray;
 
 // Form states and alerts
-@warningText:             #c09853;
-@warningBackground:       #fcf8e3;
+@warningText:             darken(@yellow, 33%);
+@warningBackground:       lighten(@beige, 5%);
 @warningBorder:           darken(spin(@warningBackground, -10), 3%);
 
-@errorText:               #b94a48;
-@errorBackground:         #f2dede;
+@errorText:               @red;
+@errorBackground:         lighten(@linkColorHover, 40%);
 @errorBorder:             darken(spin(@errorBackground, -10), 3%);
 
 @successText:             #468847;
