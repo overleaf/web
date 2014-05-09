@@ -56,8 +56,8 @@ block content
 								-if ("owner" == "owner")
 									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
 										i.icon-trash
-								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add Tags")
-									i.icon-tags
+								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add To Folder...")
+									i.icon-folder-open
 									span.caret
 								ul.dropdown-menu.pull-right(role="menu")
 									li
@@ -93,19 +93,19 @@ block content
 					li Folders
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close 
-							| PhD work
-						.normalText 5 projects
+							i.icon.icon-folder-close
+							|  PhD work
+						span.normalText  (5)
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close 
+							i.icon.icon-folder-close
 							|  Notes
-						.normalText 2 projects
+						span.normalText  (2)
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close 
+							i.icon.icon-folder-close
 							|  Papers
-						.normalText 1 project
+						span.normalText  (1)
 				ul.unstyled.menu
 					li Templates
 					li
