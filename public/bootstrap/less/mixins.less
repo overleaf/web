@@ -309,7 +309,7 @@
 // --------------------------------------------------
 
 // Border Radius
-.border-radius(@radius: 5px) {
+.border-radius(@radius: 3px) {
   -webkit-border-radius: @radius;
      -moz-border-radius: @radius;
           border-radius: @radius;
@@ -443,7 +443,6 @@
 .gradientBar(@primaryColor, @secondaryColor) {
   #gradient > .vertical(@primaryColor, @secondaryColor);
   border: 1px solid darken(@secondaryColor, 10%);
-  border-bottom: 3px solid darken(@secondaryColor, 15%);
 }
 
 // Gradients

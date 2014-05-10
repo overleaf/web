@@ -1,0 +1,58 @@
+link(rel='canonical', href='https://www.sharelatex.com')
+
+extends ../layout
+
+block content
+	.masthead
+		.container
+			.row
+				.span12
+					h1 LaTeX, Evolved
+					p Introducing the first real-time collaborative LaTeX editor.
+			.row
+				.register.offset4.span4
+					.messageArea
+					include ../general/partial/registerForm
+
+	.universities
+		.container
+			.row
+				p Used by students and academics at:
+				#slides
+					.clearfix
+						.span3
+							img(src="/img/crests/harvard.gif", alt="harvard university logo")
+						.span3
+							img(src="/img/crests/mit.gif", alt="mit university logo")
+						.span3
+							img(src="/img/crests/oxford.gif", alt="oxford university logo")
+						.span3
+							img(src="/img/crests/tokyo.png", alt="tokyo university logo")
+					.clearfix
+						.span3
+							img(src="/img/crests/cambridge.png", alt="cambridge university logo")
+						.span3
+							img(src="/img/crests/liverpool.jpg", alt="liverpool university logo")
+						.span3
+							img(src="/img/crests/icl.png", alt="icl university logo")
+						.span3
+							img(src="/img/crests/yale.png", alt="yale university logo")
+					.clearfix
+						.span3
+							img(src="/img/crests/durham.png", alt="durham university logo")
+						.span3
+							img(src="/img/crests/nasa.png", alt="nasa university logo")
+						.span3
+							img(src="/img/crests/toronto.gif", alt="toronto university logo")
+						.span3
+							img(src="/img/crests/stanford.png", alt="stanford university logo")
+
+	.alt-container
+		.container
+			include ../general/long-form-features
+			.row
+				.span12
+					p.centered
+						a(href="/user/subscription/plans").btn.btn-primary.btn-xlarge.btn-hero Sign up now!
+
+	include ../general/small-footer

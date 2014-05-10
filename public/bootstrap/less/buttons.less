@@ -10,16 +10,15 @@
   .buttonBackground(#eed, #ddc);
   text-shadow: 0 1px 1px white;
   display: inline-block;
-  padding: (@baseLineHeight / 4) @baseLineHeight;
+  padding: (@baseLineHeight * .2) (@baseLineHeight * .6);
   margin-bottom: 0; // For input.btn
   font-size: @baseFontSize;
-  font-weight: 500;
+  font-weight: 400;
   line-height: @baseLineHeight;
   color: @gray;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 3px solid #c9c9ad;
-  border-radius: 5px;
+  border-radius: 3px;
   cursor: pointer;
 
   // Give IE7 some love
@@ -69,7 +68,7 @@
   padding: 9px 14px;
   font-size: @baseFontSize + .125rem;
   line-height: normal;
-  .border-radius(5px);
+  .border-radius(3px);
 }
 .btn-large [class^="icon-"] {
   margin-top: 1px;
