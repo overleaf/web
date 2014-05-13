@@ -26,7 +26,21 @@ a.highlight {
 .alt-container {
   background-color: @beige;
 }
-
+.plans-header{
+  h1, p {
+    text-shadow: 0 -1px -1px white;
+  }
+  h1 {
+    color: @red;
+    margin-bottom: 0;
+  }
+  p {
+    margin-top: 0;
+  }
+}
+.plans {
+  margin: (@baseLineHeight * 2) auto @baseLineHeight;
+}
 .card {
   background-color: white;
   border-radius: 3px;
@@ -34,6 +48,68 @@ a.highlight {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin: @baseLineHeight 0;
   padding: @baseLineHeight;
+  .card-header {
+    border-bottom: 1px solid @grayLighter;
+    padding-bottom: @baseLineHeight;
+    margin-bottom: @baseLineHeight;
+    h2 {
+      margin: 0;
+    }
+  }
+  li {
+    font-size: @baseFontSize * .8;
+  }
+  .circle {
+    font-size: 2rem;
+    padding: 37px 20px;
+    margin: 0 auto @baseLineHeight;
+    text-shadow: 0 -1px 1px darken(@linkColor, 10%);
+    width: 50%;
+    small {
+      margin-top: @baseLineHeight / 2;
+    }
+  }
+}
+.card-group {
+  .card {
+    border-radius: 0;
+    display: inline-block;
+    margin: 0;
+    &:first-child {
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+    }
+    &:last-child {
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+  }
+  .highlighted {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-top: -@baseLineHeight * 2;
+    padding-top: @baseLineHeight * 2;
+    padding-bottom: @baseLineHeight * 2;
+    position: relative;
+    z-index: 10;
+  }
+}
+.plans > .card-group > .card {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.circle {
+  border-radius: 50%;
+  background-color: @red;
+  color: white;
+  padding: @baseLineHeight / 2;
+  margin-bottom: @baseLineHeight;
+  span, small {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: @baseFontSize * .8;
+  }
+  small {
+    display: block;
+  }
 }
 
 input.inputmodal {

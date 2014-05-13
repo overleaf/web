@@ -52,113 +52,124 @@ mixin plan(plan, cssClass, monthly)
 
 
 block content
-	.container
-		.row
-			.span12
-				.page-header
-					h1 Choose your plan
-					blockquote.quote.pull-right
-						p
-							| This is one of the most useful resources I have ever found on the Internet.
-							br
-							| Fantastic execution and thoughtful attention to detail make this product shine!
-						small Benjamin Shepherd, Waterloo University
+	.alt-container
+		.container
+			.row
+				.span12
+					.page-header.centered.plans-header
+						h1 Start Your 30-Day Free Trial Today
+						p Choose the plan that works for you with our 30-day money-back guarantee. Cancel at any time.
 
-				.row
-					.span12
-						.offset3
-							ul.nav.nav-pills.pricing-pills
-								li.active
-									a(href="#", data-target=".monthly-pricing", data-toggle="tab") Monthly
-								li
-									a(href="#", data-target=".annual-pricing", data-toggle="tab") Annual
-								li
-									a(href="#", data-target=".student-pricing", data-toggle="tab") Half price student plans
+			.row
+				.span12
+					.plans
+						.card-group.centered
+							.card
+								.card-header
+									h2 Personal
+								.circle $15
+									span / mo
+									small $180 / yr
+								ul.unstyled.centered
+									li 1 admin account
+									li 10 collaborators / project
+									li Unlimited projects
+									li High-priority LaTeX compiling
+									li Full document history
+									li DropBox synchronization
+									li Google Drive integration
+									li Git remote access
+									li
+										br
+										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=collaborator") Choose Plan
+							.card
+								.card-header
+									h2 Professional
+								.circle $30
+									span / mo
+									small $360 / yr
+								ul.unstyled.centered
+									li 1 admin account
+									li Unlimited collaborators / project
+									li Unlimited Projects
+									li High-priority LaTeX compiling
+									li Full document history
+									li DropBox synchronization
+									li Google Drive integration
+									li Git remote access
+									li
+										br
+										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=professional") Choose Plan
+							.card.highlighted
+								.card-header
+									h2 Team
+								.circle $50
+									span / mo
+									small $500 / yr
+								ul.unstyled.centered
+									li 5 admin accounts
+									li Unlimited collaborators / project
+									li Unlimited Projects
+									li High-priority LaTeX compiling
+									li Full document history
+									li DropBox synchronization
+									li Google Drive integration
+									li Git remote access
+									li
+										br
+										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_5_members") Choose Plan
+							.card
+								.card-header
+									h2 Department
+								.circle $90
+									span / mo
+									small $900 / yr
+								ul.unstyled.centered
+									li 10 admin accounts
+									li Unlimited collaborators / project
+									li Unlimited Projects
+									li High-priority LaTeX compiling
+									li Full document history
+									li DropBox synchronization
+									li Google Drive integration
+									li Git remote access
+									li
+										br
+										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_10_members") Choose Plan
+							.card
+								.card-header
+									h2 Enterprise
+								.circle $170
+									span / mo
+									small $1,700 / yr
+								ul.unstyled.centered
+									li 20 admin accounts
+									li Unlimited collaborators / project
+									li Unlimited Projects
+									li High-priority LaTeX compiling
+									li Full document history
+									li DropBox synchronization
+									li Google Drive integration
+									li Git remote access
+									li
+										br
+										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_20_members") Choose Plan
 
-				.row
-					.span12
-						.page-header
-							h2 Individual Plans
+			.row
+				p.centered
+					small
+						a(href="/register") We also offer a free plan with 1 admin account, 1 collaborator / project, unlimited projects and unlimited low-priority LaTeX compiling.
 
-				.pricing-steelblue.pricing-row
-					.tab-content
-						.tab-pane.active.monthly-pricing
-							.row
-								.span12.tagline
-									p An online LaTeX editor for collaborating on the <strong>same LaTeX project and editing together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
-							.row
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['collaborator'], "big", true)
-								.span4
-									mixin plan(plans.allPlans['professional'], "", true)
+			.row
+				.offset1.span10
+					br
+					.alert.alert-info
+						strong Student or University?
+						|  Get 50% off with a valid educational email, or see our
+						a(href="/university")  site licenses
+						|  to use all of our features
+						strong  for free
+						| !
 
-						.tab-pane.annual-pricing
-							.row
-								.span12.tagline
-									p Collaborate on the <strong>same LaTeX project and edit together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['collaborator-annual'], "big", false)
-								.span4
-									mixin plan(plans.allPlans['professional-annual'], "", false)
-
-						.tab-pane.student-pricing
-							.row
-								.span8.offset2.tagline
-									p Getting started and working with <strong>LaTeX has never been so easy.</strong> Start creating beautiful work now.
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['student'], "big", true)
-								.span4
-									mixin plan(plans.allPlans['student-annual'], "", false)
-
-				.row
-					.span12.ab-guarantee-shown(style="text-align: center;")
-						h2 30 day money back guarantee, cancel anytime.
-
-				.pricing-steelblue.pricing-row
-					.tab-content
-						.tab-pane.active.monthly-pricing
-							.page-header
-								h2 Group Plans
-							.row
-								.span12.tagline
-									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
-							.row
-								.span4
-									mixin plan(plans.groupMonthlyPlans[0], "", true)
-								.span4
-									mixin plan(plans.groupMonthlyPlans[1], "big", true)
-								.span4
-									mixin plan(plans.groupMonthlyPlans[2], "", true)
-						.tab-pane.annual-pricing
-							.page-header
-								h2 Group Plans
-							.row
-								.span12.tagline
-									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
-							.row
-								.span4
-									mixin plan(plans.groupAnnualPlans[0], "", false)
-								.span4
-									mixin plan(plans.groupAnnualPlans[1], "big", false)
-								.span4
-									mixin plan(plans.groupAnnualPlans[2], "", false)
-						.tab-pane.student-pricing
-
-
-				.row
-					.span6.offset3
-						.alert.alert-info(style="color: #333")
-							h3 Want to use ShareLaTeX for free?
-							p Tell your university or department about our
-								a(href="/university") site licenses
-								| and use of all our
-								| features for free as a student or member of staff.
-
-		include ../general/small-footer
-		link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))
+	include ../general/small-footer
+	link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))
