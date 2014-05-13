@@ -113,7 +113,7 @@ define [
 
 			if !@view.hasPdf()
 				@refreshPdf()
-			
+
 		showRawLogPanel: () ->
 			@ide.mainAreaManager.change 'rawLog'
 
@@ -133,8 +133,8 @@ define [
 
 			if !@ide.project.get("rootDoc_id")?
 				new Modal
-					title: "No root document selected"
-					message: "First you need to choose a root document via the settings menu. This tells ShareLaTeX which file to run LaTeX on."
+					title: "Select a Root Document"
+					message: "To begin, choose a root document in the settings menu to tell ShareLaTeX which file to run LaTeX on."
 					buttons: [{
 						text: "OK",
 						class: "btn-primary"
@@ -233,7 +233,7 @@ define [
 				}]
 
 		syncToCode: (e) ->
-			if !e? 
+			if !e?
 				e = @view.getPdfPosition()
 				return if !e?
 				# It's not clear exactly where we should sync to if it was directly
