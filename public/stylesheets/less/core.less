@@ -136,3 +136,36 @@ input.inputmodal {
   -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
+
+// Wiki Specific
+#toc {
+  font-size: @baseFontSize;
+  margin-bottom: 0;
+  #toctitle > h2 {
+    margin-top: @baseLineHeight;
+  }
+  ul {
+    list-style-type: none;
+    .tocnumber {
+      margin-right: @baseLineHeight / 2;
+    }
+  }
+}
+.wikitable {
+  width: 100%;
+  th, td {
+    padding: 0 (@baseLineHeight / 2);
+    border-bottom: 1px solid @grayLighter;
+  }
+  th {
+    font-size: @baseFontSize * 1.25;
+    font-weight: 400;
+    text-align: left;
+  }
+  td {
+    font-size: @baseFontSize;
+  }
+}
+.printfooter {
+  font-size: @baseFontSize * .8;
+}
