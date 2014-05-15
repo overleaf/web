@@ -27,19 +27,36 @@ a.highlight {
   background-color: @beige;
 }
 .plans-header{
-  h1, p {
-    text-shadow: 0 -1px -1px white;
+  h1, h2, p {
+    text-shadow: 0 -1px 1px white;
+  }
+  h1, h2 {
+    color: @red;
   }
   h1 {
-    color: @red;
     margin-bottom: 0;
   }
   p {
     margin-top: 0;
   }
 }
+.plans-subheader {
+  margin-bottom: @baseLineHeight;
+}
 .plans {
   margin: (@baseLineHeight * 2) auto @baseLineHeight;
+}
+.card.features {
+  margin-top: @baseLineHeight;
+  i {
+    color: @red;
+  }
+  h4 {
+    margin-bottom: 0;
+  }
+  p {
+    margin: 0;
+  }
 }
 .card {
   background-color: white;
@@ -58,10 +75,10 @@ a.highlight {
   }
   .circle {
     font-size: 2rem;
-    padding: 37px 20px;
+    padding: 36px 18px;
     margin: 0 auto @baseLineHeight;
     text-shadow: 0 -1px 1px darken(@linkColor, 10%);
-    width: 50%;
+    width: 55%;
     small {
       margin-top: @baseLineHeight / 2;
     }

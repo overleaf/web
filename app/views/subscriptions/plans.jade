@@ -1,160 +1,115 @@
 extends ../layout
 
-mixin liSection(feature)
-	| #{feature.text}
-	-if(feature.comingSoon)
-		span.label.label-info coming soon
-	-if(feature.beta)
-		span.label.label-warning beta
-
-
-mixin plan(plan, cssClass, monthly)
-	.pricing-table
-		ul(class=cssClass)
-
-			li.pricing-header-row-1
-				.package-title
-					h2.no-bold #{plan.name}
-
-			li.pricing-header-row-2
-				.package-price
-					if plan.price == 0
-						h1.free Free forever
-					else
-						h1.no-bold
-							| $#{plan.price/100}
-							if monthly
-								span.cents  /month
-							else
-								span.cents  /year
-
-			- var odd = true
-			-each feature in plan.featureDescription
-				- odd = !odd
-				- if(odd)
-					li.pricing-content-row-odd
-						mixin liSection(feature)
-				- else
-					li.pricing-content-row-even
-						mixin liSection(feature)
-
-			li.pricing-footer
-				- var href = '/user/subscription/new?planCode='+plan.planCode
-
-				- planIsPersonal = plan.planCode.indexOf("personal") != -1
-				- userNotLoggedIn = session && !session.user
-				-if(planIsPersonal)
-					- href = "/register"
-				-else if(userNotLoggedIn)
-					- href = "/register?redir="+href
-				a.btn.btn-success(href='#{href}', ga_PlanType=plan.planCode).sign_up_now
-					| Sign Up Now!
-
-
 block content
-	.alt-container
-		.container
-			.row
-				.span12
-					.page-header.centered.plans-header
-						h1 Start Your 30-Day Free Trial Today
-						p Choose the plan that works for you with our 30-day money-back guarantee. Cancel at any time.
+  .alt-container
+    .container
+      .row
+        .span12
+          .page-header.centered.plans-header
+            h1 Start Your 30-Day Free Trial Today
+            p Choose the plan that works for you with our 30-day money-back guarantee. Cancel at any time.
 
-			.row
-				.span12
-					.plans
-						.card-group.centered
-							.card
-								.card-header
-									h2 Personal
-								.circle $15
-									span / mo
-									small $180 / yr
-								ul.unstyled.centered
-									li 1 admin account
-									li 10 collaborators / project
-									li Unlimited projects
-									li Full document history
-									li DropBox synchronization
-									li
-										br
-										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=collaborator") Choose Plan
-							.card
-								.card-header
-									h2 Professional
-								.circle $30
-									span / mo
-									small $360 / yr
-								ul.unstyled.centered
-									li 1 admin account
-									li Unlimited collaborators
-									li Unlimited Projects
-									li Full document history
-									li DropBox synchronization
-									li
-										br
-										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=professional") Choose Plan
-							.card.highlighted
-								.card-header
-									h2 Team
-								.circle $50
-									span / mo
-									small $500 / yr
-								ul.unstyled.centered
-									li 5 admin accounts
-									li Unlimited collaborators
-									li Unlimited Projects
-									li Full document history
-									li DropBox synchronization
-									li
-										br
-										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_5_members") Choose Plan
-							.card
-								.card-header
-									h2 Department
-								.circle $90
-									span / mo
-									small $900 / yr
-								ul.unstyled.centered
-									li 10 admin accounts
-									li Unlimited collaborators
-									li Unlimited Projects
-									li Full document history
-									li DropBox synchronization
-									li
-										br
-										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_10_members") Choose Plan
-							.card
-								.card-header
-									h2 Enterprise
-								.circle $170
-									span / mo
-									small $1,700 / yr
-								ul.unstyled.centered
-									li 20 admin accounts
-									li Unlimited collaborators
-									li Unlimited Projects
-									li Full document history
-									li DropBox synchronization
-									li
-										br
-										a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_20_members") Choose Plan
+      .row
+        .span12
+          .plans
+            .card-group.centered
+              .card
+                .card-header
+                  h2 Personal
+                .circle $15
+                  span / mo
+                  small $180 / yr
+                ul.unstyled.centered
+                  li 1 admin account
+                  li 10 collaborators / project
+                  li
+                    br
+                    a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=collaborator") Choose Plan
+              .card
+                .card-header
+                  h2 Professional
+                .circle $30
+                  span / mo
+                  small $360 / yr
+                ul.unstyled.centered
+                  li 1 admin account
+                  li Unlimited collaborators
+                  li
+                    br
+                    a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=professional") Choose Plan
+              .card.highlighted
+                .card-header
+                  h2 Team
+                .circle $50
+                  span / mo
+                  small $500 / yr
+                ul.unstyled.centered
+                  li 5 admin accounts
+                  li Unlimited collaborators
+                  li
+                    br
+                    a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_5_members") Choose Plan
+              .card
+                .card-header
+                  h2 Department
+                .circle $90
+                  span / mo
+                  small $900 / yr
+                ul.unstyled.centered
+                  li 10 admin accounts
+                  li Unlimited collaborators
+                  li
+                    br
+                    a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_10_members") Choose Plan
+              .card
+                .card-header
+                  h2 Enterprise
+                .circle $170
+                  span / mo
+                  small $1,700 / yr
+                ul.unstyled.centered
+                  li 20 admin accounts
+                  li Unlimited collaborators
+                  li
+                    br
+                    a.btn.btn-primary(href="/register?redir=/user/subscription/new?planCode=group_20_members") Choose Plan
 
-			.row
-				p.centered
-					small
-						a(href="/register") We also offer a free plan with 1 admin account, 1 collaborator / project and unlimited projects.
+      .row
+        p.centered
+          small
+            a(href="/register") We also offer a free plan with 1 admin account, 1 collaborator / project and unlimited projects.
 
-			.row
-				.offset1.span10
-					br
-					.alert.alert-info
-						strong Student or University?
-						|  Get 50% off with a valid educational email, or see our
-						a(href="/university")  site licenses
-						|  to use all of our features
-						strong  for free
-						| !
+      .row
+        .span12
+          .page-header.centered.plans-header.plans-subheader
+            h2 Enjoy all of these great features
+        .span4
+          .card.centered.features
+            i.icon-file-text-alt.icon-5x
+            h4 Unlimited Projects
+            p Create as much as you like.
+        .span4
+          .card.centered.features
+            i.icon-time.icon-5x
+            h4 Full document history
+            p Never lose a step, we've got your back.
+        .span4
+          .card.centered.features
+            i.icon-dropbox.icon-5x
+            h4 Dropbox synchronization
+            p Seamlessly access your projects everywhere.
 
-	include ../general/small-footer
-	link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))
+      .row
+        .offset1.span10
+          br
+          .alert
+            i.icon-book
+            strong  Student or University Staff?
+            |  Get 50% off with a valid educational email or view our
+            a(href="/university")  site licenses
+            |  to use our plans
+            strong  for free
+            | !
+
+  include ../general/small-footer
+  link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))
