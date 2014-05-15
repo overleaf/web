@@ -28,8 +28,6 @@ block content
 		-each project in projects
 			- project_id = project._id.toString()
 			li.project_entry(id=project_id)
-				label.checkbox.select-item
-					input(type="checkbox")
 				span.title
 					a.projectName(href="/project/#{project._id}") #{project.name}
 					span.project-tags(data-project-id=project_id)
@@ -38,57 +36,33 @@ block content
 				span.owner
 					mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
 				span.last-modified.isoDate #{project.lastUpdated.toISOString()}
+				span
+					a()
+						i.icon-cog
 
 	.page-header.project-header
 		.container
 			.row-fluid
 				.span2
 					h1 Projects
-				.span10
+				.span7
 					form.form-inline.search
-						input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span6.projectSearch.search-query
+						input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span10.projectSearch.search-query
 						i.icon-search
-						//- i.icon-remove
-						.btn-toolbar
-							.btn-group
-								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File").btn.downloadZip
-									i.icon-cloud-download
-								-if ("owner" == "owner")
-									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
-										i.icon-trash
-								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add To Folder...")
-									i.icon-folder-open
-									span.caret
-								ul.dropdown-menu.pull-right(role="menu")
-									li
-										input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id="project_id_needs_updating").tags-input
-							.btn-group.project-actions
-								a.btn.dropdown-toggle(data-toggle="dropdown", href="#") More
-									span.caret
-								ul.dropdown-menu.pull-right(role="menu")
-									li
-										a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
-									-if ("owner" == "owner")
-										li
-											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
-									-else
-										li
-											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
-
+				.span2
+					.btn-group#newProject
+						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+							span.caret
+						ul.dropdown-menu.pull-right(role="menu")
+							li
+								a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+							li
+								a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+							li
+								a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
 	.container
 		.row-fluid
 			.span2
-				.btn-group#newProject
-					a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
-						span.caret
-					ul.dropdown-menu.pull-right(role="menu")
-						li
-							a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
-						li
-							a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
-						li
-							a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
-				br
 				ul.unstyled.menu
 					li Folders
 					li
@@ -137,8 +111,6 @@ block content
 				- if (projects.length > 0)
 					ul#projectList
 						li
-							label.checkbox.select-all
-								input(type="checkbox")
 							span.title TITLE
 							span.owner OWNER
 							span.last-modified LAST MODIFIED
