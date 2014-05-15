@@ -168,8 +168,29 @@ input.inputmodal {
     }
   }
 }
+.wikifigure {
+  margin: auto 0;
+  pre {
+    border: 0 none;
+    border-radius: 3px;
+    font-weight: 700;
+    padding: (@baseLineHeight / 2) (@gridGutterWidth / 2);
+  }
+  figcaption {
+    font-size: .8rem;
+  }
+}
 .wikitable {
-  width: 100%;
+  margin-left: -230px;
+  width: 1170px;
+  @media screen and (max-width: 1200px) {
+    margin-left: -180px;
+    width: 940px;
+  }
+  @media screen and (max-width: 960px) {
+    margin-left: 0;
+    width: 100%;
+  }
   th, td {
     padding: 0 (@baseLineHeight / 2);
     border-bottom: 1px solid @grayLighter;
