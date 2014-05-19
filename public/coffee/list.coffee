@@ -40,7 +40,7 @@ require [
 			e.preventDefault()
 		refreshProjectFilter()
 
-	$('.search .icon-remove').on 'click', (e)->
+	$('.search .fa-times').on 'click', (e)->
 		$('#projectFilter').val("").focus()
 		refreshProjectFilter()
 

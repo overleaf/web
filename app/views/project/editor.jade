@@ -1,27 +1,57 @@
 extends ../layout
 
+block nav
+	aside#sidebar.ui-layout-west
+		//input#search-field(type='search', placeholder='Filter Files by Name')
+		// Position:relative is to get scrolling while dragging to work:
+		// http://stackoverflow.com/questions/1718547/jquery-draggable-scroll-not-working-when-helper-clone-is-used
+		#sections(style="position: relative;")
+		#options
+			span#saving-area
+	aside#chat-window.ui-layout-east
+		ul.chat
+			li.me
+				strong Me:
+				|  Hi!
+			li.other
+				strong James:
+				|  Cool.
+				|  This feature looks better than before.
+				|  Especially when I do a multi-line chat.
+			li.other
+				strong Henry:
+				|  Now with chat!
+			li.me
+				strong Me:
+				|  Yup...
+			li.other
+				strong Henry:
+				|  Okay bye!
+		footer.chat-options
+			form.form-inline.form-chat
+				input(type="text", placeholder="Enter message...")
+				button(type="button").btn.btn-small.btn-primary Send
+
 block content
 	#loadingScreen
-		h3 Loading...
-		p#loadingMessage Loading editor
+		.container
+			h3 Loading project...
+			.progress
+				#loadingMessage.bar
 
 	#errorMessages
 		#connectionLostMessage(style="display: none;")
-			| Lost connection. 
+			| Lost connection.
 			span#trying-reconnect
-				| Reconnecting in 
-				span#reconnection-countdown ? 
-				|  seconds. 
+				| Reconnecting in
+				span#reconnection-countdown ?
+				|  seconds.
 				a(href='#')#try-reconnect-now Try now.
 			span#reconnecting
 				| Reconnecting...
 
 		#savingProblems(style="display: none")
 			| Saving...
-	
-	div#toolbar.sidebar-navigation
-		ul#tabs
-		#toolbar-footer
 
 	#tab-content.tab-content
 
@@ -86,5 +116,3 @@ block content
 					url: "#{chatUrl}"
 				})
 			});
-	
-

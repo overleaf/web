@@ -22,7 +22,7 @@ block content
 		span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
 			span.text #{tagName} &nbsp;
 			- if (showDeleteIcon)
-				i.icon-remove.icon-white.delete-tag(data-project-id=project_id, data-tag=tagName)
+				i.fa.fa-times.delete-tag(data-project-id=project_id, data-tag=tagName)
 
 	mixin projectList(projects)
 		-each project in projects
@@ -47,17 +47,17 @@ block content
 				.span10
 					form.form-inline.search
 						input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span6.projectSearch.search-query
-						i.icon-search
-						//- i.icon-remove
+						i.fa.fa-search
+						//- i.fa.fa-remove
 						.btn-toolbar
 							.btn-group
 								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File").btn.downloadZip
-									i.icon-cloud-download
+									i.fa.fa-cloud-download
 								-if ("owner" == "owner")
 									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
-										i.icon-trash
+										i.fa.fa-trash-o
 								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add To Folder...")
-									i.icon-folder-open
+									i.fa.fa-folder-open-o
 									span.caret
 								ul.dropdown-menu.pull-right(role="menu")
 									li
@@ -93,17 +93,17 @@ block content
 					li Folders
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close
+							i.icon.fa.fa-folder-o
 							|  PhD work
 						span.normalText  (5)
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close
+							i.icon.fa.fa-folder-o
 							|  Notes
 						span.normalText  (2)
 					li
 						a.normalText.menu-indent(href="#")
-							i.icon.icon-folder-close
+							i.icon.fa.fa-folder-o
 							|  Papers
 						span.normalText  (1)
 				ul.unstyled.menu
@@ -148,7 +148,7 @@ block content
 						.span12
 							.welcome
 								h1
-									i.icon-arrow-left
+									i.fa.fa-arrow-left
 									| Welcome! Follow the arrow to get started
 								h3 New to LaTeX? Start by having a look at our
 									a(href="/templates")  templates
