@@ -305,7 +305,7 @@ body.editor {
 	}
  
 	#pdfArea {
-		background-color: #eee;
+		background-color: #fafafa;
 		#pdfToolBar{
 			padding: 5px 5px 3px 5px;
 			margin: 0;
@@ -365,7 +365,7 @@ body.editor {
 				margin-left: 10px;
 				margin-bottom: 20px;
 			}
-			background: url('/img/noise.png') #eee;
+			background-color: #fafafa;
 			.alert-warning {
 				border-color: lighten(#f89406, 35%);
 				background-color: lighten(#f89406, 40%);
@@ -577,11 +577,11 @@ body.editor {
 
  
 #sidebar {
+	background-color: #fafafa;
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
 	border-right: 1px solid #aaa;
-	background-color: rgb(238,238,238);
 	padding: 6px 0 0 6px;
 
 	ul {
@@ -625,6 +625,7 @@ body.editor {
 	.entity-project {
 		.clickable {
 			margin-left: 0;
+			display: none;
 		}
 	}
 
@@ -640,9 +641,9 @@ body.editor {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: rgb(185,201,227);
+		background-color: #f4f1de;
 		.border-radius(5px 0 0 5px);
-		color: #3d5979;
+		color: #000;
 		.dropdown-caret {
 			display: block;
 			padding: 4px 6px 4px 4px;
@@ -650,10 +651,10 @@ body.editor {
 			top: 0;
 			right: 0;
 			bottom: 0;
-			background-color: rgb(185,201,227);
+			background-color: rgb(244,241,222);
 			&:before {
 				content: " ";
-				#gradient > .horizontal(rgba(185,201,227,0), rgb(185,201,227));
+				#gradient > .horizontal(rgba(244,241,222,0), rgb(244,241,222));
 				background-color: transparent;
 				width: 12px;
 				height: 100%;
@@ -724,27 +725,22 @@ body.editor {
 	}
 
 	.actions {
-		margin: 4px 4px 4px 26px;
+		margin-bottom: 8px;
 		> div {
 			display: inline;
 			margin-right: 8px;
 		}
-		a {
-			color: #333;
-		}
 		.rename-btn, .delete-btn {
-			margin-top: 4px;	
+			float: right;
+			& > a {
+				color: #aaa;
+			}
 		}
-		.text {
-			margin-left: 4px;
+		.new-entity a.btn-small > {
+			padding: 2px 8px;
 		}
 		.new-entity .dropdown-menu {
-			left: -12px;
 			margin: 0;
-		}
-		.new-entity.open .dropdown-toggle {
-			background: none;
-			text-decoration: underline;
 		}
 	}
 

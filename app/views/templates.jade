@@ -34,9 +34,10 @@
 	script(type="text/template")#fileTreeActionsTemplate
 		.actions
 			.new-entity.dropdown.js-new-entity-menu
-				a.dropdown-toggle(href="#", data-toggle="dropdown", title="New file, folder or upload")
-					i.icon-plus
-					span.text New
+				a.btn.btn-primary.btn-small.dropdown-toggle(href="#", data-toggle="dropdown", title="New file, folder or upload")
+					i.fa.fa-plus
+					|  New 
+					b.caret
 				ul.dropdown-menu
 					li
 						a.js-new-file(href="#")
@@ -50,12 +51,12 @@
 						a.js-upload-file(href="#")
 							img(src="/img/upload-file.png")
 							| Upload file(s)
-			.js-rename-btn.rename-btn
-				a(href="#", title="Rename")
-					i.icon-pencil
 			.js-delete-btn.delete-btn
 				a(href="#", title="Delete")
-					i.icon-trash
+					i.fa.fa-trash-o
+			.js-rename-btn.rename-btn
+				a(href="#", title="Rename")
+					i.fa.fa-pencil
 
 	script(type="text/template")#rootDocListEntity
 		option {{name}}

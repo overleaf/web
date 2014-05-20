@@ -22,17 +22,17 @@
   // IE7 won't do the border trick if there's a text indent, but it doesn't
   // do the content that text-indent is hiding, either, so we're ok.
   *text-indent: 0;
-  vertical-align: top;
+  vertical-align: middle;
   border-left:  4px solid transparent;
   border-right: 4px solid transparent;
   border-top:   4px solid @black;
   .opacity(30);
   content: "\2193";
 }
-.dropdown .caret {
-  margin-top: 8px;
-  margin-left: 2px;
-}
+// .dropdown .caret {
+//   margin-top: 8px;
+//   margin-left: 2px;
+// }
 .dropdown:hover .caret,
 .open.dropdown .caret {
   .opacity(100);
