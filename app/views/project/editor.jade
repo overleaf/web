@@ -104,7 +104,16 @@ block content
 				ul.nav.pull-right
 					li
 						a(href='/project')
-							i.fa.fa-angle-left
+							i.fa.fa-bars
+					li.dropdown
+						a.dropdown-toggle(href="#",data-toggle="dropdown")
+							i.fa.fa-question
+							b.caret
+						ul.dropdown-menu
+							li
+								a(href='/learn') Documentation
+							li
+								a(href='/help') Support
 					li.dropdown
 						a.dropdown-toggle(href="#",data-toggle="dropdown")
 							i.fa.fa-user
@@ -115,13 +124,6 @@ block content
 							- if (settings.enableSubscriptions)
 								li
 									a(href='/user/subscription').subscriptionLink Subscription
-							li.divider
-							li
-								a(href='/learn')#learnLink LaTeX Tutorial
-							li
-								a(href='/resources')#resourcesLink Resources
-							li
-								a(href='/help') Help
 							li.divider
 							li
 								a(href='/logout').logoutLink Logout
