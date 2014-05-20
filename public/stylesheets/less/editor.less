@@ -458,10 +458,9 @@ body.editor {
 	width: 180px;
 	padding: 10px;
 	top: 0;
-	left: 0;
+	left: -200px;
 	bottom: 0;
 	background-color: #faf9f1;
-	box-shadow: 5px 0px 10px #aaa;
 	z-index: 10;
 	h2 {
 		margin: 0;
@@ -486,10 +485,15 @@ body.editor {
 			border-radius: 5px;
 		}
 	}
+	&.shown {
+		box-shadow: 5px 0px 10px #aaa;
+	}
+	-webkit-transition: left ease-in-out 0.35s;
+	transition: left ease-in-out 0.35s;
 }
 
-#mask {
-	opacity: 0.2;
+#left-menu-mask {
+	opacity: 0.4;
 	background-color: #999;
 	z-index: 9;
 	position: absolute;

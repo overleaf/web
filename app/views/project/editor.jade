@@ -26,55 +26,55 @@ block content
 	//- 	ul#tabs
 	//- 	#toolbar-footer
 
-	//- #mask
-	//- aside#left-menu
-	//- 	ul.nav
-	//- 		li
-	//- 			a(href='#')
-	//- 				i.fa.fa-download
-	//- 				|  Download
-	//- 		li
-	//- 			a(href='#') 
-	//- 				i.fa.fa-copy
-	//- 				|  Clone
-	//- 	h2 OFFLINE SYNC
-	//- 	ul.nav
-	//- 		li
-	//- 			a(href='#') 
-	//- 				i.fa.fa-dropbox
-	//- 				|  Dropbox
-	//- 				div.small Your project is synced!
-	//- 	h2 PUBLISH
-	//- 	ul.nav
-	//- 		li
-	//- 			a(href='#') 
-	//- 				i.fa.fa-file-pdf-o
-	//- 				|  As Template
-	//- 				div.small Last published - 13th May 2014
-	//- 	h2 SETTINGS
-	//- 	ul.nav
-	//- 		li.dropdown
-	//- 			a.dropdown-toggle(href="#",data-toggle="dropdown")
-	//- 				|  Compiler: 
-	//- 				span.setting
-	//- 					| XeLaTeX 
-	//- 					b.caret
-	//- 			ul.dropdown-menu
-	//- 				li
-	//- 					a(href='#') LaTeX
-	//- 				li
-	//- 					a(href='#') pdfLaTeX
-	//- 				li
-	//- 					a(href='#') XeLaTeX
-	//- 				li
-	//- 					a(href='#') LuaTeX
+	#left-menu-mask(style="display: none;")
+	aside#left-menu
+		ul.nav
+			li
+				a(href='#')
+					i.fa.fa-download
+					|  Download
+			li
+				a(href='#') 
+					i.fa.fa-copy
+					|  Clone
+		h2 OFFLINE SYNC
+		ul.nav
+			li
+				a(href='#') 
+					i.fa.fa-dropbox
+					|  Dropbox
+					div.small Your project is synced!
+		h2 PUBLISH
+		ul.nav
+			li
+				a(href='#') 
+					i.fa.fa-file-pdf-o
+					|  As Template
+					div.small Last published - 13th May 2014
+		h2 SETTINGS
+		ul.nav
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Compiler: 
+					span.setting
+						| XeLaTeX 
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') LaTeX
+					li
+						a(href='#') pdfLaTeX
+					li
+						a(href='#') XeLaTeX
+					li
+						a(href='#') LuaTeX
 				
 	div#fixed-content
 		header.navbar.editor
 			.navbar-inner
 				ul.nav
 					li
-						a(href='#').menu-toggle.menu-toggle-left
+						a(href='#').menu-toggle.menu-toggle-left#leftMenuToggle
 							i.fa.fa-bars
 					li.name
 						| Project Name
@@ -126,6 +126,24 @@ block content
 						a(href='#').menu-toggle.menu-toggle-right
 							i.fa.fa-comment
 		#tab-content.tab-content
+
+	script(type="text/javascript")
+		$(function() {
+			$("a#leftMenuToggle").on("click", function() {
+				$("aside#left-menu").css({
+					left: 0
+				});
+				$("aside#left-menu").addClass("shown");
+				$("#left-menu-mask").show();
+			});
+			$("#left-menu-mask").on("click", function() {
+				$("aside#left-menu").css({
+					left: -200
+				});
+				$("aside#left-menu").removeClass("shown");
+				$("#left-menu-mask").hide();
+			});
+		})
 
 	include ../jade-templates/dropbox
 	include ../templates
