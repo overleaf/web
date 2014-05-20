@@ -7,6 +7,71 @@ body.editor {
 	background-color: white;
 }
 
+.navbar.editor {
+	.navbar-inner {
+		padding: 0;
+		height: 38px;
+		border-bottom: 1px solid #aaa;
+	}
+	.nav > li > a {
+		color: #ccc;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		font-size: 14px;
+		padding-top: 9px;
+	}
+
+	.nav > li > a.menu-toggle {
+		border: 2px solid #a93629;
+		padding: 4px 7px 4px 10px;
+		margin: 3px 10px;
+		background-color: #faf9f1;
+		i {
+			color: #333;
+		}
+		&.menu-toggle-right {
+			box-shadow: -1px 1px 3px #ccc;
+			border-radius: 6px 0 0 6px;
+			border-right: none;
+			margin-right: 0;
+		}
+		&.menu-toggle-left {
+			box-shadow: 1px 1px 3px #ccc;
+			border-radius: 0 6px 6px 0;
+			border-left: none;
+			margin-left: 0;
+		}
+	}
+
+	.name {
+		margin: 8px;
+		margin-right: 0;
+	}
+
+	.nav > li.share > a {
+		color: #a93629;
+	}
+
+	.nav > li.recent-changes > a {
+		color: #333;
+	}
+
+	.nav > li > a.btn {
+		padding: 4px 8px;
+		margin-top: 4px;
+		margin-right: 6px;
+		font-size: 14px;
+		color: @grayDark;
+	}
+
+	.nav > li > a.btn-primary {
+		color: white;
+	}
+
+	.pdf-toolbar {
+		margin-left: 350px;
+	}
+}
+
 @-webkit-keyframes dot {
       0% { background-color: rgb(40,40,40); }
      50% { background-color: white; }
@@ -388,11 +453,65 @@ body.editor {
 	}
 }
 
+#left-menu {
+	position: absolute;
+	width: 180px;
+	padding: 10px;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	background-color: #faf9f1;
+	box-shadow: 5px 0px 10px #aaa;
+	z-index: 10;
+	h2 {
+		margin: 0;
+		margin-bottom: 1em;
+		font-size: 1em;
+		color: #a93629;
+		border-bottom: 1px solid #a93629;
+	}
+	.nav > li > a {
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		color: #333;
+		padding: 5px;
+		font-size: 14px;
+		.small {
+			line-height: 1;
+			font-size: 11px;
+			color: #888;
+		}
+		.setting {
+			padding: 4px 8px;
+			background: #eee;
+			border-radius: 5px;
+		}
+	}
+}
+
+#mask {
+	opacity: 0.2;
+	background-color: #999;
+	z-index: 9;
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
+#fixed-content {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}
+
 #tab-content {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: 40px;
+	left: 0;
 	right: 0;
 	#collaborators-tab, #settings-tab {
 		padding: 10px;

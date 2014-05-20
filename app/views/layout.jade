@@ -9,7 +9,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- else
 			title= 'Online LaTeX Editor ShareLaTeX - ' +title
 		link(rel='stylesheet', href='/stylesheets/mainStyle.css?fingerprint='+fingerprint('/stylesheets/mainStyle.css'))
-		link(href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css",rel="stylesheet")
+		link(href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css",rel="stylesheet")
 		link(href="//fonts.googleapis.com/css?family=Vollkorn:400,700",rel="stylesheet")
 
 		meta(itemprop="name" ,content="ShareLaTeX - Real Time Online LaTeX Collaborative Editor in Your Browser")
@@ -39,7 +39,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 	- if (typeof(bodyClasses) == "undefined")
 		bodyClasses = []
 	body(class=bodyClasses)
-		include menubar
+		- if (typeof(suppressMenuBar) == "undefined")
+			include menubar
 		block content
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			.modal.hide#scribtexModal

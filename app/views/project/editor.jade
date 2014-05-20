@@ -1,6 +1,9 @@
+- var suppressMenuBar = true
+
 extends ../layout
 
 block content
+
 	#loadingScreen
 		h3 Loading...
 		p#loadingMessage Loading editor
@@ -19,11 +22,110 @@ block content
 		#savingProblems(style="display: none")
 			| Saving...
 	
-	div#toolbar.sidebar-navigation
-		ul#tabs
-		#toolbar-footer
+	//- div#toolbar.sidebar-navigation
+	//- 	ul#tabs
+	//- 	#toolbar-footer
 
-	#tab-content.tab-content
+	//- #mask
+	//- aside#left-menu
+	//- 	ul.nav
+	//- 		li
+	//- 			a(href='#')
+	//- 				i.fa.fa-download
+	//- 				|  Download
+	//- 		li
+	//- 			a(href='#') 
+	//- 				i.fa.fa-copy
+	//- 				|  Clone
+	//- 	h2 OFFLINE SYNC
+	//- 	ul.nav
+	//- 		li
+	//- 			a(href='#') 
+	//- 				i.fa.fa-dropbox
+	//- 				|  Dropbox
+	//- 				div.small Your project is synced!
+	//- 	h2 PUBLISH
+	//- 	ul.nav
+	//- 		li
+	//- 			a(href='#') 
+	//- 				i.fa.fa-file-pdf-o
+	//- 				|  As Template
+	//- 				div.small Last published - 13th May 2014
+	//- 	h2 SETTINGS
+	//- 	ul.nav
+	//- 		li.dropdown
+	//- 			a.dropdown-toggle(href="#",data-toggle="dropdown")
+	//- 				|  Compiler: 
+	//- 				span.setting
+	//- 					| XeLaTeX 
+	//- 					b.caret
+	//- 			ul.dropdown-menu
+	//- 				li
+	//- 					a(href='#') LaTeX
+	//- 				li
+	//- 					a(href='#') pdfLaTeX
+	//- 				li
+	//- 					a(href='#') XeLaTeX
+	//- 				li
+	//- 					a(href='#') LuaTeX
+				
+	div#fixed-content
+		header.navbar.editor
+			.navbar-inner
+				ul.nav
+					li
+						a(href='#').menu-toggle.menu-toggle-left
+							i.fa.fa-bars
+					li.name
+						| Project Name
+					li
+						a(href='#')
+							i.fa.fa-pencil
+					li.share
+						a(href='#')
+							i.fa.fa-users
+							|  Share
+					li.recent-changes
+						a(href='#')
+							i.fa.fa-history
+							|  Recent Changes
+
+				ul.nav.pdf-toolbar
+					li
+						a(href='#').btn.btn-primary Recompile
+					li
+						a(href='#').btn Logs
+					li
+						a(href='#').btn Download
+
+				ul.nav.pull-right
+					li
+						a(href='/project')
+							i.fa.fa-bars
+					li.dropdown
+						a.dropdown-toggle(href="#",data-toggle="dropdown")
+							i.fa.fa-user
+							b.caret
+						ul.dropdown-menu
+							li
+								a(href='/user/settings').userSettingsLink Account Settings
+							- if (settings.enableSubscriptions)
+								li
+									a(href='/user/subscription').subscriptionLink Subscription
+							li.divider
+							li
+								a(href='/learn')#learnLink LaTeX Tutorial
+							li
+								a(href='/resources')#resourcesLink Resources
+							li
+								a(href='/help') Help
+							li.divider
+							li
+								a(href='/logout').logoutLink Logout
+					li
+						a(href='#').menu-toggle.menu-toggle-right
+							i.fa.fa-comment
+		#tab-content.tab-content
 
 	include ../jade-templates/dropbox
 	include ../templates
