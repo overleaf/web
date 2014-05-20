@@ -420,10 +420,14 @@ body.editor {
 				padding: 0.5em 0.5em 1em 4.3625em;
 				span {
 					color: @red;
+					margin-top: @baseLineHeight / 4;
+					padding: @baseLineHeight / 4;
 					&:hover {
 						cursor: pointer;
 						text-decoration: underline;
-						background-color: rgba(77,77,77,0.3);
+						background-color: rgba(95, 86, 32, 0.1);
+						border: 1px solid @grayLight;
+						border-radius: 3px;
 					}
 				}
 				.btn-group {
