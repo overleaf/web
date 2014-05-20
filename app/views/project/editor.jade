@@ -29,6 +29,10 @@ block content
 	#left-menu-mask(style="display: none;")
 	aside#left-menu
 		ul.nav
+			li.share
+				a(href='#')
+					i.fa.fa-users
+					|  Share
 			li
 				a(href='#')
 					i.fa.fa-download
@@ -79,24 +83,23 @@ block content
 					li.name
 						| Project Name
 					li
-						a(href='#')
+						a(href='#', data-toggle="tooltip", title="Rename")
 							i.fa.fa-pencil
-					li.share
-						a(href='#')
-							i.fa.fa-users
-							|  Share
 					li.recent-changes
-						a(href='#')
+						a(href='#', data-toggle="tooltip", title="Recent Changes")
 							i.fa.fa-history
-							|  Recent Changes
 
 				ul.nav.pdf-toolbar
+					li.recompile
+						a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
+							i.fa.fa-refresh
 					li
-						a(href='#').btn.btn-primary Recompile
+						a(href='#', data-toggle="tooltip", title="Logs")
+							i.fa.fa-file-text-o
 					li
-						a(href='#').btn Logs
-					li
-						a(href='#').btn Download
+						a(href='#', data-toggle="tooltip", title="Download")
+							i.fa.fa-download
+							b.caret
 
 				ul.nav.pull-right
 					li
@@ -143,6 +146,9 @@ block content
 				$("aside#left-menu").removeClass("shown");
 				$("#left-menu-mask").hide();
 			});
+			setTimeout(function() {
+				$("header.editor a").tooltip({placement: "bottom", container: "body"})
+			}, 5000);
 		})
 
 	include ../jade-templates/dropbox

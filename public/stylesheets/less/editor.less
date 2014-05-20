@@ -14,30 +14,32 @@ body.editor {
 		border-bottom: 1px solid #aaa;
 	}
 	.nav > li > a {
-		color: #ccc;
+		color: #999;
 		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 		font-size: 14px;
 		padding-top: 9px;
+		&:hover {
+			border-bottom: none;
+			color: #333;
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+		}
 	}
 
 	.nav > li > a.menu-toggle {
-		border: 2px solid #a93629;
-		padding: 4px 7px 4px 10px;
+		padding: 6px 9px 6px 12px;
 		margin: 3px 10px;
-		background-color: #faf9f1;
+		background-color: #a93629;
 		i {
-			color: #333;
+			color: white;
 		}
 		&.menu-toggle-right {
-			box-shadow: -1px 1px 3px #ccc;
+			box-shadow: -1px 1px 3px #999;
 			border-radius: 6px 0 0 6px;
-			border-right: none;
 			margin-right: 0;
 		}
 		&.menu-toggle-left {
-			box-shadow: 1px 1px 3px #ccc;
+			box-shadow: 1px 1px 3px #999;
 			border-radius: 0 6px 6px 0;
-			border-left: none;
 			margin-left: 0;
 		}
 	}
@@ -47,12 +49,11 @@ body.editor {
 		margin-right: 0;
 	}
 
-	.nav > li.share > a {
-		color: #a93629;
+	.nav > li.recent-changes {
+		margin-left: 16px;
 	}
-
-	.nav > li.recent-changes > a {
-		color: #333;
+	.nav > li.recompile > a {
+		color: #a93629;
 	}
 
 	.nav > li > a.btn {
@@ -68,7 +69,7 @@ body.editor {
 	}
 
 	.pdf-toolbar {
-		margin-left: 350px;
+		margin-left: 500px;
 	}
 }
 
