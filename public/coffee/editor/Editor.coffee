@@ -52,8 +52,8 @@ define [
 		initSplitView: () ->
 			@$splitter = splitter = @editorPanel.find("#editorSplitter")
 			options =
-				spacing_open: 8
-				spacing_closed: 16
+				spacing_open: 24
+				spacing_closed: 24
 				east:
 					size: "50%"
 				maskIframesOnResize: true

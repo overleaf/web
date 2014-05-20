@@ -37,8 +37,8 @@ define [
 
 		initLayout: () ->
 			options =
-				spacing_open: 8
-				spacing_closed: 16
+				spacing_open: 24
+				spacing_closed: 24
 				onresize: () =>
 					@.trigger("resize")
 			

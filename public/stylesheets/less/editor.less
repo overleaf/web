@@ -11,7 +11,7 @@ body.editor {
 	.navbar-inner {
 		padding: 0;
 		height: 38px;
-		border-bottom: 1px solid #aaa;
+		border-bottom: 1px solid #ddd;
 		background-color: #f4f4f4;
 	}
 	.nav > li > a {
@@ -114,7 +114,7 @@ body.editor {
 }
 
 .sidebar-navigation {
-	border-right: 1px solid #999;
+	border-right: 1px solid #ddd;
 	position: fixed;
 	left: 0;
 	top: 0;
@@ -204,12 +204,35 @@ body.editor {
 
 .ui-layout-resizer {
 	width: 6px;
-	background-color: #eee;
+	background-color: #f4f4f4;
 	.ui-layout-toggler {
-		background-color: #ddd;
-		background-image: url(/img/resizer.png);
-		background-repeat: no-repeat;
-		background-position: center center;
+		color: #999;
+		font-family: FontAwesome;
+		font-style: normal;
+		font-weight: normal;
+		line-height: 1;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font-size: 16px !important;
+		line-height: 50px;
+		&:hover {
+			background-color: #ddd;
+			color: #333;
+		}
+	}
+}
+.ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
+	.ui-layout-toggler {
+		&:before {
+			content: "\f104"
+		}
+	}
+}
+.ui-layout-resizer-east.ui-layout-resizer-open, .ui-layout-resizer-west.ui-layout-resizer-closed {
+	.ui-layout-toggler {
+		&:before {
+			content: "\f105"
+		}
 	}
 }
 .ui-layout-resizer-dragging {
@@ -221,7 +244,7 @@ body.editor {
 }
 
 #content{
-	border-left: 1px solid #aaa;
+	border-left: 1px solid #ddd;
 
 	iframe{
 		width: 100%;
@@ -252,10 +275,10 @@ body.editor {
 			width: 100%;
 		}
 		#rightEditorPanel {
-			border-left: 1px solid #aaa;
+			border-left: 1px solid #ddd;
 		}
 		#leftEditorPanel {
-			border-right: 1px solid #aaa;
+			border-right: 1px solid #ddd;
 		}
 		.loading {
 			background: url('/img/spin.gif') center center no-repeat, url('/img/noise.png') #aaa;
@@ -586,7 +609,7 @@ body.editor {
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
-	border-right: 1px solid #aaa;
+	border-right: 1px solid #ddd;
 	padding: 6px 0 0 6px;
 
 	ul {
