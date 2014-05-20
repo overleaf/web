@@ -12,6 +12,7 @@ body.editor {
 		padding: 0;
 		height: 38px;
 		border-bottom: 1px solid #aaa;
+		background-color: #f4f4f4;
 	}
 	.nav > li > a {
 		color: #999;
@@ -113,7 +114,6 @@ body.editor {
 }
 
 .sidebar-navigation {
-	background: rgb(40,40,40);
 	border-right: 1px solid #999;
 	position: fixed;
 	left: 0;
@@ -730,22 +730,24 @@ body.editor {
 	}
 
 	.actions {
-		margin-bottom: 8px;
+		margin: 0 8px 8px 4px;
+		border-bottom: 1px solid #ddd;
 		> div {
 			display: inline;
 			margin-right: 8px;
+			& > a {
+				color: #999;
+				&:hover {
+					color: #333;
+					text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+				}
+			}
 		}
 		.rename-btn, .delete-btn {
 			float: right;
-			& > a {
-				color: #aaa;
-			}
 		}
-		.new-entity a.btn-small > {
-			padding: 2px 8px;
-		}
-		.new-entity .dropdown-menu {
-			margin: 0;
+		.delete-btn {
+			margin-right: 0;
 		}
 	}
 
