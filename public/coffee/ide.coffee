@@ -127,7 +127,7 @@ define [
 				@trackChangesManager = new TrackChangesManager(@)
 
 			@setLoadingMessage('50%')
-			$('button[data-toggle="tooltip"], button[rel="tooltip"]').tooltip()
+			$('[data-toggle="tooltip"], [rel="tooltip"]').tooltip()
 			firstConnect = true
 			socket.on "connect", () =>
 				@setLoadingMessage('99%')

@@ -148,21 +148,28 @@
 									i.fa.fa-clock-o
 								button#shareDialog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Share Project")
 									i.fa.fa-share-alt
-								button#settingsDialog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Settings")
+								button#settingsDialog.btn.btn-small.dropdown-toggle(data-toggle="dropdown", rel="tooltip", data-placement="bottom", title="", data-original-title="Settings")
 									i.fa.fa-gears
-								button#dropboxSync.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Sync with Dropbox")
-									i.fa.fa-dropbox
-								button#uploadFile.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Upload File")
-									i.fa.fa-cloud-upload
-								button#downloadLinksButton.btn.btn-small.dropdown-toggle(data-toggle="dropdown", rel="tooltip", data-placement="bottom", title="", data-original-title="Download")
-									i.fa.fa-cloud-download
 									b.caret
 								ul.dropdown-menu
-									#downloadLinks
 									li
-										a#DownloadZip Download as PDF
+										a#DownloadZip
+											i.fa.fa-cloud-download
+											|  Download File as PDF
+									li
+										a#dropboxSync
+											i.fa.fa-dropbox
+											|  Sync with Dropbox
+									li.divider
+									li
+										a#uploadFile
+											i.fa.fa-cloud-upload
+											|  Upload File...
+
 									li.delete-cached-files
-										a(href="#") Clear cached files
+										a(href="#")
+											i.fa.fa-times
+											|  Clear Cached Files
 						#editor
 						#undoConflictWarning(style="display: none")
 							| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
@@ -193,8 +200,8 @@
 		#pdfArea(style='display: none;').fullEditorArea
 			#pdfAreaContent
 				.not-compiled-yet-message
-					i.fa.fa-arrow-left
-					|  Click "Load PDF" to preview your work as a PDF.
+					i.fa.fa-arrow-left &nbsp;
+					|  Click "Load PDF" to preview your work as a PDF over here.
 				.compiling-message(style='display: none;') Compiling...
 				#logArea(style='display: none;')
 					ul

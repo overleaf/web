@@ -1,5 +1,5 @@
 @padding-top : 40px;
-@menu_width: 10em;
+@menu_width: 10.5em;
 @content_offset : .5em;
 @icon_width: 2.375em;
 
@@ -9,15 +9,18 @@ body.editor {
 	overflow: hidden;
 	padding-top: 0;
 	background-color: white;
-	.navbar {
-		margin-bottom: 0;
+
+	.tooltip {
+		font-family: @baseInteractionFamily;
 	}
-	.navbar-inner {
-		padding: 0 2em;
-		.fa-bars, .fa-comments {
-			display: inline-block;
-			cursor: pointer;
-		}
+
+	.fa-bars, .fa-comments {
+		display: inline-block;
+		cursor: pointer;
+	}
+
+	header {
+		display: none;
 	}
 
 	@-webkit-keyframes bugfix { from {padding:0;} to {padding:0;} }
@@ -28,49 +31,59 @@ body.editor {
 	  left: -9999px;
 	}
 
-	#editor-menu-label {
-	  position: absolute;
-	  left:0;
+	#editor-menu-label,
+	#chat-menu-label {
+		position: absolute;
 	  display: block;
-	  padding: .5em .7em;
+	  padding: .6em .8em;
 	  font-size: 1.25em;
 	  color: #fff;
 	  transition: color .3s ease-in-out;
 	  cursor: pointer;
 	  user-select:none;
 	  margin:0;
-	  background-color: @red;
 	  z-index: 1039;
 	}
+
+	#editor-menu-label {
+	  left: 0;
+	  background-color: @red;
+	}
 	#chat-menu-label {
-	  position: absolute;
 	  right: 0;
-	  display: block;
-	  padding: .5em .7em;
-	  font-size: 1.25em;
-	  color: #fff;
-	  transition: color .3s ease-in-out;
-	  cursor: pointer;
-	  user-select:none;
-	  margin:0;
 	  background-color: #555;
-	  z-index: 1039;
 	}
 
 	#chat-window {
 		background-color: #eceff1;
-		border-left: darken(@beige, 10%);
+		border-left: darken(@beige, 20%);
 		position: absolute;
     right: -@menu_width * 2;
     width: @menu_width * 2;
     opacity: 0;
     height: 100%;
     z-index: 1041;
+    clear: both;
+    .me, .other {
+    	clear: both;
+    }
+		.img-container {
+			border-radius: 50%;
+			float: left;
+			height: @baseLineHeight * 2;
+			overflow: hidden;
+			margin-right: @baseLineHeight / 4;
+			margin-bottom: @baseLineHeight / 4;
+			width: @baseLineHeight * 2;
+		}
+		img {
+			margin-top: -10px;
+		}
     ul {
+    	height: 100%;
+    	overflow: scroll;
     	list-style-type: none;
-    	margin-top: @baseLineHeight;
-    	margin-left: @baseLineHeight / 2;
-    	margin-right: @baseLineHeight / 2;
+    	margin: @baseLineHeight (@baseLineHeight / 2) (@baseLineHeight * 2.4);
     }
     li {
     	background-color: white;
@@ -88,6 +101,9 @@ body.editor {
     	&.other {
 				float: right;
     	}
+    	&:last-child {
+    		margin-bottom: 105px;
+    	}
     }
     footer {
     	position: absolute;
@@ -104,11 +120,18 @@ body.editor {
     }
 	}
 	#sidebar {
-    position: absolute;
+		position: absolute;
     left: -@menu_width;
     width: @menu_width;
     opacity: 0;
     height: 100%;
+    overflow: scroll;
+
+    .brand {
+    	position: absolute;
+			top: @baseLineHeight / 2;
+			left: @baseLineHeight / 4;
+		}
 
     .entity-list-item,
     .actions,
@@ -118,6 +141,47 @@ body.editor {
       text-align: left;
       margin: 0;
     }
+
+    .files {
+			margin-top: @baseLineHeight * 2;
+			font-size: @baseFontSize * .8;
+			clear: both;
+			a {
+				font-family: @baseInteractionFamily;
+				color: @gray;
+				display: block;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				width: 100%;
+				.fa-times, .fa-copy {
+					display: none;
+				}
+				&:hover {
+					color: white;
+					background-color: @red;
+					text-decoration: none;
+					.fa-times, .fa-copy {
+						display: inline;
+					}
+				}
+			}
+			li {
+				width: 100%;
+				i {
+					margin-right: @baseLineHeight / 4;
+				}
+			}
+			.project i:first-of-type {
+				padding-left: @baseLineHeight / 4;
+			}
+			.folder i:first-of-type {
+				padding-left: @baseLineHeight / 2;
+			}
+			.file i:first-of-type {
+				padding-left: @baseLineHeight;
+			}
+		}
   }
 
   #editor-menu-label:hover,
@@ -159,13 +223,6 @@ body.editor {
     right: 0;
   }
 
-	#editor-menu ~ .navbar {
-		margin-left: @icon_width;
-	}
-	#chat-menu ~ .navbar {
-		margin-right: @icon_width;
-	}
-
 	#editor-menu:checked ~ #editor-menu-label {
 		margin-left: 8.4em;
 	}
@@ -173,22 +230,12 @@ body.editor {
 		margin-right: 16em;
 	}
 
-	#editor-menu:checked ~ .navbar {
-    margin-left: @menu_width + @content_offset + @icon_width;
-    margin-right: -(@menu_width + @content_offset + @icon_width);
-  }
-  #chat-menu:checked ~ .navbar {
-    margin-right: (@menu_width * 1.8) + @content_offset + @icon_width;
-    margin-left: -((@menu_width * 1.8) + @content_offset + @icon_width);
-  }
-
   #editor-menu:checked ~ .tab-content {
-  	margin-left: @menu_width + @content_offset;
-  	margin-right: -(@menu_width + @content_offset);
+  	margin-left: @menu_width;
+  	margin-right: -(@menu_width);
   }
   #chat-menu:checked ~ .tab-content {
   	margin-right: (@menu_width * 1.8) + @content_offset;
-  	margin-left: -((@menu_width * 1.8) + @content_offset);
   }
 }
 
@@ -370,7 +417,7 @@ body.editor {
 			.btn-toolbar {
 				background-color: lighten(@beige, 5%);
 				margin: 0;
-				padding: 0.5em 0.5em 1em;
+				padding: 0.5em 0.5em 1em 4.3625em;
 				span {
 					color: @red;
 					&:hover {
@@ -435,7 +482,7 @@ body.editor {
 		.ace_gutter {
 			background-color: lighten(#333, 5%);
 			color: white;
-			width: 3em;
+			width: 4em;
 		}
 		.ace_gutter-active-line,
 		.ace_active-line {
@@ -678,7 +725,7 @@ body.editor {
 	cursor: default;
 	border-right: 1px solid darken(@beige, 10%);
 	background-color: lighten(@beige, 5%);;
-	padding: 6px 0 0 6px;
+	padding: 0;
 
 	ul {
 		margin: 8px 0;

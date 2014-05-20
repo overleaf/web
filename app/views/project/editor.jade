@@ -1,118 +1,185 @@
 extends ../layout
 
 block nav
-	aside#sidebar.ui-layout-west
-		//input#search-field(type='search', placeholder='Filter Files by Name')
-		// Position:relative is to get scrolling while dragging to work:
-		// http://stackoverflow.com/questions/1718547/jquery-draggable-scroll-not-working-when-helper-clone-is-used
-		#sections(style="position: relative;")
-		#options
-			span#saving-area
-	aside#chat-window.ui-layout-east
-		ul.chat
-			li.me
-				strong Me:
-				|  Hi!
-			li.other
-				strong James:
-				|  Cool.
-				|  This feature looks better than before.
-				|  Especially when I do a multi-line chat.
-			li.other
-				strong Henry:
-				|  Now with chat!
-			li.me
-				strong Me:
-				|  Yup...
-			li.other
-				strong Henry:
-				|  Okay bye!
-		footer.chat-options
-			form.form-inline.form-chat
-				input(type="text", placeholder="Enter message...")
-				button(type="button").btn.btn-small.btn-primary Send
+  aside#sidebar.ui-layout-west
+    a(href='/').brand
+    ul.files.unstyled
+      li.project
+        a(href="#")
+          i.fa.fa-home
+          | the project
+          .pull-right
+            i.fa.fa-times
+            i.fa.fa-copy
+      li.folder
+        a(href="#")
+          i.fa.fa-folder-open
+          | folder1
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          //- if(active)
+          strong name.tex
+          //- if(edited)
+          | *
+          //- else
+          //- | name.text
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          | name2.tex
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          | name3.tex
+          .pull-right
+            i.fa.fa-times
+      li.folder
+        a(href="#")
+          i.fa.fa-folder-open
+          | folder-altawefaoweifjaweofjiawefoa
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          | name4.tex
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          | name5.tex
+          .pull-right
+            i.fa.fa-times
+      li.file
+        a(href="#")
+          i.fa.fa-file-text
+          | name6awefaoiefjaweofijawefoiajwef.tex
+          .pull-right
+            i.fa.fa-times
+
+  aside#chat-window.ui-layout-east
+    ul.chat
+      li.me
+        span.img-container
+          img(src='/img/about/james_allen.jpg')
+        strong Me:
+        |  Hi!
+      li.other
+        span.img-container
+          img(src='/img/about/james_allen.jpg')
+        strong James:
+        |  Cool.
+        |  This feature looks better than before.
+        |  Especially when I do a multi-line chat.
+      li.other
+        span.img-container
+          img(src='/img/about/henry_oswald.jpg')
+        strong Henry:
+        |  Now with chat!
+      li.me
+        span.img-container
+          img(src='/img/about/james_allen.jpg')
+        strong Me:
+        |  Yup...
+      li.other
+        span.img-container
+          img(src='/img/about/henry_oswald.jpg')
+        strong Henry:
+        |  Okay bye!
+    footer.chat-options
+      form.form-inline.form-chat
+        input(type="text", placeholder="Enter message...")
+        button(type="button").btn.btn-small.btn-primary Send
 
 block content
-	#loadingScreen
-		.container
-			h3 Loading project...
-			.progress
-				#loadingMessage.bar
+  #loadingScreen
+    .container
+      h3 Loading project...
+      .progress
+        #loadingMessage.bar
 
-	#errorMessages
-		#connectionLostMessage(style="display: none;")
-			| Lost connection.
-			span#trying-reconnect
-				| Reconnecting in
-				span#reconnection-countdown ?
-				|  seconds.
-				a(href='#')#try-reconnect-now Try now.
-			span#reconnecting
-				| Reconnecting...
+  #errorMessages
+    #connectionLostMessage(style="display: none;")
+      | Lost connection.
+      span#trying-reconnect
+        | Reconnecting in
+        span#reconnection-countdown ?
+        |  seconds.
+        a(href='#')#try-reconnect-now Try now.
+      span#reconnecting
+        | Reconnecting...
 
-		#savingProblems(style="display: none")
-			| Saving...
+    #savingProblems(style="display: none")
+      | Saving...
 
-	#tab-content.tab-content
+  #tab-content.tab-content
 
-	include ../jade-templates/dropbox
-	include ../templates
+  include ../jade-templates/dropbox
+  include ../templates
 
-	script(src='/socket.io/socket.io.js')
+  script(src='/socket.io/socket.io.js')
 
-	script(type='text/javascript')
-		window.sharelatex = !{sharelatexObject};
-		window.userSettings = !{userSettingsObject};
-		window.user = !{userObject};
-		window.csrfToken = "!{csrfToken}";
-		window.requirejs = {
-			"paths" : {
-				"underscore": "libs/underscore",
-				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
-				"moment": "libs/moment"
-			},
-			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
-			"waitSeconds": 0,
-			"shim": {
-				"libs/backbone": {
-					deps: ["libs/underscore"]
-				},
-				"libs/pdfListView/PdfListView": {
-					deps: ["libs/pdf"]
-				},
-				"libs/pdf": {
-					deps: ["libs/compatibility"]
-				}
-			}
-		};
+  script(type='text/javascript')
+    window.sharelatex = !{sharelatexObject};
+    window.userSettings = !{userSettingsObject};
+    window.user = !{userObject};
+    window.csrfToken = "!{csrfToken}";
+    window.requirejs = {
+      "paths" : {
+        "underscore": "libs/underscore",
+        "mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
+        "moment": "libs/moment"
+      },
+      "urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
+      "waitSeconds": 0,
+      "shim": {
+        "libs/backbone": {
+          deps: ["libs/underscore"]
+        },
+        "libs/pdfListView/PdfListView": {
+          deps: ["libs/pdf"]
+        },
+        "libs/pdf": {
+          deps: ["libs/compatibility"]
+        }
+      }
+    };
 
-	script(type='text/javascript')
-		ga('send', 'event', 'editor-interaction', 'editor-opened')
+  script(type='text/javascript')
+    ga('send', 'event', 'editor-interaction', 'editor-opened')
 
-	- locals.supressDefaultJs = true
-	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
-	- var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
-	script
-		window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
+  - locals.supressDefaultJs = true
+  - var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
+  - var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
+  script
+    window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
 
-	script(
-		data-main=jsPath+'ide.js',
-		baseurl=jsPath,
-		data-ace-base=jsPath+'ace',
-		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
-	)
+  script(
+    data-main=jsPath+'ide.js',
+    baseurl=jsPath,
+    data-ace-base=jsPath+'ace',
+    src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+  )
 
-	- if (!anonymous)
-		script(type="text/javascript")
-			var chatReq = require.config({
-				context: "chat",
-				baseUrl: "#{chatUrl}/chat"
-			});
-			chatReq(["require", "chat"], function(require, Chat) {
-				new Chat({
-					room: {
-						project_id: window.userSettings.project_id
-					},
-					url: "#{chatUrl}"
-				})
-			});
+  - if (!anonymous)
+    script(type="text/javascript")
+      var chatReq = require.config({
+        context: "chat",
+        baseUrl: "#{chatUrl}/chat"
+      });
+      chatReq(["require", "chat"], function(require, Chat) {
+        new Chat({
+          room: {
+            project_id: window.userSettings.project_id
+          },
+          url: "#{chatUrl}"
+        })
+      });

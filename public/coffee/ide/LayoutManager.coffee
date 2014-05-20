@@ -26,7 +26,7 @@ define [
 			@refreshHeights()
 
 			@initLayout()
-					
+
 			$(window).keypress (event)->
 				if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19))
 					return true
@@ -41,7 +41,7 @@ define [
 				spacing_closed: 16
 				onresize: () =>
 					@.trigger("resize")
-			
+
 			if (state = $.localStorage("layout.main"))?
 				options.west =
 					state.west
@@ -54,15 +54,10 @@ define [
 		refreshHeights: ->
 			@setSplitterHeight()
 			@setSectionsHeight()
-			@setTopOffset()
 
 		setSplitterHeight: () ->
-			$("#mainSplitter").height($(window).height() - $(".navbar").outerHeight())
+			$("#mainSplitter").height($(window).height())
 
-		setTopOffset: () ->
-			$("#toolbar").css(top: $(".navbar").outerHeight())
-			$("#tab-content").css(top: $(".navbar").outerHeight())
-			
 		setSectionsHeight: ()->
 			$sections = $('#sections')
 			$chatArea = $('#chatArea')
