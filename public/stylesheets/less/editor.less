@@ -142,34 +142,47 @@ body.editor {
       margin: 0;
     }
 
-    .files {
-			margin-top: @baseLineHeight * 2;
-			font-size: @baseFontSize * .8;
-			clear: both;
-			a {
+    .sidebar-menu {
+    	margin-bottom: @baseLineHeight;
+    	li {
+    		font-size: @baseFontSize * .8;
+				clear: both;
+				width: 100%;
+				i {
+					margin-right: @baseLineHeight / 4;
+					&:first-of-type {
+						padding-left: @baseLineHeight / 4;
+					}
+				}
+    	}
+    	a, .header {
 				font-family: @baseInteractionFamily;
 				color: @gray;
 				display: block;
+    	}
+    	a:hover {
+				color: white;
+				background-color: @red;
+				text-decoration: none;
+				.fa-times, .fa-copy {
+					display: inline;
+				}
+			}
+    	.header {
+    		font-size: @baseFontSize;
+				font-weight: 700;
+				margin-left: @baseLineHeight / 4;
+    	}
+    }
+
+    .files {
+			a {
 				overflow: hidden;
 				text-overflow: ellipsis;
 				white-space: nowrap;
 				width: 100%;
 				.fa-times, .fa-copy {
 					display: none;
-				}
-				&:hover {
-					color: white;
-					background-color: @red;
-					text-decoration: none;
-					.fa-times, .fa-copy {
-						display: inline;
-					}
-				}
-			}
-			li {
-				width: 100%;
-				i {
-					margin-right: @baseLineHeight / 4;
 				}
 			}
 			.project i:first-of-type {

@@ -146,34 +146,11 @@
 							.btn-group.pull-right
 								button#showLog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Show Logs")
 									i.fa.fa-clock-o
-								button#shareDialog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Share Project")
+								button#shareDialog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Share...")
 									i.fa.fa-share-alt
-								button#settingsDialog.btn.btn-small.dropdown-toggle(data-toggle="dropdown", rel="tooltip", data-placement="bottom", title="", data-original-title="Settings")
-									i.fa.fa-gears
-									b.caret
-								ul.dropdown-menu
-									li
-										a#DownloadZip
-											i.fa.fa-cloud-download
-											|  Download File as PDF
-									li
-										a#dropboxSync
-											i.fa.fa-dropbox
-											|  Sync with Dropbox
-									li.divider
-									li
-										a#uploadFile
-											i.fa.fa-cloud-upload
-											|  Upload File...
+								button#DownloadZip.btn.btn-small.dropdown-toggle(data-toggle="dropdown", rel="tooltip", data-placement="bottom", title="", data-original-title="Download File as PDF")
+									i.fa.fa-cloud-download
 
-									li.delete-cached-files
-										a(href="#")
-											i.fa.fa-times
-											|  Clear Cached Files
-									li
-										a(href="/help")
-											i.fa.fa-question-circle
-											|  Help
 						#editor
 						#undoConflictWarning(style="display: none")
 							| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.

@@ -2,8 +2,8 @@ extends ../layout
 
 block nav
   aside#sidebar.ui-layout-west
-    a(href='/').brand
-    ul.files.unstyled
+    ul.files.unstyled.sidebar-menu
+      li.header Folders
       li.project
         a(href="#")
           i.fa.fa-home
@@ -64,6 +64,35 @@ block nav
           | name6awefaoiefjaweofijawefoiajwef.tex
           .pull-right
             i.fa.fa-times
+    ul.unstyled.sidebar-menu
+      li.header Options
+      li
+        a#dropboxSync
+          i.fa.fa-dropbox
+          |  Sync with Dropbox
+      li
+        a#uploadFile
+          i.fa.fa-cloud-upload
+          |  Upload File...
+      li.delete-cached-files
+        a(href="#")
+          i.fa.fa-times
+          |  Clear Cached Files
+      li
+        a#settingsModal
+          i.fa.fa-gears
+          |  Project Settings...
+      li
+        a(href="/help")
+          i.fa.fa-question-circle
+          |  Help
+      li
+        a(href="/")
+          i.fa.fa-home
+          |  Home
+
+    p.centered
+      small &copy; 2014 ShareLaTeX
 
   aside#chat-window.ui-layout-east
     ul.chat
