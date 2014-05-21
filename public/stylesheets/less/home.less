@@ -2,7 +2,7 @@
 	background-size: cover;
 	background-image: url('/img/splash.jpg');
 	position: relative;
-	height: @baseLineHeight * 25;
+	min-height: @baseLineHeight * 30;
 	text-align: center;
 	h1, p {
 		color: white;
@@ -16,7 +16,7 @@
 	}
 	p {
 		font-size: @baseLineHeight;
-		font-weight: 100;
+		font-weight: 200;
 		letter-spacing: 4px;
 		margin-top: 0;
 		text-rendering: auto;
@@ -44,6 +44,11 @@
 	margin: 0 auto;
 }
 
+.pattern-container {
+	background: url('/img/pattern-home.png') repeat #f1f1f1;
+	border-top: 1px solid @grayLightest;
+}
+
 .long-form-features {
 	.row {
 		margin-top: 4rem;
@@ -61,11 +66,13 @@
 	  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 	}
 	h3 {
-		color: @linkColor;
 		margin: 0;
 	}
 	p {
-		color: #333;
+		color: @gray
+	}
+	i {
+		color: lighten(@blue, 15%);
 	}
 }
 

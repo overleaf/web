@@ -3,28 +3,33 @@
   background-image: none;
   box-shadow: none;
   border-bottom: 1px solid @grayLighter;
-  padding: 1em 2em;
+  height: 40px;
+  padding: 1rem 2rem;
   .fa-bars {
     display: none;
   }
 }
-.brand {
+.brand, .navbar .brand {
   background-image: url('/img/logo.png');
   background-repeat: no-repeat;
   height: 16px;
-  margin-top: .375em;
+  margin-top: @baseLineHeight / 2;
   padding: 0;
   width: 128px;
 }
+.navbar .brand {
+  margin-left: 0;
+}
 .navbar .nav > li > a {
-  text-shadow: none;
+  border: 2px solid @red;
+  border-radius: 3px;
+  font-size: @baseFontSize * .8;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 1rem;
 }
 .navbar .nav > li > .highlight {
-  border-bottom: 4px solid @red;
-  margin-left: 1em;
-}
-.navbar .nav > li > .btn,
-.navbar .nav > li > .btn:hover {
+  background-color: @red;
   color: white;
-  margin-top: 0;
+  margin-left: 1rem;
 }

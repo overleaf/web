@@ -10,10 +10,6 @@ body.editor {
 	padding-top: 0;
 	background-color: white;
 
-	.tooltip {
-		font-family: @baseInteractionFamily;
-	}
-
 	.fa-bars, .fa-comments {
 		display: inline-block;
 		cursor: pointer;
@@ -56,7 +52,7 @@ body.editor {
 
 	#chat-window {
 		background-color: #eceff1;
-		border-left: darken(@beige, 20%);
+		border-left: darken(@gray, 20%);
 		position: absolute;
     right: -@menu_width * 2;
     width: @menu_width * 2;
@@ -89,7 +85,6 @@ body.editor {
     	background-color: white;
     	border-radius: 3px;
     	padding: @baseLineHeight / 4;
-    	font-family: @baseInteractionFamily;
     	margin-bottom: @baseLineHeight;
     	width: 80%;
     	clear: both;
@@ -108,7 +103,7 @@ body.editor {
     footer {
     	position: absolute;
     	bottom: 0;
-    	background-color: lighten(@beige, 5%);
+    	background-color: lighten(@gray, 5%);
     	padding: @baseLineHeight / 2;
     	width: 100%;
     	form {
@@ -156,7 +151,6 @@ body.editor {
 				}
     	}
     	a, .header {
-				font-family: @baseInteractionFamily;
 				color: @gray;
 				display: block;
     	}
@@ -199,13 +193,13 @@ body.editor {
 
   #editor-menu-label:hover,
   #editor-menu:checked ~ #editor-menu-label {
-    color: @beige;
+    color: @gray;
     background-color: darken(@red, 10%);
   }
 
   #chat-menu-label:hover,
   #chat-menu:checked ~ #chat-menu-label {
-    color: @beige;
+    color: @gray;
     background-color: darken(@gray, 10%);
   }
 
@@ -428,7 +422,7 @@ body.editor {
 			height: 100%;
 			width: 100%;
 			.btn-toolbar {
-				background-color: lighten(@beige, 5%);
+				background-color: lighten(@gray, 5%);
 				margin: 0;
 				padding: 0.5em 0.5em 1em 4.3625em;
 				span {
@@ -449,13 +443,13 @@ body.editor {
 			}
 		}
 		#rightEditorPanel {
-			border-left: 1px solid darken(@beige, 10%);
+			border-left: 1px solid darken(@gray, 10%);
 		}
 		#leftEditorPanel {
-			border-right: 1px solid darken(@beige, 10%);
+			border-right: 1px solid darken(@gray, 10%);
 		}
 		.loading {
-			background-color: @beige;
+			background-color: @gray;
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -526,12 +520,12 @@ body.editor {
 	}
 
 	#pdfArea {
-		background-color: @beige;
+		background-color: @gray;
 		#pdfToolBar{
 			padding: 5px 5px 3px 5px;
 			margin: 0;
 			background-color: white;
-			border-bottom: 1px solid darken(@beige, 5%);
+			border-bottom: 1px solid darken(@gray, 5%);
 			i {
 				display: block;
 				height: 18px;
@@ -740,8 +734,8 @@ body.editor {
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
-	border-right: 1px solid darken(@beige, 10%);
-	background-color: lighten(@beige, 5%);;
+	border-right: 1px solid darken(@gray, 10%);
+	background-color: lighten(@gray, 5%);;
 	padding: 0;
 
 	ul {
@@ -752,7 +746,6 @@ body.editor {
 
 	.entity-list-item {
 		color: #444;
-		font-family: @baseInteractionFamily;
 		font-size: @baseFontSize * .8;
 		list-style: none;
 		white-space: nowrap;

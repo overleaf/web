@@ -5,42 +5,40 @@
 // GLOBAL VALUES
 // --------------------------------------------------
 
-// Links
-@linkColor:             #a93629;
-@linkColorHover:        #e24b3b;
-
 // Grays
 @black:                 #000;
-@grayDarker:            #2c280f;
-@grayDark:              #393313;
-@gray:                  #5f5620;
-@grayLight:             #999;
-@grayLighter:           #dadfd0;
+@grayDarker:            #252525;
+@grayDark:              #505050;
+@gray:                  #7a7a7a;
+@grayLight:             #a4a4a4;
+@grayLighter:           #cfcfcf;
+@grayLightest:           #f0f0f0;
 @white:                 #fff;
 
 // Accent colors
-@blue:                  #049cdb;
-@blueDark:              #0064cd;
+@blue:                  #263872;
+@blueDark:              #040D2D;
 @green:                 #46a546;
-@red:                   @linkColor;
-@yellow:                #dbd192;
+@red:                   #a93529;
+@yellow:                #A1A729;
 @orange:                #f89406;
 @pink:                  #c3325f;
 @purple:                #7a43b6;
-@beige:                 #f4f1de;
+
+// Links
+@linkColor:             @red;
+@linkColorHover:        darken(@linkColor, 10%);
 
 // Typography
 @baseFontSize:          1rem;
-@baseFontFamily:        "Vollkorn", Georgia, Times, serif;
-@baseInteractionFamily: "Helvetica Neue", Helvetica, Arial, sans-serif;
+@baseFontFamily:        "Helvetica Neue", Helvetica, Arial, sans-serif;
+@baseHeaderFamily:      "PT Serif", Georgia, Times, serif;
 @baseLineHeight:        1.5625rem;
 @baseScaleFactor:       1.25rem;
 @textColor:             @grayDark;
 
 // Buttons
 @primaryButtonBackground:    @linkColor;
-
-
 
 // COMPONENT VARIABLES
 // --------------------------------------------------
@@ -75,8 +73,8 @@
 @navbarLinkColorHover:            @gray;
 
 // Form states and alerts
-@warningText:             darken(@yellow, 33%);
-@warningBackground:       lighten(@beige, 5%);
+@warningText:             darken(@yellow, 15%);
+@warningBackground:       lighten(@yellow, 55%);
 @warningBorder:           darken(spin(@warningBackground, -10), 3%);
 
 @errorText:               @red;

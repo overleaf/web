@@ -1,3 +1,6 @@
+* {
+  -webkit-font-smoothing: antialiased;
+}
 html, body{
 	background-color: white;
 }
@@ -15,7 +18,7 @@ body {
   display: none;
 }
 a.plain{
-   color: #333;
+   color: @grayDarker;
 }
 a.plain:hover {
   text-decoration: none;
@@ -29,7 +32,7 @@ a.highlight {
 }
 
 .alt-container {
-  background-color: @beige;
+  background-color: @grayLightest;
 }
 .plans-header{
   h1, h2, p {
@@ -79,7 +82,8 @@ a.highlight {
     }
   }
   .circle {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
     padding: 36px 18px;
     margin: 0 auto @baseLineHeight;
     text-shadow: 0 -1px 1px darken(@linkColor, 10%);
@@ -153,7 +157,7 @@ input.inputmodal {
 }
 
 .sample-template {
-  border: 1px solid @grayLighter;
+  border: 1px solid @grayLightest;
   border-radius: 3px;
   -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -198,7 +202,7 @@ input.inputmodal {
   }
   th, td {
     padding: 0 (@baseLineHeight / 2);
-    border-bottom: 1px solid @grayLighter;
+    border-bottom: 1px solid @grayLightest;
   }
   th {
     font-size: @baseFontSize * 1.25;

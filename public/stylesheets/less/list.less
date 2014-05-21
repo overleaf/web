@@ -16,11 +16,10 @@
 }
 
 #projectList {
-	font-family: @baseInteractionFamily;
 	list-style-type: none;
 	margin: 0;
 	li {
-		border-bottom: 1px solid @grayLighter;
+		border-bottom: 1px solid @grayLightest;
 		padding: (@baseLineHeight / 4) 0;
 		&:first-child {
 			.last-modified, .owner {
@@ -31,11 +30,14 @@
 			border-bottom: 0 none;
 		}
 		&:hover {
-			background-color: @beige;
+			background-color: @grayLightest;
 		}
 		&:first-child:hover {
 			background-color: white;
 		}
+    a {
+      color: lighten(@blue, 10%);
+    }
 		.select-item, .select-all, .title, .last-modified, .owner {
 			display: inline-block;
 			vertical-align: top;

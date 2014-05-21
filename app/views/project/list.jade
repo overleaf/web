@@ -75,102 +75,108 @@ block content
 										li
 											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
 
-	.container
-		.row-fluid
-			.span2
-				.btn-group#newProject
-					a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
-						span.caret
-					ul.dropdown-menu.pull-right(role="menu")
+	.container-fluid.alt-container
+		.container
+			.row-fluid
+				.span2
+					br
+					.btn-group#newProject
+						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+							span.caret
+						ul.dropdown-menu.pull-right(role="menu")
+							li
+								a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+							li
+								a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+							li
+								a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
+					br
+					ul.unstyled.menu
+						li Folders
 						li
-							a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+							a.normalText.menu-indent(href="#")
+								i.icon.fa.fa-folder-o
+								|  PhD work
+							span.normalText  (5)
 						li
-							a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+							a.normalText.menu-indent(href="#")
+								i.icon.fa.fa-folder-o
+								|  Notes
+							span.normalText  (2)
 						li
-							a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
-				br
-				ul.unstyled.menu
-					li Folders
-					li
-						a.normalText.menu-indent(href="#")
-							i.icon.fa.fa-folder-o
-							|  PhD work
-						span.normalText  (5)
-					li
-						a.normalText.menu-indent(href="#")
-							i.icon.fa.fa-folder-o
-							|  Notes
-						span.normalText  (2)
-					li
-						a.normalText.menu-indent(href="#")
-							i.icon.fa.fa-folder-o
-							|  Papers
-						span.normalText  (1)
-				ul.unstyled.menu
-					li Templates
-					li
-						a.normalText.menu-indent(href="/templates/cv") CV or Resume
-					li
-						a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
-					li
-						a.normalText.menu-indent(href="/templates/journals") Journal Article
-					li
-						a.normalText.menu-indent(href="/templates/presentations") Presentation
-					li
-						a.normalText.menu-indent(href="/templates/thesis") Thesis
-					li
-						a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
-					li
-						a.normalText.menu-indent(href="/templates") View All »
-				-if (tags.length > 0)
-					hr.soften
-					ul#allProjectTagsArea.unstyled.menu
-						li Tags
-						- each tag in tags
-							-if (tag.project_ids.length > 0)
+							a.normalText.menu-indent(href="#")
+								i.icon.fa.fa-folder-o
+								|  Papers
+							span.normalText  (1)
+					ul.unstyled.menu
+						li Templates
+						li
+							a.normalText.menu-indent(href="/templates/cv") CV or Resume
+						li
+							a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
+						li
+							a.normalText.menu-indent(href="/templates/journals") Journal Article
+						li
+							a.normalText.menu-indent(href="/templates/presentations") Presentation
+						li
+							a.normalText.menu-indent(href="/templates/thesis") Thesis
+						li
+							a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+						li
+							a.normalText.menu-indent(href="/templates") View All »
+					-if (tags.length > 0)
+						hr.soften
+						ul#allProjectTagsArea.unstyled.menu
+							li Tags
+							- each tag in tags
+								-if (tag.project_ids.length > 0)
+									li
+										mixin tag("", tag.name, false)
+										span.number x #{tag.project_ids.length}
+
+					-if (settings.enableSubscriptions)
+						p
+							a(href="/user/bonus").btn.btn-info Upgrade Account
+
+				.span10
+					.card
+						- if (projects.length > 0)
+							ul#projectList
 								li
-									mixin tag("", tag.name, false)
-									span.number x #{tag.project_ids.length}
+									label.checkbox.select-all
+										input(type="checkbox")
+									span.title TITLE
+									span.owner OWNER
+									span.last-modified LAST MODIFIED
+								mixin projectList(projects)
+						- else
+							.row
+								.span12
+									.welcome
+										h1
+											i.fa.fa-arrow-left
+											| Welcome! Follow the arrow to get started
+										h3 New to LaTeX? Start by having a look at our
+											a(href="/templates")  templates
+											|  or
+											a(href="/learn")  help guides
+											| .
 
-				include ../general/sidebar
-			.span10
-				- if (projects.length > 0)
-					ul#projectList
-						li
-							label.checkbox.select-all
-								input(type="checkbox")
-							span.title TITLE
-							span.owner OWNER
-							span.last-modified LAST MODIFIED
-						mixin projectList(projects)
-				- else
-					.row
-						.span12
-							.welcome
-								h1
-									i.fa.fa-arrow-left
-									| Welcome! Follow the arrow to get started
-								h3 New to LaTeX? Start by having a look at our
-									a(href="/templates")  templates
-									|  or
-									a(href="/learn")  help guides
-									| .
-
-				if freeTrial && !freeTrial.expired
-					.row-fluid
-						.span12
-							.alert.alert-info.alert-free-trial
-								h2 You are currently using a free trial which expires on #{freeTrial.expiresAt}.
-								p
-									a(href="/user/subscription").btn.btn-primary Upgrade now
-				if freeTrial && freeTrial.expired
-					.row-fluid
-						.span12
-							.alert.alert-danger.alert-free-trial
-								h2 Your free trial has expired!
-								p Upgrade now to continue using ShareLaTeX uninterrupted.
-								p
-									a(href="/user/subscription").btn.btn-danger Upgrade now
+						if freeTrial && !freeTrial.expired
+							.row-fluid
+								.span12
+									.alert.alert-info.alert-free-trial
+										h2 You are currently using a free trial which expires on #{freeTrial.expiresAt}.
+										p
+											a(href="/user/subscription").btn.btn-primary Upgrade now
+						if freeTrial && freeTrial.expired
+							.row-fluid
+								.span12
+									.alert.alert-danger.alert-free-trial
+										h2 Your free trial has expired!
+										p Upgrade now to continue using ShareLaTeX uninterrupted.
+										p
+											a(href="/user/subscription").btn.btn-danger Upgrade now
 
 	include ../general/small-footer
 

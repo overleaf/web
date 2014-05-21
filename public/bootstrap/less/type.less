@@ -7,6 +7,7 @@
 // ---------
 
 p {
+  color: @grayDark;
   margin: 0 0 @baseLineHeight / 2;
   font-family: @baseFontFamily;
   font-size: @baseFontSize;
@@ -26,7 +27,8 @@ p {
 // HEADINGS
 // --------
 h1, h2, h3, h4, h5, h6 {
-  color: @grayDark;
+  color: @grayDarker;
+  font-family: @baseHeaderFamily;
   font-weight: 400;
   text-rendering: optimizelegibility; // Fix the character spacing for headings
   small {
@@ -34,7 +36,7 @@ h1, h2, h3, h4, h5, h6 {
     color: @grayLight;
   }
 }
-h1 {
+h1, .h1 {
   font-size: 1.9375rem;
   line-height: @baseLineHeight * 2;
   margin-top: @baseLineHeight * 2;
@@ -43,7 +45,7 @@ h1 {
     font-size: @baseLineHeight;
   }
 }
-h2 {
+h2, .h2 {
   font-size: @baseLineHeight;
   line-height: @baseLineHeight;
   margin-top: @baseLineHeight * 2;
@@ -52,7 +54,7 @@ h2 {
     font-size: @baseScaleFactor;
   }
 }
-h3, h4 {
+h3, .h3, h4, .h4 {
   font-size: @baseScaleFactor;
   line-height: @baseLineHeight;
   margin-top: @baseLineHeight;
@@ -61,7 +63,7 @@ h3, h4 {
     font-size: @baseFontSize;
   }
 }
-h4 {
+h4, .h4 {
   color: @gray;
 }
 p, ul, ol, pre, table, blockquote {
@@ -85,9 +87,6 @@ sup, sub {
 sub {
   top: 0.4em;
 }
-input, button, a.btn, select, textarea, .menu, .dropdown-menu {
-  font-family: @baseInteractionFamily;
-}
 .menu, .dropdown-menu {
   font-weight: 700;
 }
@@ -104,13 +103,13 @@ input, button, a.btn, select, textarea, .menu, .dropdown-menu {
   }
 }
 .project-header {
-  background-color: lighten(@beige, 5%);
-  border-top: 1px solid darken(@beige, 10%);
-  border-bottom: 1px solid darken(@beige, 10%);
-  margin-top: 0;
+  background: url('/img/pattern.png') top left repeat  @gray;
+  border-top: 1px solid darken(@gray, 10%);
+  border-bottom: 1px solid darken(@gray, 10%);
+  margin: 0;
   padding-top: @baseLineHeight;
   h1 {
-    color: @red;
+    color: white;
     margin-top: 0;
     margin-right: @baseLineHeight * 5;
     line-height: 1;
