@@ -44,7 +44,7 @@ block content
       .row-fluid
         .span2
           br
-          .btn-group#newProject
+          #newProject.dropdown
             a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
               span.caret
             ul.dropdown-menu.pull-right(role="menu")
@@ -56,7 +56,7 @@ block content
                 a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
               li.divider
               li.dropdown-submenu
-                a(tabindex="-1", href="#") Templates
+                a(tabindex="-1", href="#", data-toggle="dropdown") Templates
                 ul.dropdown-menu
                   li
                     a.normalText.menu-indent(href="/templates/cv") CV or Resume
