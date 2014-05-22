@@ -1,197 +1,193 @@
 extends ../layout
 
 block content
-	mixin formatAccessLevel(accessLevel)
-		-if (accessLevel == "owner")
-			span Owner
-		-else if (accessLevel == "readWrite")
-			span Read and Write
-		-else if (accessLevel == "readOnly")
-			span Read Only
-		-else
-			span Unknown?
+  mixin formatAccessLevel(accessLevel)
+    -if (accessLevel == "owner")
+      span Owner
+    -else if (accessLevel == "readWrite")
+      span Read and Write
+    -else if (accessLevel == "readOnly")
+      span Read Only
+    -else
+      span Unknown?
 
-	mixin formatOwnerText(level, publicLevel)
-		-if (level == "owner")
-			span Me
-		-else
-			span #{formatProjectPublicAccessLevel()} &nbsp;
-				mixin formatAccessLevel(project.accessLevel)
+  mixin formatOwnerText(level, publicLevel)
+    -if (level == "owner")
+      span Me
+    -else
+      span #{formatProjectPublicAccessLevel()} &nbsp;
+        mixin formatAccessLevel(project.accessLevel)
 
-	mixin tag(project_id, tagName, showDeleteIcon)
-		span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
-			span.text #{tagName} &nbsp;
-			- if (showDeleteIcon)
-				i.fa.fa-times.delete-tag(data-project-id=project_id, data-tag=tagName)
+  mixin tag(project_id, tagName, showDeleteIcon)
+    span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
+      span.text #{tagName} &nbsp;
+      - if (showDeleteIcon)
+        i.fa.fa-times.delete-tag(data-project-id=project_id, data-tag=tagName)
 
-	mixin projectList(projects)
-		-each project in projects
-			- project_id = project._id.toString()
-			li.project_entry(id=project_id)
-				label.checkbox.select-item
-					input(type="checkbox")
-				span.title
-					a.projectName(href="/project/#{project._id}") #{project.name}
-					span.project-tags(data-project-id=project_id)
-						- each tag in project.tags
-							mixin tag(project_id, tag.name, true)
-				span.owner
-					mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
-				span.last-modified.isoDate #{project.lastUpdated.toISOString()}
+  mixin projectList(projects)
+    -each project in projects
+      - project_id = project._id.toString()
+      li.project_entry(id=project_id)
+        label.checkbox.select-item
+          input(type="checkbox")
+        span.title
+          a.projectName(href="/project/#{project._id}") #{project.name}
+          span.project-tags(data-project-id=project_id)
+            - each tag in project.tags
+              mixin tag(project_id, tag.name, true)
+        span.owner
+          mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
+        span.last-modified.isoDate #{project.lastUpdated.toISOString()}
 
-	.page-header.project-header
-		.container
-			.row-fluid
-				.span2
-					h1 Projects
-				.span10
-					form.form-inline.search
-						input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span6.projectSearch.search-query
-						i.fa.fa-search
-						//- i.fa.fa-remove
-						.btn-toolbar
-							.btn-group
-								a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File").btn.downloadZip
-									i.fa.fa-cloud-download
-								-if ("owner" == "owner")
-									a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
-										i.fa.fa-trash-o
-								a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add To Folder...")
-									i.fa.fa-folder-open-o
-									span.caret
-								ul.dropdown-menu.pull-right(role="menu")
-									li
-										input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id="project_id_needs_updating").tags-input
-							.btn-group.project-actions
-								a.btn.dropdown-toggle(data-toggle="dropdown", href="#") More
-									span.caret
-								ul.dropdown-menu.pull-right(role="menu")
-									li
-										a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
-									-if ("owner" == "owner")
-										li
-											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
-									-else
-										li
-											a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
+  .container-fluid.alt-container
+    .container
+      .row-fluid
+        .span2
+          br
+          .btn-group#newProject
+            a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+              span.caret
+            ul.dropdown-menu.pull-right(role="menu")
+              li
+                a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+              li
+                a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+              li
+                a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
+              li.divider
+              li.dropdown-submenu
+                a(tabindex="-1", href="#") Templates
+                ul.dropdown-menu
+                  li
+                    a.normalText.menu-indent(href="/templates/cv") CV or Resume
+                  li
+                    a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
+                  li
+                    a.normalText.menu-indent(href="/templates/journals") Journal Article
+                  li
+                    a.normalText.menu-indent(href="/templates/presentations") Presentation
+                  li
+                    a.normalText.menu-indent(href="/templates/thesis") Thesis
+                  li
+                    a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+                  li
+                    a.normalText.menu-indent(href="/templates") View All »
 
-	.container-fluid.alt-container
-		.container
-			.row-fluid
-				.span2
-					br
-					.btn-group#newProject
-						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
-							span.caret
-						ul.dropdown-menu.pull-right(role="menu")
-							li
-								a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
-							li
-								a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
-							li
-								a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
-					br
-					ul.unstyled.menu
-						li Folders
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  PhD work
-							span.normalText  (5)
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  Notes
-							span.normalText  (2)
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  Papers
-							span.normalText  (1)
-					ul.unstyled.menu
-						li Templates
-						li
-							a.normalText.menu-indent(href="/templates/cv") CV or Resume
-						li
-							a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
-						li
-							a.normalText.menu-indent(href="/templates/journals") Journal Article
-						li
-							a.normalText.menu-indent(href="/templates/presentations") Presentation
-						li
-							a.normalText.menu-indent(href="/templates/thesis") Thesis
-						li
-							a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
-						li
-							a.normalText.menu-indent(href="/templates") View All »
-					-if (tags.length > 0)
-						hr.soften
-						ul#allProjectTagsArea.unstyled.menu
-							li Tags
-							- each tag in tags
-								-if (tag.project_ids.length > 0)
-									li
-										mixin tag("", tag.name, false)
-										span.number x #{tag.project_ids.length}
+          br
+          ul.unstyled.menu.js-folders-menu
+            li Folders
+            li
+              a.normalText.menu-indent(href="#")
+                i.icon.fa.fa-folder-o
+                |  PhD work
+              span.normalText  (5)
+            li
+              a.normalText.menu-indent(href="#")
+                i.icon.fa.fa-folder-o
+                |  Notes
+              span.normalText  (2)
+            li
+              a.normalText.menu-indent(href="#")
+                i.icon.fa.fa-folder-o
+                |  Papers
+              span.normalText  (1)
 
-					-if (settings.enableSubscriptions)
-						p
-							a(href="/user/bonus").btn.btn-info Upgrade Account
+          -if (tags.length > 0)
+            hr.soften
+            ul#allProjectTagsArea.unstyled.menu
+              li Tags
+              - each tag in tags
+                -if (tag.project_ids.length > 0)
+                  li
+                    mixin tag("", tag.name, false)
+                    span.number x #{tag.project_ids.length}
 
-				.span10
-					.card
-						- if (projects.length > 0)
-							ul#projectList
-								li
-									label.checkbox.select-all
-										input(type="checkbox")
-									span.title TITLE
-									span.owner OWNER
-									span.last-modified LAST MODIFIED
-								mixin projectList(projects)
-						- else
-							.row
-								.span12
-									.welcome
-										h1
-											i.fa.fa-arrow-left
-											| Welcome! Follow the arrow to get started
-										h3 New to LaTeX? Start by having a look at our
-											a(href="/templates")  templates
-											|  or
-											a(href="/learn")  help guides
-											| .
+          -if (settings.enableSubscriptions)
+            p
+              a(href="/user/bonus").btn.btn-info Upgrade Account
 
-						if freeTrial && !freeTrial.expired
-							.row-fluid
-								.span12
-									.alert.alert-info.alert-free-trial
-										h2 You are currently using a free trial which expires on #{freeTrial.expiresAt}.
-										p
-											a(href="/user/subscription").btn.btn-primary Upgrade now
-						if freeTrial && freeTrial.expired
-							.row-fluid
-								.span12
-									.alert.alert-danger.alert-free-trial
-										h2 Your free trial has expired!
-										p Upgrade now to continue using ShareLaTeX uninterrupted.
-										p
-											a(href="/user/subscription").btn.btn-danger Upgrade now
+        .span10
+          .row-fluid
+            .span12
+              form.form-inline.search.project-search
+                input#projectFilter(placeholder='Search projects…', autofocus='autofocus').span6.projectSearch.search-query
+                i.fa.fa-search
+                //- i.fa.fa-remove
+                .project-tools.js-toggle-tools.hidden
+                  .btn-toolbar
+                    .btn-group
+                      a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/download/zip', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download .zip File").btn.downloadZip
+                        i.fa.fa-cloud-download
+                      -if ("owner" == "owner")
+                        a(href='/project/'+"5369c5737fc6b47f048da1f5", data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken, data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Remove").btn.deleteProject
+                          i.fa.fa-trash-o
+                      a.btn.addTagButton.dropdown-toggle(data-project-id="5369c5737fc6b47f048da1f5", data-toggle="dropdown", href="#", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Add To Folder...")
+                        i.fa.fa-folder-open-o
+                    .btn-group.project-actions
+                      a.btn.dropdown-toggle(data-toggle="dropdown", href="#") More
+                        span.caret
+                      ul.dropdown-menu.pull-right(role="menu")
+                        li
+                          a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
+                        -if ("owner" == "owner")
+                          li
+                            a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
+                        -else
+                          li
+                            a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
+          .card.first
+            - if (projects.length > 0)
+              ul#projectList
+                li
+                  label.checkbox.select-all
+                    input(type="checkbox")
+                  span.title TITLE
+                  span.owner OWNER
+                  span.last-modified LAST MODIFIED
+                mixin projectList(projects)
+            - else
+              .row
+                .span12
+                  .welcome
+                    h1
+                      i.fa.fa-arrow-left
+                      | Welcome! Follow the arrow to get started
+                    p New to LaTeX? Start by having a look at our
+                      a(href="/templates")  templates
+                      |  or
+                      a(href="/learn")  help guides
+                      | .
 
-	include ../general/small-footer
+            if freeTrial && !freeTrial.expired
+              .row-fluid
+                .span12
+                  .alert.alert-info.alert-free-trial
+                    h2 You are currently using a free trial which expires on #{freeTrial.expiresAt}.
+                    p
+                      a(href="/user/subscription").btn.btn-primary Upgrade now
+            if freeTrial && freeTrial.expired
+              .row-fluid
+                .span12
+                  .alert.alert-danger.alert-free-trial
+                    h2 Your free trial has expired!
+                    p Upgrade now to continue using ShareLaTeX uninterrupted.
+                    p
+                      a(href="/user/subscription").btn.btn-danger Upgrade now
 
-	script(type="text/template")#tagTemplate
-		mixin tag('{{ project_id }}', '{{ tagName }}', true)
+  include ../general/small-footer
 
-	- locals.supressDefaultJs = true
-	script
-		window.requirejs = {
-			"paths" : {
-				"moment": "libs/moment"
-			}
-		};
-	script(
-		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'),
-		baseurl=jsPath,
-		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
-	)
+  script(type="text/template")#tagTemplate
+    mixin tag('{{ project_id }}', '{{ tagName }}', true)
+
+  - locals.supressDefaultJs = true
+  script
+    window.requirejs = {
+      "paths" : {
+        "moment": "libs/moment"
+      }
+    };
+  script(
+    data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'),
+    baseurl=jsPath,
+    src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+  )

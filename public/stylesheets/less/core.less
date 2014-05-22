@@ -32,7 +32,7 @@ a.highlight {
 }
 
 .alt-container {
-  background-color: @grayLightest;
+  background-color: lighten(@grayLightest, 2.5%);
 }
 .plans-header{
   h1, h2, p {
@@ -92,6 +92,9 @@ a.highlight {
       margin-top: @baseLineHeight / 2;
     }
   }
+}
+.card.first {
+  margin-top: 0;
 }
 .card-group {
   .card {
