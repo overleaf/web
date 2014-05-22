@@ -2,6 +2,14 @@
 
 	script(type="text/template")#editorLayoutTemplate
 		div#mainSplitter
+			aside#sidebar.ui-layout-west
+				//input#search-field(type='search', placeholder='Filter Files by Name')
+				// Position:relative is to get scrolling while dragging to work:
+				// http://stackoverflow.com/questions/1718547/jquery-draggable-scroll-not-working-when-helper-clone-is-used
+				#sections(style="position: relative;")
+				#options
+					span#saving-area 
+
 			#content.content.ui-layout-center
 				#loading.fullEditorArea
 				#disconnect(style='display: none;').fullEditorArea
@@ -11,7 +19,7 @@
 				#folderArea(style='display: none;').fullEditorArea
 				#imageArea(style='display: none;').fullEditorArea
 					iframe
-
+		
 	script(type="text/template")#tabTemplate
 		li(id="{{ id }}-tab-li")
 			a(href="#", data-toggle="tab", data-target="\\#{{ show }}-tab", class="tab-link {{ id }}-tab")
@@ -25,29 +33,21 @@
 
 	script(type="text/template")#fileTreeActionsTemplate
 		.actions
-			.new-entity.dropdown.js-new-entity-menu
-				a.dropdown-toggle(href="#", data-toggle="dropdown", title="New file, folder or upload")
-					i.fa.fa-plus
-					span.text New
-				ul.dropdown-menu
-					li
-						a.js-new-file(href="#")
-							img(src="/img/nide/doc.png")
-							| New File
-					li
-						a.js-new-folder(href="#")
-							img(src="/img/nide/folder.png")
-							| New Folder
-					li
-						a.js-upload-file(href="#")
-							img(src="/img/upload-file.png")
-							| Upload file(s)
-			.js-rename-btn.rename-btn
-				a(href="#", title="Rename")
-					i.fa.fa-pencil
+			.js-new-file(href="#")
+				a(href="#", data-toggle="tooltip", title="New file")
+					i.fa.fa-file-o
+			.js-new-folder(href="#")
+				a(href="#", data-toggle="tooltip", title="New folder")
+					i.fa.fa-folder
+			.js-upload-file(href="#")
+				a(href="#", data-toggle="tooltip", title="Upload")
+					i.fa.fa-upload
 			.js-delete-btn.delete-btn
-				a(href="#", title="Delete")
+				a(href="#", data-toggle="tooltip", title="Delete")
 					i.fa.fa-trash-o
+			.js-rename-btn.rename-btn
+				a(href="#", data-toggle="tooltip", title="Rename")
+					i.fa.fa-pencil
 
 	script(type="text/template")#rootDocListEntity
 		option {{name}}
@@ -59,7 +59,7 @@
 				span.name {{ name }}
 				input.rename.js-rename
 			.dropdown-caret
-				i.fa.fa-chevron-down
+				i.icon-chevron-down
 			.entity-label.label.label-success
 
 	script(type="text/template")#folderTemplate
@@ -72,9 +72,9 @@
 				span.name {{ name }}
 				input.rename.js-rename
 			.dropdown-caret
-				i.fa.fa-chevron-down
+				i.icon-chevron-down
 			.entity-label.label.label-success
-
+	
 	script(type="text/template")#entityListTemplate
 		.contents
 			.entity-list(id="{{ id }}-file-list")
@@ -82,7 +82,7 @@
 	script(type="text/template")#newEntityModalTemplate
 		div
 			input.inputmodal(placeholder="name")
-
+	
 	script(type="text/template")#messageTemplate
 		.chatMessage
 			span.name {{name}}
@@ -111,7 +111,7 @@
 
 	script(type="text/template")#contextMenuDividerTemplate
 		li.divider
-
+	
 	script(type="text/template")#genericModalTemplate
 		.modal
 			.modal-header
@@ -138,19 +138,6 @@
 			#editorSplitter
 				#leftEditorPanel.ui-layout-center
 					#editorWrapper
-						#pdfToolBar.btn-toolbar
-							span#filename name.tex
-
-							.btn-group.pull-right
-								button#recompilePdf.btn.btn-small.btn-success(type='button') Load PDF
-							.btn-group.pull-right
-								button#showLog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Show Logs")
-									i.fa.fa-clock-o
-								button#shareDialog.btn.btn-small(type="button", data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Share...")
-									i.fa.fa-share-alt
-								button#DownloadZip.btn.btn-small.dropdown-toggle(data-toggle="dropdown", rel="tooltip", data-placement="bottom", title="", data-original-title="Download File as PDF")
-									i.fa.fa-cloud-download
-
 						#editor
 						#undoConflictWarning(style="display: none")
 							| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
@@ -159,16 +146,13 @@
 
 	script(type="text/template")#loadingIndicatorTemplate
 		.loading
-			p.centered
-				i.fa.fa-spinner.fa-spin.fa-large
-				|  Loading file...
 
 	script(type="text/template")#pdfSideBarLinkTemplate
 		ul
 			li.root.project#pdf(title='Show PDF', alt='pdf')
-				img(src='/img/pdf.png')
+				img(src='/img/pdf.png') 
 				span PDF
-
+	
 	script(type="text/template")#helpLinkTemplate
 		div
 			a(href="#", title="LaTeX Help") LaTeX Help
@@ -179,10 +163,30 @@
 
 	script(type="text/template")#pdfPanelTemplate
 		#pdfArea(style='display: none;').fullEditorArea
+			//- #pdfToolBar.btn-toolbar
+			//- 	.btn-group
+			//- 		button#recompilePdf.btn.btn-success(type='button') Recompile
+			//- 	.btn-group#showLogGroup
+			//- 		button#showLog.btn Logs
+			//- 	.btn-group#showPdfGroup
+			//- 		button#showPdf.btn Back to PDF
+			//- 	.btn-group
+			//- 		button#downloadPdf.btn Download
+			//- 		button#downloadLinksButton.btn.dropdown-toggle(data-toggle="dropdown")
+			//- 			span.caret
+			//- 		ul.dropdown-menu
+			//- 			#downloadLinks
+			//- 			li.divider
+			//- 			li.delete-cached-files
+			//- 				a(href="#") Clear cached files
+			//- 	.btn-group.pull-right(data-toggle="buttons-radio")
+			//- 		button(type="button", title="Flat view")#flatViewButton.btn
+			//- 			i.icon-flatview
+			//- 		button(type="button", title="Split view")#splitViewButton.btn
+			//- 			i.icon-splitview
 			#pdfAreaContent
 				.not-compiled-yet-message
-					i.fa.fa-arrow-left &nbsp;
-					|  Click "Load PDF" to preview your work as a PDF over here.
+					| Click here to preview your work as a PDF.
 				.compiling-message(style='display: none;') Compiling...
 				#logArea(style='display: none;')
 					ul
@@ -217,22 +221,22 @@
 
 	script(type="text/template")#compileSuccessTemplate
 		li.alert.alert-success
-			strong No errors.
+			strong No errors. 
 			span Great Job!
-
+	
 	script(type="text/template")#compileErrorTemplate
 		li.alert.alert-error
-			strong Compile Error:
+			strong Compile Error: 
 			span Sorry, something went wrong and the project could not be compiled. This may be due to our compiler being overloaded or an incompatibility with the project. Please try again in a few moments and if the problem continues let us know via the feedback tab at the top.
-
+	
 	script(type="text/template")#compileFailedTemplate
 		li.alert.alert-error
 			strong Ooops, your LaTeX code couldn't compile for some reason. Please check these errors for details:
-
+		
 
 	script(type="text/template")#compileLogEntryTemplate
 		li.alert.clickable(class="alert-{{ type }}")
-			strong {{ title }}:
+			strong {{ title }}: 
 			span {{ message }}
 			.small {{ content }}
 
@@ -268,19 +272,19 @@
 				h2 Share Publicly
 			div.share-button
 				a.btn.btn-twitter.btn-large(href="#")
-					i.fa.fa-twitter-square
+					i.icon-twitter
 					| &nbsp; Share on Twitter
 			div.share-button
 				.btn.btn-facebook.btn-large
-					i.fa.fa-facebook-square
+					i.icon-facebook
 					| &nbsp; Share on Facebook
 			div.share-button
 				.btn.btn-google-plus.btn-large
-					i.fa.fa-google-plus-square
+					i.icon-google-plus
 					| &nbsp; Share on Google+
 			div.share-button
 				.btn.btn-large.btn-url
-					i.fa.fa-link
+					i.icon-link
 					| &nbsp; Share URL
 
 
@@ -288,15 +292,15 @@
 		.box
 			.page-header
 				h2 Publish project as template
-
+				
 			#publishedAsTemplateArea.show-when-published.alert.alert-success
 				p
 					.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
-					i.fa.fa-ok
-					|  Your project is currently published.
+					i.icon-ok 
+					|  Your project is currently published. 
 					a#templateLink(href='{{canonicalUrl}}') View in template gallery.
 				p
-					| Lastest version: {{publishedDate}}.
+					| Lastest version: {{publishedDate}}. 
 
 			#problemWithPublishingArea
 				p There is a problem with our publishing service, please try again in a few minutes.
@@ -319,7 +323,7 @@
 	script(type="text/template")#userPanelTemplate
 		.fullEditorArea.projectSettings
 			.box
-				.page-header
+				.page-header      
 					h2 Share Privately (via email)
 				#projectMembersList
 			#socialSharing
@@ -338,7 +342,7 @@
 		#enableVersioningMessage
 			.message History is not yet enabled for this project.
 			a.btn.btn-primary.btn-large#enableVersioning Enable history
-
+	
 
 	script(type='text/template')#snapshotCommentTemplate
 		input(type="text", placeholder="Snapshot comment")#snapshotComment
@@ -394,7 +398,7 @@
 		{{/diff}}
 		{{#binary}}
 		{{^deleted}}
-		.binaryFileDiff
+		.binaryFileDiff 
 			a(href="{{url}}",target="_blank").rawFileLink View this version of the file
 		{{/deleted}}
 		{{/binary}}
@@ -402,7 +406,7 @@
 	script(type='text/template')#versionListItemTemplate
 		a(href="#")
 			div(class='version-message') {{message}}
-			div(class='version-date') {{date}}
+			div(class='version-date') {{date}} 
 
 	script(type='text/template')#versionListTemplate
 		ul#version-list.nav.nav-pills.nav-stacked
@@ -433,7 +437,7 @@
 				.track-changes-header
 					h3 Recent changes
 					a(href="#").track-changes-close
-						i.fa.fa-times
+						i.icon-remove
 				.change-list-area
 			.track-changes-diff
 			.track-changes-upgrade-popup(style="display: none;")
@@ -533,10 +537,10 @@
 			.hotkeys-column
 				.hotkey
 					span.combination.win Ctrl + U
-					span.combination.mac Ctrl + U
+					span.combination.mac Ctrl + U 
 					span.description     To Uppercase
 				.hotkey
 					span.combination.win Ctrl + Shift + U
-					span.combination.mac Ctrl + Shift + U
+					span.combination.mac Ctrl + Shift + U 
 					span.description     To Lowercase
 			.clear

@@ -1,214 +1,219 @@
+- var suppressMenuBar = true
+
 extends ../layout
 
-block nav
-  aside#sidebar.ui-layout-west
-    ul.files.unstyled.sidebar-menu
-      li.header Folders
-      li.project
-        a(href="#")
-          i.fa.fa-home
-          | the project
-          .pull-right
-            i.fa.fa-times
-            i.fa.fa-copy
-      li.folder
-        a(href="#")
-          i.fa.fa-folder-open
-          | folder1
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          //- if(active)
-          strong name.tex
-          //- if(edited)
-          | *
-          //- else
-          //- | name.text
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          | name2.tex
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          | name3.tex
-          .pull-right
-            i.fa.fa-times
-      li.folder
-        a(href="#")
-          i.fa.fa-folder-open
-          | folder-altawefaoweifjaweofjiawefoa
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          | name4.tex
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          | name5.tex
-          .pull-right
-            i.fa.fa-times
-      li.file
-        a(href="#")
-          i.fa.fa-file-text
-          | name6awefaoiefjaweofijawefoiajwef.tex
-          .pull-right
-            i.fa.fa-times
-    ul.unstyled.sidebar-menu
-      li.header Options
-      li
-        a#dropboxSync
-          i.fa.fa-dropbox
-          |  Sync with Dropbox
-      li
-        a#uploadFile
-          i.fa.fa-cloud-upload
-          |  Upload File...
-      li.delete-cached-files
-        a(href="#")
-          i.fa.fa-times
-          |  Clear Cached Files
-      li
-        a#settingsModal
-          i.fa.fa-gears
-          |  Project Settings...
-      li
-        a(href="/help")
-          i.fa.fa-question-circle
-          |  Help
-      li
-        a(href="/")
-          i.fa.fa-home
-          |  Home
-
-    p.centered
-      small &copy; 2014 ShareLaTeX
-
-  aside#chat-window.ui-layout-east
-    ul.chat
-      li.me
-        span.img-container
-          img(src='/img/about/james_allen.jpg')
-        strong Me:
-        |  Hi!
-      li.other
-        span.img-container
-          img(src='/img/about/james_allen.jpg')
-        strong James:
-        |  Cool.
-        |  This feature looks better than before.
-        |  Especially when I do a multi-line chat.
-      li.other
-        span.img-container
-          img(src='/img/about/henry_oswald.jpg')
-        strong Henry:
-        |  Now with chat!
-      li.me
-        span.img-container
-          img(src='/img/about/james_allen.jpg')
-        strong Me:
-        |  Yup...
-      li.other
-        span.img-container
-          img(src='/img/about/henry_oswald.jpg')
-        strong Henry:
-        |  Okay bye!
-    footer.chat-options
-      form.form-inline.form-chat
-        input(type="text", placeholder="Enter message...")
-        button(type="button").btn.btn-small.btn-primary Send
-
 block content
-  #loadingScreen
-    .container
-      h3 Loading project...
-      .progress
-        #loadingMessage.bar
 
-  #errorMessages
-    #connectionLostMessage(style="display: none;")
-      | Lost connection.
-      span#trying-reconnect
-        | Reconnecting in
-        span#reconnection-countdown ?
-        |  seconds.
-        a(href='#')#try-reconnect-now Try now.
-      span#reconnecting
-        | Reconnecting...
+	#loadingScreen
+		h3 Loading...
+		p#loadingMessage Loading editor
 
-    #savingProblems(style="display: none")
-      | Saving...
+	#errorMessages
+		#connectionLostMessage(style="display: none;")
+			| Lost connection. 
+			span#trying-reconnect
+				| Reconnecting in 
+				span#reconnection-countdown ? 
+				|  seconds. 
+				a(href='#')#try-reconnect-now Try now.
+			span#reconnecting
+				| Reconnecting...
 
-  #tab-content.tab-content
+		#savingProblems(style="display: none")
+			| Saving...
+	
+	//- div#toolbar.sidebar-navigation
+	//- 	ul#tabs
+	//- 	#toolbar-footer
 
-  include ../jade-templates/dropbox
-  include ../templates
+	#left-menu-mask(style="display: none;")
+	aside#left-menu
+		ul.nav
+			li.share
+				a(href='#')
+					i.fa.fa-users
+					|  Share
+			li
+				a(href='#')
+					i.fa.fa-download
+					|  Download
+			li
+				a(href='#') 
+					i.fa.fa-copy
+					|  Clone
+		h2 OFFLINE SYNC
+		ul.nav
+			li
+				a(href='#') 
+					i.fa.fa-dropbox
+					|  Dropbox
+					div.small Your project is synced!
+		h2 PUBLISH
+		ul.nav
+			li
+				a(href='#') 
+					i.fa.fa-file-pdf-o
+					|  As Template
+					div.small Last published - 13th May 2014
+		h2 SETTINGS
+		ul.nav
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Compiler: 
+					span.setting
+						| XeLaTeX 
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') LaTeX
+					li
+						a(href='#') pdfLaTeX
+					li
+						a(href='#') XeLaTeX
+					li
+						a(href='#') LuaTeX
+				
+	div#fixed-content
+		header.navbar.editor
+			.navbar-inner
+				ul.nav
+					li
+						a(href='#').menu-toggle.menu-toggle-left#leftMenuToggle
+							i.fa.fa-bars
+					li.name
+						| Project Name
+					li
+						a(href='#', data-toggle="tooltip", title="Rename")
+							i.fa.fa-pencil
+					li.recent-changes
+						a(href='#', data-toggle="tooltip", title="Recent Changes")
+							i.fa.fa-history
 
-  script(src='/socket.io/socket.io.js')
+				ul.nav.pdf-toolbar
+					li.recompile
+						a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
+							i.fa.fa-refresh
+					li
+						a(href='#', data-toggle="tooltip", title="Logs")
+							i.fa.fa-file-text-o
+					li
+						a(href='#', data-toggle="tooltip", title="Download")
+							i.fa.fa-download
+							b.caret
 
-  script(type='text/javascript')
-    window.sharelatex = !{sharelatexObject};
-    window.userSettings = !{userSettingsObject};
-    window.user = !{userObject};
-    window.csrfToken = "!{csrfToken}";
-    window.requirejs = {
-      "paths" : {
-        "underscore": "libs/underscore",
-        "mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
-        "moment": "libs/moment"
-      },
-      "urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
-      "waitSeconds": 0,
-      "shim": {
-        "libs/backbone": {
-          deps: ["libs/underscore"]
-        },
-        "libs/pdfListView/PdfListView": {
-          deps: ["libs/pdf"]
-        },
-        "libs/pdf": {
-          deps: ["libs/compatibility"]
-        }
-      }
-    };
+				ul.nav.pull-right
+					li
+						a(href='/project')
+							i.fa.fa-bars
+					li.dropdown
+						a.dropdown-toggle(href="#",data-toggle="dropdown")
+							i.fa.fa-question
+							b.caret
+						ul.dropdown-menu
+							li
+								a(href='/learn') Documentation
+							li
+								a(href='/help') Support
+					li.dropdown
+						a.dropdown-toggle(href="#",data-toggle="dropdown")
+							i.fa.fa-user
+							b.caret
+						ul.dropdown-menu
+							li
+								a(href='/user/settings').userSettingsLink Account Settings
+							- if (settings.enableSubscriptions)
+								li
+									a(href='/user/subscription').subscriptionLink Subscription
+							li.divider
+							li
+								a(href='/logout').logoutLink Logout
+					li
+						a(href='#').menu-toggle.menu-toggle-right
+							i.fa.fa-comment
+		#tab-content.tab-content
 
-  script(type='text/javascript')
-    ga('send', 'event', 'editor-interaction', 'editor-opened')
+	script(type="text/javascript")
+		$(function() {
+			$("a#leftMenuToggle").on("click", function() {
+				$("aside#left-menu").css({
+					left: 0
+				});
+				$("aside#left-menu").addClass("shown");
+				$("#left-menu-mask").show();
+			});
+			$("#left-menu-mask").on("click", function() {
+				$("aside#left-menu").css({
+					left: -200
+				});
+				$("aside#left-menu").removeClass("shown");
+				$("#left-menu-mask").hide();
+			});
+			setTimeout(function() {
+				$("header.editor a").tooltip({placement: "bottom", container: "body"})
+				$(".actions a").tooltip({placement: "bottom", container: "body"})
+			}, 5000);
+		})
 
-  - locals.supressDefaultJs = true
-  - var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
-  - var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
-  script
-    window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
+	include ../jade-templates/dropbox
+	include ../templates
 
-  script(
-    data-main=jsPath+'ide.js',
-    baseurl=jsPath,
-    data-ace-base=jsPath+'ace',
-    src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
-  )
+	script(src='/socket.io/socket.io.js')
 
-  - if (!anonymous)
-    script(type="text/javascript")
-      var chatReq = require.config({
-        context: "chat",
-        baseUrl: "#{chatUrl}/chat"
-      });
-      chatReq(["require", "chat"], function(require, Chat) {
-        new Chat({
-          room: {
-            project_id: window.userSettings.project_id
-          },
-          url: "#{chatUrl}"
-        })
-      });
+	script(type='text/javascript')
+		window.sharelatex = !{sharelatexObject};
+		window.userSettings = !{userSettingsObject};
+		window.user = !{userObject};
+		window.csrfToken = "!{csrfToken}";
+		window.requirejs = {
+			"paths" : {
+				"underscore": "libs/underscore",
+				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
+				"moment": "libs/moment"
+			},
+			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
+			"waitSeconds": 0,
+			"shim": {
+				"libs/backbone": {
+					deps: ["libs/underscore"]
+				},
+				"libs/pdfListView/PdfListView": {
+					deps: ["libs/pdf"]
+				},
+				"libs/pdf": {
+					deps: ["libs/compatibility"]
+				}
+			}
+		};
+
+	script(type='text/javascript')
+		ga('send', 'event', 'editor-interaction', 'editor-opened')
+
+	- locals.supressDefaultJs = true
+	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
+	- var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
+	script
+		window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
+
+	script(
+		data-main=jsPath+'ide.js',
+		baseurl=jsPath,
+		data-ace-base=jsPath+'ace',
+		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+	)
+
+	- if (!anonymous)
+		script(type="text/javascript")
+			var chatReq = require.config({
+				context: "chat",
+				baseUrl: "#{chatUrl}/chat"
+			});
+			chatReq(["require", "chat"], function(require, Chat) {
+				new Chat({
+					room: {
+						project_id: window.userSettings.project_id
+					},
+					url: "#{chatUrl}"
+				})
+			});
+	
+

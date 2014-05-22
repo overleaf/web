@@ -94,7 +94,7 @@ define [
 			@project_id = @userSettings.project_id
 
 			@user = User.findOrBuild window.user.id, window.user
-
+			
 			ide = this
 			@isAllowedToDoIt = isAllowedToDoIt
 
@@ -126,11 +126,10 @@ define [
 			else
 				@trackChangesManager = new TrackChangesManager(@)
 
-			@setLoadingMessage('50%')
-			$('[data-toggle="tooltip"], [rel="tooltip"]').tooltip()
+			@setLoadingMessage("Connecting")
 			firstConnect = true
 			socket.on "connect", () =>
-				@setLoadingMessage('99%')
+				@setLoadingMessage("Joining project")
 				joinProject = () =>
 					socket.emit 'joinProject', {project_id: @project_id}, (err, project, permissionsLevel, protocolVersion) =>
 						@hideLoadingScreen()
@@ -141,14 +140,15 @@ define [
 						Security.permissionsLevel = permissionsLevel
 						@security = security = Object.freeze(Security)
 						@project = new Project project, parse: true
-						@project.set("ide", ide)
+						@project.set("ide", ide)						
 						ide.trigger "afterJoinProject", @project
+
 						if firstConnect
 							@pdfManager.refreshPdf(isAutoCompile:true)
 						firstConnect = false
 
 				setTimeout(joinProject, 100)
-
+	
 		showErrorModal: (title, message)->
 			new Modal {
 				title: title
@@ -191,8 +191,8 @@ define [
 				headers:
 					"X-Csrf-Token": window.csrfToken
 
-		setLoadingMessage: (theSize) ->
-			$("#loadingMessage").css("width", theSize)
+		setLoadingMessage: (message) ->
+			$("#loadingMessage").text(message)
 
 		hideLoadingScreen: () ->
 			$("#loadingScreen").remove()

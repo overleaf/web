@@ -164,6 +164,7 @@ module.exports =
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
 					languages: Settings.languages
+					suppressMenuBar: true
 					timer.done()
 
 

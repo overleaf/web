@@ -9,18 +9,7 @@ require [
 	"libs/bootstrap"
 ], (tagsManager, moment)->
 
-	$('[data-toggle="tooltip"]').tooltip()
-
-	$('#projectList').on 'click', '.select-item', ->
-		$('.js-toggle-tools').toggleClass 'hidden'
-		return
-
-	$('.js-folders-menu').on 'click', 'a', ->
-		$(this).addClass('active')
-			.find('i').removeClass('fa-folder-o').addClass('fa-folder-open').end().parent()
-			.siblings().find('a').removeClass('active')
-				.find('i').removeClass('fa-folder-open').addClass('fa-folder-o')
-		return
+	$('.tooltip').tooltip()
 
 	$('.isoDate').each (i, d)->
 		html = $(d)
@@ -51,7 +40,7 @@ require [
 			e.preventDefault()
 		refreshProjectFilter()
 
-	$('.search .fa-times').on 'click', (e)->
+	$('.search .icon-remove').on 'click', (e)->
 		$('#projectFilter').val("").focus()
 		refreshProjectFilter()
 
