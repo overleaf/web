@@ -72,6 +72,40 @@ block content
 						a(href='#') XeLaTeX
 					li
 						a(href='#') LuaTeX
+
+	aside#chat-window
+		ul.chat
+			li.me
+				span.img-container
+					img(src='/img/about/james_allen.jpg')
+				strong Me:
+					|  Hi!
+			li.other
+				span.img-container
+					img(src='/img/about/james_allen.jpg')
+				strong James:
+					|  Cool.
+					|  This feature looks better than before.
+					|  Especially when I do a multi-line chat.
+			li.other
+				span.img-container
+					img(src='/img/about/henry_oswald.jpg')
+				strong Henry:
+					|  Now with chat!
+			li.me
+				span.img-container
+					img(src='/img/about/james_allen.jpg')
+				strong Me:
+					|  Yup...
+			li.other
+				span.img-container
+					img(src='/img/about/henry_oswald.jpg')
+				strong Henry:
+					|  Okay bye!
+		footer.chat-options
+			form.form-inline.form-chat
+			input(type="text", placeholder="Enter message...")
+			button(type="button").btn.btn-small.btn-primary Send
 				
 	div#fixed-content
 		header.navbar.editor
@@ -128,7 +162,7 @@ block content
 							li
 								a(href='/logout').logoutLink Logout
 					li
-						a(href='#').menu-toggle.menu-toggle-right
+						a#chat-menu-toggle(href='#').menu-toggle.menu-toggle-right
 							i.fa.fa-comment
 		#tab-content.tab-content
 
@@ -148,6 +182,15 @@ block content
 				$("aside#left-menu").removeClass("shown");
 				$("#left-menu-mask").hide();
 			});
+
+			$("a#chat-menu-toggle").on("click", function() {
+
+				$("body").toggleClass("chat-open");
+				setTimeout(function() {
+					ide.layoutManager.resizeAllSplitters();
+				}, 500)
+			});
+
 			setTimeout(function() {
 				$("header.editor a").tooltip({placement: "bottom", container: "body"})
 				$(".actions a").tooltip({placement: "bottom", container: "body"})
