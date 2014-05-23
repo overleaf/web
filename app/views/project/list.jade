@@ -97,9 +97,12 @@ block content
                 i.icon.fa.fa-folder-o
                 |  Papers
               span.normalText  (1)
-            a.normalText.menu-indent(href="#")
+
+          ul.unstyled.menu
+            li
+              a.normalText.menu-indent(href="#")
                 i.icon.fa.fa-plus
-                |  New
+                |  New Folder
 
           -if (tags.length > 0)
             hr.soften
@@ -144,7 +147,7 @@ block content
                         -else
                           li
                             a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
-          .card.first
+          .card.card-thin.first
             - if (projects.length > 0)
               ul#projectList
                 li

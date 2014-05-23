@@ -27,6 +27,14 @@
   font-weight: 700;
   line-height: 1;
   margin-left: 1rem;
+  &:hover {
+    border: 2px solid @linkColorHover;
+    background-color: @linkColorHover;
+    color: @white;
+    > .caret {
+      color: rgba(255,255,255,0.5);
+    }
+  }
 }
 .navbar .nav > li > .highlight {
   background-color: @red;

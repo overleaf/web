@@ -4,28 +4,48 @@ block content
 	.alt-container
 		.container
 			.row
-				.span6.offset3
+				.span8.offset2
 					.card
 						.page-header
 							h1 Account Settings
 						.messageArea
 
-						h3 Change Password
-						form#changePasswordForm(method="post", action="/user/password/update")
-							input(type="hidden", name="_csrf", value=csrfToken)
-							.clearfix
-								label(for='xlinput') Current Password
-								.input
-									input#currentPassword(type='password', name='currentPassword', placeholder='*********')
-							.clearfix
-								label(for='xlinput') New Password
-								.input
-									input#newPassword1(type='password', name='newPassword1', placeholder='************')
-							.clearfix
-								label(for='xlinput') Confirm Password
-								.input
-									input#newPassword2(type='password', name='newPassword2', placeholder='************')
-							button(type="submit").btn.btn-primary#confirmPasswordChange Change
+						.row-fluid
+							.span6
+								h3 Update Account Info
+								form#updateUserForm(method="post", action="/user/update")
+									input(type="hidden", name="_csrf", value=csrfToken)
+									.clearfix
+										label(for='xlinput') Email
+										.input
+											input#currentPassword(type='email', name='email')
+									.clearfix
+										label(for='xlinput') First Name
+										.input
+											input#newPassword1(type='text', name='firstName')
+									.clearfix
+										label(for='xlinput') Last Name
+										.input
+											input#newPassword2(type='text', name='lastName')
+									button(type="submit").btn.btn-primary#confirmUserChange Update
+
+							.span6
+								h3 Change Password
+								form#changePasswordForm(method="post", action="/user/password/update")
+									input(type="hidden", name="_csrf", value=csrfToken)
+									.clearfix
+										label(for='xlinput') Current Password
+										.input
+											input#currentPassword(type='password', name='currentPassword', placeholder='*********')
+									.clearfix
+										label(for='xlinput') New Password
+										.input
+											input#newPassword1(type='password', name='newPassword1', placeholder='************')
+									.clearfix
+										label(for='xlinput') Confirm Password
+										.input
+											input#newPassword2(type='password', name='newPassword2', placeholder='************')
+									button(type="submit").btn.btn-primary#confirmPasswordChange Change
 
 						hr.soften
 

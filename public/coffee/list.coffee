@@ -16,9 +16,9 @@ require [
 		return
 
 	$('.js-folders-menu').on 'click', 'a', ->
-		$(this).addClass('active')
-			.find('i').removeClass('fa-folder-o').addClass('fa-folder-open').end().parent()
-			.siblings().find('a').removeClass('active')
+		$(this).parent('li').addClass('active')
+			.find('i').removeClass('fa-folder-o').addClass('fa-folder-open').end()
+			.siblings().removeClass('active')
 				.find('i').removeClass('fa-folder-open').addClass('fa-folder-o')
 		return
 
