@@ -116,55 +116,20 @@ block content
 					li
 						a(href='#').menu-toggle.menu-toggle-left#leftMenuToggle
 							i.fa.fa-bars
+					li.recent-changes
+						a(href='#', data-toggle="tooltip", title="Recent Changes")
+							i.fa.fa-history
+
+				ul.nav.project-name
 					li.name
 						| Project Name
 					li
 						a(href='#', data-toggle="tooltip", title="Rename")
 							i.fa.fa-pencil
-					li.recent-changes
-						a(href='#', data-toggle="tooltip", title="Recent Changes")
-							i.fa.fa-history
-
-				ul.nav.pdf-toolbar
-					li.recompile
-						a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
-							i.fa.fa-refresh
-					li
-						a(href='#', data-toggle="tooltip", title="Logs")
-							i.fa.fa-file-text-o
-					li
-						a(href='#', data-toggle="tooltip", title="Download")
-							i.fa.fa-download
-							b.caret
 
 				ul.nav.pull-right
 					li
-						a(href='/project')
-							i.fa.fa-bars
-					li.dropdown
-						a.dropdown-toggle(href="#",data-toggle="dropdown")
-							i.fa.fa-question
-							b.caret
-						ul.dropdown-menu
-							li
-								a(href='/learn') Documentation
-							li
-								a(href='/help') Support
-					li.dropdown
-						a.dropdown-toggle(href="#",data-toggle="dropdown")
-							i.fa.fa-user
-							b.caret
-						ul.dropdown-menu
-							li
-								a(href='/user/settings').userSettingsLink Account Settings
-							- if (settings.enableSubscriptions)
-								li
-									a(href='/user/subscription').subscriptionLink Subscription
-							li.divider
-							li
-								a(href='/logout').logoutLink Logout
-					li
-						a#chat-menu-toggle(href='#').menu-toggle.menu-toggle-right
+						a#chat-menu-toggle(href='#', data-toggle="tooltip", title="Chat").menu-toggle.menu-toggle-right
 							i.fa.fa-comment
 		#tab-content.tab-content
 
