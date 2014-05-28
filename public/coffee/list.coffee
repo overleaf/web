@@ -9,6 +9,14 @@ require [
 	"libs/bootstrap"
 ], (tagsManager, moment)->
 
+	resizeProjectList = () ->
+		height = $(window).height() - $(".navbar").outerHeight() - $("footer").outerHeight() - 130
+		height = Math.max(274, height)
+		$('#projectList').height(height)
+
+	$(window).on "resize", resizeProjectList
+	resizeProjectList()
+
 	$('[data-toggle="tooltip"]').tooltip()
 
 	$('#projectList').on 'click', '.select-item', ->
