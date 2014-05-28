@@ -90,11 +90,12 @@ define [
 
 	Ide = class Ide
 		constructor: () ->
+			@setLoadingMessage(10)
 			@userSettings = window.userSettings
 			@project_id = @userSettings.project_id
 
 			@user = User.findOrBuild window.user.id, window.user
-			
+
 			ide = this
 			@isAllowedToDoIt = isAllowedToDoIt
 
@@ -109,6 +110,7 @@ define [
 			@layoutManager = new LayoutManager(@)
 			@sideBarView = new SideBarManager(@, $("#sections"))
 			selectElement = @sideBarView.selectElement
+			@setLoadingMessage(50)
 			mainAreaManager = @mainAreaManager = new MainAreaManager(@, $("#content"))
 			@fileTreeManager = new FileTreeManager(@)
 			@editor = new Editor(@)
@@ -126,10 +128,10 @@ define [
 			else
 				@trackChangesManager = new TrackChangesManager(@)
 
-			@setLoadingMessage("Connecting")
+			@setLoadingMessage(90)
 			firstConnect = true
 			socket.on "connect", () =>
-				@setLoadingMessage("Joining project")
+				@setLoadingMessage(100)
 				joinProject = () =>
 					socket.emit 'joinProject', {project_id: @project_id}, (err, project, permissionsLevel, protocolVersion) =>
 						@hideLoadingScreen()
@@ -140,7 +142,7 @@ define [
 						Security.permissionsLevel = permissionsLevel
 						@security = security = Object.freeze(Security)
 						@project = new Project project, parse: true
-						@project.set("ide", ide)						
+						@project.set("ide", ide)
 						ide.trigger "afterJoinProject", @project
 
 						if firstConnect
@@ -148,7 +150,7 @@ define [
 						firstConnect = false
 
 				setTimeout(joinProject, 100)
-	
+
 		showErrorModal: (title, message)->
 			new Modal {
 				title: title
@@ -191,8 +193,8 @@ define [
 				headers:
 					"X-Csrf-Token": window.csrfToken
 
-		setLoadingMessage: (message) ->
-			$("#loadingMessage").text(message)
+		setLoadingMessage: (width) ->
+			$("#editorBar").css("width", width + "%")
 
 		hideLoadingScreen: () ->
 			$("#loadingScreen").remove()

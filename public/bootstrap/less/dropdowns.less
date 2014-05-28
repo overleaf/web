@@ -24,7 +24,7 @@
   width: 0;
   height: 0;
   vertical-align: top;
-  border-top:   4px solid rgba(255, 255, 255, 0.7);
+  border-top:   4px solid rgba(96,96,96, 0.7);
   border-right: 4px solid transparent;
   border-left:  4px solid transparent;
   content: "";
@@ -100,7 +100,7 @@
 .dropdown-submenu:hover > a,
 .dropdown-submenu:focus > a {
   text-decoration: none;
-  color: @white;
+  color: @linkColorHover;
   #gradient > .vertical(@linkColor, darken(@linkColor, 5%));
 }
 
@@ -109,7 +109,7 @@
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
 .dropdown-menu > .active > a:focus {
-  color: @white;
+  color: @linkColorHover;
   text-decoration: none;
   outline: 0;
   #gradient > .vertical(@linkColor, darken(@linkColor, 5%));

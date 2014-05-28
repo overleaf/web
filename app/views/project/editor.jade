@@ -4,24 +4,26 @@ extends ../layout
 
 block content
 
-	#loadingScreen
-		h3 Loading...
-		p#loadingMessage Loading editor
+	#loadingScreen.alt-container
+		.container
+			h3 Loading...
+			.progress
+				.bar#editorBar(style="width:0")
 
 	#errorMessages
 		#connectionLostMessage(style="display: none;")
-			| Lost connection. 
+			| Lost connection.
 			span#trying-reconnect
-				| Reconnecting in 
-				span#reconnection-countdown ? 
-				|  seconds. 
+				| Reconnecting in
+				span#reconnection-countdown ?
+				|  seconds.
 				a(href='#')#try-reconnect-now Try now.
 			span#reconnecting
 				| Reconnecting...
 
 		#savingProblems(style="display: none")
 			| Saving...
-	
+
 	//- div#toolbar.sidebar-navigation
 	//- 	ul#tabs
 	//- 	#toolbar-footer
@@ -38,20 +40,20 @@ block content
 					i.fa.fa-download
 					|  Download
 			li
-				a(href='#') 
+				a(href='#')
 					i.fa.fa-copy
 					|  Clone
 		h2 OFFLINE SYNC
 		ul.nav
 			li
-				a(href='#') 
+				a(href='#')
 					i.fa.fa-dropbox
 					|  Dropbox
 					div.small Your project is synced!
 		h2 PUBLISH
 		ul.nav
 			li
-				a(href='#') 
+				a(href='#')
 					i.fa.fa-file-pdf-o
 					|  As Template
 					div.small Last published - 13th May 2014
@@ -59,9 +61,9 @@ block content
 		ul.nav
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Compiler: 
+					|  Compiler:
 					span.setting
-						| XeLaTeX 
+						| XeLaTeX
 						b.caret
 				ul.dropdown-menu
 					li
@@ -106,7 +108,7 @@ block content
 			form.form-inline.form-chat
 			input(type="text", placeholder="Enter message...")
 			button(type="button").btn.btn-small.btn-primary Send
-				
+
 	div#fixed-content
 		header.navbar.editor
 			.navbar-inner
@@ -258,5 +260,5 @@ block content
 					url: "#{chatUrl}"
 				})
 			});
-	
+
 
