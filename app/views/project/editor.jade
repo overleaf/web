@@ -114,11 +114,11 @@ block content
 			.navbar-inner
 				ul.nav
 					li
-						a(href='#').menu-toggle.menu-toggle-left#leftMenuToggle
+						a(href='#')#leftMenuToggle
 							i.fa.fa-bars
 					li.recent-changes
-						a(href='#', data-toggle="tooltip", title="Recent Changes")
-							i.fa.fa-history
+						a(href='#', data-toggle="tooltip", title="Home")
+							i.fa.fa-home
 
 				ul.nav.project-name
 					li.name
@@ -128,8 +128,14 @@ block content
 							i.fa.fa-pencil
 
 				ul.nav.pull-right
+					li.recent-changes
+						a(href='#', data-toggle="tooltip", title="Share")
+							i.fa.fa-users
+					li.recent-changes
+						a(href='#', data-toggle="tooltip", title="Recent Changes")
+							i.fa.fa-history
 					li
-						a#chat-menu-toggle(href='#', data-toggle="tooltip", title="Chat").menu-toggle.menu-toggle-right
+						a#chat-menu-toggle(href='#', data-toggle="tooltip", title="Chat")
 							i.fa.fa-comment
 		#tab-content.tab-content
 
