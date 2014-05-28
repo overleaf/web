@@ -114,11 +114,35 @@ block content
 			.navbar-inner
 				ul.nav
 					li
-						a(href='#')#leftMenuToggle
+						a(href='#', data-toggle="tooltip", title="Menu")#leftMenuToggle
 							i.fa.fa-bars
-					li.recent-changes
-						a(href='#', data-toggle="tooltip", title="Home")
-							i.fa.fa-home
+					li.recent-changes.dropdown
+						a(href='#', data-toggle="tooltip", title="Navigate", data-toggle="dropdown")
+							i.fa.fa-level-up
+						ul.dropdown-menu
+							li Recent projects
+							li
+								a(href="#") Thesis
+							li
+								a(href="#") Nature Paper
+							li
+								a(href="#") Research Notes
+							li
+								a(href="#") Thesis v2
+							li.divider
+							li
+								a(href="#") All projects
+							li.divider
+							li.dropdown-submenu
+								a(href="#", data-toggle="dropdown") Account
+								ul.dropdown-menu
+									li
+										a(href="#") Settings
+									li
+										a(href="#") Subscription
+									li
+										a(href="#") Log out
+
 
 				ul.nav.project-name
 					li.name
