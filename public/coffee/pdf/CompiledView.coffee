@@ -40,8 +40,8 @@ define [
 			outputFileLink: $('#outputFileLinkTemplate').html()
 		
 		events:
-			"click #recompilePdf": -> @recompilePdf()
-			"click #showLog": -> @showLog()
+			"click #recompile-btn": -> @recompilePdf()
+			"click #logs-btn": -> @showLog()
 			"click #showRawLog": -> @showRawLog()
 			"click #showPdf": -> @showPdf()
 			"click #downloadPdf": -> @options.manager.downloadPdf()

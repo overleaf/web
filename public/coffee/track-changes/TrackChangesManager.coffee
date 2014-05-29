@@ -18,14 +18,9 @@ define [
 				identifier: "trackChanges"
 				element: @$el
 
-			@ide.tabManager.addTab
-				id: "history"
-				name: "History"
-				show: "code"
-				after: "code"
-				contract: true
-				onShown: () => @show()
-				onHidden: () => @hide()
+			$("#track-changes-btn").on "click", (e) =>
+				e.preventDefault()
+				@show()
 
 			@ide.editor.on "resize", () =>
 				@diffView?.resize()
