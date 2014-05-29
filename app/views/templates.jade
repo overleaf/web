@@ -166,15 +166,12 @@
 			#pdfToolBar
 				ul.pdf-toolbar
 					li.recompile
-						a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
+						button(href='#', data-toggle="tooltip", title="Recompile (^↵)").btn.btn-small.btn-primary
 							i.fa.fa-refresh
-					li
+							|  Recompile
+					li.logs
 						a(href='#', data-toggle="tooltip", title="Logs")
 							i.fa.fa-file-text-o
-					li
-						a(href='#', data-toggle="tooltip", title="Download")
-							i.fa.fa-download
-							b.caret
 				//- .btn-group
 				//- 	a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
 				//- 			i.fa.fa-refresh

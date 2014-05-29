@@ -199,8 +199,7 @@ block content
 			});
 
 			setTimeout(function() {
-				$("header.editor a").tooltip({placement: "bottom", container: "body"})
-				$(".actions a").tooltip({placement: "bottom", container: "body"})
+				$('[data-toggle="tooltip"]').tooltip({placement: "bottom", container: "body"});
 			}, 5000);
 		})
 
