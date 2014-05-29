@@ -480,10 +480,10 @@ body.editor {
 
 #left-menu {
 	position: absolute;
-	width: 180px;
+	width: 210px;
 	padding: 10px;
 	top: 0;
-	left: -200px;
+	left: -280px;
 	bottom: 0;
 	background-color: #faf9f1;
 	z-index: 10;
@@ -515,6 +515,22 @@ body.editor {
 	}
 	-webkit-transition: left ease-in-out 0.35s;
 	transition: left ease-in-out 0.35s;
+
+	ul.download {
+		> li {
+			display: inline-block;
+			width: 60px;
+			text-align: center;
+			vertical-align: top;
+			a {
+				font-size: 12px;
+				i {
+					font-size: 24px;
+					display: block
+				}
+			}
+		}
+	}
 }
 
 #left-menu-mask {

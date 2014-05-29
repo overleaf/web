@@ -31,18 +31,38 @@ block content
 	#left-menu-mask(style="display: none;")
 	aside#left-menu
 		ul.nav
-			li.share
+			li
 				a(href='#')
 					i.fa.fa-users
 					|  Share
 			li
 				a(href='#')
-					i.fa.fa-download
-					|  Download
-			li
-				a(href='#')
 					i.fa.fa-copy
 					|  Clone
+		h2 Download
+		ul.nav.download
+			li
+				a(href='#')
+					i.fa.fa-file-archive-o
+					|  Source
+			li
+				a(href='#')
+					i.fa.fa-file-pdf-o
+					|  Pdf
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					i.fa.fa-file-code-o
+					|  Other
+					b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') aux file
+					li
+						a(href='#') bbl file
+					li
+						a(href='#') figure.pdf
+
 		h2 OFFLINE SYNC
 		ul.nav
 			li
@@ -59,6 +79,7 @@ block content
 					div.small Last published - 13th May 2014
 		h2 SETTINGS
 		ul.nav
+			li Compiler
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
 					|  Compiler:
@@ -74,6 +95,100 @@ block content
 						a(href='#') XeLaTeX
 					li
 						a(href='#') LuaTeX
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Root document:
+					span.setting
+						| main.tex
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') main.tex
+					li
+						a(href='#') chapters/chapter1.tex
+
+			li Editor
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Theme:
+					span.setting
+						| Twilight
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') Twilight
+					li
+						a(href='#') Twilight Dark
+					li
+						a(href='#') Twilight Light
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Font Size:
+					span.setting
+						| 12pt
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') 10pt
+					li
+						a(href='#') 12pt
+					li
+						a(href='#') 14pt
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Spell Check:
+					span.setting
+						| Off
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') Off
+					li.divider
+					li
+						a(href='#') English
+					li
+						a(href='#') French
+					li
+						a(href='#') German
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Autocomplete:
+					span.setting
+						| Off
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') Off
+					li
+						a(href='#') On
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  Key-bindings:
+					span.setting
+						| vim
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') vim
+					li
+						a(href='#') emacs
+
+			li.dropdown
+				a.dropdown-toggle(href="#",data-toggle="dropdown")
+					|  PDF viewer:
+					span.setting
+						| Built-in
+						b.caret
+				ul.dropdown-menu
+					li
+						a(href='#') Built-in
+					li
+						a(href='#') Native
 
 	aside#chat-window
 		ul.chat
@@ -126,33 +241,6 @@ block content
 								a(href="#") New Folder
 							li
 								a(href="#") Upload File
-					//- li.recent-changes.dropdown
-					//- 	a(href='#', data-toggle="tooltip", title="Navigate", data-toggle="dropdown")
-					//- 		i.fa.fa-level-up
-					//- 	ul.dropdown-menu
-					//- 		li Recent projects
-					//- 		li
-					//- 			a(href="#") Thesis
-					//- 		li
-					//- 			a(href="#") Nature Paper
-					//- 		li
-					//- 			a(href="#") Research Notes
-					//- 		li
-					//- 			a(href="#") Thesis v2
-					//- 		li.divider
-					//- 		li
-					//- 			a(href="#") All projects
-					//- 		li.divider
-					//- 		li.dropdown-submenu
-					//- 			a(href="#", data-toggle="dropdown") Account
-					//- 			ul.dropdown-menu
-					//- 				li
-					//- 					a(href="#") Settings
-					//- 				li
-					//- 					a(href="#") Subscription
-					//- 				li
-					//- 					a(href="#") Log out
-
 
 				ul.nav.project-name
 					li.name
@@ -184,7 +272,7 @@ block content
 			});
 			$("#left-menu-mask").on("click", function() {
 				$("aside#left-menu").css({
-					left: -200
+					left: -280
 				});
 				$("aside#left-menu").removeClass("shown");
 				$("#left-menu-mask").hide();
