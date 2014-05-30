@@ -55,7 +55,7 @@
 	script(type="text/template")#entityTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
 			.clickable.js-clickable
-				i(class="sprite-{{ type }}")
+				i(class="fa fa-file")
 				span.name {{ name }}
 				input.rename.js-rename
 			.dropdown-caret
@@ -68,7 +68,7 @@
 				img(src="/img/nide/right-arrow.png").js-closed
 				img(src="/img/nide/down-arrow.png").js-open
 			.clickable.js-clickable
-				i(class="sprite-{{ type }}")
+				i(class="fa fa-folder")
 				span.name {{ name }}
 				input.rename.js-rename
 			.dropdown-caret

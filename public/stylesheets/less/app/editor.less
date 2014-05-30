@@ -509,7 +509,7 @@ body.editor {
 	bottom: 0;
 	background-color: #eceff1;
 	z-index: 10;
-	overflow: scroll;
+	overflow: auto;
 	h4 {
 		font-family: @baseFontFamily;
 		font-weight: 600;
@@ -823,9 +823,12 @@ body.chat-open {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: #b9c9e3;
+		background-color: #A4B0DA;
 		.border-radius(5px 0 0 5px);
-		color: #000;
+		color: white;
+		i.fa-file, i.fa-folder {
+			color: white;
+		}
 		.dropdown-caret {
 			display: block;
 			padding: 4px 6px 4px 4px;
@@ -878,10 +881,16 @@ body.chat-open {
 	}
 
 	li img, .entity-list-item i {
-		margin: 4px;
-		vertical-align: -7px;
-		min-width: 16px;
-		min-height: 16px;
+		font-size: 14px;
+		margin: 2px 6px 2px 4px;
+	}
+
+	.entity-list-item i.fa-file {
+		color: rgb(170,170,170);
+	}
+	.entity-list-item i.fa-folder {
+		color: #5F74BB;
+		margin-top: 3px;
 	}
 
 	input.rename{
@@ -1164,25 +1173,6 @@ table {
     background-color: #656565;
     background-position: 50% 100%;
     color: white;
-}
-
-i[class*="sprite-"] {
-	display: inline-block;
-	height: 16px;
-	width: 16px;
-}
-
-.sprite-folder {
-	background-image: url(/img/nide/folder.png);
-}
-.sprite-project {
-	background-image: url(/img/project.png);
-}
-.sprite-file {
-	background-image: url(/img/file.png);
-}
-.sprite-doc {
-	background-image: url(/img/nide/doc.png);
 }
 
 .hotkeys {
