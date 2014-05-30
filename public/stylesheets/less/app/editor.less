@@ -509,41 +509,53 @@ body.editor {
 	bottom: 0;
 	background-color: #eceff1;
 	z-index: 10;
+	overflow: scroll;
 	h4 {
 		font-family: @baseFontFamily;
 		font-weight: 600;
-		margin: 0;
-		margin-bottom: 1em;
-		color: @gray;
+		font-size: 14px;
+		margin: 0.4em 0;
+		color: #aaa;
+		border-bottom: 1px solid #ddd;
 		text-shadow: 0 1px 1px white;
 	}
-	.nav > li > a {
-		font-family: @baseFontFamily;
-		color: @grayDarker;
-		padding: 5px;
-		font-size: 14px;
-		&:hover {
-			color: white;
-			background-color: @red;
-			.small, b {
+	h4:first-child {
+		margin-top: 0;
+	}
+	ul.nav {
+		margin-bottom: 0;
+		> li > a {
+			font-family: @baseFontFamily;
+			color: @grayDarker;
+			padding: 5px;
+			font-size: 14px;
+			&:hover {
 				color: white;
+				background-color: @red;
+				.small, b {
+					color: white;
+				}
+				.setting {
+					color: @red;
+				}
+			}
+			.caret {
+				margin-top: 10px;
+			}
+			.small {
+				line-height: 1;
+				font-size: 11px;
+				color: #888;
 			}
 			.setting {
-				color: @red;
+				padding: 4px 8px;
+				background: #eee;
+				border-radius: 5px;
+				position: absolute;
+				right: 0;
+				top: 1px;
+				font-weight: bold;
 			}
-		}
-		.caret {
-			margin-top: 10px;
-		}
-		.small {
-			line-height: 1;
-			font-size: 11px;
-			color: #888;
-		}
-		.setting {
-			padding: 4px 8px;
-			background: #eee;
-			border-radius: 5px;
 		}
 	}
 	&.shown {
