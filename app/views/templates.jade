@@ -8,7 +8,7 @@
 				// http://stackoverflow.com/questions/1718547/jquery-draggable-scroll-not-working-when-helper-clone-is-used
 				#sections(style="position: relative;")
 				#options
-					span#saving-area 
+					span#saving-area
 
 			#content.content.ui-layout-center
 				#loading.fullEditorArea
@@ -19,7 +19,7 @@
 				#folderArea(style='display: none;').fullEditorArea
 				#imageArea(style='display: none;').fullEditorArea
 					iframe
-		
+
 	script(type="text/template")#tabTemplate
 		li(id="{{ id }}-tab-li")
 			a(href="#", data-toggle="tab", data-target="\\#{{ show }}-tab", class="tab-link {{ id }}-tab")
@@ -74,7 +74,7 @@
 			.dropdown-caret
 				i.icon-chevron-down
 			.entity-label.label.label-success
-	
+
 	script(type="text/template")#entityListTemplate
 		.contents
 			.entity-list(id="{{ id }}-file-list")
@@ -82,7 +82,7 @@
 	script(type="text/template")#newEntityModalTemplate
 		div
 			input.inputmodal(placeholder="name")
-	
+
 	script(type="text/template")#messageTemplate
 		.chatMessage
 			span.name {{name}}
@@ -111,7 +111,7 @@
 
 	script(type="text/template")#contextMenuDividerTemplate
 		li.divider
-	
+
 	script(type="text/template")#genericModalTemplate
 		.modal
 			.modal-header
@@ -146,13 +146,17 @@
 
 	script(type="text/template")#loadingIndicatorTemplate
 		.loading
+			p.centered
+				strong Loading editor...
+			p.centered
+				i.fa.fa-circle-o-notch.fa-spin
 
 	script(type="text/template")#pdfSideBarLinkTemplate
 		ul
 			li.root.project#pdf(title='Show PDF', alt='pdf')
-				img(src='/img/pdf.png') 
+				img(src='/img/pdf.png')
 				span PDF
-	
+
 	script(type="text/template")#helpLinkTemplate
 		div
 			a(href="#", title="LaTeX Help") LaTeX Help
@@ -170,8 +174,11 @@
 							i.fa.fa-refresh
 							|  Recompile
 					li.logs
-						a#logs-btn(href='#', data-toggle="tooltip", title="Logs")
+						a#logs-btn(href='#', data-toggle="tooltip", title="PDF Logs")
 							i.fa.fa-file-text-o
+					li.changes
+						a#changes-btn(href='#', data-toggle="tooltip", title="LaTeX History")
+							i.fa.fa-history
 				//- .btn-group
 				//- 	a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
 				//- 			i.fa.fa-refresh
@@ -203,11 +210,6 @@
 				#rawLogArea(style='display: none;')
 					pre
 
-	script(type="text/template")#syncButtonsTemplate
-		div.sync-buttons
-			button.btn.sync-code-to-pdf &rarr;
-			button.btn.sync-pdf-to-code &larr;
-
 	script(type="text/template")#outputFileLinkTemplate
 		li
 			a(href="/project/{{ project_id }}/output/{{ path }}", target="_blank") Download {{ name }}
@@ -230,22 +232,22 @@
 
 	script(type="text/template")#compileSuccessTemplate
 		li.alert.alert-success
-			strong No errors. 
+			strong No errors.
 			span Great Job!
-	
+
 	script(type="text/template")#compileErrorTemplate
 		li.alert.alert-error
-			strong Compile Error: 
+			strong Compile Error:
 			span Sorry, something went wrong and the project could not be compiled. This may be due to our compiler being overloaded or an incompatibility with the project. Please try again in a few moments and if the problem continues let us know via the feedback tab at the top.
-	
+
 	script(type="text/template")#compileFailedTemplate
 		li.alert.alert-error
 			strong Ooops, your LaTeX code couldn't compile for some reason. Please check these errors for details:
-		
+
 
 	script(type="text/template")#compileLogEntryTemplate
 		li.alert.clickable(class="alert-{{ type }}")
-			strong {{ title }}: 
+			strong {{ title }}:
 			span {{ message }}
 			.small {{ content }}
 
@@ -301,15 +303,15 @@
 		.box
 			.page-header
 				h2 Publish project as template
-				
+
 			#publishedAsTemplateArea.show-when-published.alert.alert-success
 				p
 					.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
-					i.icon-ok 
-					|  Your project is currently published. 
+					i.icon-ok
+					|  Your project is currently published.
 					a#templateLink(href='{{canonicalUrl}}') View in template gallery.
 				p
-					| Lastest version: {{publishedDate}}. 
+					| Lastest version: {{publishedDate}}.
 
 			#problemWithPublishingArea
 				p There is a problem with our publishing service, please try again in a few minutes.
@@ -332,7 +334,7 @@
 	script(type="text/template")#userPanelTemplate
 		.fullEditorArea.projectSettings
 			.box
-				.page-header      
+				.page-header
 					h2 Share Privately (via email)
 				#projectMembersList
 			#socialSharing
@@ -351,7 +353,7 @@
 		#enableVersioningMessage
 			.message History is not yet enabled for this project.
 			a.btn.btn-primary.btn-large#enableVersioning Enable history
-	
+
 
 	script(type='text/template')#snapshotCommentTemplate
 		input(type="text", placeholder="Snapshot comment")#snapshotComment
@@ -407,7 +409,7 @@
 		{{/diff}}
 		{{#binary}}
 		{{^deleted}}
-		.binaryFileDiff 
+		.binaryFileDiff
 			a(href="{{url}}",target="_blank").rawFileLink View this version of the file
 		{{/deleted}}
 		{{/binary}}
@@ -415,7 +417,7 @@
 	script(type='text/template')#versionListItemTemplate
 		a(href="#")
 			div(class='version-message') {{message}}
-			div(class='version-date') {{date}} 
+			div(class='version-date') {{date}}
 
 	script(type='text/template')#versionListTemplate
 		ul#version-list.nav.nav-pills.nav-stacked
@@ -546,10 +548,10 @@
 			.hotkeys-column
 				.hotkey
 					span.combination.win Ctrl + U
-					span.combination.mac Ctrl + U 
+					span.combination.mac Ctrl + U
 					span.description     To Uppercase
 				.hotkey
 					span.combination.win Ctrl + Shift + U
-					span.combination.mac Ctrl + Shift + U 
+					span.combination.mac Ctrl + Shift + U
 					span.description     To Lowercase
 			.clear

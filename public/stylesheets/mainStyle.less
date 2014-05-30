@@ -32,29 +32,27 @@
 @import "public/bootstrap/less/hero-unit.less";
 @import "public/bootstrap/less/labels-badges.less";
 @import "public/bootstrap/less/utilities.less"; // Has to be last to override when necessary
-
 @import "public/bootstrap/less/responsive.less"; //keep this very last!
+@import "bootstrap-select.css";
 
 @import "public/stylesheets/variables.less";
 
-@import "public/stylesheets/less/core.less";
-@import "public/stylesheets/less/style.less";
-@import "public/stylesheets/less/editor.less";
-@import "public/stylesheets/less/home.less";
-@import "public/stylesheets/less/faq.less";
-@import "public/stylesheets/less/subscriptions.less";
-@import "public/stylesheets/less/revisions.less";
-@import "public/stylesheets/less/bonus.less";
-@import "public/stylesheets/less/navbar.less";
-@import "public/stylesheets/less/footer.less";
-@import "public/stylesheets/less/list.less";
-@import "public/stylesheets/less/trackchanges.less";
+@import "public/stylesheets/less/base/core.less";
+@import "public/stylesheets/less/base/style.less";
+@import "public/stylesheets/less/base/prettify.less";
+@import "public/stylesheets/less/base/revisions.less";
 
-@import "public/stylesheets/less/fileuploader.less";
-@import "public/stylesheets/less/prettify.less";
-@import "public/stylesheets/less/intro.less";
-@import "public/stylesheets/less/blog.less";
+@import "public/stylesheets/less/app/intro.less";
+@import "public/stylesheets/less/app/blog.less";
+@import "public/stylesheets/less/app/editor.less";
+@import "public/stylesheets/less/app/home.less";
+@import "public/stylesheets/less/app/faq.less";
+@import "public/stylesheets/less/app/subscriptions.less";
 
-@import "public/stylesheets/less/tagmanager.less";
-
-@import "bootstrap-select.css";
+@import "public/stylesheets/less/components/bonus.less";
+@import "public/stylesheets/less/components/navbar.less";
+@import "public/stylesheets/less/components/footer.less";
+@import "public/stylesheets/less/components/list.less";
+@import "public/stylesheets/less/components/trackchanges.less";
+@import "public/stylesheets/less/components/fileuploader.less";
+@import "public/stylesheets/less/components/tagmanager.less";

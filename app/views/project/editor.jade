@@ -30,16 +30,7 @@ block content
 
 	#left-menu-mask(style="display: none;")
 	aside#left-menu
-		ul.nav
-			li
-				a(href='#')
-					i.fa.fa-users
-					|  Share
-			li
-				a(href='#')
-					i.fa.fa-copy
-					|  Clone
-		h2 Download
+		h4 Download
 		ul.nav.download
 			li
 				a(href='#')
@@ -63,26 +54,25 @@ block content
 					li
 						a(href='#') figure.pdf
 
-		h2 OFFLINE SYNC
+		h4 Offline Sync
 		ul.nav
 			li
 				a(href='#')
 					i.fa.fa-dropbox
 					|  Dropbox
 					div.small Your project is synced!
-		h2 PUBLISH
+		h4 Publish
 		ul.nav
 			li
 				a(href='#')
 					i.fa.fa-file-pdf-o
 					|  As Template
 					div.small Last published - 13th May 2014
-		h2 SETTINGS
+		h4 Settings
 		ul.nav
-			li Compiler
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Compiler:
+					strong Compiler:&nbsp;
 					span.setting
 						| XeLaTeX
 						b.caret
@@ -98,7 +88,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Root document:
+					strong Root document:&nbsp;
 					span.setting
 						| main.tex
 						b.caret
@@ -108,10 +98,9 @@ block content
 					li
 						a(href='#') chapters/chapter1.tex
 
-			li Editor
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Theme:
+					strong Theme:&nbsp;
 					span.setting
 						| Twilight
 						b.caret
@@ -125,7 +114,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Font Size:
+					strong Font Size:&nbsp;
 					span.setting
 						| 12pt
 						b.caret
@@ -139,7 +128,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Spell Check:
+					strong Spell Check:&nbsp;
 					span.setting
 						| Off
 						b.caret
@@ -156,7 +145,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Autocomplete:
+					strong Autocomplete:&nbsp;
 					span.setting
 						| Off
 						b.caret
@@ -168,7 +157,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  Key-bindings:
+					strong Key-bindings:&nbsp;
 					span.setting
 						| vim
 						b.caret
@@ -180,7 +169,7 @@ block content
 
 			li.dropdown
 				a.dropdown-toggle(href="#",data-toggle="dropdown")
-					|  PDF viewer:
+					strong PDF viewer:&nbsp;
 					span.setting
 						| Built-in
 						b.caret
@@ -195,34 +184,39 @@ block content
 			li.me
 				span.img-container
 					img(src='/img/about/james_allen.jpg')
-				strong Me:
+				p
+					strong Me:
 					|  Hi!
 			li.other
 				span.img-container
 					img(src='/img/about/james_allen.jpg')
-				strong James:
+				p
+					strong James:
 					|  Cool.
 					|  This feature looks better than before.
 					|  Especially when I do a multi-line chat.
 			li.other
 				span.img-container
 					img(src='/img/about/henry_oswald.jpg')
-				strong Henry:
+				p
+					strong Henry:
 					|  Now with chat!
 			li.me
 				span.img-container
 					img(src='/img/about/james_allen.jpg')
-				strong Me:
+				p
+					strong Me:
 					|  Yup...
 			li.other
 				span.img-container
 					img(src='/img/about/henry_oswald.jpg')
-				strong Henry:
+				p
+					strong Henry:
 					|  Okay bye!
 		footer.chat-options
 			form.form-inline.form-chat
-			input(type="text", placeholder="Enter message...")
-			button(type="button").btn.btn-small.btn-primary Send
+				input(type="text", placeholder="Enter message...")
+				button(type="button").btn.btn-small.btn-primary Send
 
 	div#fixed-content
 		header.navbar.editor
@@ -231,31 +225,17 @@ block content
 					li
 						a(href='#', data-toggle="tooltip", title="Menu")#leftMenuToggle
 							i.fa.fa-bars
-					li.dropdown
-						a(href='#', data-toggle="tooltip", title="New", data-toggle="dropdown")
-							i.fa.fa-plus
-						ul.dropdown-menu
-							li
-								a(href="#") New File
-							li
-								a(href="#") New Folder
-							li
-								a(href="#") Upload File
 
 				ul.nav.project-name
 					li.name
-						| Project Name
+						i.fa.fa-share-alt.share-container(data-toggle="tooltip", title="Share")
+						input(type="text", value="Project Name")
+
 					li
 						a(href='#', data-toggle="tooltip", title="Rename")
 							i.fa.fa-pencil
 
 				ul.nav.pull-right
-					li
-						a(href='#', data-toggle="tooltip", title="Share")
-							i.fa.fa-users
-					li
-						a#track-changes-btn(href='#', data-toggle="tooltip", title="Recent Changes")
-							i.fa.fa-history
 					li
 						a#chat-menu-toggle(href='#', data-toggle="tooltip", title="Chat")
 							i.fa.fa-comment

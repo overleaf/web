@@ -32,10 +32,30 @@ body.editor {
 		border-right: 1px solid #ddd;
 		border-radius: 0;
 	}
+	.nav.pull-right > li > a {
+		border: none;
+		border-left: 1px solid #ddd;
+	}
 
 	.name {
-		margin: 8px;
-		margin-right: 0;
+		> input {
+			background-color: transparent;
+			border: 0 none;
+			font-weight: bold;
+			margin: 0;
+			text-shadow: 0 1px 1px white;
+			box-shadow: none;
+			&:hover {
+				background-color: white;
+				box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+				border: 1px solid #ccc;
+				font-weight: normal;
+			}
+		}
+		> .share-container {
+			margin-right: 5px;
+			cursor: pointer;
+		}
 	}
 
 	.nav > li.recompile > a {
@@ -45,7 +65,7 @@ body.editor {
 	ul.project-name {
 		position: absolute;
 		left: 50%;
-		width: 160px;
+		width: 250px;
 		margin-left: -80px;
 		> li a {
 			display: none;
@@ -250,7 +270,7 @@ body.editor {
 		width: 100%;
 		height: 100%;
 	}
-	
+
 	.fullEditorArea, #pdfArea, #imageArea iframe{
 		position: absolute;
 		top: 0;
@@ -281,13 +301,15 @@ body.editor {
 			border-right: 1px solid #ddd;
 		}
 		.loading {
-			background: url('/img/spin.gif') center center no-repeat, url('/img/noise.png') #aaa;
+			background-color: #eceff1;
 			position: absolute;
 			top: 0;
 			left: 0;
 			right: 0;
 			bottom: 0;
 			z-index: 100;
+			margin: auto;
+			padding-top: 10rem;
 		}
 		#trackChangesPanel {
 			width: 100%;
@@ -327,7 +349,7 @@ body.editor {
 			float: right;
 		}
 	}
- 
+
 	#pdfArea {
 		background-color: #fafafa;
 		#pdfToolBar{
@@ -456,12 +478,12 @@ body.editor {
 		}
 	}
 
- 
+
 	#loading{
 		background: url('/img/spin.gif') center center no-repeat, url('/img/noise.png') #aaa;
 	}
- 
- 
+
+
 	#projectDeleted {
 		background: url('/img/noise.png') #aaa;
 	}
@@ -485,20 +507,34 @@ body.editor {
 	top: 0;
 	left: -280px;
 	bottom: 0;
-	background-color: #faf9f1;
+	background-color: #eceff1;
 	z-index: 10;
-	h2 {
+	h4 {
+		font-family: @baseFontFamily;
+		font-weight: 600;
 		margin: 0;
 		margin-bottom: 1em;
-		font-size: 1em;
-		color: #a93629;
-		border-bottom: 1px solid #a93629;
+		color: @gray;
+		text-shadow: 0 1px 1px white;
 	}
 	.nav > li > a {
-		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-		color: #333;
+		font-family: @baseFontFamily;
+		color: @grayDarker;
 		padding: 5px;
 		font-size: 14px;
+		&:hover {
+			color: white;
+			background-color: @red;
+			.small, b {
+				color: white;
+			}
+			.setting {
+				color: @red;
+			}
+		}
+		.caret {
+			margin-top: 10px;
+		}
 		.small {
 			line-height: 1;
 			font-size: 11px;
@@ -602,6 +638,9 @@ body.editor {
     	clear: both;
     	overflow: hidden;
     	box-shadow: 0 2px 4px rgba(77,77,77, .2);
+    	p {
+    		margin-top: 0;
+    	}
     	&.me {
 			float: left;
     	}
@@ -613,6 +652,7 @@ body.editor {
     	}
     }
     footer {
+    	background-color: #eceff1;
     	position: absolute;
     	bottom: 0;
     	//background-color: lighten(@beige, 5%);
@@ -622,6 +662,7 @@ body.editor {
     		margin: 0;
     		input {
     			margin-right: 5px;
+    			vertical-align: top;
     		}
     	}
     }
@@ -673,7 +714,7 @@ body.chat-open {
 }
 
 
- 
+
 #options button, button.gradient {
 	background: #fafafa;
 	border: 1px solid rgba(0,0,0,0.25);
@@ -683,7 +724,7 @@ body.chat-open {
 	margin: 0 0 0 -1px;
 	height: 26px;
 }
- 
+
 #options button:active, button.gradient:active {
 	background: #b7cbe1;
 }
@@ -698,13 +739,13 @@ body.chat-open {
 		padding-right:10px;
 }
 
- 
+
 #search {
 	display: none;
 }
 
 
- 
+
 #sidebar {
 	background-color: #fafafa;
 	width: 250px;
@@ -764,7 +805,7 @@ body.chat-open {
 	.entity-list .entity-list {
 		padding-left: 10px;
 	}
-	
+
 	.droppable-folder-hover, {
 		 background:lighten(#eddc89, 0%);
 	}
@@ -823,14 +864,14 @@ body.chat-open {
 			display: none;
 		}
 	}
-	
+
 	li img, .entity-list-item i {
 		margin: 4px;
 		vertical-align: -7px;
 		min-width: 16px;
 		min-height: 16px;
 	}
-	
+
 	input.rename{
 		margin: -1px 0 0 -1px;
 		padding: 1px;
@@ -877,13 +918,13 @@ body.chat-open {
 		padding: 0 5px;
 	}
 }
- 
+
 table#addUserTable, table#addUserTable td{
 		border:none;
 		border-left:none;
 }
- 
- 
+
+
 table {
 		margin: 1em 0;
 		clear: both;
