@@ -15,23 +15,14 @@ define [
 
 		constructor: (@ide, options) ->
 			options || = {}
-			setupArea = _.once =>
-				@ide.tabManager.addTab
-					id : "collaborators"
-					name: "Share"
-					content : $(@templates.userPanel)
-					lock: true
-					onShown: () =>
-						@publishProjectView?.refreshPublishStatus()
 
-			setupPublish = _.once =>
-				if @ide.security? and @ide.security.permissionsLevel == "owner"
-					@publishProjectView = new PublishProjectView
-						ide: @ide
-						el: $("#publishProject")
-					@publishProjectView.render()
+			$userPanel = $(@templates.userPanel)
+			$(document.body).append($userPanel)
+			$userPanel.modal(show: false)
+			$("#share-btn").on "click", (e) =>
+				e.preventDefault()
+				$userPanel.modal("show")
 
-			setupArea()
 			if @ide?
 				@ide.on "afterJoinProject", (project) =>
 					@project = project
@@ -54,9 +45,6 @@ define [
 					else
 						@view.options.showAdminControls = false
 					@view.render()
-
-					if @ide.project.get("owner") == @ide.user and @ide.user.get("id") != "openUser"
-						setupPublish()
 
 					if @ide.project.get("owner") == @ide.user or @ide.project.get("publicAccesLevel") != "private"
 						if !@socialView?
