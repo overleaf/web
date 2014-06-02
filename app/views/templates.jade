@@ -32,22 +32,22 @@
 		.file-tree.js-file-tree
 
 	script(type="text/template")#fileTreeActionsTemplate
-		//- .actions
-		//- 	.js-new-file(href="#")
-		//- 		a(href="#", data-toggle="tooltip", title="New file")
-		//- 			i.fa.fa-file-o
-		//- 	.js-new-folder(href="#")
-		//- 		a(href="#", data-toggle="tooltip", title="New folder")
-		//- 			i.fa.fa-folder
-		//- 	.js-upload-file(href="#")
-		//- 		a(href="#", data-toggle="tooltip", title="Upload")
-		//- 			i.fa.fa-upload
-		//- 	.js-delete-btn.delete-btn
-		//- 		a(href="#", data-toggle="tooltip", title="Delete")
-		//- 			i.fa.fa-trash-o
-		//- 	.js-rename-btn.rename-btn
-		//- 		a(href="#", data-toggle="tooltip", title="Rename")
-		//- 			i.fa.fa-pencil
+		.actions
+			.js-new-file(href="#")
+				a(href="#", data-toggle="tooltip", title="New file")
+					i.fa.fa-file-o
+			.js-new-folder(href="#")
+				a(href="#", data-toggle="tooltip", title="New folder")
+					i.fa.fa-folder
+			.js-upload-file(href="#")
+				a(href="#", data-toggle="tooltip", title="Upload")
+					i.fa.fa-upload
+			.js-delete-btn.delete-btn
+				a(href="#", data-toggle="tooltip", title="Delete")
+					i.fa.fa-trash-o
+			.js-rename-btn.rename-btn
+				a(href="#", data-toggle="tooltip", title="Rename")
+					i.fa.fa-pencil
 
 	script(type="text/template")#rootDocListEntity
 		option {{name}}
@@ -176,9 +176,6 @@
 					li.logs
 						a#logs-btn(href='#', data-toggle="tooltip", title="PDF Logs")
 							i.fa.fa-file-text-o
-					li.changes
-						a#changes-btn(href='#', data-toggle="tooltip", title="LaTeX History")
-							i.fa.fa-history
 				//- .btn-group
 				//- 	a(href='#', data-toggle="tooltip", title="Recompile (^↵)")
 				//- 			i.fa.fa-refresh

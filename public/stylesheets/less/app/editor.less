@@ -11,30 +11,29 @@ body.editor {
 	.navbar-inner {
 		padding: 0;
 		height: 38px;
-		border-bottom: 1px solid #ddd;
-		background-color: #f4f4f4;
+		background-color: #3d476a;
+		border-radius: 0;
 	}
 	.nav > li > a {
-		color: #999;
+		color: white;
 		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 		font-size: 20px;
 		padding-top: 8px;
 		&:hover {
-			color: #333;
 			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 			background: none;
 			border: none;
-			border-right: 1px solid #ddd;
-			background-color: #ddd;
+			border-right: 1px solid white;
+			background-color: lighten(#3d476a, 15%);
 		}
 		border: none;
 		margin-left: 0;
-		border-right: 1px solid #ddd;
+		border-right: 1px solid white;
 		border-radius: 0;
 	}
 	.nav.pull-right > li > a {
 		border: none;
-		border-left: 1px solid #ddd;
+		border-left: 1px solid white;
 	}
 
 	.name {
@@ -43,12 +42,13 @@ body.editor {
 			border: 0 none;
 			font-weight: bold;
 			margin: 0;
-			text-shadow: 0 1px 1px white;
 			box-shadow: none;
+			color: white;
 			&:hover {
 				background-color: white;
 				box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-				border: 1px solid #ccc;
+				border: 1px solid white;
+				color: @grayDarker;
 				font-weight: normal;
 			}
 		}
@@ -360,7 +360,7 @@ body.editor {
 					display: inline-block;
 					margin: 6px;
 					a {
-						color: #999;
+						color: #828799;
 					}
 				}
 			}
@@ -398,6 +398,7 @@ body.editor {
 			font-size: 16px;
 		}
 		#logArea {
+			background-color: #dde0eb;
 			overflow: auto;
 			ul {
 				margin: 0px;
@@ -412,7 +413,6 @@ body.editor {
 				margin-left: 10px;
 				margin-bottom: 20px;
 			}
-			background-color: #fafafa;
 			.alert-warning {
 				border-color: lighten(#f89406, 35%);
 				background-color: lighten(#f89406, 40%);
@@ -507,7 +507,7 @@ body.editor {
 	top: 0;
 	left: -280px;
 	bottom: 0;
-	background-color: #eceff1;
+	background-color: #495580;
 	z-index: 10;
 	overflow: auto;
 	h4 {
@@ -515,9 +515,8 @@ body.editor {
 		font-weight: 600;
 		font-size: 14px;
 		margin: 0.4em 0;
-		color: #aaa;
-		border-bottom: 1px solid #ddd;
-		text-shadow: 0 1px 1px white;
+		color: #a7afcc;
+		border-bottom: 1px solid #a7afcc;
 	}
 	h4:first-child {
 		margin-top: 0;
@@ -526,17 +525,17 @@ body.editor {
 		margin-bottom: 0;
 		> li > a {
 			font-family: @baseFontFamily;
-			color: @grayDarker;
+			color: white;
 			padding: 5px;
 			font-size: 14px;
 			&:hover {
 				color: white;
-				background-color: @red;
+				background-color: #6775a6;
 				.small, b {
 					color: white;
 				}
 				.setting {
-					color: @red;
+					color: #6775a6;
 				}
 			}
 			.caret {
@@ -545,9 +544,10 @@ body.editor {
 			.small {
 				line-height: 1;
 				font-size: 11px;
-				color: #888;
+				color: white;
 			}
 			.setting {
+				color: #495580;
 				padding: 4px 8px;
 				background: #eee;
 				border-radius: 5px;
@@ -559,7 +559,7 @@ body.editor {
 		}
 	}
 	&.shown {
-		box-shadow: 5px 0px 10px #aaa;
+		box-shadow: 3px 0px 6px rgba(0,0,0,0.1);
 	}
 	-webkit-transition: left ease-in-out 0.35s;
 	transition: left ease-in-out 0.35s;
@@ -759,12 +759,11 @@ body.chat-open {
 
 
 #sidebar {
-	background-color: #fafafa;
+	background-color: #e7eaf1;
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
-	border-right: 1px solid #ddd;
-	padding: 6px 0 0 6px;
+	padding: 0;
 
 	ul {
 		margin: 8px 0;
@@ -773,8 +772,7 @@ body.chat-open {
 	}
 
 	.entity-list-item {
-		color: #444;
-		font-family: 'Lucida Grande', 'Segoe UI', 'Ubuntu', sans-serif;
+		color: #828799;
 		font-size: 9pt;
 		list-style: none;
 		white-space: nowrap;
@@ -823,13 +821,13 @@ body.chat-open {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: #A4B0DA;
-		.border-radius(5px 0 0 5px);
+		background-color: @red;
 		color: white;
 		i.fa-file, i.fa-folder {
 			color: white;
 		}
 		.dropdown-caret {
+			color: white;
 			display: block;
 			padding: 4px 6px 4px 4px;
 			position: absolute;
@@ -847,6 +845,7 @@ body.chat-open {
 				right: 20px
 			}
 			i {
+				color: white;
 				vertical-align: top;
 				margin: 0;
 			}
@@ -914,13 +913,14 @@ body.chat-open {
 	}
 
 	.actions {
-		margin: 0 8px 8px 4px;
+		margin: 0 0 8px 4px;
+		padding: 0 4px;
 		border-bottom: 1px solid #ddd;
 		> div {
 			display: inline;
 			margin-right: 8px;
 			& > a {
-				color: #999;
+				color: #828799;
 				&:hover {
 					color: #333;
 					text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);

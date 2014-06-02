@@ -228,7 +228,6 @@ block content
 
 				ul.nav.project-name
 					li.name
-						i.fa.fa-share-alt.share-container(data-toggle="tooltip", title="Share")
 						input(type="text", value="Project Name")
 
 					li
@@ -236,6 +235,12 @@ block content
 							i.fa.fa-pencil
 
 				ul.nav.pull-right
+					li
+						a#share-modal(href='#', data-toggle="tooltip", title="Share")
+							i.fa.fa-share-alt
+					li
+						a#changes-btn(href='#', data-toggle="tooltip", title="LaTeX History")
+							i.fa.fa-history
 					li
 						a#chat-menu-toggle(href='#', data-toggle="tooltip", title="Chat")
 							i.fa.fa-comment
