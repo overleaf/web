@@ -11,7 +11,7 @@
 		height: 100%;
 		.ace_editor {
 			position: absolute;
-			top: 30px;
+			top: 42px;
 			left: 0;
 			right: 0;
 			bottom: 0;
@@ -24,7 +24,7 @@
 			top: 0;
 			left: 0;
 			right: -1px;
-			height: 20px;
+			height: 32px;
 			padding: 5px 5px 5px 5px;
 			margin: 0;
 			background-color: #282828;
@@ -54,19 +54,30 @@
 		background-color: white;
 
 		.track-changes-header {
-			background-color: #282828;
+			background-color: #444;
+			border-left: 1px solid #999;
+			height: 42px;
+
 			h3 {
-				color: white;
+				font-family: @baseFontFamily;
+				font-weight: 700;
+				color: #eee;
 				padding-left: 8px;
 				font-size: 1.2em;
+				margin-top: 0;
 			}
 			a {
-				color: white;
+				color: #eee;
 				position: absolute;
 				top: 6px;
 				right: 8px;
 			}
-			height: 30px;
+			a, i {
+				color: #eee;
+			}
+			h3, a, i {
+				line-height: 2;
+			}
 		}
 
 		.change-list-area {
@@ -74,7 +85,7 @@
 			position: absolute;
 			left: 0px;
 			right: 0px;
-			top: 30px;
+			top: 42px;
 			bottom: 0px;
 		}
 	}
@@ -157,11 +168,13 @@
 			-moz-user-select: none;
 			-webkit-user-select: none;
 			.track-changes-date-header {
+				background-color: #fafafa;
 				border-bottom: 1px solid #ccc;
 				padding: 2px;
 				font-weight: bold;
+				line-height: 1.5;
 				text-align: center;
-				height: 19px;
+				height: 24px;
 				display: none;
 			}
 			.change-selectors {

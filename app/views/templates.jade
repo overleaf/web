@@ -274,6 +274,7 @@
 				button(href="#").btn.btn-danger.removeUser Remove
 				{{/showRemove}}
 
+
 	script(type="text/template")#socialSharingTemplate
 		.box
 			.page-header
@@ -295,33 +296,33 @@
 					i.icon-link
 					| &nbsp; Share URL
 
-
 	script(type="text/template")#publishProjectTemplate
-		.box
-			.page-header
-				h2 Publish project as template
+		.modal
+			.box
+				.page-header
+					h2 Publish project as template
 
-			#publishedAsTemplateArea.show-when-published.alert.alert-success
-				p
-					.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
-					i.icon-ok
-					|  Your project is currently published.
-					a#templateLink(href='{{canonicalUrl}}') View in template gallery.
-				p
-					| Lastest version: {{publishedDate}}.
+				#publishedAsTemplateArea.show-when-published.alert.alert-success
+					p
+						.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
+						i.icon-ok
+						|  Your project is currently published.
+						a#templateLink(href='{{canonicalUrl}}') View in template gallery.
+					p
+						| Lastest version: {{publishedDate}}.
 
-			#problemWithPublishingArea
-				p There is a problem with our publishing service, please try again in a few minutes.
-			#publishWorkingArea
-				p Working...
-			div.show-when-published.show-when-unpublished.project-description
-				label(for="project-description") Description
-				.row-fluid
-					textarea(placeholder="Template description", name="project-description").span12#projectDescription {{description}}
-			#unpublishedAsTemplateArea.show-when-unpublished
-				.btn.btn-success#publishProjectAsTemplate Publish
-			p.show-when-published
-				button.btn.btn-success#republishProjectAsTemplate Re-Publish
+				#problemWithPublishingArea
+					p There is a problem with our publishing service, please try again in a few minutes.
+				#publishWorkingArea
+					p Working...
+				div.show-when-published.show-when-unpublished.project-description
+					label(for="project-description") Description
+					.row-fluid
+						textarea(placeholder="Template description", name="project-description").span12#projectDescription {{description}}
+				#unpublishedAsTemplateArea.show-when-unpublished
+					.btn.btn-success#publishProjectAsTemplate Publish
+				p.show-when-published
+					button.btn.btn-success#republishProjectAsTemplate Re-Publish
 
 
 	script(type="text/template")#settingsPanelTemplate
@@ -329,13 +330,22 @@
 			include project/partials/manage
 
 	script(type="text/template")#userPanelTemplate
-		.fullEditorArea.projectSettings
-			.box
-				.page-header
-					h2 Share Privately (via email)
+		.modal.hide
+			.modal-header
+				h1 Share
+			.modal-body
 				#projectMembersList
-			#socialSharing
-			#publishProject
+				#socialSharing
+				div
+					.control-group
+						label(for='select').control-label Public Access
+						.controls
+							select#publicAccessLevel
+								option(value='private') Private
+								option(value='readOnly') Public - Read Only
+								option(value='readAndWrite') Public - Read and Write
+			.modal-footer
+				button.btn(data-dismiss="modal") OK
 
 	script(type="text/template")#historyPanelTemplate
 		#revisionHistoryArea.fullEditorArea
