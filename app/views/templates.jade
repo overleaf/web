@@ -170,7 +170,7 @@
 			#pdfToolBar
 				ul.pdf-toolbar
 					li.recompile
-						button#recompile-btn(href='#', data-toggle="tooltip", title="Recompile (^↵)").btn.btn-small.btn-info
+						button#recompile-btn(href='#', data-toggle="tooltip", title="Recompile (^↵)").btn.btn-small.btn-primary
 							i.fa.fa-refresh
 							|  Recompile
 					li.logs
@@ -241,7 +241,6 @@
 		li.alert.alert-error
 			strong Ooops, your LaTeX code couldn't compile for some reason. Please check these errors for details:
 
-
 	script(type="text/template")#compileLogEntryTemplate
 		li.alert.clickable(class="alert-{{ type }}")
 			strong {{ title }}:
@@ -249,20 +248,20 @@
 			.small {{ content }}
 
 	script(type="text/template")#projectMemberListTemplate
-		table.table
-			thead
-				tr
-					th Email
-					th Privileges
-					th
-			tbody
-		{{#showAdminControls}}
 		form.well.form-inline.addUserForm
+			table.table
+				thead
+					tr
+						th Email
+						th Privileges
+						th
+				tbody
+				{{#showAdminControls}}
 			input(type="email",placeholder="colleague@example.com")#newEmail.email.input-large
-			select.privileges.input-medium
-				option(value="readAndWrite") Read and write
-				option(value="readOnly") Read Only
-			button.btn.btn-primary.addUser Add New Collaborator
+			button.btn.btn-primary.addUser Add Collaborator
+			label.checkbox
+				input(type="checkbox")
+				| Enable Write Access
 		{{/showAdminControls}}
 
 	script(type="text/template")#projectMemberListItemTemplate
@@ -278,16 +277,16 @@
 		p.public-share
 			span Share Publicly
 			br
-			a#shareTwitter(href="#")
+			a#shareTwitter(href="#").social-icons
 				i.fa.fa-twitter-square.fa-2x
 			| &nbsp;
-			a#shareFacebook(href="#")
+			a#shareFacebook(href="#").social-icons
 				i.fa.fa-facebook-square.fa-2x
 			| &nbsp;
-			a#shareGoogle(href="#")
+			a#shareGoogle(href="#").social-icons
 				i.fa.fa-google-plus-square.fa-2x
 			| &nbsp;
-			a#shareUrl(href="#")
+			a#shareUrl(href="#").social-icons
 				i.fa.fa-link.fa-2x
 
 	script(type="text/template")#publishProjectTemplate

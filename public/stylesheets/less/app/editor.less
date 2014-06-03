@@ -110,6 +110,9 @@ body.editor {
 			display: inline-block;
 			margin-bottom: 3px;
 		}
+		.social-icons {
+			color: @grayDarker;
+		}
 	}
 }
 
@@ -790,7 +793,7 @@ body.chat-open {
 	}
 
 	.entity-list-item {
-		color: #333;
+		color: @gray;
 		font-size: @baseFontSize * .8;
 		line-height: @baseLineHeight;
 		padding: 3px;
@@ -841,13 +844,14 @@ body.chat-open {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: #B86259;
-		color: white;
+		border-right: 4px solid @red;
+		color: @red;
+		font-weight: 700;
 		i.fa-file, i.fa-folder {
-			color: white;
+			color: @red;
 		}
 		.dropdown-caret {
-			color: white;
+			color: @red;
 			display: block;
 			padding: 8px 6px 4px 4px;
 			position: absolute;
@@ -865,7 +869,7 @@ body.chat-open {
 				right: 20px
 			}
 			i {
-				color: white;
+				color: @red;
 				vertical-align: top;
 				margin: 0;
 			}
@@ -972,9 +976,14 @@ table {
 }
 
 .addUserForm {
-	padding: 12px;
-	input, button, select {
-		margin: 6px;
+	.table {
+		margin-bottom: @baseLineHeight / 2;
+	}
+	.checkbox {
+		font-size: @baseFontSize * .8;
+	}
+	button {
+		margin-left: @baseLineHeight / 2;
 	}
 }
 
