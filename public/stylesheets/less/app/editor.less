@@ -8,11 +8,17 @@ body.editor {
 }
 
 .navbar.editor {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 10;
 	.navbar-inner {
 		padding: 0;
-		height: 38px;
+		height: 39px;
 		background-color: white;
 		border-radius: 0;
+		box-shadow: 0 0 2px #ccc;
 	}
 	.nav > li > a {
 		color: @red;
@@ -530,7 +536,7 @@ body.editor {
 	left: -280px;
 	bottom: 0;
 	background-color: #f4f4f4;
-	z-index: 10;
+	z-index: 100;
 	overflow: auto;
 	h4 {
 		font-family: @baseFontFamily;
@@ -606,7 +612,7 @@ body.editor {
 #left-menu-mask {
 	opacity: 0.4;
 	background-color: #999;
-	z-index: 9;
+	z-index: 99;
 	position: absolute;
 	top: 0;
 	left: 0;
