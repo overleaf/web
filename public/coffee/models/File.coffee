@@ -4,7 +4,7 @@ define [
 	File = Backbone.Model.extend
 		initialize: () ->
 			@set("type", "file")
-
+			@set("icon", "image")
 
 		previewUrl: () ->
 			extension = @get("name").split(".").pop()

@@ -814,6 +814,26 @@ body.chat-open {
 		&:hover {
 			font-weight: bold;
 		}
+
+		// Compenstate for differnt icons widths
+		i.fa-file, i.fa-folder, i.fa-folder-open {
+			width: 15px;
+			padding-left: 1px;
+		}
+		i.fa-image {
+			width: 16px;
+		}
+
+
+		i.fa-file {
+			color: #777;
+		}
+		i.fa-folder, i.fa-folder-open {
+			color: #606885;
+		}
+		i.fa-image {
+			color: #5E6D55;
+		}
 	}
 
 	.entity-folder {
@@ -850,7 +870,7 @@ body.chat-open {
 		border-right: 4px solid @red;
 		color: @red;
 		font-weight: 700;
-		i.fa-file, i.fa-folder {
+		i.fa {
 			color: @red;
 		}
 		.dropdown-caret {
@@ -909,14 +929,6 @@ body.chat-open {
 	li img, .entity-list-item i {
 		font-size: 14px;
 		margin: 2px 6px 2px 4px;
-	}
-
-	.entity-list-item i.fa-file {
-		color: #999;
-	}
-	.entity-list-item i.fa-folder {
-		color: #B86259;
-		margin-top: 3px;
 	}
 
 	input.rename{

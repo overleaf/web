@@ -55,7 +55,7 @@
 	script(type="text/template")#entityTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
 			.clickable.js-clickable
-				i(class="fa fa-file")
+				i(class="fa fa-{{ icon }}")
 				span.name {{ name }}
 				input.rename.js-rename
 			.dropdown-caret
