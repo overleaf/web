@@ -11,11 +11,11 @@ body.editor {
 	.navbar-inner {
 		padding: 0;
 		height: 38px;
-		background-color: #3d476a;
+		background-color: white;
 		border-radius: 0;
 	}
 	.nav > li > a {
-		color: white;
+		color: @red;
 		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 		font-size: 20px;
 		padding-top: 8px;
@@ -24,16 +24,17 @@ body.editor {
 			background: none;
 			border: none;
 			border-right: 1px solid white;
-			background-color: lighten(#3d476a, 15%);
+			background-color: darken(white, 10%);
+			color: @linkColorHover;
 		}
 		border: none;
 		margin-left: 0;
-		border-right: 1px solid white;
+		border-right: 1px solid #ddd;
 		border-radius: 0;
 	}
 	.nav.pull-right > li > a {
 		border: none;
-		border-left: 1px solid white;
+		border-left: 1px solid #ddd;
 	}
 
 	.name {
@@ -43,11 +44,11 @@ body.editor {
 			font-weight: bold;
 			margin: 0;
 			box-shadow: none;
-			color: white;
+			color: @gray;
 			&:hover {
 				background-color: white;
 				box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-				border: 1px solid white;
+				border: 1px solid #ddd;
 				color: @grayDarker;
 				font-weight: normal;
 			}
@@ -398,7 +399,7 @@ body.editor {
 			font-size: 16px;
 		}
 		#logArea {
-			background-color: #dde0eb;
+			background-color: #e7e7e7;
 			overflow: auto;
 			ul {
 				margin: 0px;
@@ -507,7 +508,7 @@ body.editor {
 	top: 0;
 	left: -280px;
 	bottom: 0;
-	background-color: #495580;
+	background-color: #eee;
 	z-index: 10;
 	overflow: auto;
 	h4 {
@@ -515,8 +516,8 @@ body.editor {
 		font-weight: 600;
 		font-size: 14px;
 		margin: 0.4em 0;
-		color: #a7afcc;
-		border-bottom: 1px solid #a7afcc;
+		color: @grayLight;
+		border-bottom: 1px solid #BABABA;
 	}
 	h4:first-child {
 		margin-top: 0;
@@ -525,17 +526,17 @@ body.editor {
 		margin-bottom: 0;
 		> li > a {
 			font-family: @baseFontFamily;
-			color: white;
+			color: @grayDark;
 			padding: 5px;
 			font-size: 14px;
 			&:hover {
 				color: white;
-				background-color: #6775a6;
+				background-color: rgba(169,53,41,0.62);
 				.small, b {
 					color: white;
 				}
 				.setting {
-					color: #6775a6;
+					color: @gray;
 				}
 			}
 			.caret {
@@ -544,12 +545,12 @@ body.editor {
 			.small {
 				line-height: 1;
 				font-size: 11px;
-				color: white;
+				color: @gray;
 			}
 			.setting {
-				color: #495580;
+				color: @red;
 				padding: 4px 8px;
-				background: #eee;
+				background: #ddd;
 				border-radius: 5px;
 				position: absolute;
 				right: 0;
@@ -756,10 +757,8 @@ body.chat-open {
 	display: none;
 }
 
-
-
 #sidebar {
-	background-color: #e7eaf1;
+	background-color: #f0f0f0;
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
@@ -772,8 +771,10 @@ body.chat-open {
 	}
 
 	.entity-list-item {
-		color: #828799;
-		font-size: 9pt;
+		color: #8E4C43;
+		font-size: @baseFontSize * .8;
+		line-height: @baseLineHeight;
+		padding: 3px;
 		list-style: none;
 		white-space: nowrap;
 		cursor: pointer;
@@ -885,10 +886,10 @@ body.chat-open {
 	}
 
 	.entity-list-item i.fa-file {
-		color: rgb(170,170,170);
+		color: #8E4C43;
 	}
 	.entity-list-item i.fa-folder {
-		color: #5F74BB;
+		color: #8E4C43;
 		margin-top: 3px;
 	}
 
