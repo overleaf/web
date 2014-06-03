@@ -374,12 +374,12 @@ body.editor {
 		#pdfToolBar{
 			border-bottom: 1px solid #ddd;
 			ul {
-				margin: 0 8px;
+				margin: 0 3px;
 				li {
 					display: inline-block;
 					margin: 6px;
 					a {
-						color: #828799;
+						color: #999;
 					}
 				}
 			}
@@ -549,7 +549,7 @@ body.editor {
 			font-size: 14px;
 			&:hover {
 				color: white;
-				background-color: rgba(169,53,41,0.62);
+				background-color: @red;
 				.small, b {
 					color: white;
 				}
@@ -781,6 +781,7 @@ body.chat-open {
 	overflow: hidden;
 	cursor: default;
 	padding: 0;
+	border-right: 1px solid #ddd;
 
 	ul {
 		margin: 8px 0;
@@ -789,7 +790,7 @@ body.chat-open {
 	}
 
 	.entity-list-item {
-		color: #8E4C43;
+		color: #333;
 		font-size: @baseFontSize * .8;
 		line-height: @baseLineHeight;
 		padding: 3px;
@@ -840,7 +841,7 @@ body.chat-open {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: @red;
+		background-color: #B86259;
 		color: white;
 		i.fa-file, i.fa-folder {
 			color: white;
@@ -904,10 +905,10 @@ body.chat-open {
 	}
 
 	.entity-list-item i.fa-file {
-		color: #8E4C43;
+		color: #999;
 	}
 	.entity-list-item i.fa-folder {
-		color: #8E4C43;
+		color: #B86259;
 		margin-top: 3px;
 	}
 
@@ -939,7 +940,7 @@ body.chat-open {
 			display: inline;
 			margin-right: 8px;
 			& > a {
-				color: #828799;
+				color: #999;
 				&:hover {
 					color: #333;
 					text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
