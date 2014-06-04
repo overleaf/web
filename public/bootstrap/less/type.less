@@ -103,13 +103,13 @@ sub {
   }
 }
 .project-header {
-  background: url('/img/pattern.png') top left repeat  @gray;
-  border-top: 1px solid darken(@gray, 10%);
-  border-bottom: 1px solid darken(@gray, 10%);
+  background: @grayLightest;
+  border-top: 1px solid @grayLighter;
+  border-bottom: 1px solid @grayLighter;
   margin: 0;
   padding-top: @baseLineHeight;
   h1 {
-    color: white;
+    color: @grayDark;
     margin-top: 0;
     margin-right: @baseLineHeight * 5;
     line-height: 1;
