@@ -8,11 +8,17 @@ body.editor {
 }
 
 .navbar.editor {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 10;
 	.navbar-inner {
 		padding: 0;
-		height: 38px;
+		height: 39px;
 		background-color: white;
 		border-radius: 0;
+		box-shadow: 0 0 2px #ccc;
 	}
 	.nav > li > a {
 		color: @red;
@@ -530,7 +536,7 @@ body.editor {
 	left: -280px;
 	bottom: 0;
 	background-color: #f4f4f4;
-	z-index: 10;
+	z-index: 100;
 	overflow: auto;
 	h4 {
 		font-family: @baseFontFamily;
@@ -606,7 +612,7 @@ body.editor {
 #left-menu-mask {
 	opacity: 0.4;
 	background-color: #999;
-	z-index: 9;
+	z-index: 99;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -779,7 +785,7 @@ body.chat-open {
 }
 
 #sidebar {
-	background-color: #f0f0f0;
+	background-color: #fafafa;
 	width: 250px;
 	overflow: hidden;
 	cursor: default;
@@ -793,7 +799,7 @@ body.chat-open {
 	}
 
 	.entity-list-item {
-		color: @gray;
+		color: #333;
 		font-size: @baseFontSize * .8;
 		line-height: @baseLineHeight;
 		padding: 3px;
@@ -810,6 +816,26 @@ body.chat-open {
 		}
 		.entity-label {
 			display: none;
+		}
+		&:hover {
+			background-color: #dadada;
+		}
+
+		// Compenstate for differnt icons widths
+		i.fa-file, i.fa-folder, i.fa-folder-open {
+			width: 15px;
+			padding-left: 1px;
+		}
+		i.fa-image {
+			width: 16px;
+		}
+
+
+		i.fa-file, i.fa-image {
+			color: #999;
+		}
+		i.fa-folder, i.fa-folder-open {
+			color: #B86259;
 		}
 	}
 
@@ -847,7 +873,7 @@ body.chat-open {
 		border-right: 4px solid @red;
 		color: @red;
 		font-weight: 700;
-		i.fa-file, i.fa-folder {
+		i.fa {
 			color: @red;
 		}
 		.dropdown-caret {
@@ -906,14 +932,6 @@ body.chat-open {
 	li img, .entity-list-item i {
 		font-size: 14px;
 		margin: 2px 6px 2px 4px;
-	}
-
-	.entity-list-item i.fa-file {
-		color: #999;
-	}
-	.entity-list-item i.fa-folder {
-		color: #B86259;
-		margin-top: 3px;
 	}
 
 	input.rename{

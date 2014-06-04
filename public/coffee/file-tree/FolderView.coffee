@@ -107,12 +107,16 @@ define [
 			@$contents.hide()
 			@$toggle.find(".js-open").hide()
 			@$toggle.find(".js-closed").show()
+			@$entityListItemEl.find("i").addClass("fa-folder")
+			@$entityListItemEl.find("i").removeClass("fa-folder-open")
 			@$entityListItemEl.removeClass("folder-open")
 
 		showEntries: () ->
 			@$contents.show()
 			@$toggle.find(".js-open").show()
 			@$toggle.find(".js-closed").hide()
+			@$entityListItemEl.find("i").removeClass("fa-folder")
+			@$entityListItemEl.find("i").addClass("fa-folder-open")
 			@$entityListItemEl.addClass("folder-open")
 
 		onToggle: (e) ->

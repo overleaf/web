@@ -4,6 +4,7 @@ define [
 	Doc = Backbone.Model.extend
 		initialize: () ->
 			@set("type", "doc")
+			@set("icon", "file")
 
 		parse: (rawAttributes) ->
 			attributes =
