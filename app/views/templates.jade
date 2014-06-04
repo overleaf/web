@@ -248,21 +248,22 @@
 			.small {{ content }}
 
 	script(type="text/template")#projectMemberListTemplate
-		form.well.form-inline.addUserForm
+		form.form-inline.addUserForm
 			table.table
 				thead
 					tr
-						th Email
-						th Privileges
+						th(colspan=2) Who can access this project:
 						th
 				tbody
-				{{#showAdminControls}}
-			input(type="email",placeholder="colleague@example.com")#newEmail.email.input-large
-			button.btn.btn-primary.addUser Add Collaborator
-			label.checkbox
-				input(type="checkbox")
-				| Enable Write Access
-		{{/showAdminControls}}
+			{{#showAdminControls}}
+			div.invite-controls
+				div.small Invite:
+				input(type="email",placeholder="Enter email addressess...")#newEmail.email.input-large
+				button.btn.btn-primary.addUser Share
+				label.checkbox
+					input(type="checkbox")
+					| Enable Write Access
+			{{/showAdminControls}}
 
 	script(type="text/template")#projectMemberListItemTemplate
 		tr.projectMember
@@ -274,9 +275,7 @@
 				{{/showRemove}}
 
 	script(type="text/template")#socialSharingTemplate
-		p.public-share
-			span Share Publicly
-			br
+		span
 			a#shareTwitter(href="#").social-icons
 				i.fa.fa-twitter-square.fa-2x
 			| &nbsp;
@@ -323,24 +322,29 @@
 			include project/partials/manage
 
 	script(type="text/template")#userPanelTemplate
-		.modal.hide
+		.modal.hide.modal-share
 			.modal-header
 				h2 Share
 			.modal-body
 				#projectMembersList
 				.row-fluid
-					.span6
-						#socialSharing
-					.span6
-						.control-group
-							label(for='select').control-label Access Level
-							.controls
-								select#publicAccessLevel
-									option(value='private') Private
-									option(value='readOnly') Public - Read Only
-									option(value='readAndWrite') Public - Read and Write
+					.public-sharing
+						table.table
+							thead
+								tr
+									th(colspan=2) Global Access
+							tbody
+								tr
+									td
+										span.control-group
+											span.controls
+												select#publicAccessLevel
+													option(value='private') Private
+													option(value='readOnly') Public - Read Only
+													option(value='readAndWrite') Public - Read and Write
+										span#socialSharing
 			.modal-footer
-				button.btn.btn-primary(data-dismiss="modal") OK
+				button.btn.btn-primary(data-dismiss="modal") Done
 
 	script(type="text/template")#historyPanelTemplate
 		#revisionHistoryArea.fullEditorArea
