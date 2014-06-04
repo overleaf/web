@@ -1,9 +1,15 @@
+.btn-hero {
+	margin: 0 auto 6rem auto;
+}
+
 .masthead {
-	background-size: cover;
-	background-image: url('/img/splash.jpg');
+	background-color: rgba(0,0,0,0.85);
+	background-image: -webkit-linear-gradient(left,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
+	background-image: linear-gradient(to right,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
 	position: relative;
-	min-height: @baseLineHeight * 30;
+	min-height: @baseLineHeight * 29.5;
 	text-align: center;
+	overflow: hidden;
 	h1, p {
 		color: white;
 		text-align: center;
@@ -13,11 +19,17 @@
 	  line-height: 6.25rem;
 	  margin-bottom: 0;
 		margin-top: @baseLineHeight * 4;
+		text-shadow: 0 1px 3px rgba(0,0,0,0.42);
+		span {
+			font-family: @baseFontFamily;
+			font-weight: 100;
+			letter-spacing: 10px;
+		}
 	}
-	p {
+	p:first-of-type {
 		font-size: @baseLineHeight;
 		font-weight: 200;
-		letter-spacing: 4px;
+		letter-spacing: 5px;
 		margin-top: 0;
 		text-rendering: auto;
 	}
@@ -31,7 +43,37 @@
 			padding: 1px;
 		}
 	}
-	overflow: hidden;
+	.container-fluid {
+		background-image: -webkit-linear-gradient(top,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
+	  background-image: linear-gradient(to bottom,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
+		padding: 3rem 0 0 0;
+		margin-bottom: -3rem;
+		position: relative;
+	}
+	img {
+		box-shadow: 0 0 50px rgba(0,0,0,.67);
+		margin-top: @baseLineHeight;
+		margin-bottom: -@baseLineHeight * 15;
+	}
+	.btn-hero {
+		background-color: transparent;
+		border-color: white;
+		border-width: 3px;
+		color: white;
+		margin-right: @baseLineHeight / 2;
+		&:hover {
+			background-color: white;
+			color: @grayDark;
+		}
+		&.btn-primary {
+			border-color: lighten(@linkColor, 10%);
+			color: lighten(@linkColor, 10%);
+			&:hover {
+				background-color: lighten(@linkColor, 10%);
+				color: white;
+			}
+		}
+	}
 }
 
 .universities {
@@ -74,10 +116,6 @@
 	i {
 		color: lighten(@blue, 15%);
 	}
-}
-
-.btn-hero {
-	margin: 0 auto 6rem auto;
 }
 
 .team-profile {

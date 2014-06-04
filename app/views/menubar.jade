@@ -40,9 +40,10 @@ header.navbar.navbar-fixed-top
 						a(href='/templates')#templatesLink Templates
 					li
 						a(href='/user/subscription/plans')#plansLink Pricing
-					ul.nav.pull-right
-						li
-							a(href='/login'+getRedirAsQueryString()) Login
+					li
+						a(href='/login'+getRedirAsQueryString()) Login
+					li
+						a(href="/register").highlight Sign Up
 input#chat-menu(type="checkbox")
 label#chat-menu-label(for="chat-menu")
 	i.fa.fa-comments
