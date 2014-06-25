@@ -1,4 +1,5 @@
 sanitize = require('sanitizer')
+Settings = require 'settings-sharelatex'
 User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
@@ -22,8 +23,11 @@ module.exports =
 	_registrationRequestIsValid : (body, callback)->
 		email = sanitize.escape(body.email).trim().toLowerCase()
 		password = body.password
+		orgpassword = body.orgpassword
 		username = email.match(/^[^@]*/)
 		if @hasZeroLengths([password, email])
+			return false
+		else if orgpassword != Settings.orgPassword
 			return false
 		else if !@validateEmail(email)
 			return false

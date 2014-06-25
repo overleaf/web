@@ -113,6 +113,13 @@ module.exports =
 
 	httpAuthUsers: httpAuthUsers
 
+	 # Limit Registration
+	# ----------------
+	# If you run sharelatex locally you might want to limit the registration
+	# of new users. You can set a password that the new users must know in order
+	# to proceed with the registration. Otherwise keep blank.
+	orgPassword : ""
+
 	# Default features
 	# ----------------
 	#
