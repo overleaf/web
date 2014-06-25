@@ -25,9 +25,13 @@ block content
 						.input
 							input#email.span4.email.required(type='email', name='email', value='#{new_email}')
 					.clearfix
-						label(for='xlInput') Password 
+						label(for='xlInput') Choose your password 
 						.input
 							input#password.span4.required(type='password', name='password')
+					.clearfix
+						label(for='xlInput') Organization password (Leave blank if not required)
+						.input
+							input#password.span4(type='password', name='orgpassword')
 					.actions
 						button#registerButton.btn-primary.btn.btn-xlarge(type='submit') Register
 						
