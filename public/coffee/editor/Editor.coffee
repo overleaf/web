@@ -157,6 +157,30 @@ define [
 				position = @aceEditor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
 				e.position = position
 				@trigger "mousemove", e
+				
+			boldBtn = $("#editorToolbar .js-bold")
+			boldBtn.off("click")
+			boldBtn.on "click", (e) ->
+					e.preventDefault()
+					if aceEditor.getSelection().isEmpty()
+						aceEditor.insert("\\textbf{}")
+						aceEditor.navigateLeft(1)
+					else
+						selection = aceEditor.getCopyText()
+						aceEditor.insert("\\textbf{" + selection + "}")
+					aceEditor.focus()
+			
+			italicBtn = $("#editorToolbar .js-italic")
+			italicBtn.off("click")
+			italicBtn.on "click", (e) ->
+					e.preventDefault()
+					if aceEditor.getSelection().isEmpty()
+						aceEditor.insert("\\textit{}")
+						aceEditor.navigateLeft(1)
+					else
+						selection = aceEditor.getCopyText()
+						aceEditor.insert("\\textit{" + selection + "}")	
+					aceEditor.focus()
 
 		setIdeToEditorPanel: (options = {}) ->
 			@aceEditor.focus()
