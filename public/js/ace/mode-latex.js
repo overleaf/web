@@ -196,8 +196,6 @@ oop.inherits(Mode, TextMode);
         if (state == "start") {
             var match = line.match(/^\s*\\begin.*\s*$/);
 
-            var unbalanced = (line.match(/o/g) || []).length;
-
             var unbalanced =  (line.match(/\{/g) || []).length > (line.match(/\}/g)  || []).length ||
                               (line.match(/\(/g) || []).length > (line.match(/\)/g)  || []).length ||
                               (line.match(/\[/g) || []).length > (line.match(/\]/g)  || []).length;
@@ -222,13 +220,12 @@ oop.inherits(Mode, TextMode);
 
         if (!tokens)
             return false;
+        do {
+            var last = tokens.pop();
+        } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
 
-        // do {
-        //     var last = tokens.pop();
-        // } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
-        //
-        // if (!last)
-        //     return false;
+        if (!last)
+            return false;
 
 
         var match = line.match(/^\s*\\end.*\s*$/);
