@@ -230,7 +230,7 @@ oop.inherits(Mode, TextMode);
 
         var match = line.match(/^\s*\\end.*\s*$/);
 
-        var unbalanced =  (line.match(/\{/g) || []).length < (line.match(/\}/g)  || []).length ||
+      var unbalanced =  (line.match(/\{/g) || []).length < (line.match(/\}/g)  || []).length && ! line.match(/^\s*[\}]\s*/) ||
                           (line.match(/\(/g) || []).length < (line.match(/\)/g)  || []).length ||
                           (line.match(/\[/g) || []).length < (line.match(/\]/g)  || []).length;
 
