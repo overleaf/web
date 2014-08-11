@@ -194,7 +194,7 @@ oop.inherits(Mode, TextMode);
         }
 
         if (state == "start") {
-            var match = line.match(/^\s*(\\begin|.*\{).*\s*$/);
+            var match = line.match(/^\s*(\\begin|(.*\{(?!.*\})|\((?!.*\))|\[(?!.*\])|\:)).*\s*$/);
 
             if (match) {
                 indent += tab;
@@ -223,7 +223,7 @@ oop.inherits(Mode, TextMode);
         if (!last)
             return false;
 
-        var match = line.match(/^\s*\\end.*\s*$/);
+        var match = line.match(/^\s*(\\end.*|.*[\}\)\]])\s*$/);
 
         if(match) {
           return true;
