@@ -4,7 +4,7 @@ ace.define("ace/mode/latex_highlight_rules",["require","exports","module","ace/l
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-var LatexHighlightRules = function() {   
+var LatexHighlightRules = function() {
     this.$rules = {
         "start" : [{
             token : "keyword",
@@ -182,6 +182,64 @@ oop.inherits(Mode, TextMode);
 (function() {
     this.type = "text";
     this.lineCommentStart = "%";
+
+    this.getNextLineIndent = function(state, line, tab) {
+        var indent = this.$getIndent(line);
+
+        var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
+        var tokens = tokenizedLine.tokens;
+
+        if (tokens.length && tokens[tokens.length-1].type == "comment") {
+            return indent;
+        }
+
+        if (state == "start") {
+            var match = line.match(/^\s*(\\begin|.*\{).*\s*$/);
+
+            if (match) {
+                indent += tab;
+            }
+        }
+
+        return indent;
+    };
+
+    var outdents = {
+
+    };
+
+    this.checkOutdent = function(state, line, input) {
+        if (input !== "\r\n" && input !== "\r" && input !== "\n")
+            return false;
+
+        var tokens = this.getTokenizer().getLineTokens(line.trim(), state).tokens;
+
+        if (!tokens)
+            return false;
+        do {
+            var last = tokens.pop();
+        } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
+
+        if (!last)
+            return false;
+
+        var match = line.match(/^\s*\\end.*\s*$/);
+
+        if(match) {
+          return true;
+        }
+
+        return (last.type == "keyword" && outdents[last.value]);
+    };
+
+    this.autoOutdent = function(state, doc, row) {
+
+        row += 1;
+        var indent = this.$getIndent(doc.getLine(row));
+        var tab = doc.getTabString();
+        if (indent.slice(-tab.length) == tab)
+            doc.remove(new Range(row, indent.length-tab.length, row, indent.length));
+    };
 
     this.$id = "ace/mode/latex";
 }).call(Mode.prototype);
