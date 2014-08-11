@@ -144,6 +144,11 @@ module.exports = ProjectController =
 						hasSubscription: results.hasSubscription
 					}
 
+                                        if Settings?.apis?.templates_api?.url?
+                                                viewModel.showTemplate = true
+                                        else
+                                                viewModel.showTemplate = false
+
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
 						viewModel.showUserDetailsArea = true
 						viewModel.algolia_api_key = Settings.algolia.read_only_api_key
