@@ -194,9 +194,15 @@ oop.inherits(Mode, TextMode);
         }
 
         if (state == "start") {
-            var match = line.match(/^\s*(\\begin|(.*\{(?!.*\})|\((?!.*\))|\[(?!.*\])|\:)).*\s*$/);
+            var match = line.match(/^\s*\\begin.*\s*$/);
 
-            if (match) {
+            var unbalanced = (line.match(/o/g) || []).length;
+
+            var unbalanced =  (line.match(/\{/g) || []).length > (line.match(/\}/g)  || []).length ||
+                              (line.match(/\(/g) || []).length > (line.match(/\)/g)  || []).length ||
+                              (line.match(/\[/g) || []).length > (line.match(/\]/g)  || []).length;
+
+            if (match || unbalanced) {
                 indent += tab;
             }
         }
@@ -216,16 +222,22 @@ oop.inherits(Mode, TextMode);
 
         if (!tokens)
             return false;
-        do {
-            var last = tokens.pop();
-        } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
 
-        if (!last)
-            return false;
+        // do {
+        //     var last = tokens.pop();
+        // } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
+        //
+        // if (!last)
+        //     return false;
 
-        var match = line.match(/^\s*(\\end.*|.*[\}\)\]])\s*$/);
 
-        if(match) {
+        var match = line.match(/^\s*\\end.*\s*$/);
+
+        var unbalanced =  (line.match(/\{/g) || []).length < (line.match(/\}/g)  || []).length ||
+                          (line.match(/\(/g) || []).length < (line.match(/\)/g)  || []).length ||
+                          (line.match(/\[/g) || []).length < (line.match(/\]/g)  || []).length;
+
+        if(match || unbalanced) {
           return true;
         }
 
