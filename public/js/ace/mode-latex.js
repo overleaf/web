@@ -31,6 +31,47 @@ exports.LatexHighlightRules = LatexHighlightRules;
 
 });
 
+
+ace.define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
+"use strict";
+
+var Range = require("../range").Range;
+
+var MatchingBraceOutdent = function() {};
+
+(function() {
+
+    this.checkOutdent = function(line, input) {
+        if (! /^\s+$/.test(line))
+            return false;
+
+        return /^(\s*\})|(\s*\\end.*\s*$)/.test(input);
+    };
+
+    this.autoOutdent = function(doc, row) {
+        var line = doc.getLine(row);
+        var match = line.match(/^(\s*\})|(\s*\\end.*\s*$)/);
+
+        if (!match) return 0;
+
+        var column = match[1].length;
+        var openBracePos = doc.findMatchingBracket({row: row, column: column});
+
+        if (!openBracePos || openBracePos.row == row) return 0;
+
+        var indent = this.$getIndent(doc.getLine(openBracePos.row));
+        doc.replace(new Range(row, 0, row, column-1), indent);
+    };
+
+    this.$getIndent = function(line) {
+        return line.match(/^\s*/)[0];
+    };
+
+}).call(MatchingBraceOutdent.prototype);
+
+exports.MatchingBraceOutdent = MatchingBraceOutdent;
+});
+
 ace.define("ace/mode/folding/latex",["require","exports","module","ace/lib/oop","ace/mode/folding/fold_mode","ace/range","ace/token_iterator"], function(require, exports, module) {
 "use strict";
 
@@ -169,90 +210,84 @@ ace.define("ace/mode/latex",["require","exports","module","ace/lib/oop","ace/mod
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
+var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var LatexHighlightRules = require("./latex_highlight_rules").LatexHighlightRules;
 var LatexFoldMode = require("./folding/latex").FoldMode;
 var Range = require("../range").Range;
 
+
 var Mode = function() {
     this.HighlightRules = LatexHighlightRules;
+
+    this.$outdent = new MatchingBraceOutdent();
+    //this.$behaviour = new CstyleBehaviour();
     this.foldingRules = new LatexFoldMode();
 };
+
 oop.inherits(Mode, TextMode);
 
 (function() {
-    this.type = "text";
-    this.lineCommentStart = "%";
+
+    this.lineCommentStart = "//";
+    this.blockComment = {start: "/*", end: "*/"};
 
     this.getNextLineIndent = function(state, line, tab) {
         var indent = this.$getIndent(line);
 
         var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
         var tokens = tokenizedLine.tokens;
+        var endState = tokenizedLine.state;
 
         if (tokens.length && tokens[tokens.length-1].type == "comment") {
             return indent;
         }
 
-        if (state == "start") {
-            var match = line.match(/^\s*\\begin.*\s*$/);
-
-            var unbalanced =  (line.match(/\{/g) || []).length > (line.match(/\}/g)  || []).length ||
-                              (line.match(/\(/g) || []).length > (line.match(/\)/g)  || []).length ||
-                              (line.match(/\[/g) || []).length > (line.match(/\]/g)  || []).length;
-
-            if (match || unbalanced) {
+        if (state == "start" || state == "no_regex") {
+            var match = line.match(/^\s*\\begin.*|.*(?:\bcase\b.*\:|[\{\(\[])\s*$/);
+            if (match) {
                 indent += tab;
+            }
+        } else if (state == "doc-start") {
+            if (endState == "start" || endState == "no_regex") {
+                return "";
+            }
+            var match = line.match(/^\s*(\/?)\*/);
+            if (match) {
+                if (match[1]) {
+                    indent += " ";
+                }
+                indent += "* ";
             }
         }
 
         return indent;
     };
 
-    var outdents = {
-
-    };
-
     this.checkOutdent = function(state, line, input) {
-        if (input !== "\r\n" && input !== "\r" && input !== "\n")
-            return false;
-
-        var tokens = this.getTokenizer().getLineTokens(line.trim(), state).tokens;
-
-        if (!tokens)
-            return false;
-        do {
-            var last = tokens.pop();
-        } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
-
-        if (!last)
-            return false;
-
-
-        var match = line.match(/^\s*\\end.*\s*$/);
-
-        var unbalanced =  (line.match(/\{/g) || []).length < (line.match(/\}/g)  || []).length && ! line.match(/^\s*[\}]\s*/) ||
-                          (line.match(/\(/g) || []).length < (line.match(/\)/g)  || []).length && ! line.match(/^\s*[\)]\s*/) ||
-                          (line.match(/\[/g) || []).length < (line.match(/\]/g)  || []).length && ! line.match(/^\s*[\]]\s*/);
-
-        if(match || unbalanced) {
-          return true;
-        }
-
-        return (last.type == "keyword" && outdents[last.value]);
+        return this.$outdent.checkOutdent(line, input);
     };
 
     this.autoOutdent = function(state, doc, row) {
+        this.$outdent.autoOutdent(doc, row);
+    };
 
-        row += 1;
-        var indent = this.$getIndent(doc.getLine(row));
-        var tab = doc.getTabString();
-        if (indent.slice(-tab.length) == tab)
-            doc.remove(new Range(row, indent.length-tab.length, row, indent.length));
+    this.createWorker = function(session) {
+        var worker = new WorkerClient(["ace"], "ace/mode/javascript_worker", "JavaScriptWorker");
+        worker.attachToDocument(session.getDocument());
+
+        worker.on("jslint", function(results) {
+            session.setAnnotations(results.data);
+        });
+
+        worker.on("terminate", function() {
+            session.clearAnnotations();
+        });
+
+        return worker;
     };
 
     this.$id = "ace/mode/latex";
 }).call(Mode.prototype);
 
 exports.Mode = Mode;
-
 });
