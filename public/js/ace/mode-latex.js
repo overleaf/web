@@ -45,12 +45,12 @@ var MatchingBraceOutdent = function() {};
         if (! /^\s+$/.test(line))
             return false;
 
-        return /^(\s*\})|(\s*\\end.*\s*$)/.test(input);
+        return /^\s*\}/.test(input);
     };
 
     this.autoOutdent = function(doc, row) {
         var line = doc.getLine(row);
-        var match = line.match(/^(\s*\})|(\s*\\end.*\s*$)/);
+        var match = line.match(/^(\s*\})/);
 
         if (!match) return 0;
 
@@ -220,7 +220,6 @@ var Mode = function() {
     this.HighlightRules = LatexHighlightRules;
 
     this.$outdent = new MatchingBraceOutdent();
-    //this.$behaviour = new CstyleBehaviour();
     this.foldingRules = new LatexFoldMode();
 };
 
@@ -228,35 +227,24 @@ oop.inherits(Mode, TextMode);
 
 (function() {
 
-    this.lineCommentStart = "//";
-    this.blockComment = {start: "/*", end: "*/"};
+    this.lineCommentStart = "%";
+    this.blockComment = {start: "\\begin{comment}", end: "\\end{comment}"};
 
     this.getNextLineIndent = function(state, line, tab) {
         var indent = this.$getIndent(line);
 
         var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
         var tokens = tokenizedLine.tokens;
-        var endState = tokenizedLine.state;
 
         if (tokens.length && tokens[tokens.length-1].type == "comment") {
             return indent;
         }
 
-        if (state == "start" || state == "no_regex") {
-            var match = line.match(/^\s*\\begin.*|.*(?:\bcase\b.*\:|[\{\(\[])\s*$/);
-            if (match) {
+        if (state == "start") {
+            var match = line.match(/^.*[\{\(\[]\s*$/);
+            var startingEnvironment = line.match(/^\s*(\\begin.*)\s*/)
+            if (match || startingEnvironment) {
                 indent += tab;
-            }
-        } else if (state == "doc-start") {
-            if (endState == "start" || endState == "no_regex") {
-                return "";
-            }
-            var match = line.match(/^\s*(\/?)\*/);
-            if (match) {
-                if (match[1]) {
-                    indent += " ";
-                }
-                indent += "* ";
             }
         }
 
@@ -264,26 +252,21 @@ oop.inherits(Mode, TextMode);
     };
 
     this.checkOutdent = function(state, line, input) {
-        return this.$outdent.checkOutdent(line, input);
+        return /^\s+(\\end.*)$/.test(line + input) || this.$outdent.checkOutdent(line, input);
     };
 
-    this.autoOutdent = function(state, doc, row) {
-        this.$outdent.autoOutdent(doc, row);
-    };
-
-    this.createWorker = function(session) {
-        var worker = new WorkerClient(["ace"], "ace/mode/javascript_worker", "JavaScriptWorker");
-        worker.attachToDocument(session.getDocument());
-
-        worker.on("jslint", function(results) {
-            session.setAnnotations(results.data);
-        });
-
-        worker.on("terminate", function() {
-            session.clearAnnotations();
-        });
-
-        return worker;
+    this.autoOutdent = function(state, session, row) {
+        var line = session.getLine(row);
+        if (/\s+\}\s*/.test(line))
+            return this.$outdent.autoOutdent(session, row);
+        var indent = this.$getIndent(line);
+        var prevLine = session.getLine(row - 1);
+        var prevIndent = this.$getIndent(prevLine);
+        var tab = session.getTabString();
+        if (prevIndent.length <= indent.length) {
+            if (indent.slice(-tab.length) == tab)
+                session.remove(new Range(row, indent.length-tab.length, row, indent.length));
+        }
     };
 
     this.$id = "ace/mode/latex";
