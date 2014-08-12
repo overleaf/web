@@ -228,7 +228,6 @@ oop.inherits(Mode, TextMode);
 
     this.type = "text";
     this.lineCommentStart = "%";
-    this.blockComment = {start: "\\begin{comment}", end: "\\end{comment}"};
 
     this.getNextLineIndent = function(state, line, tab) {
         var indent = this.$getIndent(line);
