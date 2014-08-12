@@ -215,7 +215,6 @@ var LatexHighlightRules = require("./latex_highlight_rules").LatexHighlightRules
 var LatexFoldMode = require("./folding/latex").FoldMode;
 var Range = require("../range").Range;
 
-
 var Mode = function() {
     this.HighlightRules = LatexHighlightRules;
 
@@ -227,6 +226,7 @@ oop.inherits(Mode, TextMode);
 
 (function() {
 
+    this.type = "text";
     this.lineCommentStart = "%";
     this.blockComment = {start: "\\begin{comment}", end: "\\end{comment}"};
 
@@ -273,4 +273,5 @@ oop.inherits(Mode, TextMode);
 }).call(Mode.prototype);
 
 exports.Mode = Mode;
+
 });
