@@ -144,7 +144,7 @@ module.exports = ProjectController =
 						hasSubscription: results.hasSubscription
 					}
 
-					if Settings?.apis?.templates_api?.url?
+					if Settings?.apis?.templates_api? and Settings?.apis?.templates_api?.url?
 						viewModel.showTemplate = true
 					else
 						viewModel.showTemplate = false
