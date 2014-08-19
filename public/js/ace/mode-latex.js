@@ -4,7 +4,7 @@ ace.define("ace/mode/latex_highlight_rules",["require","exports","module","ace/l
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-var LatexHighlightRules = function() {   
+var LatexHighlightRules = function() {
     this.$rules = {
         "start" : [{
             token : "keyword",
@@ -29,6 +29,47 @@ oop.inherits(LatexHighlightRules, TextHighlightRules);
 
 exports.LatexHighlightRules = LatexHighlightRules;
 
+});
+
+
+ace.define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
+"use strict";
+
+var Range = require("../range").Range;
+
+var MatchingBraceOutdent = function() {};
+
+(function() {
+
+    this.checkOutdent = function(line, input) {
+        if (! /^\s+$/.test(line))
+            return false;
+
+        return /^\s*\}/.test(input);
+    };
+
+    this.autoOutdent = function(doc, row) {
+        var line = doc.getLine(row);
+        var match = line.match(/^(\s*\})/);
+
+        if (!match) return 0;
+
+        var column = match[1].length;
+        var openBracePos = doc.findMatchingBracket({row: row, column: column});
+
+        if (!openBracePos || openBracePos.row == row) return 0;
+
+        var indent = this.$getIndent(doc.getLine(openBracePos.row));
+        doc.replace(new Range(row, 0, row, column-1), indent);
+    };
+
+    this.$getIndent = function(line) {
+        return line.match(/^\s*/)[0];
+    };
+
+}).call(MatchingBraceOutdent.prototype);
+
+exports.MatchingBraceOutdent = MatchingBraceOutdent;
 });
 
 ace.define("ace/mode/folding/latex",["require","exports","module","ace/lib/oop","ace/mode/folding/fold_mode","ace/range","ace/token_iterator"], function(require, exports, module) {
@@ -169,19 +210,63 @@ ace.define("ace/mode/latex",["require","exports","module","ace/lib/oop","ace/mod
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
+var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var LatexHighlightRules = require("./latex_highlight_rules").LatexHighlightRules;
 var LatexFoldMode = require("./folding/latex").FoldMode;
 var Range = require("../range").Range;
 
 var Mode = function() {
     this.HighlightRules = LatexHighlightRules;
+
+    this.$outdent = new MatchingBraceOutdent();
     this.foldingRules = new LatexFoldMode();
 };
+
 oop.inherits(Mode, TextMode);
 
 (function() {
+
     this.type = "text";
     this.lineCommentStart = "%";
+
+    this.getNextLineIndent = function(state, line, tab) {
+        var indent = this.$getIndent(line);
+
+        var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
+        var tokens = tokenizedLine.tokens;
+
+        if (tokens.length && tokens[tokens.length-1].type == "comment") {
+            return indent;
+        }
+
+        if (state == "start") {
+            var match = line.match(/^.*[\{\(\[]\s*$/);
+            var startingEnvironment = line.match(/^\s*(\\begin.*)\s*/)
+            if (match || startingEnvironment) {
+                indent += tab;
+            }
+        }
+
+        return indent;
+    };
+
+    this.checkOutdent = function(state, line, input) {
+        return /^\s+(\\end.*)$/.test(line + input) || this.$outdent.checkOutdent(line, input);
+    };
+
+    this.autoOutdent = function(state, session, row) {
+        var line = session.getLine(row);
+        if (/\s+\}\s*/.test(line))
+            return this.$outdent.autoOutdent(session, row);
+        var indent = this.$getIndent(line);
+        var prevLine = session.getLine(row - 1);
+        var prevIndent = this.$getIndent(prevLine);
+        var tab = session.getTabString();
+        if (prevIndent.length <= indent.length) {
+            if (indent.slice(-tab.length) == tab)
+                session.remove(new Range(row, indent.length-tab.length, row, indent.length));
+        }
+    };
 
     this.$id = "ace/mode/latex";
 }).call(Mode.prototype);
