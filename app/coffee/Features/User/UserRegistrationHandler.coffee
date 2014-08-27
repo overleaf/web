@@ -6,6 +6,8 @@ NewsLetterManager = require("../Newsletter/NewsletterManager")
 async = require("async")
 EmailHandler = require("../Email/EmailHandler")
 logger = require("logger-sharelatex")
+Settings = require('settings-sharelatex')
+LdapAuth = require("../Security/LdapAuth")
 
 module.exports =
 	validateEmail : (email) ->
@@ -21,8 +23,8 @@ module.exports =
 
 	_registrationRequestIsValid : (body, callback)->
 		email = sanitize.escape(body.email).trim().toLowerCase()
-		password = body.password
 		username = email.match(/^[^@]*/)
+		password = body.password
 		if @hasZeroLengths([password, email])
 			return false
 		else if !@validateEmail(email)
@@ -42,27 +44,29 @@ module.exports =
 		if !requestIsValid
 			return callback("request is not valid")
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
-		User.findOne email:userDetails.email, (err, user)->
-			if err?
-				return callback err
-			if user?.holdingAccount == false
-				return callback("EmailAlreadyRegisterd")
-			self._createNewUserIfRequired user, userDetails, (err, user)->
-				if err?
-					return callback(err)
-				async.series [
-					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
-					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
-					(cb)-> NewsLetterManager.subscribe user, cb
-					(cb)-> 
-						emailOpts =
-							first_name:user.first_name
-							to: user.email
-						EmailHandler.sendEmail "welcome", emailOpts, cb
-				], (err)->
-					logger.log user: user, "registered"
-					callback(err, user)
-
-
-
-
+		LdapAuth.authDN userDetails, (err, isAllowed)->
+			if !isAllowed
+				return callback("LdapFail")
+			else
+				if (Settings.ldap)
+					userDetails.password = userDetails.ldap_user
+				User.findOne email:userDetails.email, (err, user)->
+					if err?
+						return callback err
+					if user?.holdingAccount == false
+						return callback("EmailAlreadyRegisterd")
+					self._createNewUserIfRequired user, userDetails, (err, user)->
+						if err?
+							return callback(err)
+						async.series [
+							(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
+							(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
+							(cb)-> NewsLetterManager.subscribe user, cb
+							(cb)-> 
+								emailOpts =
+									first_name:user.first_name
+									to: user.email
+								EmailHandler.sendEmail "welcome", emailOpts, cb
+						], (err)->
+							logger.log user: user, "registered"
+							callback(err, user)

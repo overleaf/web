@@ -24,6 +24,17 @@ block content
 								)
 								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
 									| #{translate("must_be_email_address")}
+							if (settings.ldap)
+								.form-group
+									input.form-control(
+										type='numeric',
+										name='ldap_user',
+										placeholder="LDAP User",
+										required,
+										ng-model="ldap_user"
+									)
+									span.small.text-primary(ng-show="registerForm.ldap_user.$invalid && registerForm.ldap_user.$dirty")
+										| #{translate("required")}
 							.form-group
 								input.form-control(
 									type='password',

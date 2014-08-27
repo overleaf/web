@@ -82,7 +82,7 @@ module.exports =
 		logger.log email: req.body.email, "attempted register"
 		redir = Url.parse(req.body.redir or "/project").path
 		UserRegistrationHandler.registerNewUser req.body, (err, user)->
-			if err == "EmailAlreadyRegisterd"
+			if err == "EmailAlreadyRegisterd" or err == "LdapFail"
 				return AuthenticationController.login req, res
 			else if err?
 				next(err)

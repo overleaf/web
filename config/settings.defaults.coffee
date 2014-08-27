@@ -114,6 +114,11 @@ module.exports =
 	security:
 		sessionSecret: sessionSecret
 
+	ldap: 
+		host: 'ldap://ldapteste.cpd.ufrgs.br:389'
+		dnObj: 'uid='
+		dnSuffix: ',ou=People,dc=ufrgs,dc=br'
+
 	httpAuthUsers: httpAuthUsers
 
 	# Default features
