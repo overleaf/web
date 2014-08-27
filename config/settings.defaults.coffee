@@ -115,7 +115,7 @@ module.exports =
 		sessionSecret: sessionSecret
 
 	ldap: 
-		host: 'ldap://ldapteste.cpd.ufrgs.br:389'
+		host: 'ldap://ldap.host:389'
 		dnObj: 'uid='
 		dnSuffix: ',ou=People,dc=ufrgs,dc=br'
 
