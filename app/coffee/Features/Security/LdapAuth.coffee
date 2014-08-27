@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
 ldap = require('ldapjs')
-lclient = ldap.createClient({ url: Settings.ldap.host })
+lclient = ldap.createClient({ url: Settings?.ldap?.host })
 
 module.exports =
 	authDN: (body, callback)->
