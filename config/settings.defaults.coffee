@@ -115,9 +115,9 @@ module.exports =
 		sessionSecret: sessionSecret
 
 	#ldap: 
-	#	host: 'ldap://ldap.host:389'
-	#	dnObj: 'uid='
-	#	dnSuffix: ',ou=People,dc=ufrgs,dc=br'
+	#	host: 'ldap://ldap.host.com:389'
+	#	dnObj: 'cn='
+	#	dnSuffix: ',ou=Users,dc=example,dc=com'
 
 	httpAuthUsers: httpAuthUsers
 
