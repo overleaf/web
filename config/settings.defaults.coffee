@@ -119,6 +119,8 @@ module.exports =
 	#	dnObj: 'cn='
 	#	dnSuffix: ',ou=Users,dc=example,dc=com'
 	#	failMessage: 'LDAP User Fail'
+	#	fieldName: 'LDAP User'
+	#	placeholder: 'LDAP User ID'
 
 	httpAuthUsers: httpAuthUsers
 

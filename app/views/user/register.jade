@@ -39,11 +39,11 @@ block content
 									| #{translate("must_be_email_address")}
 							if(settings.ldap)
 								.form-group
-									label(for='ldap_user') #{translate("ldap_user")}
+									label(for='ldap_user') #{settings.ldap.fieldName}
 									input.form-control(
 										type='numeric',
 										name='ldap_user',
-										placeholder="LDAP User",
+										placeholder='#{settings.ldap.placeholder}',
 										required,
 										ng-model="ldap_user"
 									)
