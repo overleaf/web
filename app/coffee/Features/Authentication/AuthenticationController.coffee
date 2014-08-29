@@ -23,7 +23,7 @@ module.exports = AuthenticationController =
 				res.statusCode = 429
 				return res.send
 					message:
-						text: "LDAP User fail",
+						text: Settings.ldap?.failMessage,
 						type: 'error'
 			LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 				if !isAllowed

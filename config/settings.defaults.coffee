@@ -118,6 +118,7 @@ module.exports =
 	#	host: 'ldap://ldap.host.com:389'
 	#	dnObj: 'cn='
 	#	dnSuffix: ',ou=Users,dc=example,dc=com'
+	#	failMessage: 'LDAP User Fail'
 
 	httpAuthUsers: httpAuthUsers
 
