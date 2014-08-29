@@ -52,4 +52,5 @@ block content
 								)
 									span(ng-show="!loginForm.inflight") #{translate("login")}
 									span(ng-show="loginForm.inflight") #{translate("logging_in")}...
-								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
+								if (!settings.ldap)
+									a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
