@@ -1,6 +1,5 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require 'sinon'
-Settings   = require 'settings-sharelatex'
 should = require("chai").should()
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
@@ -18,7 +17,7 @@ mockSubscriptions =
 		account:
 			account_code: "user-123"
 
-describe "Subscription controller sanboxed", ->
+describe "SubscriptionController sanboxed", ->
 
 	beforeEach ->
 		@user = {}
@@ -28,7 +27,7 @@ describe "Subscription controller sanboxed", ->
 			getCurrentUser: sinon.stub().callsArgWith(1, null, @user)
 		@SubscriptionHandler = 
 			createSubscription: sinon.stub().callsArgWith(2)
-			updateSubscription: sinon.stub().callsArgWith(2)
+			updateSubscription: sinon.stub().callsArgWith(3)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 			cancelSubscription: sinon.stub().callsArgWith(1)
 			recurlyCallback: sinon.stub().callsArgWith(1)
@@ -47,6 +46,15 @@ describe "Subscription controller sanboxed", ->
 		@SubscriptionViewModelBuilder = 
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
 			buildViewModel: sinon.stub()
+		@settings = 
+			coupon_codes:
+				upgradeToAnnualPromo: 
+					student:"STUDENTCODEHERE"
+					collaborator:"COLLABORATORCODEHERE"
+			apis:
+				recurly:
+					subdomain:"sl.recurly.com"
+			siteUrl: "http://de.sharelatex.dev:3000"
 
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
@@ -56,6 +64,7 @@ describe "Subscription controller sanboxed", ->
 			"./LimitationsManager": @LimitationsManager
 			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex": log:->
+			"settings-sharelatex": @settings
 
 
 		@res = new MockResponse()
@@ -78,7 +87,7 @@ describe "Subscription controller sanboxed", ->
 
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{Settings.siteUrl}/user/subscription/update"
+				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
 				@res.renderedVariables.user.id.should.equal @user.id
 
 		describe "with a user without subscription", ->
@@ -109,7 +118,7 @@ describe "Subscription controller sanboxed", ->
 					@req.session._csrf = @csrfToken = "mock-csrf-token"
 					@res.render = (page, opts)=>
 						url = JSON.parse(opts.subscriptionFormOptions).successURL
-						url.should.equal("#{Settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
+						url.should.equal("#{@settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
 						done()
 					@SubscriptionController.paymentPage @req, @res
 
@@ -193,7 +202,7 @@ describe "Subscription controller sanboxed", ->
 			done()
 
 
-	describe "updateSubscription", ->
+	describe "updateSubscription via post", ->
 		beforeEach (done)->
 			@res =
 				redirect:->
@@ -210,7 +219,6 @@ describe "Subscription controller sanboxed", ->
 		it "should redurect to the subscription page", (done)->
 			@res.redirect.calledWith("/user/subscription").should.equal true
 			done()
-
 
 	describe "reactivateSubscription", ->
 		beforeEach (done)->
@@ -286,6 +294,68 @@ describe "Subscription controller sanboxed", ->
 			it "should respond with a 200 status", ->
 				@res.send.calledWith(200)
 
+
+	describe "renderUpgradeToAnnualPlanPage", ->
+
+
+		it "should redirect to the plans page if the user does not have a subscription", (done)->
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+			@res.redirect = (url)->
+				url.should.equal "/user/subscription/plans"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+
+		it "should pass the plan code to the view - student", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"Student free trial 14 days"})
+			@res.render = (view, opts)->
+				view.should.equal "subscriptions/upgradeToAnnual"
+				opts.planName.should.equal "student"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+		it "should pass the plan code to the view - collaborator", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"free trial for Collaborator free trial 14 days"})
+			@res.render = (view, opts)->
+				opts.planName.should.equal "collaborator"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+		it "should pass annual as the plan name if the user is already on an annual plan", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"student annual with free trial"})
+			@res.render = (view, opts)->
+				opts.planName.should.equal "annual"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+
+	describe "processUpgradeToAnnualPlan", ->
+
+		beforeEach ->
+			
+		it "should tell the subscription handler to update the subscription with the annual plan and apply a coupon code", (done)->
+			@req.body =
+				planName:"student"
+
+			@res.send = ()=>
+				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "STUDENTCODEHERE").should.equal true
+				done()
+
+			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
+
+		it "should get the collaborator coupon code", (done)->
+
+			@req.body =
+				planName:"collaborator"
+
+			@res.send = (url)=>
+				@SubscriptionHandler.updateSubscription.calledWith(@user, "collaborator-annual", "COLLABORATORCODEHERE").should.equal true
+				done()
+
+			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
 
 
 
