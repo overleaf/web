@@ -10,6 +10,7 @@ AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
+_ = require('underscore')
 
 module.exports =
 
@@ -81,7 +82,7 @@ module.exports =
 	register : (req, res, next = (error) ->)->
 		logger.log email: req.body.email, "attempted register"
 		redir = Url.parse(req.body.redir or "/project").path
-		UserRegistrationHandler.registerNewUser req.body, (err, user)->
+		UserRegistrationHandler.registerNewUser _.clone(req.body), (err, user)->
 			if err == "EmailAlreadyRegisterd" or err == "LdapFail"
 				return AuthenticationController.login req, res
 			else if err?
