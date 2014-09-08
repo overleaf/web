@@ -40,6 +40,7 @@ module.exports = SubscriptionController =
 					RecurlyWrapper.sign {
 						subscription:
 							plan_code : req.query.planCode
+							currency: req.query.currency
 						account_code: user.id
 					}, (error, signature) ->
 						return next(error) if error?
@@ -47,7 +48,7 @@ module.exports = SubscriptionController =
 							title      : "subscribe"
 							plan_code: req.query.planCode
 							recurlyConfig: JSON.stringify
-								currency: "USD"
+								currency: req.query.currency
 								subdomain: Settings.apis.recurly.subdomain
 							subscriptionFormOptions: JSON.stringify
 								acceptedCards: ['discover', 'mastercard', 'visa']

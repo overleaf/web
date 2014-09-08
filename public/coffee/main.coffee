@@ -1,5 +1,5 @@
 define [
-	"main/project-list"
+	"main/project-list/index"
 	"main/user-details"
 	"main/account-settings"
 	"main/templates"
@@ -12,6 +12,7 @@ define [
 	"main/translations"
 	"main/subscription-dashboard"
 	"main/annual-upgrade"
+	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"

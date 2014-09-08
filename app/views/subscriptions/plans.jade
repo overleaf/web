@@ -1,5 +1,7 @@
 extends ../layout
-
+block scripts
+	script(type='text/javascript').
+		window.recurlyPublicToken = '#{settings.apis.recurly.publicKey}'
 block content
 	.content-alt
 		.content.plans(ng-controller="PlansController")
@@ -7,13 +9,14 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-							h1 #{translate("start_x_day_trial", {len:30})}
+
+							h1(ng-cloak) #{translate("start_x_day_trial", {len:'{{trial_len}}'})}
 				.row
 					.col-md-8.col-md-offset-2
 						p.text-centered #{translate("sl_benefits_plans")}
 
 				.row(ng-cloak)
-					.col-md-12
+					.col-md-6.col-md-offset-3
 						ul.nav.nav-pills
 							li(ng-class="{'active': ui.view == 'monthly'}")
 								a(
@@ -30,6 +33,20 @@ block content
 									href,
 									ng-click="switchToStudent()"
 								) #{translate("half_price_student")} 
+					.col-md-2
+						.dropdown
+							a.btn.btn-primary.dropdown-toggle#currenyDropdown(
+								href="#",
+								data-toggle="dropdown"
+							)
+								| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+
+							ul.dropdown-menu(role="menu")
+								li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+									a(
+										href,
+										ng-click="changeCurreny(currency)"
+									) {{currency}} ({{value['symbol']}})
 
 				.row(ng-cloak)
 					.col-md-12
@@ -50,10 +67,10 @@ block content
 									h2 #{translate("collaborator")}
 								.circle
 									span(ng-if="ui.view == 'monthly'")
-										| $15
+										| {{plans[currencyCode]['collaborator']['monthly']}}
 										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| $180
+										| {{plans[currencyCode]['collaborator']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li 
@@ -63,7 +80,8 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || '_free_trial'}}", ng-click="signUpNowClicked('collaborator')"
+
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -72,10 +90,10 @@ block content
 									h2 #{translate("professional")}
 								.circle 
 									span(ng-if="ui.view == 'monthly'")
-										| $30
+										| {{plans[currencyCode]['professional']['monthly']}}
 										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| $360
+										| {{plans[currencyCode]['professional']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li
@@ -85,7 +103,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || '_free_trial'}}", ng-click="signUpNowClicked('professional')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -107,7 +125,7 @@ block content
 									h2 #{translate("student")}
 								.circle
 									span
-										| $8
+										| {{plans[currencyCode]['student']['monthly']}}
 										span.small /mo
 								ul.list-unstyled
 									li
@@ -117,14 +135,14 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student_free_trial", ng-click="signUpNowClicked('student')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("start_free_trial")}
 							.card
 								.card-header
 									h2 #{translate("student")} (#{translate("annual")})
 								.circle
 									span
-										| $80
+										| {{plans[currencyCode]['student']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li
@@ -134,7 +152,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual", ng-click="signUpNowClicked('student')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("buy_now")}
 
 				.row(ng-cloak)
