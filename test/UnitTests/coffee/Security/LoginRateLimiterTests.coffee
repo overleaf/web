@@ -25,7 +25,7 @@ describe "LoginRateLimiter", ->
 				exec: @execStub
 
 		@LoginRateLimiter = SandboxedModule.require modulePath, requires:
-			'redis' : createClient: () => @rclient
+			'redis-sharelatex' : createClient: () => @rclient
 	
 	describe "processLoginRequest", ->
 
@@ -58,6 +58,15 @@ describe "LoginRateLimiter", ->
 			@LoginRateLimiter.processLoginRequest @email, (err, isAllowed)=>
 				isAllowed.should.equal false
 				done()
+
+
+	describe "smoke test user", ->
+
+		it "should have a higher limit", (done)->
+			done()
+
+
+
 
 
 	describe "recordSuccessfulLogin", ->

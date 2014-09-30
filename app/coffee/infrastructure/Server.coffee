@@ -9,10 +9,15 @@ socketIoConfig = require('./SocketIoConfig')
 soareqid = require('soa-req-id')
 Router = require('../router')
 metrics.inc("startup")
-redis = require('redis')
-RedisStore = require('connect-redis')(express)
 SessionSockets = require('session.socket.io')
-sessionStore = new RedisStore(host:Settings.redis.web.host, port:Settings.redis.web.port, pass:Settings.redis.web.password)
+
+
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
+
+RedisStore = require('connect-redis')(express)
+sessionStore = new RedisStore(client:rclient)
+
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
@@ -61,10 +66,7 @@ app.configure () ->
 			secure: Settings.secureCookie
 		store: sessionStore
 		key: cookieKey
-	app.use (req, res, next)->
-		console.log req.session, req.url, "session log"
-		next()
-
+	
 	# Measure expiry from last request, not last login
 	app.use (req, res, next) ->
 		req.session.touch()
