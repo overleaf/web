@@ -125,7 +125,7 @@ module.exports =
 	#ldap: 
 	#	host: 'ldap://ldap.host.com:389'
 	#	dnObj: 'cn'
-	#	filter: '(uid=#{ldap_user})'
+	#	filter: '(uid=:ldap_user)'
 	#	dnSuffix: 'ou=Users,dc=example,dc=com'
 	#	failMessage: 'LDAP User Fail'
 	#	fieldName: 'LDAP User'
