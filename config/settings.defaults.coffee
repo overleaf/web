@@ -82,16 +82,21 @@ module.exports =
 			internal_url: "http://localhost:3010"
 		blog:
 			port: 3008
+		university:
+			url: "http://localhost:3011"
 		filestore:
 			url: "http://localhost:3009"
 		clsi:
 			url: "http://localhost:3013"
 		templates:
 			url: "http://localhost:3007"
+		githubSync:
+			url: "http://localhost:3022"
 		recurly:
 			privateKey: ""
 			apiKey: ""
 			subdomain: ""
+
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -309,4 +314,5 @@ module.exports =
 		"/templates/index": "/templates/"
 
 	proxyUrls: {}
-
+	
+	reloadModuleViewsOnEachRequest: true
