@@ -69,8 +69,11 @@ module.exports = SubscriptionController =
 	userSubscriptionPage: (req, res, next) ->
 		SecurityManager.getCurrentUser req, (error, user) =>
 			return next(error) if error?
-			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember)->
-				if !hasSubOrIsGroupMember
+			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+				if subscription?.customAccount
+					logger.log user: user, "redirecting to plans"
+					res.redirect "/user/subscription/custom_account"				
+				else if !hasSubOrIsGroupMember
 					logger.log user: user, "redirecting to plans"
 					res.redirect "/user/subscription/plans"
 				else
@@ -84,6 +87,14 @@ module.exports = SubscriptionController =
 							subscription: subscription
 							groups: groups
 							subscriptionTabActive: true
+
+
+	userCustomSubscriptionPage: (req, res, next)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+				res.render "subscriptions/custom_account",
+					title: "your_subscription"
+					subscription: subscription
 
 
 	editBillingDetailsPage: (req, res, next) ->

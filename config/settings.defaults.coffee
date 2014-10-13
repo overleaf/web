@@ -142,6 +142,8 @@ module.exports =
 		collaborators: -1
 		dropbox: true
 		versioning: true
+		compileTimeout: 60
+		compileGroup: "standard"
 
 	plans: plans = [{
 		planCode: "personal"

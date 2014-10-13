@@ -184,6 +184,27 @@ describe "SubscriptionController sanboxed", ->
 			it "should set the correct subscription details", ->
 				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
 
+
+		describe "when its a custom subscription which is non recurly", ->
+			beforeEach ()->
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {customAccount:true})
+				@SubscriptionController.userSubscriptionPage @req, @res
+
+			it "should redirect to /user/subscription/custom_account", ->
+				@res.redirectedTo.should.equal("/user/subscription/custom_account")
+
+	describe "userCustomSubscriptionPage", ->
+		beforeEach (done) ->
+			@res.callback = done
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+			@SubscriptionController.userCustomSubscriptionPage @req, @res
+
+		it "should render the page", (done)->
+			@res.rendered.should.equal true
+			@res.renderedTemplate.should.equal "subscriptions/custom_account"
+			done()
+
+
 	describe "createSubscription", ->
 		beforeEach (done)->
 			@res =
