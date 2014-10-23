@@ -28,7 +28,7 @@ module.exports =
 		if @hasZeroLengths([password, email])
 			return false
 		else if !@validateEmail(email)
-			return false || Settings.ldap
+			return false || Settings.ldap!=null
 		else
 			return true
 
