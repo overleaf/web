@@ -123,12 +123,12 @@ module.exports =
 		sessionSecret: sessionSecret
 
 	# ldap configuration
-	# use dnObj for ldap bind authentication
-	# use filter for ldap search authentication
+	# type 'bind' for ldap bind authentication
+	# type 'filter' for ldap search authentication
 	#ldap: 
 	#	host: 'ldap://ldap.host.com:389'
 	#	dnObj: 'cn'
-	#	filter: '(uid=:ldap_user)'
+	#	type: 'bind'
 	#	dnSuffix: 'ou=Users,dc=example,dc=com'
 	#	failMessage: 'LDAP User Fail'
 	#	fieldName: 'LDAP User'
