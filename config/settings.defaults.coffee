@@ -88,6 +88,8 @@ module.exports =
 			url: "http://localhost:3009"
 		clsi:
 			url: "http://localhost:3013"
+		clsi_priority:
+			url: "http://localhost:3013"
 		templates:
 			url: "http://localhost:3007"
 		githubSync:
@@ -96,7 +98,8 @@ module.exports =
 			privateKey: ""
 			apiKey: ""
 			subdomain: ""
-
+		geoIpLookup:
+			url: "https://freegeoip.net/json/"
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"

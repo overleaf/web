@@ -65,15 +65,8 @@ define [
 		$scope.chat = {}
 
 		$scope.startFreeTrial = (source) ->
-
-			buckets = [
-				{ bucketName:"7d", planCode: "student_free_trial_7_days" }
-				{ bucketName:"14d", planCode: "student_free_trial_14_days" }
-			]
-			bucket = abTestManager.getABTestBucket "trial_len", buckets
-			abTestManager.processTestWithStep("trial_len", bucket.bucketName, 0)
-
-			window.open("/user/subscription/new?planCode=#{bucket.planCode}")
+			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
+			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
 			$scope.startedFreeTrial = true
 
 		window._ide = ide

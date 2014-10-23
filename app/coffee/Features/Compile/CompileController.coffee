@@ -6,22 +6,28 @@ logger  = require "logger-sharelatex"
 request = require "request"
 Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
+UserGetter = require "../User/UserGetter"
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
+		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
 		settingsOverride = req.body?.settingsOverride ? {};
 		logger.log "root doc overriden" if settingsOverride.rootDoc_id?
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
 			return next(error) if error?
-			CompileManager.compile project_id, user_id, { isAutoCompile, settingsOverride }, (error, status, outputFiles) ->
-				return next(error) if error?
-				res.contentType("application/json")
-				res.send 200, JSON.stringify {
-					status: status
-					outputFiles: outputFiles
-				}
+			UserGetter.getUser user_id, {"features.compileGroup":1, "features.compileTimeout":1}, (err, user)->
+				settingsOverride.timeout = user.features.compileTimeout || Settings.defaultFeatures.compileTimeout
+				settingsOverride.compiler = user.features.compileGroup || Settings.defaultFeatures.compileGroup
+				req.session.compileGroup = settingsOverride.compiler
+				CompileManager.compile project_id, user_id, { isAutoCompile, settingsOverride }, (error, status, outputFiles) ->
+					return next(error) if error?
+					res.contentType("application/json")
+					res.send 200, JSON.stringify {
+						status: status
+						outputFiles: outputFiles
+					}
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
@@ -58,11 +64,16 @@ module.exports = CompileController =
 		CompileController.proxyToClsi(req.url, req, res, next)
 
 	proxyToClsi: (url, req, res, next = (error) ->) ->
+		if req.session.compileGroup == "priority"
+			compilerUrl = Settings.apis.clsi_priority.url
+		else
+			compilerUrl = Settings.apis.clsi.url
+		url = "#{compilerUrl}#{url}"
 		logger.log url: url, "proxying to CLSI"
-		url = "#{Settings.apis.clsi.url}#{url}"
 		oneMinute = 60 * 1000
 		proxy = request(url: url, method: req.method, timeout: oneMinute)
 		proxy.pipe(res)
 		proxy.on "error", (error) ->
 			logger.warn err: error, url: url, "CLSI proxy error"
+
 	

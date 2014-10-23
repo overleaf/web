@@ -7,7 +7,7 @@ LimitationsManager = require("./LimitationsManager")
 RecurlyWrapper = require './RecurlyWrapper'
 Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
-
+GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 
 
 module.exports = SubscriptionController =
@@ -22,11 +22,13 @@ module.exports = SubscriptionController =
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
-		res.render viewName,
-			title: "plans_and_pricing"
-			plans: plans
-			baseUrl: baseUrl
-			gaExperiments: Settings.gaExperiments.plansPage
+		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+			res.render viewName,
+				title: "plans_and_pricing"
+				plans: plans
+				baseUrl: baseUrl
+				gaExperiments: Settings.gaExperiments.plansPage
+				recomendedCurrency:recomendedCurrency
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->
@@ -34,36 +36,43 @@ module.exports = SubscriptionController =
 			return next(error) if error?
 			plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
 			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+				return next(err) if err?
 				if hasSubscription or !plan?
 					res.redirect "/user/subscription"
 				else
-					currency = req.query.currency || "USD"
-					RecurlyWrapper.sign {
-						subscription:
-							plan_code : req.query.planCode
-							currency: currency
-						account_code: user.id
-					}, (error, signature) ->
-						return next(error) if error?
-						res.render "subscriptions/new",
-							title      : "subscribe"
-							plan_code: req.query.planCode
-							recurlyConfig: JSON.stringify
+					currency = req.query.currency?.toUpperCase()
+					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+						return next(err) if err?
+						if recomendedCurrency? and !currency?
+							currency = recomendedCurrency
+						RecurlyWrapper.sign {
+							subscription:
+								plan_code : req.query.planCode
 								currency: currency
-								subdomain: Settings.apis.recurly.subdomain
-							subscriptionFormOptions: JSON.stringify
-								acceptedCards: ['discover', 'mastercard', 'visa']
-								target      : "#subscribeForm"
-								signature   : signature
-								planCode    : req.query.planCode
-								successURL  : "#{Settings.siteUrl}/user/subscription/create?_csrf=#{req.session._csrf}"
-								accountCode : user.id
-								enableCoupons: true
-								acceptPaypal: true
-								account     :
-									firstName : user.first_name
-									lastName  : user.last_name
-									email     : user.email
+							account_code: user.id
+						}, (error, signature) ->
+							return next(error) if error?
+							res.render "subscriptions/new",
+								title      : "subscribe"
+								plan_code: req.query.planCode
+								currency: currency
+								plan:plan
+								recurlyConfig: JSON.stringify
+									currency: currency
+									subdomain: Settings.apis.recurly.subdomain
+								subscriptionFormOptions: JSON.stringify
+									acceptedCards: ['discover', 'mastercard', 'visa']
+									target      : "#subscribeForm"
+									signature   : signature
+									planCode    : req.query.planCode
+									successURL  : "#{Settings.siteUrl}/user/subscription/create?_csrf=#{req.session._csrf}"
+									accountCode : user.id
+									enableCoupons: true
+									acceptPaypal: true
+									account     :
+										firstName : user.first_name
+										lastName  : user.last_name
+										email     : user.email
 
 
 	userSubscriptionPage: (req, res, next) ->
@@ -83,6 +92,7 @@ module.exports = SubscriptionController =
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
+							recomendedCurrency: subscription.currency
 							plans: plans
 							subscription: subscription
 							groups: groups
