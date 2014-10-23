@@ -52,6 +52,7 @@ module.exports =
 	internal:
 		web:
 			port: webPort = 3000
+			host: "0.0.0.0"
 		documentupdater:
 			port: docUpdaterPort = 3003
 
@@ -127,9 +128,10 @@ module.exports =
 	# type 'filter' for ldap search authentication
 	#ldap: 
 	#	host: 'ldap://ldap.host.com:389'
+	#	type: 'bind' 
 	#	dnObj: 'cn'
-	#	type: 'bind'
-	#	dnSuffix: 'ou=Users,dc=example,dc=com'
+	#	dnSuffix: 'ou=Users,dc=example,dc=com
+	#	emailAtt: 'mail'
 	#	failMessage: 'LDAP User Fail'
 	#	fieldName: 'LDAP User'
 	#	placeholder: 'LDAP User ID'
@@ -270,12 +272,12 @@ module.exports =
 		}]
 
 		header: [{
-			text: "Register"
-			url: "/register"
-			only_when_logged_out: true
-		}, {
+	#		text: "Register"
+	#		url: "/register"
+	#		only_when_logged_out: true
+	#	}, {
 			text: "Log In"
-			url: "/login"
+			url: "/register"
 			only_when_logged_out: true
 		}, {
 			text: "Projects"

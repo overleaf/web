@@ -12,12 +12,12 @@ LdapAuth = require("../Security/LdapAuth")
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
 		email = req.body?.email?.toLowerCase()
-		if (Settings.ldap)
-			password = req.body?.ldap_user
-		else
-			password = req.body?.password
+		password = req.body?.password
 		redir = Url.parse(req.body?.redir or "/project").path
 		LdapAuth.authDN req.body, (err, isAllowed)->
+			if (Settings.ldap)
+				email = req.body.email
+				password = req.body.password
 			if !isAllowed
 				logger.log email:email, "ldap user fail"
 				res.statusCode = 429

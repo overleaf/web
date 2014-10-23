@@ -11,6 +11,7 @@ AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
 _ = require('underscore')
+Settings = require('settings-sharelatex')
 
 module.exports =
 
@@ -77,7 +78,10 @@ module.exports =
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
-			res.redirect '/login'
+			if (Settings.ldap)
+				res.redirect '/register'
+			else
+				res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
 		logger.log email: req.body.email, "attempted register"

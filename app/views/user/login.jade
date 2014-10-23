@@ -24,17 +24,6 @@ block content
 								)
 								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
 									| #{translate("must_be_email_address")}
-							if (settings.ldap)
-								.form-group
-									input.form-control(
-										type='numeric',
-										name='ldap_user',
-										placeholder='#{settings.ldap.placeholder}',
-										required,
-										ng-model="ldap_user"
-									)
-									span.small.text-primary(ng-show="registerForm.ldap_user.$invalid && registerForm.ldap_user.$dirty")
-										| #{translate("required")}
 							.form-group
 								input.form-control(
 									type='password',
@@ -52,5 +41,4 @@ block content
 								)
 									span(ng-show="!loginForm.inflight") #{translate("login")}
 									span(ng-show="loginForm.inflight") #{translate("logging_in")}...
-								if (!settings.ldap)
-									a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
+								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?

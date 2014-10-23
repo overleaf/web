@@ -28,7 +28,8 @@ block content
 													required,
 													ng-model="email",
 													ng-init="email = #{JSON.stringify(user.email)}",
-													ng-model-options="{ updateOn: 'blur' }"
+													ng-model-options="{ updateOn: 'blur' }",
+													disabled=settings.ldap!=null
 												)
 												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 													|  #{translate("must_be_email_address")}

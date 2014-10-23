@@ -23,12 +23,12 @@ module.exports =
 
 	_registrationRequestIsValid : (body, callback)->
 		email = sanitize.escape(body.email).trim().toLowerCase()
-		username = email.match(/^[^@]*/)
 		password = body.password
+		username = email.match(/^[^@]*/)
 		if @hasZeroLengths([password, email])
 			return false
 		else if !@validateEmail(email)
-			return false
+			return false || Settings.ldap
 		else
 			return true
 
@@ -48,8 +48,6 @@ module.exports =
 			if !isAllowed
 				return callback("LdapFail")
 			else
-				if (Settings.ldap)
-					userDetails.password = userDetails.ldap_user
 				User.findOne email:userDetails.email, (err, user)->
 					if err?
 						return callback err
