@@ -27,8 +27,8 @@ module.exports =
 		username = email.match(/^[^@]*/)
 		if @hasZeroLengths([password, email])
 			return false
-		else if !@validateEmail(email)
-			return false || Settings.ldap!=null
+		else if !@validateEmail(email) && !Settings.ldap
+			return false
 		else
 			return true
 
