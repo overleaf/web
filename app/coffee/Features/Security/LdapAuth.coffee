@@ -1,20 +1,20 @@
 Settings = require('settings-sharelatex')
 logger = require("logger-sharelatex")
 ldap = require('ldapjs')
-if (Settings.ldap)
-	lclient = ldap.createClient({ url: Settings.ldap.host })
 
 module.exports =
 	authDN: (body, callback)->
 		if (!Settings.ldap)
 			callback null, true 
 		else
+			lclient = ldap.createClient({ url: Settings.ldap.host })
+
 			dnObjFilter = Settings.ldap.dnObj + "=" + body.email
 			dn = dnObjFilter + "," + Settings.ldap.dnSuffix
 			filter = "(" + dnObjFilter + ")"
 			opts = { filter: filter, scope: 'sub' }
 		
-			if (Settings.ldap.type == 'bind')
+			if (!Settings.ldap.anonymous)
 				logger.log dn:dn, "ldap bind"
 				lclient.bind dn, body.password, (err)->
 					logger.log opts:opts, "ldap bind success, now ldap search"

@@ -124,11 +124,11 @@ module.exports =
 		sessionSecret: sessionSecret
 
 	# ldap configuration
-	# type 'bind' for ldap bind authentication
-	# type 'filter' for ldap search authentication
+	# Anonymous ldap use search for authentication
+	# Otherwise use bind for authentication
 	#ldap: 
 	#	host: 'ldap://ldap.host.com:389'
-	#	type: 'bind' 
+	#	anonymous: true
 	#	dnObj: 'cn'
 	#	dnSuffix: 'ou=Users,dc=example,dc=com
 	#	emailAtt: 'mail'
