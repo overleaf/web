@@ -13,6 +13,9 @@ define [
 		$scope.$on "pdf:error:display", () ->
 			$scope.pdf.error = true
 
+		$scope.$on "editor:recompile", ()->
+			$scope.recompile()
+
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
 			if options.isAutoCompile
@@ -143,9 +146,6 @@ define [
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
 					
-		# This needs to be public.
-		ide.$scope.recompile = $scope.recompile
-
 		$scope.clearCache = () ->
 			$http {
 				url: "/project/#{$scope.project_id}/output"
