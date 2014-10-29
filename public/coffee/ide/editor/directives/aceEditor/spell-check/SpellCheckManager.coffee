@@ -14,6 +14,10 @@ define [
 			@$scope.$watch "spellCheckLanguage", (language, oldLanguage) =>
 				if language != oldLanguage and oldLanguage?
 					@runFullCheck()
+					
+			@$scope.$watch "spellCheckEnabled", (value) =>
+				# Clears existing check and only runs if now enabled.
+				@runFullCheck()
 
 			onChange = (e) =>
 				@runCheckOnChange(e)
@@ -50,11 +54,11 @@ define [
 
 		runFullCheck: () ->
 			@highlightedWordManager.clearRows()
-			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
+			if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()
 
 		runCheckOnChange: (e) ->
-			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
+			if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@highlightedWordManager.applyChange(e.data)
 				@markLinesAsUpdated(e.data)
 				@runSpellCheckSoon()

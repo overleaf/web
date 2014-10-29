@@ -45,7 +45,7 @@ define [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.inputs = 
-				name: "name.tex"
+				name: "script.py"
 			$scope.state =
 				inflight: false
 

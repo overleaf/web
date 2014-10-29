@@ -30,12 +30,14 @@ define [
 				autoComplete: "="
 				sharejsDoc: "="
 				spellCheckLanguage: "="
+				spellCheckEnabled: "="
 				highlights: "="
 				text: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "=",
-				onCtrlEnter: "="
+				navigateHighlights: "="
+				aceMode: "="
+				wrapLines: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -107,14 +109,13 @@ define [
 							editor.insert("\\textit{" + text + "}")
 					readOnly: false
 
-				scope.$watch "onCtrlEnter", (callback) ->
-					if callback?
-						editor.commands.addCommand 
-							name: "compile",
-							bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
-							exec: (editor) =>
-								callback()
-							readOnly: true
+				editor.commands.addCommand
+					name: "compile",
+					bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
+					exec: (editor) =>
+						event = "#{scope.name}:recompile"
+						$rootScope.$broadcast event
+					readOnly: true
 
 				# Make '/' work for search in vim mode.
 				editor.showCommandLine = (arg) =>
@@ -154,9 +155,19 @@ define [
 					if text?
 						editor.setValue(text, -1)
 						session = editor.getSession()
-						session.setUseWrapMode(true)
-						session.setMode("ace/mode/latex")
-
+						session.setUseWrapMode(scope.wrapLines)
+						session.setMode("ace/mode/#{scope.aceMode}")
+						
+				scope.$watch "aceMode", (mode) ->
+					if mode?
+						session = editor.getSession()
+						session.setMode("ace/mode/#{mode}")
+						
+				scope.$watch "wrapLines", (wrap) ->
+					if wrap?
+						session = editor.getSession()
+						session.setUseWrapMode(wrap)
+						
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()
 					session.setAnnotations annotations
@@ -168,8 +179,9 @@ define [
 
 				resetSession = () ->
 					session = editor.getSession()
-					session.setUseWrapMode(true)
-					session.setMode("ace/mode/latex")
+					session.setUseWrapMode(scope.wrapLines)
+					session.setMode("ace/mode/#{scope.aceMode}")
+					session.setAnnotations scope.annotations
 
 				updateCount = 0
 				onChange = () ->
