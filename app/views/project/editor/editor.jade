@@ -18,7 +18,8 @@ div.full-size(
 			theme="settings.theme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
-			auto-complete="settings.autoComplete",
+			auto-complete="editor.editor_mode == 'latex' && settings.autoComplete",
+			spell-check-enabled="editor.editor_mode == 'latex'",
 			spell-check-language="project.spellCheckLanguage",
 			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
 			show-print-margin="false",
@@ -29,12 +30,13 @@ div.full-size(
 			resize-on="layout:main:resize,layout:pdf:resize",
 			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
 			read-only="!permissions.write",
-			on-ctrl-enter="recompile"
+			ace-mode="editor.ace_mode",
+			wrap-lines="editor.editor_mode == 'latex'"
 		)
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
-			include ./pdf
+			include ./output_panel/main
 
 	.ui-layout-resizer-controls.synctex-controls(
 		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
@@ -60,5 +62,5 @@ div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"
 	ng-show="ui.view == 'pdf'"
 )
-	include ./pdf
+	include ./output_panel/main
 	

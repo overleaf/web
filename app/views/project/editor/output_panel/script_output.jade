@@ -1,0 +1,55 @@
+div.full-size(ng-controller="ScriptOutputController")
+	.toolbar.toolbar-tall
+		a.btn.btn-info(
+			href,
+			ng-disabled="running",
+			ng-click="run()"
+		)
+			i.fa.fa-fw(
+				ng-class="{'fa-refresh fa-spin': running, 'fa-play': !running }"
+			)
+			| &nbsp;&nbsp;
+			span(ng-show="!running") Run
+			span(ng-show="running") Running...
+			
+	div.script-output
+		.script-uncompiled(ng-show="uncompiled")
+			| &nbsp;
+			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
+			| &nbsp;&nbsp;Click here to run your script!
+	
+		.alert.alert-danger(ng-show="error")
+			strong #{translate("server_error")} 
+			span #{translate("somthing_went_wrong_compiling")}
+
+		.alert.alert-danger(ng-show="timedout")
+			strong #{translate("timedout")}. 
+			span #{translate("proj_timed_out_reason")}
+		
+		.output-file.card.card-thin(ng-repeat="file in files")
+			.page-header.output-file-page-header {{ file.path }}
+			img(
+				ng-if="file.type == 'image'"
+				ng-src="{{ file.url }}"
+			)
+			iframe(
+				ng-if="file.type == 'pdf'"
+				ng-src="{{ file.url }}"
+			)
+			div.output-file-text(
+				ng-if="file.type == 'text'"
+			)
+				p.row-spaced-small.text-center.loading(ng-show="file.loading")
+					i.fa.fa-refresh.fa-spin
+					span  #{translate("loading")}
+				pre(ng-show="!file.loading") {{ file.content }}
+			p.output-file-download-link.text-center(ng-if="file.type != 'image'")
+				a(ng-href="{{file.url}}", target="_blank") Download
+
+		.output-file.card.card-thin(ng-if="output.stdout && output.stdout != ''")
+			.page-header.output-file-page-header Output
+			pre.output.stdout {{ output.stdout }}
+		
+		.output-file.card.card-thin(ng-if="output.stderr && output.stderr != ''")
+			.page-header.output-file-page-header Errors
+			pre.output.stderr {{ output.stderr }}
