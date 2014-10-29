@@ -112,6 +112,9 @@ describe "CompileManager", ->
 			@features = {
 				compileTimeout:   @timeout = 42
 				compileGroup:     @group = "priority"
+				compileMemory:    @memory = 1024
+				compileProcesses: @processes = 57
+				compileCpuShares: @cpu_shares = 456
 			}
 			@Project.findById = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { features: @features })
@@ -132,6 +135,9 @@ describe "CompileManager", ->
 				.calledWith(null, {
 					timeout:      @timeout
 					compileGroup: @group
+					processes:    @processes
+					cpu_shares:   @cpu_shares
+					memory:       @memory
 				})
 				.should.equal true
 				
@@ -259,3 +265,26 @@ describe "CompileManager", ->
 			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
 				canCompile.should.equal false
 				done()
+
+	describe "sortOutputFiles", ->
+		it "should prioritise png over others", ->
+			@CompileManager.sortOutputFiles([{
+				path: "main.csv"
+			}, {
+				path: "main.png"
+			}]).should.deep.equal [{
+				path: "main.png"
+			}, {
+				path: "main.csv"
+			}]
+
+		it "should sort alphabetically with the same extension", ->
+			@CompileManager.sortOutputFiles([{
+				path: "bbb.png"
+			}, {
+				path: "aaa.png"
+			}]).should.deep.equal [{
+				path: "aaa.png"
+			}, {
+				path: "bbb.png"
+			}]

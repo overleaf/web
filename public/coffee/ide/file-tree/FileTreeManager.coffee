@@ -142,6 +142,13 @@ define [
 				if entity.children?
 					@_forEachEntityInFolder(entity, childPath, callback)
 
+		getAllActiveDocs: () ->
+			docs = []
+			@_forEachEntityInFolder @$scope.rootFolder, null, (entity) ->
+				if entity.type == "doc" and !entity.deleted
+					docs.push entity
+			return docs
+
 		getEntityPath: (entity) ->
 			@_getEntityPathInFolder @$scope.rootFolder, entity
 

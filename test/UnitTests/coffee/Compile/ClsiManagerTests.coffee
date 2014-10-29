@@ -42,6 +42,7 @@ describe "ClsiManager", ->
 							type: "log"
 							build: 1234
 						}]
+						output: @output = "mock output"
 				})
 				@ClsiManager.sendRequest @project_id, {compileGroup:"standard"}, @callback
 
@@ -65,7 +66,7 @@ describe "ClsiManager", ->
 					type: "log"
 					build: 1234
 				}]
-				@callback.calledWith(null, @status, outputFiles).should.equal true
+				@callback.calledWith(null, @status, outputFiles, @output).should.equal true
 
 		describe "with a failed compile", ->
 			beforeEach ->
@@ -139,7 +140,13 @@ describe "ClsiManager", ->
 
 		describe "with a valid project", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, {timeout:100}, (error, request) =>
+				options = {
+					timeout:    @timeout = 42
+					memory:     @memory = 1024
+					processes:  @processes = 57
+					cpu_shares: @cpu_shares = 456
+				}
+				@ClsiManager._buildRequest @project_id, options, (error, request) =>
 					@request = request
 					done()
 
@@ -163,7 +170,10 @@ describe "ClsiManager", ->
 					compile:
 						options:
 							compiler: @compiler
-							timeout : 100
+							timeout : @timeout
+							memory:     @memory
+							processes:  @processes
+							cpu_shares: @cpu_shares
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
@@ -218,6 +228,31 @@ describe "ClsiManager", ->
 			
 			it "should return an error", ->
 				expect(@error).to.exist
+				
+		describe "with a python file as the root doc", ->
+			beforeEach (done) ->
+				@project =
+					_id: @project_id
+					compiler: @compiler = "latex"
+					rootDoc_id: "mock-doc-id-1"
+				@docs = {
+					"/main.py": @doc_1 = {
+						name: "main.py"
+						_id: "mock-doc-id-1"
+						lines: ["Hello", "world"]
+					}
+				}
+				@files = {}
+
+				@Project.findById = sinon.stub().callsArgWith(2, null, @project)
+				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
+				
+				@ClsiManager._buildRequest @project, null, (@error, @request) =>
+					done()
+					
+			it "should set the compiler to python", ->
+				@request.compile.options.compiler.should.equal "python"
 
 
 	describe '_postToClsi', ->

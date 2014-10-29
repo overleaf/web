@@ -8,7 +8,10 @@ define [
 			@$scope.editor = {
 				sharejs_doc: null
 				open_doc_id: null
+				open_doc: null
 				opening: true
+				editor_mode: null
+				ace_mode: null
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -32,8 +35,10 @@ define [
 			open_doc_id = 
 				@ide.localStorage("doc.open_id.#{@$scope.project_id}") or
 				@$scope.project.rootDoc_id
-			return if !open_doc_id?
-			doc = @ide.fileTreeManager.findEntityById(open_doc_id)
+			if open_doc_id?
+				doc = @ide.fileTreeManager.findEntityById(open_doc_id)
+			if !doc?
+				doc = @ide.fileTreeManager.getAllActiveDocs()[0]
 			return if !doc?
 			@openDoc(doc)
 
@@ -50,6 +55,9 @@ define [
 				return
 
 			@$scope.editor.open_doc_id = doc.id
+			@$scope.editor.open_doc = doc
+			@$scope.editor.editor_mode = @_getEditorModeFromDoc(doc)
+			@$scope.editor.ace_mode = @_getAceModeFromDoc(doc)
 
 			@ide.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)
@@ -100,6 +108,22 @@ define [
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
+			
+		_getEditorModeFromDoc: (doc) ->
+			extension = doc.name.split(".").pop()?.toLowerCase()
+			if extension in ["py", "r"]
+				return "script"
+			else
+				return "latex"
+				
+		_getAceModeFromDoc: (doc) ->
+			extension = doc.name.split(".").pop()?.toLowerCase()
+			if extension == "py"
+				return "python"
+			else if extension == "r"
+				return "r"
+			else
+				return "latex"
 
 		getCurrentDocValue: () ->
 			@$scope.editor.sharejs_doc?.getSnapshot()
