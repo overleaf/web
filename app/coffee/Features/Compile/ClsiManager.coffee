@@ -8,7 +8,7 @@ logger = require "logger-sharelatex"
 url = require("url")
 
 module.exports = ClsiManager =
-	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
+	sendRequest: (project_id, options = {}, callback = (error, success, outputFiles, output) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
@@ -19,6 +19,7 @@ module.exports = ClsiManager =
 					null
 					response?.compile?.status
 					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+					response?.compile?.output
 				)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
@@ -56,14 +57,11 @@ module.exports = ClsiManager =
 				type: file.type
 		return outputFiles
 
-	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
-	_buildRequest: (project_id, settingsOverride={}, callback = (error, request) ->) ->
+	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r"]
+	_buildRequest: (project_id, options={}, callback = (error, request) ->) ->
 		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
-
-			if project.compiler not in ClsiManager.VALID_COMPILERS
-				project.compiler = "pdflatex"
 
 			ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
 				return callback(error) if error?
@@ -81,7 +79,7 @@ module.exports = ClsiManager =
 							content: doc.lines.join("\n")
 						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 							rootResourcePath = path
-						if settingsOverride.rootDoc_id? and doc._id.toString() == settingsOverride.rootDoc_id.toString()
+						if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
 							rootResourcePathOverride = path
 
 					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
@@ -96,11 +94,25 @@ module.exports = ClsiManager =
 					if !rootResourcePath?
 						callback new Error("no root document exists")
 					else
+						compiler = project.compiler
+						if options.compiler?
+							compiler = options.compiler
+						else if rootResourcePath.match(/\.R$/)
+							compiler = "r"
+						else if rootResourcePath.match(/\.py$/)
+							compiler = "python"
+
+						if compiler not in ClsiManager.VALID_COMPILERS
+							compiler = "pdflatex"
+
 						callback null, {
 							compile:
 								options:
-									compiler: project.compiler
-									timeout: settingsOverride.timeout
+									compiler:   compiler
+									timeout:    options.timeout
+									memory:     options.memory
+									cpu_shares: options.cpu_shares
+									processes:  options.processes
 								rootResourcePath: rootResourcePath
 								resources: resources
 						}

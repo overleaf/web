@@ -1,4 +1,4 @@
-.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
+.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled, .script-output {
 	.full-size;
 	top: 58px;
 }
@@ -7,7 +7,7 @@
 	padding: @line-height-computed / 2;
 }
 
-.pdf-uncompiled {
+.pdf-uncompiled, .script-uncompiled {
 	.fa {
 		color: @blue;
 	}
@@ -145,6 +145,58 @@
 	.btn-xs {
 		line-height: 1.3;
 		padding: 0 2px 0;
+	}
+}
+
+.script-output {
+	overflow: auto;
+	background-color: @gray-lightest;
+	padding: @line-height-computed / 2;
+	
+	pre.output {
+		font-size: 14px;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		margin: (@line-height-computed / 2) 0;
+		&.stdout {
+			color: black;
+		}
+		&.stderr {
+			color: @brand-danger;
+		}
+	}
+	
+	.output-file {
+		margin-bottom: @line-height-computed / 2;
+		
+		.output-file-page-header {
+			margin-bottom: 0;
+			padding-bottom: @line-height-computed / 4;
+		}
+		
+		img {
+			max-width: 100%;
+			max-height: 600px;
+		}
+		
+		iframe {
+			width: 100%;
+			height: 700px;
+			border: none;
+		}
+		
+		.output-file-text {
+			pre {
+				margin: 0;
+				font-size: 14px;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+			}
+		}
+		
+		.output-file-download-link {
+			margin-top: @line-height-computed / 2;
+		}
 	}
 }
 

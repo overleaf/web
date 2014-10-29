@@ -32,6 +32,7 @@ module.exports = CompileController =
 					status: status
 					outputFiles: outputFiles
 					compileGroup: limits?.compileGroup
+					output: output
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->
@@ -53,13 +54,18 @@ module.exports = CompileController =
 			return next(error) if error?
 			res.send(200)
 
-	compileAndDownloadPdf: (req, res, next)->
+	compileAndDownloadOutput: (req, res, next)->
 		project_id = req.params.project_id
-		CompileManager.compile project_id, null, {}, (err)->
+		logger.log {project_id}, "compiling and downloading project"
+		CompileManager.compile project_id, null, {}, (err, status, outputFiles = [])->
+			logger.log {project_id, outputFiles}, "compiled project"
 			if err?
 				logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
 				res.send 500
-			url = "/project/#{project_id}/output/output.pdf"
+			if outputFiles.length == 0
+				logger.err {project_id}, "no output files to return"
+			outputFiles = CompileManager.sortOutputFiles(outputFiles)
+			url = "/project/#{project_id}/output/#{outputFiles[0].path}"
 			CompileController.proxyToClsi project_id, url, req, res, next
 
 	getFileFromClsi: (req, res, next = (error) ->) ->

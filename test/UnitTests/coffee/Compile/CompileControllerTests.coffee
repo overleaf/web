@@ -27,7 +27,6 @@ describe "CompileController", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"../../infrastructure/Metrics": @Metrics =  { inc: sinon.stub() }
 			"./CompileManager":@CompileManager
-			"../User/UserGetter":@UserGetter
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
@@ -70,6 +69,7 @@ describe "CompileController", ->
 				@res.body.should.equal JSON.stringify({
 					status: @status
 					outputFiles: @outputFiles
+					output: @output
 				})
 
 		describe "when an auto compile", ->
@@ -300,22 +300,28 @@ describe "CompileController", ->
 				.calledWith(200)
 				.should.equal true
 
-	describe "compileAndDownloadPdf", ->
+	describe "compileAndDownloadOutput", ->
 		beforeEach ->
 			@req =
 				params:
 					project_id:@project_id
-			@CompileManager.compile.callsArgWith(3)
+			@outputFiles = [{
+				path: "main.png"
+			}, {
+				path: "other.csv"
+			}]
+			@CompileManager.compile.callsArgWith(3, null, "success", @outputFiles)
+			@CompileManager.sortOutputFiles = sinon.stub().returns(@outputFiles)
 			@CompileController.proxyToClsi = sinon.stub()
 			@res = 
 				send:=>
 									
 		it "should call compile in the compile manager", (done)->
-			@CompileController.compileAndDownloadPdf @req, @res
+			@CompileController.compileAndDownloadOutput @req, @res
 			@CompileManager.compile.calledWith(@project_id).should.equal true
 			done()
 
 		it "should proxy the res to the clsi with correct url", (done)->
-			@CompileController.compileAndDownloadPdf @req, @res
-			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
+			@CompileController.compileAndDownloadOutput @req, @res
+			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/main.png", @req, @res).should.equal true
 			done()

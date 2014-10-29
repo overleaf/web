@@ -128,7 +128,8 @@ module.exports = class Router
 		app.get  '/project/:project_id/details', httpAuth, ProjectApiController.getProjectDetails
 
 		app.get '/internal/project/:Project_id/zip', httpAuth, ProjectDownloadsController.downloadProject
-		app.get '/internal/project/:project_id/compile/pdf', httpAuth, CompileController.compileAndDownloadPdf
+		# The 'pdf' in this end point is a relic of ShareLaTeX only doing PDFs
+		app.get '/internal/project/:project_id/compile/pdf', httpAuth, CompileController.compileAndDownloadOutput
 
 
 		app.get  '/project/:Project_id/doc/:doc_id', httpAuth, DocumentController.getDocument
