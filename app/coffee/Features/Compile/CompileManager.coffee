@@ -54,7 +54,16 @@ module.exports = CompileManager =
 				callback null, {
 					timeout: owner.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
 					compileGroup: owner.features?.compileGroup || Settings.defaultFeatures.compileGroup
+					processes: owner.features?.compileProcesses || Settings.defaultFeatures.compileProcesses
+					cpu_shares: owner.features?.compileCpuShares || Settings.defaultFeatures.compileCpuShares
+					memory: owner.features?.compileMemory || Settings.defaultFeatures.compileMemory
 				}
+			
+	getLogLines: (project_id, callback)->
+		Metrics.inc "editor.raw-logs"
+		ClsiManager.getLogLines project_id, (error, logLines)->
+			return callback(error) if error?
+			callback null, logLines
 
 	COMPILE_DELAY: 1 # seconds
 	_checkIfRecentlyCompiled: (project_id, user_id, callback = (error, recentlyCompiled) ->) ->
@@ -91,3 +100,32 @@ module.exports = CompileManager =
 			else
 				ProjectRootDocManager.setRootDocAutomatically project_id, callback
 		
+	EXTENSION_PRIORITIES: {
+		"png":  2
+		"jpg":  2
+		"jpeg": 2
+		"pdf":  1
+	}
+	# Sort output files by extension based on the above priorities,
+	# and then alphabetically.
+	sortOutputFiles: (outputFiles) ->
+		outputFiles.sort (a,b) ->
+			aParts = a.path.split(".")
+			if aParts.length > 1
+				aExt = aParts.pop().toLowerCase()
+			aPriority = CompileManager.EXTENSION_PRIORITIES[aExt] or 0
+			bParts = b.path.split(".")
+			if bParts.length > 1
+				bExt = bParts.pop().toLowerCase()
+			bPriority = CompileManager.EXTENSION_PRIORITIES[bExt] or 0
+			if aPriority > bPriority
+				return -1
+			else if aPriority < bPriority
+				return 1
+			else if a.path < b.path
+				return -1
+			else if a.path > b.path
+				return 1
+			else return 0
+				
+				

@@ -17,6 +17,14 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 					ng-model="templateDetails.description",
 					value=""
 				)
+				.form-group
+					label(for="rootDoc_id") #{translate("main_document")}
+					select.form-control(
+						name="rootDoc_id",
+						ng-model="project.rootDoc_id",
+						ng-options="doc.doc.id as doc.path for doc in docs"
+					)
+			
 			div(ng-show="templateDetails.exists").text-center.templateDetails
 				|  #{translate("project_last_published_at")} 
 				strong {{templateDetails.publishedDate}}. 
