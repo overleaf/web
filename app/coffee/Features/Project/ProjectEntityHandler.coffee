@@ -64,14 +64,15 @@ module.exports = ProjectEntityHandler =
 			files = {}
 			for folderPath, folder of folders
 				for file in folder.fileRefs
-					files[path.join(folderPath, file.name)] = file
+					if file?
+						files[path.join(folderPath, file.name)] = file
 			callback null, files
 
 	flushProjectToThirdPartyDataStore: (project_id, callback) ->
 		self = @
 		logger.log project_id:project_id, "flushing project to tpds"
 		documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-		documentUpdaterHandler.flushProjectToMongo project_id, undefined, (error) ->
+		documentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
 			Project.findById project_id, (error, project) ->
 				return callback(error) if error?
@@ -183,6 +184,9 @@ module.exports = ProjectEntityHandler =
 			logger.log project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
+				if !origonalFileRef?
+					logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
+					return callback()
 				fileRef = new File name : origonalFileRef.name
 				FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
 					if err?
