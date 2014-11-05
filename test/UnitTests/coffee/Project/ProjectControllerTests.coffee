@@ -25,8 +25,8 @@ describe "ProjectController", ->
 		@ProjectDuplicator =
 			duplicate: sinon.stub().callsArgWith(3, null, {_id:@project_id})
 		@ProjectCreationHandler =
-			createExampleProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
-			createBasicProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
+			createPythonProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
+			createRProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 		@LimitationsManager = 
@@ -175,19 +175,19 @@ describe "ProjectController", ->
 	describe "newProject", ->
 
 		it "should call the projectCreationHandler with createExampleProject", (done)->
-			@req.body.template = "example"
+			@req.body.template = "python"
 			@res.send = (json)=>
-				@ProjectCreationHandler.createExampleProject.calledWith(@user._id, @projectName).should.equal true
-				@ProjectCreationHandler.createBasicProject.called.should.equal false
+				@ProjectCreationHandler.createPythonProject.calledWith(@user._id, @projectName).should.equal true
+				@ProjectCreationHandler.createRProject.called.should.equal false
 				done()
 			@ProjectController.newProject @req, @res
 
 
 		it "should call the projectCreationHandler with createBasicProject", (done)->
-			@req.body.template = "basic"
+			@req.body.template = "r"
 			@res.send = (json)=>
-				@ProjectCreationHandler.createExampleProject.called.should.equal false
-				@ProjectCreationHandler.createBasicProject.calledWith(@user._id, @projectName).should.equal true
+				@ProjectCreationHandler.createPythonProject.called.should.equal false
+				@ProjectCreationHandler.createRProject.calledWith(@user._id, @projectName).should.equal true
 				done()
 			@ProjectController.newProject @req, @res
 

@@ -94,10 +94,10 @@ module.exports = ProjectController =
 		logger.log user: user, projectType: template, name: projectName, "creating project"
 		async.waterfall [
 			(cb)->
-				if template == 'example'
-					projectCreationHandler.createExampleProject user._id, projectName, cb
+				if template == 'r'
+					projectCreationHandler.createRProject user._id, projectName, cb
 				else
-					projectCreationHandler.createBasicProject user._id, projectName, cb
+					projectCreationHandler.createPythonProject user._id, projectName, cb
 		], (err, project)->
 			if err?
 				logger.error err: err, project: project, user: user, name: projectName, templateType: template, "error creating project"
