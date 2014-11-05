@@ -79,108 +79,57 @@ describe 'ProjectCreationHandler', ->
 			it 'should return the error to the callback', ->
 				should.exist @callback.args[0][0]
 
-	describe 'Creating a basic project', ->
+	describe 'Creating a python project', ->
 		beforeEach ->
 			@project = new @ProjectModel()
 			@handler._buildTemplate = (template_name, user, project_name, callback) ->
-				if template_name == "mainbasic.tex"
-					return callback(null, ["mainbasic.tex", "lines"])
+				if template_name == "main.py"
+					return callback(null, ["main.py", "lines"])
 				throw new Error("unknown template: #{template_name}")
 			sinon.spy @handler, "_buildTemplate"
 			@handler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
-			@handler.createBasicProject(ownerId, projectName, @callback)
+			@handler.createPythonProject(ownerId, projectName, @callback)
 
 		it "should create a blank project first", ->
 			@handler.createBlankProject.calledWith(ownerId, projectName)
 				.should.equal true
 
 		it 'should insert main.tex', ->
-			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"])
+			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.py", ["main.py", "lines"])
 				.should.equal true
 
 		it 'should set the main doc id', ->
 			@ProjectEntityHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
-		it 'should build the mainbasic.tex template', ->
+		it 'should build the main.py template', ->
 			@handler._buildTemplate
-				.calledWith("mainbasic.tex", ownerId, projectName)
+				.calledWith("main.py", ownerId, projectName)
 				.should.equal true
 
-
-	describe 'Creating an example project', ->
+	describe 'Creating an R project', ->
 		beforeEach ->
 			@project = new @ProjectModel()
 			@handler._buildTemplate = (template_name, user, project_name, callback) ->
-				if template_name == "main.tex"
-					return callback(null, ["main.tex", "lines"])
-				if template_name == "references.bib"
-					return callback(null, ["references.bib", "lines"])
+				if template_name == "main.R"
+					return callback(null, ["main.R", "lines"])
 				throw new Error("unknown template: #{template_name}")
 			sinon.spy @handler, "_buildTemplate"
 			@handler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
-			@handler.createExampleProject(ownerId, projectName, @callback)
+			@handler.createRProject(ownerId, projectName, @callback)
 
 		it "should create a blank project first", ->
 			@handler.createBlankProject.calledWith(ownerId, projectName)
 				.should.equal true
 
 		it 'should insert main.tex', ->
-			@ProjectEntityHandler.addDoc
-				.calledWith(project_id, rootFolderId, "main.tex", ["main.tex", "lines"])
-				.should.equal true
-
-		it 'should insert references.bib', ->
-			@ProjectEntityHandler.addDoc
-				.calledWith(project_id, rootFolderId, "references.bib", ["references.bib", "lines"])
-				.should.equal true
-
-		it 'should insert universe.jpg', ->
-			@ProjectEntityHandler.addFile
-				.calledWith(
-					project_id, rootFolderId, "universe.jpg",
-					Path.resolve(__dirname + "/../../../../app/templates/project_files/universe.jpg")
-				)
+			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.R", ["main.R", "lines"])
 				.should.equal true
 
 		it 'should set the main doc id', ->
 			@ProjectEntityHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
-		it 'should build the main.tex template', ->
+		it 'should build the main.R template', ->
 			@handler._buildTemplate
-				.calledWith("main.tex", ownerId, projectName)
+				.calledWith("main.R", ownerId, projectName)
 				.should.equal true
 
-		it 'should build the references.bib template', ->
-			@handler._buildTemplate
-				.calledWith("references.bib", ownerId, projectName)
-				.should.equal true
-
-
-	describe "_buildTemplate", ->
-
-		beforeEach (done)->
-			@handler._buildTemplate "main.tex", @user_id, projectName, (err, templateLines)=>
-				@template = templateLines.reduce (singleLine, line)-> "#{singleLine}\n#{line}"
-				done()
-
-		it "should insert the project name into the template", (done)->
-			@template.indexOf(projectName).should.not.equal -1
-			done()
-
-		it "should insert the users name into the template", (done)->
-			@template.indexOf(@user.first_name).should.not.equal -1
-			@template.indexOf(@user.last_name).should.not.equal -1
-			done()
-
-		it "should not have undefined in the template", (done)->
-			@template.indexOf("undefined").should.equal -1
-			done()
-
-		it "should not have any underscore brackets in the output", (done)->
-			@template.indexOf("{{").should.equal -1
-			@template.indexOf("<%=").should.equal -1
-			done()
-
-		it "should put the year in", (done)->
-			@template.indexOf(new Date().getUTCFullYear()).should.not.equal -1
-			done()

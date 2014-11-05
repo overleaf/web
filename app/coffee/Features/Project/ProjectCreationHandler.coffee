@@ -27,38 +27,29 @@ module.exports =
 				return callback(err) if err?
 				callback err, project
 
-	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
+	createPythonProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @
 		@createBlankProject owner_id, projectName, (error, project)->
 			return callback(error) if error?
-			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
+			self._buildTemplate "main.py", owner_id, projectName, (error, docLines)->
 				return callback(error) if error?
-				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
+				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.py", docLines, (error, doc)->
 					return callback(error) if error?
 					ProjectEntityHandler.setRootDoc project._id, doc._id, (error) ->
+						return callback(error) if error?
 						callback(error, project)
 
-	createExampleProject: (owner_id, projectName, callback = (error, project) ->)->
+	createRProject: (owner_id, projectName, callback = (error, project) ->)->
 		self = @
 		@createBlankProject owner_id, projectName, (error, project)->
 			return callback(error) if error?
-			async.series [
-				(callback) ->
-					self._buildTemplate "main.tex", owner_id, projectName, (error, docLines)->
+			self._buildTemplate "main.R", owner_id, projectName, (error, docLines)->
+				return callback(error) if error?
+				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.R", docLines, (error, doc)->
+					return callback(error) if error?
+					ProjectEntityHandler.setRootDoc project._id, doc._id, (error) ->
 						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
-							return callback(error) if error?
-							ProjectEntityHandler.setRootDoc project._id, doc._id, callback
-				(callback) ->
-					self._buildTemplate "references.bib", owner_id, projectName, (error, docLines)->
-						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "references.bib", docLines, (error, doc)->
-							callback(error)
-				(callback) ->
-					universePath = Path.resolve(__dirname + "/../../../templates/project_files/universe.jpg")
-					ProjectEntityHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, callback
-			], (error) ->
-				callback(error, project)
+						callback(error, project)
 
 	_buildTemplate: (template_name, user_id, project_name, callback = (error, output) ->)->
 		User.findById user_id, "first_name last_name", (error, user)->
