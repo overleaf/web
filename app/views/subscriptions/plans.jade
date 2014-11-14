@@ -62,6 +62,7 @@ block content
 											li #{translate("one_collaborator")}
 											li &nbsp;
 											li &nbsp;
+											li &nbsp;
 											li
 												br
 												a.btn.btn-info(href="/register") #{translate("sign_up_now")}
@@ -81,6 +82,7 @@ block content
 												strong #{translate("collabs_per_proj", {collabcount:10})}
 											li #{translate("full_doc_history")}
 											li #{translate("sync_to_dropbox")}
+											li #{translate("sync_to_github")}
 											li
 												br
 												a.btn.btn-info(
@@ -105,6 +107,7 @@ block content
 												strong #{translate("unlimited_collabs")}
 											li #{translate("full_doc_history")}
 											li #{translate("sync_to_dropbox")}
+											li #{translate("sync_to_github")}
 											li
 												br
 												a.btn.btn-info(
@@ -121,6 +124,7 @@ block content
 										.circle #{translate("free")}
 										ul.list-unstyled
 											li #{translate("one_collaborator")}
+											li &nbsp;
 											li &nbsp;
 											li &nbsp;
 											li
@@ -140,6 +144,7 @@ block content
 												strong #{translate("collabs_per_proj", {collabcount:6})}
 											li #{translate("full_doc_history")}
 											li #{translate("sync_to_dropbox")}
+											li #{translate("sync_to_github")}
 											li
 												br
 												a.btn.btn-info(
@@ -159,6 +164,7 @@ block content
 												strong #{translate("collabs_per_proj", {collabcount:6})}
 											li #{translate("full_doc_history")}
 											li #{translate("sync_to_dropbox")}
+											li #{translate("sync_to_github")}
 											li
 												br
 												a.btn.btn-info(
@@ -221,5 +227,7 @@ block content
 					.col-md-4
 						.card.features.text-centered
 							i.fa.fa-dropbox.fa-5x
-							h4 #{translate("sync_to_dropbox")}
+							|  &nbsp; &nbsp; 
+							i.fa.fa-github.fa-5x
+							h4 #{translate("sync_to_dropbox_and_github")}
 							p #{translate("access_projects_anywhere")}

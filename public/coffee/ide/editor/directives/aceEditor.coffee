@@ -163,11 +163,14 @@ define [
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
 
+				editor.setOption("scrollPastEnd", true)
+
 				resetSession = () ->
 					session = editor.getSession()
 					session.setUseWrapMode(true)
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
+
 
 				updateCount = 0
 				onChange = () ->
@@ -216,8 +219,7 @@ define [
 					</div>
 					<div class="ace-editor-body"></div>
 					<div
-						id="spellCheckMenu"
-						class="dropdown context-menu"
+						class="dropdown context-menu spell-check-menu"
 						ng-show="spellingMenu.open"
 						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
 						ng-class="{open: spellingMenu.open}"

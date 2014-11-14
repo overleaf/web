@@ -6,7 +6,7 @@ SpellingController = require('./Features/Spelling/SpellingController')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
-EditorHttpController = require("./Features/Editor/EditorHttpController")
+EditorRouter = require("./Features/Editor/EditorRouter")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
@@ -16,11 +16,9 @@ metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 TemplatesRouter = require('./Features/Templates/TemplatesRouter')
-TemplatesController = require('./Features/Templates/TemplatesController')
-TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
-CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
+CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
 UserController = require("./Features/User/UserController")
 UserPagesController = require('./Features/User/UserPagesController')
@@ -62,6 +60,8 @@ module.exports = class Router
 		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.register
 
+		EditorRouter.apply(app, httpAuth)
+		CollaboratorsRouter.apply(app)
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
@@ -91,19 +91,10 @@ module.exports = class Router
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
-		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
-
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
 		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
-
-		app.post '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
-		app.post '/project/:Project_id/folder', SecurityManager.requestCanModifyProject, EditorHttpController.addFolder
-
-		app.post '/project/:Project_id/:entity_type/:entity_id/rename', SecurityManager.requestCanModifyProject, EditorHttpController.renameEntity
-		app.post '/project/:Project_id/:entity_type/:entity_id/move', SecurityManager.requestCanModifyProject, EditorHttpController.moveEntity
-		app.delete '/project/:Project_id/:entity_type/:entity_id', SecurityManager.requestCanModifyProject, EditorHttpController.deleteEntity
 
 		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
@@ -119,7 +110,6 @@ module.exports = class Router
 		app.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
 		app.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
 
-
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
 		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
@@ -129,11 +119,6 @@ module.exports = class Router
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-
-		app.post "/project/:Project_id/doc/:doc_id/restore", SecurityManager.requestCanAccessProject, EditorHttpController.restoreDoc
-
-		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
-		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
 
 		app.get  '/project/:Project_id/connected_users', SecurityManager.requestCanAccessProject, ConnectedUsersController.getConnectedUsers
 
@@ -251,13 +236,6 @@ module.exports = class Router
 				metrics.inc ('socket-io.disconnect')
 				EditorController.leaveProject client, user
 
-			client.on 'reportError', (error, callback) ->
-				EditorController.reportError client, error, callback
-
-			client.on 'sendUpdate', (doc_id, windowName, change)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorUpdatesController.applyAceUpdate(client, project_id, doc_id, windowName, change)
-
 			client.on 'applyOtUpdate', (doc_id, update) ->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorUpdatesController.applyOtUpdate(client, project_id, doc_id, update)
@@ -265,14 +243,6 @@ module.exports = class Router
 			client.on 'clientTracking.updatePosition', (cursorData) ->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.updateClientPosition(client, cursorData)
-
-			client.on 'addUserToProject', (email, newPrivalageLevel, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.addUserToProject project_id, email, newPrivalageLevel, callback
-
-			client.on 'removeUserFromProject', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.removeUserFromProject(project_id, user_id, callback)
 
 			client.on 'leaveDoc', (doc_id, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
@@ -282,37 +252,32 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.joinDoc(client, project_id, args...)
 
-			# Deprecated and can be removed after deploying.
-			client.on 'pdfProject', (opts, callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					CompileManager.compile project_id, user._id, opts, (error, status, outputFiles) ->
-						return callback error, status == "success", outputFiles
-
-			client.on 'getRootDocumentsList', (callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.getListOfDocPaths project_id, callback
-
-			client.on 'forceResyncOfDropbox', (callback)->
+			# The remaining can be done via HTTP
+			client.on 'addUserToProject', (email, newPrivalageLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.forceResyncOfDropbox project_id, callback
+					EditorController.addUserToProject project_id, email, newPrivalageLevel, callback
+
+			client.on 'removeUserFromProject', (user_id, callback)->
+				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+					EditorController.removeUserFromProject(project_id, user_id, callback)
 
 			client.on 'getUserDropboxLinkStatus', (owner_id, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					dropboxHandler.getUserRegistrationStatus owner_id, callback
 
-			client.on 'publishProjectAsTemplate', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					TemplatesController.publishProject user_id, project_id, callback
-
-			client.on 'unPublishProjectAsTemplate', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					TemplatesController.unPublishProject user_id, project_id, callback
-
-			client.on 'updateProjectDescription', (description, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.updateProjectDescription project_id, description, callback
-
-			client.on "getPublishedDetails", (user_id, callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					TemplatesController.getTemplateDetails user_id, project_id, callback
+			# client.on 'publishProjectAsTemplate', (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+			# 		TemplatesController.publishProject user_id, project_id, callback
+			# 
+			# client.on 'unPublishProjectAsTemplate', (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+			# 		TemplatesController.unPublishProject user_id, project_id, callback
+			# 
+			# client.on 'updateProjectDescription', (description, callback)->
+			# 	AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
+			# 		EditorController.updateProjectDescription project_id, description, callback
+			# 
+			# client.on "getPublishedDetails", (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
+			# 		TemplatesController.getTemplateDetails user_id, project_id, callback
 

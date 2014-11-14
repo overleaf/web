@@ -7,6 +7,7 @@ ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 ProjectDeleter = require("../Project/ProjectDeleter")
 ProjectGetter = require('../Project/ProjectGetter')
+UserGetter = require('../User/UserGetter')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 LimitationsManager = require("../Subscription/LimitationsManager")
@@ -33,34 +34,48 @@ module.exports = EditorController =
 	joinProject: (client, user, project_id, callback) ->
 		logger.log user_id:user._id, project_id:project_id, "user joining project"
 		Metrics.inc "editor.join-project"
+		EditorController.buildJoinProjectView project_id, user._id, (error, project, privilegeLevel, protocolVersion) ->
+			return callback(error) if error?
+			if !privilegeLevel
+				callback new Error("Not authorized")
+			else
+				client.join(project_id)
+				client.set("project_id", project_id)
+				client.set("owner_id", project.owner._id)
+				client.set("user_id", user._id)
+				client.set("first_name", user.first_name)
+				client.set("last_name", user.last_name)
+				client.set("email", user.email)
+				client.set("connected_time", new Date())
+				client.set("signup_date", user.signUpDate)
+				client.set("login_count", user.loginCount)
+				AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
+				
+				callback null, project, privilegeLevel, EditorController.protocolVersion
+
+				# can be done after the connection has happened
+				ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, ->
+				
+				# Only show the 'renamed or deleted' message once
+				if project.deletedByExternalDataSource
+					ProjectDeleter.unmarkAsDeletedByExternalSource project_id
+							
+	buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->
 				return callback(error) if error?
-				AuthorizationManager.getPrivilegeLevelForProject project, user,
-					(error, canAccess, privilegeLevel) ->
-						if error? or !canAccess
-							callback new Error("Not authorized")
+				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
+					return callback(error) if error?
+					AuthorizationManager.getPrivilegeLevelForProject project, user, (error, canAccess, privilegeLevel) ->
+						return callback(error) if error?
+						if !canAccess
+							callback null, null, false
 						else
-							client.join(project_id)
-							client.set("project_id", project_id)
-							client.set("owner_id", project.owner_ref._id)
-							client.set("user_id", user._id)
-							client.set("first_name", user.first_name)
-							client.set("last_name", user.last_name)
-							client.set("email", user.email)
-							client.set("connected_time", new Date())
-							client.set("signup_date", user.signUpDate)
-							client.set("login_count", user.loginCount)
-							AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
-							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
-
-							# can be done affter the connection has happened
-							ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, ->
-							
-							# Only show the 'renamed or deleted' message once
-							ProjectDeleter.unmarkAsDeletedByExternalSource project
-
+							callback(null,
+								ProjectEditorHandler.buildProjectModelView(project),
+								privilegeLevel
+							)
 
 	leaveProject: (client, user) ->
 		self = @
@@ -87,9 +102,15 @@ module.exports = EditorController =
 			if docLines?
 				docLines = for line in docLines
 					if line.text?
-						line.text = unescape(encodeURIComponent(line.text))
+						try
+							line.text = unescape(encodeURIComponent(line.text))
+						catch err
+							logger.err err:err, project_id:project_id, doc_id:doc_id, fromVersion:fromVersion, line:line, "error encoding line.text uri component"
 					else
-						line = unescape(encodeURIComponent(line))
+						try
+							line = unescape(encodeURIComponent(line))
+						catch err
+							logger.err err:err, project_id:project_id, doc_id:doc_id, fromVersion:fromVersion, line:line, "error encoding line uri component"
 					line
 			callback(err, docLines, version, ops)
 
@@ -150,15 +171,17 @@ module.exports = EditorController =
 				callback null, false
 			else
 				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
-					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, "", ->
+					return callback(err) if error?
+					# Flush to TPDS to add files to collaborator's Dropbox
+					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, ->
 					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
 					callback null, ProjectEditorHandler.buildUserModelView(user, privileges)
 
-	removeUserFromProject: (project_id, user_id, callback)->
-		CollaboratorsHandler.removeUserFromProject project_id, user_id, =>
+	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
+		CollaboratorsHandler.removeUserFromProject project_id, user_id, (error) =>
+			return callback(error) if error?
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
-			if callback?
-				callback()
+			callback()
 
 	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
 		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>

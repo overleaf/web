@@ -54,10 +54,7 @@ module.exports = SecurityManager =
 						res.redirect('/restricted')
 					else
 						logger.log "user not logged in and trying to access #{req.url}, being redirected to login"
-						req.query.redir = req._parsedUrl.pathname
-						url = "/register?#{querystring.stringify(req.query)}"
-						res.redirect url
-						email = "not logged in user"
+						AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 		if arguments.length > 1
 			options =
 				allow_auth_token: false
@@ -72,7 +69,7 @@ module.exports = SecurityManager =
 				if canModify
 					next()
 				else
-					logger.log "user_id: #{user._id} email: #{user.email} can not modify project redirecting to restricted page"
+					logger.log "user_id: #{user?._id} email: #{user?.email} can not modify project redirecting to restricted page"
 					res.redirect('/restricted')
 
 	userCanModifyProject : userCanModifyProject = (user, project, callback)->

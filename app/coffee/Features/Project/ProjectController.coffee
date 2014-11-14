@@ -72,7 +72,7 @@ module.exports = ProjectController =
 			else
 				res.send 200
 
-	cloneProject: (req, res)->
+	cloneProject: (req, res, next)->
 		metrics.inc "cloned-project"
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
@@ -147,7 +147,7 @@ module.exports = ProjectController =
 						projects: projects
 						tags: tags
 						user: user
-						hasSubscription: results.hasSubscription
+						hasSubscription: results.hasSubscription[0]
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?

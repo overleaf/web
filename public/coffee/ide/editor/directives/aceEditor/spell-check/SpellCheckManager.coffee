@@ -6,6 +6,8 @@ define [
 
 	class SpellCheckManager
 		constructor: (@$scope, @editor, @element) ->
+			$(document.body).append @element.find(".spell-check-menu")
+			
 			@updatedLines = []
 			@highlightedWordManager = new HighlightedWordManager(@editor)
 
@@ -17,7 +19,7 @@ define [
 				@runCheckOnChange(e)
 
 			@editor.on "changeSession", (e) =>
-				@runFullCheck()
+				@runSpellCheckSoon(200)
 
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
@@ -98,14 +100,14 @@ define [
 				end: cursor
 			return highlight
 
-		runSpellCheckSoon: () ->
+		runSpellCheckSoon: (delay = 1000) ->
 			run = () =>
 				delete @timeoutId
 				@runSpellCheck(@updatedLines)
 				@updatedLines = []
 			if @timeoutId?
 				clearTimeout @timeoutId
-			@timeoutId = setTimeout run, 1000
+			@timeoutId = setTimeout run, delay
 
 		markLinesAsUpdated: (change) ->
 			start = change.range.start

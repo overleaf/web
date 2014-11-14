@@ -17,7 +17,7 @@ define [
 			}
 			modal.result.then(resetState, resetState)
 
-	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, ide) ->
+	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, ide, $http) ->
 		user_id = ide.$scope.user.id
 		$scope.templateDetails = {exists:false}
 
@@ -29,34 +29,56 @@ define [
 			$scope.problemTalkingToTemplateApi = true
 
 		refreshPublishedStatus = ->
-			ide.socket.emit "getPublishedDetails", user_id, (err, data)->
-				if !data? or err? then return problemTalkingToTemplateApi()
-				$scope.templateDetails = data
-				$scope.templateDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
-				$scope.templateDetails.description = data.description
+			$http.get("/project/#{ide.project_id}/template")
+				.success (data) ->
+					$scope.templateDetails = data
+					$scope.templateDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
+					$scope.templateDetails.description = data.description
+				.error () ->
+					problemTalkingToTemplateApi()
 
 		refreshPublishedStatus()
-		$scope.$watch $scope.problemTalkingToTemplateApi, refreshPublishedStatus
+		$scope.$watch $scope.problemTalkingToTemplateApi, (value) ->
+			if value?
+				refreshPublishedStatus()
 
-		$scope.updateProjectDescription = ->
-			description = $scope.templateDetails.description
-			if description?
-				ide.socket.emit 'updateProjectDescription', description, (err) => 
-					if err? then return problemTalkingToTemplateApi()
+		updateProjectDescription = ->
+			$http.post("/project/#{ide.project_id}/template/description", {
+				description: $scope.templateDetails.description
+				_csrf: window.csrfToken
+			})
+			
+		# Save the description on modal close
+		$modalInstance.result.finally () -> updateProjectDescription()
 
 		$scope.publishTemplate = ->
 			$scope.state.publishInflight = true
-			ide.socket.emit 'publishProjectAsTemplate', user_id, (error) =>
-				if err? then return problemTalkingToTemplateApi()
-				refreshPublishedStatus()
-				$scope.state.publishInflight = false
+			updateProjectDescription()
+				.error () ->
+					problemTalkingToTemplateApi()
+				.success () ->
+					$http
+						.post("/project/#{ide.project_id}/template/publish", {
+							_csrf: window.csrfToken
+						})
+						.error () ->
+							problemTalkingToTemplateApi()
+						.success () ->
+							refreshPublishedStatus()
+							$scope.state.publishInflight = false
+					
 
 		$scope.unpublishTemplate = ->
 			$scope.state.unpublishInflight = true
-			ide.socket.emit 'unPublishProjectAsTemplate', user_id, (error) =>
-				if err? then return problemTalkingToTemplateApi()
-				refreshPublishedStatus()
-				$scope.state.unpublishInflight = false
+			$http
+				.post("/project/#{ide.project_id}/template/unpublish", {
+					_csrf: window.csrfToken
+				})
+				.success () ->
+					refreshPublishedStatus()
+					$scope.state.unpublishInflight = false
+				.error () ->
+					problemTalkingToTemplateApi()
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss()
