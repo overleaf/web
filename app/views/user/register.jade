@@ -23,7 +23,7 @@ block content
 								h1 #{translate("log_in")}
 							else
 								h1 #{translate("register")}
-						form(async-form="register", name="registerForm", action="/register", ng-cloak)
+						form(async-form="register", name="registerForm", action="/register", method="POST", ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages(for="registerForm")
