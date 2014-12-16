@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/script-output/ScriptOutputManager"
+	"ide/analytics/AnalyticsManager"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -38,6 +39,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ScriptOutputManager
+	AnalyticsManager
 ) ->
 
 	App.controller "IdeController", ($scope, $timeout, ide, localStorage) ->
@@ -82,6 +84,7 @@ define [
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 		ide.scriptOutputManager = new ScriptOutputManager(ide, $scope)
+		ide.analyticsManager = new AnalyticsManager(ide, $scope)
 		
 		inited = false
 		$scope.$on "project:joined", () ->
