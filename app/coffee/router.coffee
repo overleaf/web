@@ -34,6 +34,7 @@ BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
+AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -82,7 +83,7 @@ module.exports = class Router
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
 		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
 
-		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
+		app.get  '/project', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
 		app.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
@@ -90,7 +91,7 @@ module.exports = class Router
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
-		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
+		}), SecurityManager.requestCanAccessProject, AnalyticsMiddlewear.injectIntercomDetails, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
 		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings

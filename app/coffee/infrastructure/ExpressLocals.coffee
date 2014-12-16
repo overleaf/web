@@ -118,17 +118,6 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
-		if req.session.user?
-			res.locals.user =
-				email: req.session.user.email
-				first_name: req.session.user.first_name
-				last_name: req.session.user.last_name
-			if req.session.justRegistered
-				res.locals.justRegistered = true
-				delete req.session.justRegistered
-			if req.session.justLoggedIn
-				res.locals.justLoggedIn = true
-				delete req.session.justLoggedIn
 		res.locals.gaToken       = Settings.analytics?.ga?.token
 		res.locals.tenderUrl     = Settings.tenderUrl
 		res.locals.sentrySrc     = Settings.sentry?.src
