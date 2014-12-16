@@ -36,6 +36,7 @@ Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
+AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -86,7 +87,7 @@ module.exports = class Router
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
 		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
-		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
+		webRouter.get  '/project', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
 		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
@@ -94,7 +95,7 @@ module.exports = class Router
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
-		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
+		}), SecurityManager.requestCanAccessProject, AnalyticsMiddlewear.injectIntercomDetails, ProjectController.loadEditor
 		webRouter.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
 
