@@ -139,15 +139,17 @@ module.exports = ProjectController =
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
-
+                    
 					viewModel = {
 						title:'your_projects'
 						priority_title: true
 						projects: projects
 						tags: tags
-						user: user
+						user: user 
 						hasSubscription: results.hasSubscription[0]
+						canCreateProject: SecurityManager.userCanCreateProject(req.session.user)
 					}
+					logger.log viewModel
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
 						viewModel.showUserDetailsArea = true

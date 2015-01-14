@@ -83,7 +83,7 @@ module.exports = class Router
 		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
 
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
-		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
+		app.post '/project/new', AuthenticationController.requireLogin(), SecurityManager.requestCanCreateProject, ProjectController.newProject
 
 		app.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
 			endpointName: "open-project"
@@ -111,7 +111,7 @@ module.exports = class Router
 
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
-		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
+		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, SecurityManager.requestCanCreateProject, ProjectController.cloneProject
 
 		app.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
 
