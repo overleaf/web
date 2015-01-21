@@ -32,6 +32,7 @@ StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
+ConfirmEmailController = require ("./Features/ConfirmEmail/ConfirmEmailController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 
@@ -53,11 +54,21 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
-		app.get  '/register', UserPagesController.registerPage
-		app.post '/register', UserController.register
+		if Settings.security.emailVerification
+			app.get  '/register', UserPagesController.registerPageEmail
+			app.post '/register', UserController.registerEmail
+			app.get '/register_email/confirmation', (req, res) -> res.render "general/confirmation"
+			app.get '/update/email/validated', (req, res) -> res.render "general/emailValidate"
+			app.get '/user/update/email', ConfirmEmailController.renderUpdateEmail
+			app.get '/user/password/create', ConfirmEmailController.renderCreatePasswordForm
+			app.post '/user/password/create', ConfirmEmailController.requestCreatePassword
+		else
+			app.get  '/register', UserPagesController.registerPage
+			app.post '/register', UserController.register
 
 		EditorRouter.apply(app, httpAuth)
 		CollaboratorsRouter.apply(app)
+
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
