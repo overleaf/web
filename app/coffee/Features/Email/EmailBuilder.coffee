@@ -21,19 +21,19 @@ templates.registered =
 """
 
 templates.canceledSubscription = 
-	subject:  _.template "ShareLaTeX thoughts"
+	subject:  _.template "DataJoy thoughts"
 	layout: PersonalEmailLayout
 	type:"lifecycle"
 	compiledTemplate: _.template '''
 <p>Hi <%= first_name %>,</p>
 
-<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment via <a href="https://sharelatex.typeform.com/to/F7OzIY">this survey</a>?</p>
+<p>I'm sorry to see you cancelled your DataJoy premium account. Would you mind giving me some advice on what the site is lacking at the moment? Feedback from our users is the only way we can improve DataJoy.</p>
 
 <p>Thank you in advance.</p>
 
 <p>
-Henry <br>
-ShareLaTeX Co-founder
+James <br>
+DataJoy Co-founder
 </p>
 '''
 
