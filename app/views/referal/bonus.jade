@@ -10,12 +10,12 @@ block content
 							.row
 								.col-md-12
 									.page-header
-										h1 #{translate("help_us_spread_word")}.
+										h1 Help us spread the word about DataJoy.
 
 
 							.row
 								.col-md-10.col-md-offset-1
-									h2 #{translate("share_sl_to_get_rewards")}
+									h2 Share DataJoy with your friends and colleagues and unlock the rewards below
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -24,7 +24,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
+										a(href='https://twitter.com/share?text=is%20trying%20out%20ShareLaTeX,%20the%20online%20Python%20and%20R%20editor&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.getdatajoy.com', target="_blank").twitter Tweet
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -39,7 +39,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email #{translate("email_us_to_your_friends")}
+										a(href='mailto:?subject=Online Python and R editor you may like &body=Hey, I have been using DataJoy, an online Python and R editor recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email #{translate("email_us_to_your_friends")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -53,7 +53,7 @@ block content
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
-									p.thanks !{translate("sl_gives_you_free_stuff_see_progress_below")}
+									p.thanks When someone starts using DataJoy after your recommendation we'll give you some <strong>free stuff</strong> to say thanks! Check your progress below.
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
 									- for (var i = 0; i <= 10; i++) {
@@ -81,11 +81,11 @@ block content
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
 									- if (refered_user_count == 0)
-										p.thanks !{translate("you_not_introed_anyone_to_sl")}
+										p.thanks You've not introduced anyone to DataJoy yet.
 									- else if (refered_user_count == 1)
-										p.thanks !{translate("you_introed_small_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
+										p.thanks You've introduced <strong>#{refered_used_count}</strong> person to DataJoy. Good job, but can you get some more?
 									- else
-										p.thanks !{translate("you_introed_high_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
+										p.thanks You've introduced <strong>#{refered_used_count}</strong> person to DataJoy. Good job!
 						
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
@@ -132,12 +132,12 @@ block content
 			// calling the API ...
 			var obj = {
 				method: 'feed',
-				redirect_uri: 'https://www.sharelatex.com',
+				redirect_uri: 'https://www.getdatajoy.com',
 				link: '!{buildReferalUrl("fb")}',
-				picture: 'https://www.sharelatex.com/brand/logo/logosmall.png',
-				name: 'ShareLaTeX - Online LaTeX Editor',
+				picture: 'https://www.getdatajoy.com/img/logo.png',
+				name: 'DataJoy - Online Python and R Editor',
 				caption: 'Free Unlimited Projects and Compiles',
-				description: 'ShareLaTeX is a free online LaTeX Editor. Real time collaboration like Google Docs, with Dropbox, history and auto-complete'
+				description: 'DataJoy is a free online Python and R Editor. Runs your scripts online and work together in real-time, with full version history.'
 			};
 
 			function callback(response) {
