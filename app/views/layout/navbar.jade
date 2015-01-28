@@ -11,6 +11,15 @@ nav.navbar.navbar-default
 		.navbar-collapse.collapse(collapse="navCollapsed")
 			
 			ul.nav.navbar-nav.navbar-right
+				if (freeTrial && freeTrial.exists)
+					if (freeTrial.timeRemaining > -1 && !freeTrial.downgraded)
+						li.subdued
+							a(href="/user/subscription/new?planCode=#{settings.paidPlanCode}") You have #{Math.ceil(freeTrial.timeRemaining / (24 * 60 * 60 * 1000))} days of free trial remaining
+					if (freeTrial.downgraded)
+						li.trial-expired
+							span
+								a(href="/user/subscription/new?planCode=#{settings.paidPlanCode}").text-danger Your free trial has expired!
+								a(href="/user/subscription/new?planCode=#{settings.paidPlanCode}").btn.btn-success Buy Now
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown
@@ -34,7 +43,5 @@ nav.navbar.navbar-default
 									a(href=item.url, class=item.class) !{translate(item.text)}
 								else
 									| !{translate(item.text)}
-				
-				
 				
 

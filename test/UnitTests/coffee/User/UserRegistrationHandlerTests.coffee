@@ -22,12 +22,20 @@ describe "UserRegistrationHandler", ->
 			subscribe: sinon.stub().callsArgWith(1)
 		@EmailHandler =
 			sendEmail:sinon.stub().callsArgWith(2)
+		@SubscriptionUpdater =
+			createFreeTrial: sinon.stub().callsArg(3)
+		@Settings =
+			paidPlanCode: "datajoy"
+			freeTrialDays: 42
 		@handler = SandboxedModule.require modulePath, requires:
 			"../../models/User": {User:@User}
 			"./UserCreator": @UserCreator
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"../Newsletter/NewsletterManager":@NewsLetterManager
 			"../Email/EmailHandler": @EmailHandler
+			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater
+			"settings-sharelatex": @Settings
+			"logger-sharelatex": @logger = {log: sinon.stub()}
 
 		@passingRequest = {email:"something@email.com", password:"123"}
 
@@ -129,6 +137,7 @@ describe "UserRegistrationHandler", ->
 				@handler.registerNewUser @passingRequest, (err)=>
 					@EmailHandler.sendEmail.calledWith("welcome").should.equal true
 					done()
+				
 
 
 		it "should call the ReferalAllocator", (done)->

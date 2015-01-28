@@ -10,6 +10,7 @@ User = require('../../models/User').User
 fs = require('fs')
 Path = require "path"
 _ = require "underscore"
+SubscriptionUpdater = require "../Subscription/SubscriptionUpdater"
 
 module.exports =
 	createBlankProject : (owner_id, projectName, callback = (error, project) ->)->
@@ -21,11 +22,13 @@ module.exports =
 			 name       : projectName
 			 useClsi2   : true
 		project.rootFolder[0] = rootFolder
-		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
-			project.spellCheckLanguage = user.ace.spellCheckLanguage
-			project.save (err)->
-				return callback(err) if err?
-				callback err, project
+		SubscriptionUpdater.createFreeTrialIfNoSubscription owner_id, Settings.paidPlanCode, Settings.freeTrialDays, (error) ->
+			return callback(error) if error?
+			User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
+				project.spellCheckLanguage = user.ace.spellCheckLanguage
+				project.save (err)->
+					return callback(err) if err?
+					callback err, project
 
 	createPythonProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @

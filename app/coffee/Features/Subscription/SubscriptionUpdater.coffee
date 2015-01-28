@@ -10,7 +10,7 @@ ObjectId = require('mongoose').Types.ObjectId
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
-module.exports =
+module.exports = SubscriptionUpdater =
 
 	syncSubscription: (recurlySubscription, adminUser_id, callback) ->
 		self = @
@@ -26,12 +26,15 @@ module.exports =
 
 	addUserToGroup: (adminUser_id, user_id, callback)->
 		logger.log adminUser_id:adminUser_id, user_id:user_id, "adding user into mongo subscription"
-		searchOps = 
-			admin_id: adminUser_id
-		insertOperation = 
-			"$addToSet": {member_ids:user_id}
-		Subscription.findAndModify searchOps, insertOperation, (err, subscription)->
-			UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
+		SubscriptionUpdater.destroyFreeTrial user_id, (error) ->
+			return callback(error) if error?
+			searchOps = 
+				admin_id: adminUser_id
+			insertOperation = 
+				"$addToSet": {member_ids:user_id}
+			Subscription.findAndModify searchOps, insertOperation, (error, subscription)->
+				return callback(error) if error?
+				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
 
 	removeUserFromGroup: (adminUser_id, user_id, callback)->
 		searchOps = 
@@ -41,6 +44,49 @@ module.exports =
 		Subscription.update searchOps, removeOperation, ->
 			UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, callback
 
+	createFreeTrialIfNoSubscription: (user_id, plan_code, length_in_days, callback = (error, subscription) ->) ->
+		# We can't check using LimitationsManager.userHasSubscriptionOrIsGroupMember
+		# because that only checks for *paid* subscriptions, not existing free trials.
+		# We only want to start a free trial if there is no existing subscription object
+		# at all (or group membership).
+		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+			return callback(error) if error?
+			return callback() if subscription?
+			SubscriptionLocator.getMemberSubscriptions user_id, (error, groupSubscriptions = []) ->
+				return callback(error) if error?
+				return callback() if groupSubscriptions.length > 0
+				logger.log {user_id, plan_code, length_in_days}, "starting free trial for user"
+				SubscriptionUpdater._createNewSubscription user_id, (error, subscription) ->
+					return callback(error) if error?
+					subscription.freeTrial.planCode = plan_code
+					subscription.freeTrial.expiresAt = new Date(Date.now() + length_in_days * 24 * 60 * 60 * 1000)
+					subscription.save (error) ->
+						return callback(error) if error?
+						UserFeaturesUpdater.updateFeatures user_id, plan_code, callback
+				
+	downgradeFreeTrialIfExpired: (user_id, callback = (error) ->) ->
+		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+			return callback(error) if error?
+			freeTrial = subscription?.freeTrial
+			return callback() if !freeTrial?
+			# Downgrade if past expiry date and not already downgraded
+			if !freeTrial.downgraded and freeTrial.expiresAt? and freeTrial.expiresAt < new Date()
+				subscription.freeTrial.downgraded = true
+				subscription.save (error) ->
+					return callback(error) if error?
+					UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, callback
+			else
+				callback()
+	
+	destroyFreeTrial: (user_id, callback = (error) ->) ->
+		logger.log {user_id}, "destroying user free trial subscription if it exists"
+		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+			return callback(error) if error?
+			# Don't destroy groupPlan free trials, since this is called when adding oneself
+			# to a group plan, and that would destroy if it was a free trial.
+			isFreeTrial = subscription?.freeTrial?.expiresAt? and !subscription.groupPlan
+			return callback() if !isFreeTrial
+			subscription.remove callback
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"

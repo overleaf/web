@@ -29,8 +29,10 @@ describe "ProjectController", ->
 			createRProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
+		@SubscriptionUpdater =
+			downgradeFreeTrialIfExpired: sinon.stub().callsArg(1)
 		@LimitationsManager = 
-			userHasSubscriptionOrIsGroupMember: sinon.stub()
+			userHasFreeTrial: sinon.stub()
 		@TagsHandler =
 			getAllTags: sinon.stub()
 		@ProjectModel =
@@ -52,6 +54,7 @@ describe "ProjectController", ->
 			"./ProjectCreationHandler": @ProjectCreationHandler
 			"../Editor/EditorController": @EditorController
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator
+			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater
 			"../Subscription/LimitationsManager": @LimitationsManager
 			"../Tags/TagsHandler":@TagsHandler
 			'../../models/Project': Project:@ProjectModel
@@ -202,7 +205,7 @@ describe "ProjectController", ->
 			@UserModel.findById = (id, fields, callback) =>
 				callback null, @users[id]
 
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+			@LimitationsManager.userHasFreeTrial.callsArgWith(1, null, true, @timeRemaining = 42, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
@@ -234,6 +237,14 @@ describe "ProjectController", ->
 			@res.render = (pageName, opts)=>
 				opts.projects[0].owner.should.equal (@users[@projects[0].owner_ref])
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
+				done()
+			@ProjectController.projectListPage @req, @res
+			
+		it "should downgrade the free trial if expired", (done) ->
+			@res.render = (pageName, opts)=>
+				@SubscriptionUpdater.downgradeFreeTrialIfExpired
+					.calledWith(@user._id)
+					.should.equal true
 				done()
 			@ProjectController.projectListPage @req, @res
 
@@ -277,6 +288,7 @@ describe "ProjectController", ->
 					fontSize:"massive"
 					theme:"sexy"
 				email: "bob@bob.com"
+			@req.session.user = @user
 			@ProjectModel.findPopulatedById.callsArgWith 1, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
@@ -319,5 +331,13 @@ describe "ProjectController", ->
 			@SecurityManager.userCanAccessProject = sinon.stub().callsArgWith 2, false
 			@res.send = (resCode, opts)=>
 				resCode.should.equal 401
+				done()
+			@ProjectController.loadEditor @req, @res
+			
+		it "should downgrade the free trial if expired", (done) ->
+			@res.render = (pageName, opts)=>
+				@SubscriptionUpdater.downgradeFreeTrialIfExpired
+					.calledWith(@user._id)
+					.should.equal true
 				done()
 			@ProjectController.loadEditor @req, @res

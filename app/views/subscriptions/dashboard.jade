@@ -51,7 +51,6 @@ block content
 									p !{translate("choose_a_plan_below")}
 								when "active"
 									p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + subscription.name + "</strong>"})} 
-										a(href, ng-click="changePlan = true") !{translate("change_plan")}.
 									p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>" + subscription.price + "</strong>", collectionDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
 									p.pull-right
 
@@ -76,32 +75,6 @@ block content
 							-if(subscription.groupPlan)
 								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
 
-								
-
-
-							div(ng-show="changePlan", ng-cloak)#changePlanSection
-								h2.col-md-7 !{translate("change_plan")}
-								span.dropdown.col-md-1.changePlanButton(ng-controller="CurrenyDropdownController", style="display:none")
-									a.btn.btn-primary.dropdown-toggle(
-										href="#",
-										data-toggle="dropdown"
-									)
-										| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
-									ul.dropdown-menu(role="menu")
-										li(ng-repeat="(currency, value) in plans", dropdown-toggle)
-											a(
-												href,
-												ng-click="changeCurrency(currency)"
-											) {{currency}} ({{value['symbol']}})
-								p: table.table
-									tr
-										th !{translate("name")}
-										th !{translate("price")}
-										th
-									mixin printPlans(plans.studentAccounts)
-									mixin printPlans(plans.individualMonthlyPlans)
-									mixin printPlans(plans.individualAnnualPlans)
-							
 						-if (subscription && groups.length > 0)
 							hr
 						

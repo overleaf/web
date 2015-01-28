@@ -3,11 +3,13 @@ define [
 ], (App) ->
 	App.controller "ScriptOutputController", ($scope, $http, ide) ->
 		reset = () ->
+			$scope.needToUpgrade = ($scope.project.features.compileTimeout == 0)
 			$scope.files = []
 			$scope.output = {}
 			$scope.running = false
 			$scope.error = false
 			$scope.timedout = false
+		reset()
 			
 		$scope.uncompiled = true
 		
@@ -16,6 +18,7 @@ define [
 		
 		$scope.run = () ->
 			return if $scope.running
+			return if $scope.needToUpgrade
 			
 			reset()
 			$scope.running = true
