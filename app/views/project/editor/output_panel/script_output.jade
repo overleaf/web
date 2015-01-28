@@ -2,7 +2,7 @@ div.full-size(ng-controller="ScriptOutputController")
 	.toolbar.toolbar-tall
 		a.btn.btn-info(
 			href,
-			ng-disabled="running",
+			ng-disabled="running || needToUpgrade",
 			ng-click="run()"
 		)
 			i.fa.fa-fw(
@@ -13,7 +13,13 @@ div.full-size(ng-controller="ScriptOutputController")
 			span(ng-show="running") Running...
 			
 	div.script-output
-		.script-uncompiled(ng-show="uncompiled")
+		.alert.alert-info(ng-if="needToUpgrade", ng-controller="FreeTrialModalController")
+			p.text-center
+				| Your free trial has expired. You need to upgrade to run scripts.
+			p.text-center
+				a.btn.btn-success(href, ng-click="startFreeTrial('runScript')") Upgrade Now
+
+		.script-uncompiled(ng-show="uncompiled && !needToUpgrade")
 			| &nbsp;
 			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 			| &nbsp;&nbsp;Click here to run your script!

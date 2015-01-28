@@ -57,6 +57,18 @@ module.exports =
 			limitReached = subscription.member_ids.length >= subscription.membersLimit
 			logger.log user_id:user_id, limitReached:limitReached, currentTotal: subscription.member_ids.length, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
 			callback(err, limitReached)
+			
+	userHasFreeTrial: (user_id, callback = (error, hasFreeTrial, timeRemaining, expired) ->) ->
+		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+			return callback(error) if error?
+			if !subscription?
+				return callback null, false, -1, false
+			hasFreeTrial = !!subscription.freeTrial?.expiresAt?
+			timeRemaining = -1
+			if hasFreeTrial
+				timeRemaining = subscription.freeTrial.expiresAt - new Date()
+			expired = !!subscription.freeTrial?.downgraded
+			return callback null, hasFreeTrial, timeRemaining, expired
 
 getOwnerOfProject = (project_id, callback)->
 	Project.findById project_id, 'owner_ref', (error, project) ->

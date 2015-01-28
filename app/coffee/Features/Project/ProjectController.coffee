@@ -9,6 +9,7 @@ Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
+SubscriptionUpdater = require("../Subscription/SubscriptionUpdater")
 LimitationsManager = require("../Subscription/LimitationsManager")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
@@ -120,44 +121,50 @@ module.exports = ProjectController =
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
 		user_id = req.session.user._id
-		async.parallel {
-			tags: (cb)->
-				TagsHandler.getAllTags user_id, cb
-			projects: (cb)->
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
-			hasSubscription: (cb)->
-				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
-			user: (cb) ->
-				User.findById user_id, "featureSwitches", cb
-			}, (err, results)->
-				if err?
-					logger.err err:err, "error getting data for project list page"
-					return next(err)
-				logger.log results:results, user_id:user_id, "rendering project list"
-				tags = results.tags[0]
-				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
-				user = results.user
-				ProjectController._injectProjectOwners projects, (error, projects) ->
-					return next(error) if error?
+		SubscriptionUpdater.downgradeFreeTrialIfExpired user_id, (error) ->
+			return next(error) if error?
+			async.parallel {
+				tags: (cb)->
+					TagsHandler.getAllTags user_id, cb
+				projects: (cb)->
+					Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+				freeTrial: (cb)->
+					LimitationsManager.userHasFreeTrial user_id, cb
+				user: (cb) ->
+					User.findById user_id, "featureSwitches", cb
+				}, (err, results)->
+					if err?
+						logger.err err:err, "error getting data for project list page"
+						return next(err)
+					logger.log results:results, user_id:user_id, "rendering project list"
+					tags = results.tags[0]
+					projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+					user = results.user
+					ProjectController._injectProjectOwners projects, (error, projects) ->
+						return next(error) if error?
 
-					viewModel = {
-						title:'your_projects'
-						priority_title: true
-						projects: projects
-						tags: tags
-						user: user
-						hasSubscription: results.hasSubscription[0]
-					}
+						viewModel = {
+							title:'your_projects'
+							priority_title: true
+							projects: projects
+							tags: tags
+							user: user
+							freeTrial: {
+								exists: results.freeTrial[0]
+								timeRemaining: results.freeTrial[1]
+								downgraded: results.freeTrial[2]
+							}
+						}
 
-					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
-						viewModel.showUserDetailsArea = true
-						viewModel.algolia_api_key = Settings.algolia.read_only_api_key
-						viewModel.algolia_app_id = Settings.algolia.app_id
-					else
-						viewModel.showUserDetailsArea = false
+						if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
+							viewModel.showUserDetailsArea = true
+							viewModel.algolia_api_key = Settings.algolia.read_only_api_key
+							viewModel.algolia_app_id = Settings.algolia.app_id
+						else
+							viewModel.showUserDetailsArea = false
 
-					res.render 'project/list', viewModel
-					timer.done()
+						res.render 'project/list', viewModel
+						timer.done()
 
 
 	loadEditor: (req, res, next)->
@@ -174,61 +181,63 @@ module.exports = ProjectController =
 		
 		project_id = req.params.Project_id
 	
-		async.parallel {
-			project: (cb)->
-				Project.findPopulatedById project_id, cb
-			user: (cb)->
-				if user_id == 'openUser'
-					cb null, defaultSettingsForAnonymousUser(user_id)
-				else
-					User.findById user_id, cb
-			subscription: (cb)->
-				if user_id == 'openUser'
-					return cb()
-				SubscriptionLocator.getUsersSubscription user_id, cb
-		}, (err, results)->
-			if err?
-				logger.err err:err, "error getting details for project page"
-				return next err
-			project = results.project
-			user = results.user
-			subscription = results.subscription
+		SubscriptionUpdater.downgradeFreeTrialIfExpired user_id, (error) ->
+			return next(error) if error?
+			async.parallel {
+				project: (cb)->
+					Project.findPopulatedById project_id, cb
+				user: (cb)->
+					if user_id == 'openUser'
+						cb null, defaultSettingsForAnonymousUser(user_id)
+					else
+						User.findById user_id, cb
+				subscription: (cb)->
+					if user_id == 'openUser'
+						return cb()
+					SubscriptionLocator.getUsersSubscription user_id, cb
+			}, (err, results)->
+				if err?
+					logger.err err:err, "error getting details for project page"
+					return next err
+				project = results.project
+				user = results.user
+				subscription = results.subscription
 
-			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
-				if !canAccess
-					return res.send 401
+				SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
+					if !canAccess
+						return res.send 401
 
-				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
-					allowedFreeTrial = !!subscription.freeTrial.allowed || true
+					if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
+						allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
-				res.render 'project/editor',
-					title:  project.name
-					priority_title: true
-					bodyClasses: ["editor"]
-					project : project
-					project_id : project._id
-					user : {
-						id    : user.id
-						email : user.email
-						first_name : user.first_name
-						last_name  : user.last_name
-						referal_id : user.referal_id
-						subscription :
-							freeTrial: {allowed: allowedFreeTrial}
-						featureSwitches: user.featureSwitches
-					}
-					userSettings: {
-						mode  : user.ace.mode
-						theme : user.ace.theme
-						fontSize : user.ace.fontSize
-						autoComplete: user.ace.autoComplete
-						pdfViewer : user.ace.pdfViewer
-					}
-					privilegeLevel: privilegeLevel
-					chatUrl: Settings.apis.chat.url
-					anonymous: anonymous
-					languages: Settings.languages
-					themes: THEME_LIST
+					res.render 'project/editor',
+						title:  project.name
+						priority_title: true
+						bodyClasses: ["editor"]
+						project : project
+						project_id : project._id
+						user : {
+							id    : user.id
+							email : user.email
+							first_name : user.first_name
+							last_name  : user.last_name
+							referal_id : user.referal_id
+							subscription :
+								freeTrial: {allowed: allowedFreeTrial}
+							featureSwitches: user.featureSwitches
+						}
+						userSettings: {
+							mode  : user.ace.mode
+							theme : user.ace.theme
+							fontSize : user.ace.fontSize
+							autoComplete: user.ace.autoComplete
+							pdfViewer : user.ace.pdfViewer
+						}
+						privilegeLevel: privilegeLevel
+						chatUrl: Settings.apis.chat.url
+						anonymous: anonymous
+						languages: Settings.languages
+						themes: THEME_LIST
 					timer.done()
 
 	_buildProjectList: (ownedProjects, sharedProjects, readOnlyProjects)->
