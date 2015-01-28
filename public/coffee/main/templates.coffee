@@ -4,7 +4,7 @@ define [
 
 	App.controller "openInSlController", ($scope) ->
 
-		$scope.openInSlText = "Open in ShareLaTeX"
+		$scope.openInSlText = "Open in DataJoy"
 		$scope.isDisabled = false
 
 		$scope.open = ->

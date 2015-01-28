@@ -21,19 +21,19 @@ templates.registered =
 """
 
 templates.canceledSubscription = 
-	subject:  _.template "ShareLaTeX thoughts"
+	subject:  _.template "DataJoy thoughts"
 	layout: PersonalEmailLayout
 	type:"lifecycle"
 	compiledTemplate: _.template '''
 <p>Hi <%= first_name %>,</p>
 
-<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment? Feedback from our users is the only way we can improve ShareLaTeX.</p>
+<p>I'm sorry to see you cancelled your DataJoy premium account. Would you mind giving me some advice on what the site is lacking at the moment? Feedback from our users is the only way we can improve DataJoy.</p>
 
 <p>Thank you in advance.</p>
 
 <p>
-Henry <br>
-ShareLaTeX Co-founder
+James <br>
+DataJoy Co-founder
 </p>
 '''
 
@@ -44,7 +44,11 @@ templates.passwordResetRequested =
 	compiledTemplate: _.template """
 <h2>Password Reset</h2>
 <p>
+<<<<<<< HEAD
 We got a request to reset your #{settings.appName} password.
+=======
+We got a request to reset your DataJoy password.
+>>>>>>> Change branding for DataJoy
 <p>
 <center>
 	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
