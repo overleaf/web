@@ -24,5 +24,5 @@ define [
 
 		$scope.$watch "project.name", (name) ->
 			if name?
-				window.document.title = name + " - Online LaTeX Editor ShareLaTeX"
+				window.document.title = name + " - DataJoy - Online Python and R"
 	]
