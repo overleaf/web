@@ -314,7 +314,7 @@ module.exports = _.template '''
 											<td class="headerContent" style="padding: 25px;border-bottom:#dadf90;background-color:#F6F6F6;text-align:left;">
 
 												<!-- // Begin Module: Standard Header Image \\ -->
-												<img src="https://www.sharelatex.com/img/logo.png" style="max-width:600px;" id="headerImage campaign-icon"  />
+												<img src="https://www.getdatajoy.com/img/logo.png" style="max-width:600px;" id="headerImage campaign-icon"  />
 												<!-- // End Module: Standard Header Image \\ -->
 
 											</td>
@@ -344,31 +344,6 @@ module.exports = _.template '''
 										</tr>
 									</table>
 									<!-- // End Template Body \\ -->
-								</td>
-							</tr>
-							<tr>
-								<td align="center" valign="top">
-									<!-- // Begin Template Footer \\ -->
-									<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateFooter">
-										<tr>
-											<td valign="top" class="footerContent">
-
-												<!-- // Begin Module: Standard Footer \\ -->
-												<table border="0" cellpadding="25" cellspacing="0" width="100%">
-													<tr>
-														<td colspan="2" valign="middle" id="social">
-															<div>
-																&nbsp;<a href="http://twitter.com/#!/sharelatex">Follow on Twitter</a> | <a href="http://www.facebook.com/pages/ShareLaTeX/301671376556660">Friend on Facebook</a>
-															</div>
-														</td>
-													</tr>
-												</table>
-												<!-- // End Module: Standard Footer \\ -->
-
-											</td>
-										</tr>
-									</table>
-									<!-- // End Template Footer \\ -->
 								</td>
 							</tr>
 						</table>
