@@ -13,22 +13,7 @@ GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
-		plans = SubscriptionViewModelBuilder.buildViewModel()
-		if !req.session.user?
-			baseUrl = "/register?redir="
-		else
-			baseUrl = ""
-		viewName = "subscriptions/plans"
-		if req.query.v?
-			viewName = "#{viewName}_#{req.query.v}"
-		logger.log viewName:viewName, "showing plans page"
-		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
-			res.render viewName,
-				title: "plans_and_pricing"
-				plans: plans
-				baseUrl: baseUrl
-				gaExperiments: Settings.gaExperiments.plansPage
-				recomendedCurrency:recomendedCurrency
+		res.redirect "/user/subscription/new?planCode=#{Settings.paidPlanCode}"
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->

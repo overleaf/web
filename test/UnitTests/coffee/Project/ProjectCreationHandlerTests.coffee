@@ -33,6 +33,11 @@ describe 'ProjectCreationHandler', ->
 			addDoc: sinon.stub().callsArgWith(4, null, {_id: docId})
 			addFile: sinon.stub().callsArg(4)
 			setRootDoc: sinon.stub().callsArg(2)
+		@SubscriptionUpdater =
+			createFreeTrialIfNoSubscription: sinon.stub().callsArg(3)
+		@Settings =
+			paidPlanCode: "paid-plan-code"
+			freeTrialDays: 42
 
 		@user = 
 			first_name:"first name here"
@@ -47,7 +52,9 @@ describe 'ProjectCreationHandler', ->
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
 			'./ProjectEntityHandler':@ProjectEntityHandler
+			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater
 			'logger-sharelatex': {log:->}
+			"settings-sharelatex": @Settings
 
 	describe 'Creating a Blank project', ->
 		beforeEach ->
@@ -70,6 +77,14 @@ describe 'ProjectCreationHandler', ->
 				@handler.createBlankProject ownerId, projectName, (err, project)->
 					project.spellCheckLanguage.should.equal "de"
 					done()
+					
+			it "should start a free trial for the owner if needed", (done) ->
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					@SubscriptionUpdater.createFreeTrialIfNoSubscription
+						.calledWith(ownerId, @Settings.paidPlanCode, @Settings.freeTrialDays)
+						.should.equal true
+					done()
+				
 
 		describe "with an error", ->
 			beforeEach ->

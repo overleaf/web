@@ -124,7 +124,6 @@ describe "UserRegistrationHandler", ->
 					@NewsLetterManager.subscribe.calledWith(@user).should.equal true
 					done()
 
-
 		it "should call the ReferalAllocator", (done)->
 			done()
 

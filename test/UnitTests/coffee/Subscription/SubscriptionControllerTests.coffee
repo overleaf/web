@@ -56,6 +56,7 @@ describe "SubscriptionController sanboxed", ->
 					subdomain:"sl.recurly.com"
 			siteUrl: "http://de.sharelatex.dev:3000"
 			gaExperiments:{}
+			paidPlanCode: "paid-plan-code"
 		@GeoIpLookup =
 			getCurrencyCode:sinon.stub()
 
@@ -80,16 +81,14 @@ describe "SubscriptionController sanboxed", ->
 		@stubbedCurrencyCode = "GBP"
 
 	describe "plansPage", ->
-		beforeEach (done) ->
-			@req.ip  = "1234.3123.3131.333 313.133.445.666 653.5345.5345.534"
-			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
-			@res.callback = done
+		beforeEach ->
+			@res.redirect = sinon.stub()
 			@SubscriptionController.plansPage(@req, @res)
 
-		it "should set the recommended currency from the geoiplookup", (done)->
-			@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
-			@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
-			done()
+		it "should redirect to the new payment page", ->
+			@res.redirect
+				.calledWith("/user/subscription/new?planCode=#{@settings.paidPlanCode}")
+				.should.equal true
 
 	describe "editBillingDetailsPage", ->
 		describe "with a user with a subscription", ->

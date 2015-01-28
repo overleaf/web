@@ -3,6 +3,7 @@ sinon = require('sinon')
 require('chai').should()
 modulePath = require('path').join __dirname, '../../../../app/js/Features/Subscription/LimitationsManager'
 Settings = require("settings-sharelatex")
+tk = require "timekeeper"
 
 describe "LimitationsManager", ->
 	beforeEach ->
@@ -24,12 +25,16 @@ describe "LimitationsManager", ->
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 
+		tk.freeze(new Date())
 		@LimitationsManager = SandboxedModule.require modulePath, requires:
 			'../../models/Project' : Project: @Project
 			'../../models/User' : User: @User
 			'./SubscriptionLocator':@SubscriptionLocator
 			'settings-sharelatex' : @Settings = {}
 			'logger-sharelatex':log:->
+				
+	afterEach ->
+		tk.reset()
 
 	describe "allowedNumberOfCollaboratorsInProject", ->
 		describe "when the project is owned by a user without a subscription", ->
@@ -207,3 +212,48 @@ describe "LimitationsManager", ->
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true
 				done()
+				
+	describe "userHasFreeTrial", ->
+		beforeEach ->
+			@subscription =
+				freeTrial: {}
+			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@callback = sinon.stub()
+
+		describe "with free trial which is active", ->
+			beforeEach ->
+				@subscription.freeTrial =
+					expiresAt: new Date(Date.now() + @offset = (6.3 * 24 * 60 * 60 * 1000)) # 6.3 days in future
+					downgraded: true
+				@LimitationsManager.userHasFreeTrial @user.id, @callback
+				
+			it "should callback the callback with hasFreeTrial = true, timeRemaining, downgraded = true", ->
+				@callback.calledWith(null, true, @offset, true).should.equal true
+
+		describe "with free trial which is downgraded", ->
+			beforeEach ->
+				@subscription.freeTrial =
+					expiresAt: new Date() - 1000
+					downgraded: true
+				@LimitationsManager.userHasFreeTrial @user.id, @callback
+				
+			it "should callback the callback with hasFreeTrial = true, downgraded = true", ->
+				@callback.calledWith(null, true, -1000, true).should.equal true
+	
+		describe "without free trial", ->
+			beforeEach ->
+				@subscription.freeTrial =
+					expiresAt: null
+					downgraded: false
+				@LimitationsManager.userHasFreeTrial @user.id, @callback
+				
+			it "should callback the callback with hasFreeTrial = false, downgraded = false", ->
+				@callback.calledWith(null, false, -1, false).should.equal true
+			
+		describe "with no subscription object", ->
+			beforeEach ->
+				@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArg(1)
+				@LimitationsManager.userHasFreeTrial @user.id, @callback
+				
+			it "should callback the callback with hasFreeTrial = false, downgraded = false", ->
+				@callback.calledWith(null, false, -1, false).should.equal true

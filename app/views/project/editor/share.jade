@@ -69,7 +69,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				div.text-center(ng-hide="canAddCollaborators")
 					p #{translate("need_to_upgrade_for_more_collabs")}.
 					p(ng-controller="FreeTrialModalController")
-						a.btn(href, ng-click="startFreeTrial('projectMembers')", ng-class="buttonClass") #{translate("start_free_trial")}
+						a.btn.btn-success(href, ng-click="startFreeTrial('projectMembers')", ng-class="buttonClass") Upgrade Now
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}.
 

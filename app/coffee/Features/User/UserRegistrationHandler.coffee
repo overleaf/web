@@ -5,6 +5,7 @@ AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
 async = require("async")
 logger = require("logger-sharelatex")
+Settings = require "settings-sharelatex"
 
 module.exports =
 	validateEmail : (email) ->
