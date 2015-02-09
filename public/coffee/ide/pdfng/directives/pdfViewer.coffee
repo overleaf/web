@@ -25,7 +25,7 @@ define [
 			# $scope.pages = []
 
 			$scope.document.destroy() if $scope.document?
-
+			$scope.loadCount = if $scope.loadCount? then $scope.loadCount + 1 else 1
 			# TODO need a proper url manipulation library to add to query string
 			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
 				scale: 1,
@@ -35,6 +35,13 @@ define [
 					$scope.$apply()
 				progressCallback: (progress) ->
 					$scope.$emit 'progress', progress
+				loadedCallback: () ->
+					$scope.$emit 'loaded'
+				errorCallback: (error) ->
+					Raven?.captureMessage?('pdfng error ' + error + ' (1% sample)') if Math.random() < 0.01
+					$scope.$emit 'pdf:error', error
+				pageSizeChangeCallback: (pageNum, deltaH) ->
+					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
 			})
 
 			# we will have all the main information needed to start display
@@ -51,7 +58,9 @@ define [
 					]
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
-					$scope.$emit "loaded"
+				.catch (error) ->
+					$scope.$emit 'pdf:error', error
+					return $q.reject(error)
 
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->
@@ -79,6 +88,9 @@ define [
 					numScale * $scope.pdfPageSize[1]
 				]
 				# console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
+			.catch (error) ->
+				$scope.$emit 'pdf:error', error
+				return $q.reject(error)
 
 		@redraw = (position) ->
 			# console.log 'in redraw'
@@ -90,6 +102,8 @@ define [
 				# console.log 'position is', position.page, position.offset
 				# console.log 'setting current page', position.page
 				pagenum = position.page
+				if pagenum > $scope.numPages - 1
+					pagenum = $scope.numPages - 1
 				$scope.pages[pagenum].current = true
 				$scope.pages[pagenum].position = position
 
@@ -138,18 +152,18 @@ define [
 			# find first visible page
 			visible = $scope.pages.some (page, i) ->
 				[topPageIdx, topPage] = [i, page] if page.visible
-			if visible
+			if visible && topPage.element?
 				# console.log 'found it', topPageIdx
 			else
 				# console.log 'CANNOT FIND TOP PAGE'
 				return
 
 			# console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
-			top = topPage.elemTop
-			bottom = topPage.elemBottom
-			viewportTop = 0
-			viewportHeight = $element.height()
-			topVisible = (top >= viewportTop && top < viewportTop + viewportHeight)
+			top = topPage.element.offset().top
+			bottom = top + topPage.element.innerHeight()
+			viewportTop = $element.offset().top
+			viewportBottom = viewportTop + $element.height()
+			topVisible = (top >= viewportTop && top < viewportBottom)
 			someContentVisible = (top < viewportTop && bottom > viewportTop)
 			# console.log 'in PdfListView', top, topVisible, someContentVisible, viewportTop
 			if topVisible
@@ -231,104 +245,191 @@ define [
 				layoutReady.promise.then () ->
 					# console.log 'layoutReady was resolved'
 
-				# TODO can we combine this with scope.parentSize, need to finalize boxes
-				updateContainer = () ->
-					scope.containerSize = [
-						element.innerWidth()
-						element.innerHeight()
-						element.offset().top
-					]
+				renderVisiblePages = () ->
+					pages = getVisiblePages()
+					# pages = getExtraPages visiblePages
+					scope.document.renderPages(pages)
+
+				getVisiblePages = () ->
+					top = element[0].scrollTop;
+					bottom = top + element[0].clientHeight;
+					visiblePages = scope.pages.filter (page) ->
+						pageElement = page.element[0]
+						pageTop = pageElement.offsetTop
+						pageBottom = pageTop + pageElement.clientHeight
+						page.visible = pageTop < bottom and pageBottom > top
+						return page.visible
+					return visiblePages
+
+				getExtraPages = (visiblePages) ->
+					extra = []
+					firstVisiblePage = visiblePages[0].pageNum
+					firstVisiblePageIdx = firstVisiblePage - 1
+					len = visiblePages.length
+					lastVisiblePage = visiblePages[len-1].pageNum
+					lastVisiblePageIdx = lastVisiblePage - 1
+					# first page after
+					if lastVisiblePageIdx + 1 < scope.pages.length
+						extra.push scope.pages[lastVisiblePageIdx + 1]
+					# page before
+					if firstVisiblePageIdx > 0
+						extra.push scope.pages[firstVisiblePageIdx - 1]
+					# second page after
+					if lastVisiblePageIdx + 2 < scope.pages.length
+						extra.push scope.pages[lastVisiblePageIdx + 2]
+					return visiblePages.concat extra
+
+				rescaleTimer = null
+				queueRescale = (scale) ->
+					# console.log 'call to queueRescale'
+					return if rescaleTimer? or layoutTimer? or elementTimer?
+					# console.log 'adding to rescale queue'
+					rescaleTimer = setTimeout () ->
+						doRescale scale
+						rescaleTimer = null
+					, 0
 
 				doRescale = (scale) ->
 					# console.log 'doRescale', scale
+					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
-					layoutReady.promise.then () ->
-						[h, w] = [element.innerHeight(), element.width()]
+					layoutReady.promise.then (parentSize) ->
+						[h, w] = parentSize
 						# console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
-							spinner.remove(element)
-							ctrl.redraw(origposition)
+							# console.log 'in setscale then', scale, h, w
+							scope.$evalAsync () ->
+								if spinnerTimer
+									clearTimeout spinnerTimer
+								else
+									spinner.remove(element)
+								ctrl.redraw(origposition)
+								$timeout renderVisiblePages
+								scope.loadSuccess = true
+						.catch (error) ->
+							scope.$emit 'pdf:error', error
 
-				checkElementReady = () ->
+				elementTimer = null
+				spinnerTimer = null
+				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
+					# console.log 'checking element ready', element.height(), element.width()
 					if element.height() == 0 or element.width() == 0
-						$timeout () ->
-							checkElementReady()
-						, 250
+						return if elementTimer?
+						elementTimer = setTimeout () ->
+							elementTimer = null
+							updateLayout()
+						, 1000
 					else
-						scope.$broadcast 'layout-ready' if !scope.parentSize?
+						scope.parentSize = [
+							element.innerHeight(),
+							element.innerWidth()
+						]
+						# console.log 'resolving layoutReady with', scope.parentSize
+						$timeout () ->
+							if not spinnerTimer?
+								spinnerTimer = setTimeout () ->
+									spinner.add(element)
+									spinnerTimer = null
+								, 100
+							layoutReady.resolve scope.parentSize
+							scope.$emit 'flash-controls'
 
-				checkElementReady()
+				layoutTimer = null
+				queueLayout = () ->
+					# console.log 'call to queue layout'
+					return if layoutTimer?
+					# console.log 'added to queue layoyt'
+					layoutReady = $q.defer()
+					layoutTimer = setTimeout () ->
+						# console.log 'calling update layout'
+						updateLayout()
+						# console.log 'setting layout timer to null'
+						layoutTimer = null
+					, 0
 
-				scope.$on 'layout-ready', () ->
-					# console.log 'GOT LAYOUT READY EVENT'
-					# console.log 'calling refresh'
-					updateContainer()
-					spinner.add(element)
-					layoutReady.resolve 'layout is ready'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$emit 'flash-controls'
-					#scope.$apply()
+				queueLayout()
+
+				#scope.$on 'layout:pdf:view', (e, args) ->
+				#	console.log 'pdf view change', element, e, args
+				#	queueLayout()
 
 				scope.$on 'layout:main:resize', () ->
 					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$apply()
-
+					queueLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
+					# FIXME we get this event twice
+					# also we need to start a new layout when we get it
 					# console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					#scope.$apply()
+					queueLayout()
+
+				scope.$on 'pdf:error', (event, error) ->
+					return if error == 'cancelled'
+					# check if too many retries or file is missing
+					if scope.loadCount > 3 || error.match(/^Missing PDF/i) || error.match(/^loading/i)
+						scope.$emit 'pdf:error:display'
+						return
+					if scope.loadSuccess
+						ctrl.load().then () ->
+							# trigger a redraw
+							scope.scale = angular.copy (scope.scale)
+						.catch (error) ->
+							scope.$emit 'pdf:error:display'
+					else
+						scope.$emit 'pdf:error:display'
+						return
+
+				scope.$on 'pdf:page:size-change', (event, pageNum, delta) ->
+					#console.log 'page size change event', pageNum, delta
+					origposition = angular.copy scope.position
+					#console.log 'orig position', JSON.stringify(origposition)
+					if pageNum - 1 < origposition.page && delta != 0
+						currentScrollTop =  element.scrollTop()
+						#console.log 'adjusting scroll from', currentScrollTop, 'by', delta
+						scope.adjustingScroll = true
+						element.scrollTop(currentScrollTop + delta)
 
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
+					#scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
-						updateContainer()
-						scope.$apply()
+						renderVisiblePages()
 						scope.adjustingScroll = false
 						return
-					scope.scrolled = true
 					if scope.scrollHandlerTimeout
-						$timeout.cancel(scope.scrollHandlerTimeout)
-					scope.scrollHandlerTimeout = $timeout scrollHandler, 100
+						clearTimeout(scope.scrollHandlerTimeout)
+					scope.scrollHandlerTimeout = setTimeout scrollHandler, 25
 
 				scrollHandler = () ->
-					scope.scrollHandlerTimeout = null
-					updateContainer()
-					scope.$apply()
+					renderVisiblePages()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
-					scope.$apply()
+					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
 					return unless newVal?
-					ctrl.load()
-					# trigger a redraw
-					scope.scale = angular.copy (scope.scale)
+					scope.loadCount = 0; # new pdf, so reset load count
+					scope.loadSuccess = false
+					ctrl.load().then () ->
+						# trigger a redraw
+						scope.scale = angular.copy (scope.scale)
+					.catch (error) ->
+						scope.$emit 'pdf:error', error
 
 				scope.$watch 'scale', (newVal, oldVal) ->
 					# no need to set scale when initialising, done in pdfSrc
 					return if newVal == oldVal
 					# console.log 'XXX calling Setscale in scale watch'
-					doRescale newVal
+					queueRescale newVal
 
 				scope.$watch 'forceScale', (newVal, oldVal) ->
 					# console.log 'got change in numscale watcher', newVal, oldVal
 					return unless newVal?
-					doRescale newVal
+					queueRescale newVal
 
 #				scope.$watch 'position', (newVal, oldVal) ->
 #					console.log 'got change in position watcher', newVal, oldVal
@@ -337,16 +438,17 @@ define [
 					# console.log 'forceCheck', newVal, oldVal
 					return unless newVal?
 					scope.adjustingScroll = true  # temporarily disable scroll
-					doRescale scope.scale
+					queueRescale scope.scale
 
 				scope.$watch('parentSize', (newVal, oldVal) ->
 					# console.log 'XXX in parentSize watch', newVal, oldVal
 					# if newVal == oldVal
 					# 	console.log 'returning because old and new are the same'
 					# 	return
-					return unless oldVal?
+					# return unless oldVal?
 					# console.log 'XXX calling setScale in parentSize watcher'
-					doRescale scope.scale
+					return unless newVal?
+					queueRescale scope.scale
 				, true)
 
 				# scope.$watch 'elementWidth', (newVal, oldVal) ->
@@ -404,6 +506,8 @@ define [
 
 					return if !highlights.length
 
+					scope.$broadcast 'pdf:highlights', areas
+
 					first = highlights[0]
 
 					pageNum = scope.pages[first.page].pageNum
@@ -417,9 +521,11 @@ define [
 						}
 						ctrl.setPdfPosition(scope.pages[first.page], position)
 
-				scope.$watch '$destroy', () ->
-					#console.log 'handle pdfng directive destroy'
-
-
+				scope.$on '$destroy', () ->
+					# console.log 'handle pdfng directive destroy'
+					clearTimeout elementTimer if elementTimer?
+					clearTimeout layoutTimer if layoutTimer?
+					clearTimeout rescaleTimer if rescaleTimer?
+					clearTimeout spinnerTimer if spinnerTimer?
 		}
 	]

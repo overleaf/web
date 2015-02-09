@@ -75,7 +75,7 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(src='/socket.io/socket.io.js')
+	script(src='#{settings.websocketsUrl}/socket.io/socket.io.js')
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
@@ -88,7 +88,7 @@ block content
 		window.anonymous = #{anonymous};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
+				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
 				"moment": "libs/moment-2.7.0"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
@@ -102,6 +102,11 @@ block content
 				},
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
+				}
+			},
+			config:{
+				moment:{
+					noGlobal: true
 				}
 			}
 		};

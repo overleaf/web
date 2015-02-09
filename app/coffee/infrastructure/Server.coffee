@@ -5,11 +5,8 @@ logger = require 'logger-sharelatex'
 metrics = require('./Metrics')
 crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
-socketIoConfig = require('./SocketIoConfig')
 Router = require('../router')
 metrics.inc("startup")
-SessionSockets = require('session.socket.io')
-
 
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
@@ -106,17 +103,21 @@ app.use (req, res, next) ->
 app.get "/status", (req, res)->
 	res.send("web sharelatex is alive")
 	req.session.destroy()
+	
+profiler = require "v8-profiler"
+app.get "/profile", (req, res) ->
+	time = parseInt(req.query.time || "1000")
+	profiler.startProfiling("test")
+	setTimeout () ->
+		profile = profiler.stopProfiling("test")
+		res.json(profile)
+	, time
 
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-io = require('socket.io').listen(server)
-
-sessionSockets = new SessionSockets(io, sessionStore, cookieParser, cookieKey)
-router = new Router(app, io, sessionSockets)
-socketIoConfig.configure(io)
+router = new Router(app)
 
 module.exports =
-	io: io
 	app: app
 	server: server

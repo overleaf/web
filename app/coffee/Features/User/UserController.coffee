@@ -12,6 +12,7 @@ ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
 _ = require('underscore')
 Settings = require('settings-sharelatex')
+SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
 
 module.exports =
 
@@ -96,6 +97,7 @@ module.exports =
 				req.session.user = user
 				req.session.justRegistered = true
 				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
+				SubscriptionDomainAllocator.autoAllocate(user)
 				res.send
 					redir:redir
 					id:user._id.toString()

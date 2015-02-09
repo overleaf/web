@@ -17,13 +17,15 @@ module.exports =
 					return callback(error) if error?
 					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
 					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
+						tax = recurlySubscription?.tax_in_cents || 0
 						callback null, {
 							name: plan.name
-							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription.current_period_ends_at)
-							state: recurlySubscription.state
-							price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents, recurlySubscription.currency
+							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription?.current_period_ends_at)
+							state: recurlySubscription?.state
+							price: SubscriptionFormatters.formatPrice (recurlySubscription?.unit_amount_in_cents + tax), recurlySubscription?.currency
 							planCode: subscription.planCode
-							currency:recurlySubscription.currency
+							currency:recurlySubscription?.currency
+							taxRate:parseFloat(recurlySubscription?.tax_rate?._)
 							groupPlan: subscription.groupPlan
 						}, memberSubscriptions
 				else

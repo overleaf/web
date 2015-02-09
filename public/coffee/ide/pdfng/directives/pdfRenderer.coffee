@@ -7,9 +7,11 @@ define [
 
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
+			PAGE_LOAD_TIMEOUT: 60*1000
+			PAGE_RENDER_TIMEOUT: 60*1000
 
 			constructor: (@url, @options) ->
-				PDFJS.disableFontFace = true  # avoids repaints, uses worker more
+				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
 				# PDFJS.disableAutoFetch = true # enable this to prevent loading whole file
 				# PDFJS.disableStream
 				# PDFJS.disableRange
@@ -19,9 +21,16 @@ define [
 				@navigateFn = @options.navigateFn
 				@spinner = new pdfSpinner
 				@resetState()
+				@document.then (pdfDocument) =>
+					pdfDocument.getDownloadInfo().then () =>
+						@options.loadedCallback()
+				@errorCallback = @options.errorCallback
+				@pageSizeChangeCallback = @options.pageSizeChangeCallback
+				@pdfjs.catch (exception) =>
+					# console.log 'ERROR in get document', exception
+					@errorCallback(exception)
 
 			resetState: () ->
-				@page = []
 				@complete = []
 				@timeout = []
 				@pageLoad = []
@@ -34,38 +43,46 @@ define [
 					pdfDocument.numPages
 
 			getPage: (pageNum) ->
-				# with promise caching
-				return @page[pageNum] if @page[pageNum]?
-				@page[pageNum] = @document.then (pdfDocument) ->
+				@document.then (pdfDocument) ->
+					# console.log 'got pdf document, now getting Page', pageNum
 					pdfDocument.getPage(pageNum)
 
 			getPdfViewport: (pageNum, scale) ->
 				scale ?= @scale
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPage(pageNum).then (page) ->
 						viewport = page.getViewport scale
+					, (error) =>
+						@errorCallback?(error)
 
 			getDestinations: () ->
 				@document.then (pdfDocument) ->
 					pdfDocument.getDestinations()
 
-# Not available in pdf.js-1.0.712, in later versions there is a direct
-# call for this - we should use it as soon as it is available in a
-# stable version
 			getDestination: (dest) ->
+				# There is a direct method for this in pdf.js but it is not
+				# available in pdf.js-1.0.712. Use the following workaround of
+				# getting all the destinations and returning only the one we
+				# want.
 				@destinations = @document.then (pdfDocument) ->
 					pdfDocument.getDestinations()
 				return @destinations.then (all) ->
 					all[dest]
-
-				@document.then (pdfDocument) ->
-					pdfDocument.getDestination(dest)
-
+				, (error) =>
+					@errorCallback?(error)
+				# When we upgrade we can switch to using the following direct
+				# code.
+				# @document.then (pdfDocument) ->
+				# 	pdfDocument.getDestination(dest)
+				# , (error) ->
+				# 	console.log 'ERROR', error
 
 			getPageIndex: (ref) ->
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPageIndex(ref).then (idx) ->
 						idx
+					, (error) =>
+						@errorCallback?(error)
 
 			getScale: () ->
 				@scale
@@ -73,15 +90,9 @@ define [
 			setScale: (@scale) ->
 				@resetState()
 
-			pause: (element, pagenum) ->
-				return if @complete[pagenum]
-				return if @shuttingDown
-				@renderQueue = @renderQueue.filter (q) ->
-					q.pagenum != pagenum
-				@spinner.stop(element.canvas)
-
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
-				$timeout () =>
+				@queueTimer = setTimeout () =>
+					@queueTimer = null
 					@processRenderQueue()
 				, interval
 
@@ -91,16 +102,26 @@ define [
 				@jobs = @jobs - 1
 				@triggerRenderQueue(0)
 
-			renderPage: (element, pagenum) ->
+			renderPages: (pages) ->
 				return if @shuttingDown
-				current = {
-					'element': element
-					'pagenum': pagenum
-				}
-				@renderQueue.push(current)
+				@renderQueue = for page in pages
+					{
+						'element': page.elementChildren
+						'pagenum': page.pageNum
+					}
 				@triggerRenderQueue()
 
+			renderPage: (page) ->
+				return if @shuttingDown
+				current =		{
+					'element': page.elementChildren
+					'pagenum': page.pageNum
+				}
+				@renderQueue.push current
+				@processRenderQueue()
+
 			processRenderQueue: () ->
+				return if @shuttingDown
 				return if @jobs > 0
 				current = @renderQueue.shift()
 				return unless current?
@@ -114,21 +135,47 @@ define [
 				@jobs = @jobs + 1
 
 				element.canvas.addClass('pdfng-loading')
-				@spinner.add(element.canvas)
+				spinTimer = setTimeout () =>
+					@spinner.add(element.canvas)
+				, 100
 
 				completeRef = @complete
 				renderTaskRef = @renderTask
+				# console.log 'started page load', pagenum
+
+				timedOut = false
+				timer = $timeout () =>
+					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
+					# console.log 'page load timed out', pagenum
+					timedOut = true
+					clearTimeout(spinTimer)
+					@spinner.stop(element.canvas)
+					# @jobs = @jobs - 1
+					# @triggerRenderQueue(0)
+					@errorCallback?('timeout')
+				, @PAGE_LOAD_TIMEOUT
 
 				@pageLoad[pagenum] = @getPage(pagenum)
+
 				@pageLoad[pagenum].then (pageObject) =>
+					# console.log 'in page load success', pagenum
+					$timeout.cancel(timer)
+					clearTimeout(spinTimer)
 					@renderTask[pagenum] = @doRender element, pagenum, pageObject
 					@renderTask[pagenum].then () =>
 						# complete
+						# console.log 'render task success', pagenum
 						completeRef[pagenum] = true
 						@removeCompletedJob renderTaskRef, pagenum
 					, () =>
+						# console.log 'render task failed', pagenum
 						# rejected
 						@removeCompletedJob renderTaskRef, pagenum
+				.catch (error) ->
+					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
+					$timeout.cancel(timer)
+					clearTimeout(spinTimer)
+					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
 				self = this
@@ -164,8 +211,14 @@ define [
 				canvas.height(newHeight + 'px')
 				canvas.width(newWidth + 'px')
 
-				element.canvas.height(newHeight)
-				element.canvas.width(newWidth)
+				oldHeight = element.canvas.height()
+				oldWidth = element.canvas.width()
+				if newHeight != oldHeight  or  newWidth != oldWidth
+					element.canvas.height(newHeight + 'px')
+					element.canvas.width(newWidth + 'px')
+					element.container.height(newHeight + 'px')
+					element.container.width(newWidth + 'px')
+					@pageSizeChangeCallback?(pagenum, newHeight - oldHeight)
 
 				if pixelRatio != 1
 					ctx.scale(pixelRatio, pixelRatio)
@@ -183,23 +236,50 @@ define [
 
 				element.canvas.replaceWith(canvas)
 
+				# console.log 'staring page render', pagenum
+
 				result = page.render {
 					canvasContext: ctx
 					viewport: viewport
 				}
 
+				timedOut = false
+
+				timer = $timeout () =>
+					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
+					# console.log 'page render timed out', pagenum
+					timedOut = true
+					result.cancel()
+				, @PAGE_RENDER_TIMEOUT
+
 				result.then () ->
+					# console.log 'page rendered', pagenum
+					$timeout.cancel(timer)
 					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
+					, (error) ->
+						self.errorCallback?(error)
 					page.getAnnotations().then (annotations) ->
 						annotationsLayer.setAnnotations annotations
+					, (error) ->
+						self.errorCallback?(error)
+				.catch (error) ->
+					# console.log 'page render failed', pagenum, error
+					$timeout.cancel(timer)
+					if timedOut
+						# console.log 'calling ERROR callback - was timeout'
+						self.errorCallback?('timeout')
+					else if error != 'cancelled'
+						# console.log 'calling ERROR callback'
+						self.errorCallback?(error)
 
 				return result
 
 			destroy: () ->
 				# console.log 'in pdf renderer destroy', @renderQueue
 				@shuttingDown = true
+				clearTimeout @queueTimer if @queueTimer?
 				@renderQueue = []
 				for task in @renderTask
 					task.cancel() if task?
