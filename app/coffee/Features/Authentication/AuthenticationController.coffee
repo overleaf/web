@@ -26,22 +26,6 @@ module.exports = AuthenticationController =
 						text: Settings.ldap?.failMessage,
 						text: req.i18n.translate("to_many_login_requests_2_mins"),
 						type: 'error'
-			AuthenticationManager.authenticate email: email, password, (error, user) ->
-				return next(error) if error?
-				if user?
-					LoginRateLimiter.recordSuccessfulLogin email
-					AuthenticationController._recordSuccessfulLogin user._id
-					AuthenticationController.establishUserSession req, user, (error) ->
-						return next(error) if error?
-						req.session.justLoggedIn = true
-						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
-				else
-					AuthenticationController._recordFailedLogin()
-					logger.log email: email, "failed log in"
-					res.send message:
-						text: req.i18n.translate("email_or_password_wrong_try_again"),
-						type: 'error'
 			LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 				if !isAllowed
 					logger.log email:email, "too many login requests"
@@ -55,8 +39,9 @@ module.exports = AuthenticationController =
 					if user?
 						LoginRateLimiter.recordSuccessfulLogin email
 						AuthenticationController._recordSuccessfulLogin user._id
-						AuthenticationController._establishUserSession req, user, (error) ->
+						AuthenticationController.establishUserSession req, user, (error) ->
 							return next(error) if error?
+							req.session.justLoggedIn = true
 							logger.log email: email, user_id: user._id.toString(), "successful log in"
 							res.send redir: redir
 					else
