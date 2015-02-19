@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		autoCompile = true
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -70,16 +70,17 @@ define [
 
 					$scope.pdf.logEntryAnnotations = {}
 					for entry in logEntries.all
-						entry.file = normalizeFilePath(entry.file)
+						if entry.file?
+							entry.file = normalizeFilePath(entry.file)
 
-						entity = ide.fileTreeManager.findEntityByPath(entry.file)
-						if entity?
-							$scope.pdf.logEntryAnnotations[entity.id] ||= []
-							$scope.pdf.logEntryAnnotations[entity.id].push {
-								row: entry.line - 1
-								type: if entry.level == "error" then "error" else "warning"
-								text: entry.message
-							}
+							entity = ide.fileTreeManager.findEntityByPath(entry.file)
+							if entity?
+								$scope.pdf.logEntryAnnotations[entity.id] ||= []
+								$scope.pdf.logEntryAnnotations[entity.id].push {
+									row: entry.line - 1
+									type: if entry.level == "error" then "error" else "warning"
+									text: entry.message
+								}
 
 				.error () ->
 					$scope.pdf.logEntries = []
@@ -170,14 +171,14 @@ define [
 		$scope.switchToFlatLayout = () ->
 			$scope.ui.pdfLayout = 'flat'
 			$scope.ui.view = 'pdf'
-			$.localStorage "pdf.layout", "flat"
+			ide.localStorage "pdf.layout", "flat"
 			
 		$scope.switchToSideBySideLayout = () ->
 			$scope.ui.pdfLayout = 'sideBySide'
 			$scope.ui.view = 'editor'
-			$.localStorage "pdf.layout", "split"
+			localStorage "pdf.layout", "split"
 			
-		if pdfLayout = $.localStorage("pdf.layout")
+		if pdfLayout = localStorage("pdf.layout")
 			$scope.switchToSideBySideLayout() if pdfLayout == "split"
 			$scope.switchToFlatLayout() if pdfLayout == "flat"
 		else
