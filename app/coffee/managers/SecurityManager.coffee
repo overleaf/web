@@ -12,6 +12,26 @@ querystring = require('querystring')
 async = require "async"
 
 module.exports = SecurityManager =
+	userCanCreateProject : (user)->
+		logger.log "SecurityManager.userCanCreateProject"
+		email = user.email
+		suffix = email.split("@")[1]
+		domains = Settings.security.authorizedDomains
+		if domains == "any"
+			return true
+		for d in domains
+			if d == suffix
+				return true
+		return false
+
+	requestCanCreateProject : (req, res, next)->	
+		logger.log "SecurityManager.requestCanCreateProject"
+		if SecurityManager.userCanCreateProject(req.user)
+			next()
+		else
+			res.redirect('/restricted')
+			logger.log "email: #{email} can not create project redirecting to restricted page"
+
 	restricted : (req, res, next)->
 		if req.session.user?
 			res.render 'user/restricted',

@@ -73,6 +73,39 @@ If you didn't request a password reset, let us know.
 <p> <a href="<%= siteUrl %>"> ShareLatex.com </a></p>
 '''
 
+
+templates.emailVerificationRequested =	
+	subject:  _.template "Email Verification - ShareLatex.com"
+	layout: NotificationEmailLayout
+	type:"notification"
+	compiledTemplate: _.template '''
+<h1 class="h1">Email Verification</h1>
+<p>
+Thanks for using ShareLatex. In order to confirm your email address please click on the button below.
+<p>
+<center>
+	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:12.5px;">
+		<div style="padding-right:10px;padding-left:10px">
+			<a href="<%= setEmailVerificationUrl %>" style="text-decoration:none" target="_blank">
+				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
+		  			Confirm Email
+				</span>
+			</a>
+		</div>
+	</div>
+</center>
+
+If you ignore this message, your email won't be confirmed.
+<p>
+If you didn't request an account, let us know.
+
+</p>
+<p>Thank you</p>
+<p> <a href="<%= siteUrl %>"> ShareLatex.com </a></p>
+'''
+
+
+
 templates.projectSharedWithYou = 
 	subject: _.template "<%= owner.email %> wants to share <%= project.name %> with you"
 	layout: NotificationEmailLayout

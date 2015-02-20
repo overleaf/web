@@ -1,33 +1,42 @@
-.dropdown
-	a.btn.btn-primary.dropdown-toggle(
-		href="#",
-		data-toggle="dropdown"
-	)
-		| #{translate("new_project")}
+if canCreateProject
+	.dropdown
+		a.btn.btn-primary.dropdown-toggle(
+			href="#",
+			data-toggle="dropdown"
+		)
+			| #{translate("new_project")}
 
-	ul.dropdown-menu(role="menu")
-		li
-			a(
-				href,
-				ng-click="openCreateProjectModal()"
-			) #{translate("blank_project")}
-		li
-			a(
-				href,
-				ng-click="openCreateProjectModal('example')"
-			) #{translate("example_project")}
-		li
-			a(
-				href,
-				ng-click="openUploadProjectModal()"
-			) #{translate("upload_project")}
-		!{moduleIncludes("newProjectMenu", locals)}
-		if (templates)
-			li.divider
-			li.dropdown-header #{translate("templates")}
-			each item in templates
-				li
-					a.menu-indent(href=item.url) #{translate(item.name)}
+		ul.dropdown-menu(role="menu")
+			li
+				a(
+					href,
+					ng-click="openCreateProjectModal()"
+				) #{translate("blank_project")}
+			li
+				a(
+					href,
+					ng-click="openCreateProjectModal('example')"
+				) #{translate("example_project")}
+			li
+				a(
+					href,
+					ng-click="openUploadProjectModal()"
+				) #{translate("upload_project")}
+			!{moduleIncludes("newProjectMenu", locals)}
+			if (templates)
+				li.divider
+					li.dropdown-header #{translate("templates")}
+				each item in templates
+					li
+						a.menu-indent(href=item.url) #{translate(item.name)}
+
+	.row-spaced(ng-if="projects.length == 0", ng-cloak)
+		.first-project
+			div
+				i.fa.fa-arrow-up.fa-2x
+					div
+						strong #{translate("create_your_first_project")}
+
 
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
@@ -55,19 +64,12 @@
 						'fa-folder-o': !tag.selected\
 					}"
 				)
-				span.name {{tag.name}} 
+					span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus
 				span.name #{translate("new_folder")}
-
-.row-spaced(ng-if="projects.length == 0", ng-cloak)
-	.first-project
-		div
-			i.fa.fa-arrow-up.fa-2x
-		div
-			strong #{translate("create_your_first_project")}
 
 - if (showUserDetailsArea)
 	.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
@@ -77,8 +79,8 @@
 				.progress
 					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
 
-				p.small #{translate("profile_complete_percentage", {percentval:"{{percentComplete}}"})}
-				
+					p.small #{translate("profile_complete_percentage", {percentval:"{{percentComplete}}"})}
+
 				button#completeUserProfileInformation.btn.btn-info(
 					ng-hide="formVisable",
 					ng-click="openUserProfileModal()"

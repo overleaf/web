@@ -21,6 +21,22 @@ module.exports =
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
 
+	registerPageEmail : (req, res)->
+		sharedProjectData =
+			project_name:req.query.project_name
+			user_first_name:req.query.user_first_name
+
+		newTemplateData = {}
+		if req.session.templateData?
+			newTemplateData.templateName = req.session.templateData.templateName
+
+		res.render 'user/registerEmail',
+			title: 'register'
+			redir: req.query.redir
+			sharedProjectData: sharedProjectData
+			newTemplateData: newTemplateData
+			new_email:req.query.new_email || ""
+
 	loginPage : (req, res)->
 		res.render 'user/login',
 			title: 'login',

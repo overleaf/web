@@ -11,6 +11,9 @@ AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
+RateLimiter = require("../../infrastructure/RateLimiter")
+Settings = require('settings-sharelatex')
+ConfirmEmailHandler = require("../ConfirmEmail/ConfirmEmailHandler")
 
 module.exports =
 
@@ -60,16 +63,29 @@ module.exports =
 					return res.send 200
 				else if newEmail.indexOf("@") == -1
 					return res.send(400)
-				else
-					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
-						if err?
-							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
-							if err.message == "alread_exists"
-								message = req.i18n.translate("alread_exists")
+				else 
+					if Settings.security.emailVerification
+						emails =
+							newEmail: newEmail
+							oldEmail: user.email
+						ConfirmEmailHandler.generateAndEmailVerificationToken emails, "update/email", (err, exists)->
+							if err?
+								res.send 500, {message:err?.message}
+							else if exists
+								res.send 401, {message: req.i18n.translate("email_already_register")}
 							else
-								message = req.i18n.translate("problem_changing_email_address")
-							return res.send 500, {message:message}
-						res.send(200)
+								res.send 
+							  	redir: '/register_email/confirmation'
+					else
+						UserUpdater.changeEmailAddress user_id, newEmail, (err)->
+							if err?
+								logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
+								if err.message == "alread_exists"
+									message = req.i18n.translate("alread_exists")
+								else
+									message = req.i18n.translate("problem_changing_email_address")
+								return res.send 500, {message:message}
+							res.send(200)
 
 	logout : (req, res)->
 		metrics.inc "user.logout"
@@ -101,6 +117,28 @@ module.exports =
 						last_name: user.last_name
 						email: user.email
 						created: Date.now()
+
+	registerEmail : (req, res, next = (error) ->)->
+		email = req.body.email.trim().toLowerCase()
+		opts = 
+			endpointName: "email_verification_rate_limit"
+			timeInterval: 60
+			subjectName: req.ip
+			throttle: 6
+		RateLimiter.addCount opts, (err, canCompile)->
+			if !canCompile
+				return res.send 500, { message: req.i18n.translate("rate_limit_hit_wait")}
+			emails =
+				newEmail: email
+				oldEmail: null
+			ConfirmEmailHandler.generateAndEmailVerificationToken emails, "password/create", (err, exists)->
+				if err?
+					res.send 500, {message:err?.message}
+				else if exists
+					res.send 401, {message: req.i18n.translate("email_already_register")}
+				else
+					res.send 
+					  redir: '/register_email/confirmation'
 
 
 	changePassword : (req, res, next = (error) ->)->

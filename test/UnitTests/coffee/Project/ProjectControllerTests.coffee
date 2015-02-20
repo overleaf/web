@@ -40,6 +40,7 @@ describe "ProjectController", ->
 			findById: sinon.stub()
 		@SecurityManager =
 			userCanAccessProject:sinon.stub()
+			userCanCreateProject:sinon.stub()
 		@EditorController = 
 			renameProject:sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
@@ -205,6 +206,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
+			@SecurityManager.userCanCreateProject.returns "boolean"
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -227,6 +229,12 @@ describe "ProjectController", ->
 		it "should send the user", (done)->
 			@res.render = (pageName, opts)=>
 				opts.user.should.deep.equal @user
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it "should send the canCreateProject flag", (done)->
+			@res.render = (pageName, opts)=>
+				opts.canCreateProject.should.equal "boolean"
 				done()
 			@ProjectController.projectListPage @req, @res
 

@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.directive "asyncForm", ($http) ->
+	App.directive "asyncForm", ($http, $log) ->
 		return {
 			link: (scope, element, attrs) ->
 				formName = attrs.asyncForm
@@ -17,10 +17,10 @@ define [
 						formData[data.name] = data.value
 
 					scope[attrs.name].inflight = true
-
 					$http
 						.post(element.attr('action'), formData)
 						.success (data, status, headers, config) ->
+							$log.info "success"
 							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false

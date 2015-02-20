@@ -32,6 +32,7 @@ StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
+ConfirmEmailController = require ("./Features/ConfirmEmail/ConfirmEmailController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 
@@ -53,11 +54,21 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
-		app.get  '/register', UserPagesController.registerPage
-		app.post '/register', UserController.register
+		if Settings.security.emailVerification
+			app.get  '/register', UserPagesController.registerPageEmail
+			app.post '/register', UserController.registerEmail
+			app.get '/register_email/confirmation', (req, res) -> res.render "general/confirmation"
+			app.get '/update/email/validated', (req, res) -> res.render "general/emailValidate"
+			app.get '/user/update/email', ConfirmEmailController.renderUpdateEmail
+			app.get '/user/password/create', ConfirmEmailController.renderCreatePasswordForm
+			app.post '/user/password/create', ConfirmEmailController.requestCreatePassword
+		else
+			app.get  '/register', UserPagesController.registerPage
+			app.post '/register', UserController.register
 
 		EditorRouter.apply(app, httpAuth)
 		CollaboratorsRouter.apply(app)
+
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
@@ -83,7 +94,7 @@ module.exports = class Router
 		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
 
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
-		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
+		app.post '/project/new', AuthenticationController.requireLogin(), SecurityManager.requestCanCreateProject, ProjectController.newProject
 
 		app.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
 			endpointName: "open-project"
@@ -111,7 +122,7 @@ module.exports = class Router
 
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
-		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
+		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, SecurityManager.requestCanCreateProject, ProjectController.cloneProject
 
 		app.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
 
