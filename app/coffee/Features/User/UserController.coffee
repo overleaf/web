@@ -10,6 +10,8 @@ AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
+_ = require('underscore')
+Settings = require('settings-sharelatex')
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
 
 module.exports =
@@ -77,13 +79,16 @@ module.exports =
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
-			res.redirect '/login'
+			if (Settings.ldap)
+				res.redirect '/register'
+			else
+				res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
 		logger.log email: req.body.email, "attempted register"
 		redir = Url.parse(req.body.redir or "/project").path
-		UserRegistrationHandler.registerNewUser req.body, (err, user)->
-			if err == "EmailAlreadyRegisterd"
+		UserRegistrationHandler.registerNewUser _.clone(req.body), (err, user)->
+			if err == "EmailAlreadyRegisterd" or err == "LdapFail"
 				return AuthenticationController.login req, res
 			else if err?
 				next(err)

@@ -6,36 +6,50 @@ Metrics = require('../../infrastructure/Metrics')
 logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
+Settings = require('settings-sharelatex')
+LdapAuth = require("../Security/LdapAuth")
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
 		email = req.body?.email?.toLowerCase()
 		password = req.body?.password
 		redir = Url.parse(req.body?.redir or "/project").path
-		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+		LdapAuth.authDN req.body, (err, isAllowed)->
+			if (Settings.ldap)
+				email = req.body.email
+				password = req.body.password
 			if !isAllowed
-				logger.log email:email, "too many login requests"
+				logger.log email:email, "ldap user fail"
 				res.statusCode = 429
 				return res.send
 					message:
+						text: Settings.ldap?.failMessage,
 						text: req.i18n.translate("to_many_login_requests_2_mins"),
 						type: 'error'
-			AuthenticationManager.authenticate email: email, password, (error, user) ->
-				return next(error) if error?
-				if user?
-					LoginRateLimiter.recordSuccessfulLogin email
-					AuthenticationController._recordSuccessfulLogin user._id
-					AuthenticationController.establishUserSession req, user, (error) ->
-						return next(error) if error?
-						req.session.justLoggedIn = true
-						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
-				else
-					AuthenticationController._recordFailedLogin()
-					logger.log email: email, "failed log in"
-					res.send message:
-						text: req.i18n.translate("email_or_password_wrong_try_again"),
-						type: 'error'
+			LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+				if !isAllowed
+					logger.log email:email, "too many login requests"
+					res.statusCode = 429
+					return res.send
+						message:
+							text: req.i18n.translate("to_many_login_requests_2_mins"),
+							type: 'error'
+				AuthenticationManager.authenticate email: email, password, (error, user) ->
+					return next(error) if error?
+					if user?
+						LoginRateLimiter.recordSuccessfulLogin email
+						AuthenticationController._recordSuccessfulLogin user._id
+						AuthenticationController.establishUserSession req, user, (error) ->
+							return next(error) if error?
+							req.session.justLoggedIn = true
+							logger.log email: email, user_id: user._id.toString(), "successful log in"
+							res.send redir: redir
+					else
+						AuthenticationController._recordFailedLogin()
+						logger.log email: email, "failed log in"
+						res.send message:
+							text: req.i18n.translate("email_or_password_wrong_try_again"),
+							type: 'error'
 
 	getAuthToken: (req, res, next = (error) ->) ->
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
