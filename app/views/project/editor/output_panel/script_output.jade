@@ -12,7 +12,7 @@ div.full-size(ng-controller="ScriptOutputController")
 			span(ng-show="!running") Run
 			span(ng-show="running") Running...
 			
-	div.script-output
+	div.script-output(scroll-glue)
 		.alert.alert-info(ng-if="needToUpgrade", ng-controller="FreeTrialModalController")
 			p.text-center
 				| Your free trial has expired. You need to upgrade to run scripts.
@@ -23,39 +23,41 @@ div.full-size(ng-controller="ScriptOutputController")
 			| &nbsp;
 			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 			| &nbsp;&nbsp;Click here to run your script!
-	
-		.alert.alert-danger(ng-show="error")
+			
+		.alert.alert-info(ng-show="running && stillIniting && !inited")
+			p
+				i.fa.fa-spinner.fa-spin.fa-fw 
+				|  Initializing environment...
+			p.small (This can take a while the first time you run a script)
+
+		span.output(ng-repeat="part in output | orderBy:'msg_id' track by $index ")
+			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
+			span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
+			div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
+				div.text-center(ng-show="running")
+					i.fa.fa-2x.fa-spin.fa-spinner
+				
+				.download-controls
+					span.name(ng-show="part.file_type == 'image' && part.path.slice(0,7) != '.output'") {{ part.path }}
+					a(
+						ng-href="{{part.url}}",
+						target="_blank",
+						tooltip="Download",
+						tooltip-append-to-body="true",
+						tooltip-placement="bottom"
+					)
+						i.fa.fa-download
+
+				img(ng-if="part.file_type == 'image' && !running", ng-src="{{part.url}}")
+				div(ng-if="part.file_type != 'image' && !running")
+					.small File written
+					div
+						a(ng-href="{{part.url}}", target="_blank") {{ part.path }}
+						
+		.alert.alert-danger.row-spaced-small(ng-show="error")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
 
-		.alert.alert-danger(ng-show="timedout")
+		.alert.alert-danger.row-spaced-small(ng-show="timedout")
 			strong #{translate("timedout")}. 
-			span #{translate("proj_timed_out_reason")}
-		
-		.output-file.card.card-thin(ng-repeat="file in files")
-			.page-header.output-file-page-header {{ file.path }}
-			img(
-				ng-if="file.type == 'image'"
-				ng-src="{{ file.url }}"
-			)
-			iframe(
-				ng-if="file.type == 'pdf'"
-				ng-src="{{ file.url }}"
-			)
-			div.output-file-text(
-				ng-if="file.type == 'text'"
-			)
-				p.row-spaced-small.text-center.loading(ng-show="file.loading")
-					i.fa.fa-refresh.fa-spin
-					span  #{translate("loading")}
-				pre(ng-show="!file.loading") {{ file.content }}
-			p.output-file-download-link.text-center(ng-if="file.type != 'image'")
-				a(ng-href="{{file.url}}", target="_blank") Download
-
-		.output-file.card.card-thin(ng-if="output.stdout && output.stdout != ''")
-			.page-header.output-file-page-header Output
-			pre.output.stdout {{ output.stdout }}
-		
-		.output-file.card.card-thin(ng-if="output.stderr && output.stderr != ''")
-			.page-header.output-file-page-header Errors
-			pre.output.stderr {{ output.stderr }}
+			span Sorry, your script took too long to run and timed out.
