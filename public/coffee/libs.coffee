@@ -10,4 +10,5 @@ define [
 	"libs/angular-sanitize-1.2.17"
 	"libs/angular-cookie"
 	"libs/autolinker"
+	"libs/angular-scroll-glue"
 ], () ->

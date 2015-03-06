@@ -150,53 +150,91 @@
 
 .script-output {
 	overflow: auto;
-	background-color: @gray-lightest;
+	background-color: white;
 	padding: @line-height-computed / 2;
 	
-	pre.output {
+	.output {
+		font-family: @font-family-monospace;
 		font-size: 14px;
 		white-space: pre-wrap;
 		word-wrap: break-word;
 		margin: (@line-height-computed / 2) 0;
-		&.stdout {
-			color: black;
-		}
-		&.stderr {
+		.stderr {
 			color: @brand-danger;
 		}
 	}
 	
 	.output-file {
-		margin-bottom: @line-height-computed / 2;
+		border: 1px solid @gray-lighter;
+		background-color: white;
+		margin: 12px 0;
+		padding: 6px 12px;
+		box-shadow: 0 0 5px #ddd;
+		position: relative;
 		
-		.output-file-page-header {
-			margin-bottom: 0;
-			padding-bottom: @line-height-computed / 4;
+		i.fa {
+			margin: auto;
+			padding: 16px;
+			font-size: 18px;
 		}
 		
 		img {
-			max-width: 100%;
-			max-height: 600px;
-		}
-		
-		iframe {
 			width: 100%;
-			height: 700px;
-			border: none;
 		}
 		
-		.output-file-text {
-			pre {
-				margin: 0;
-				font-size: 14px;
-				white-space: pre-wrap;
-				word-wrap: break-word;
+		.download-controls {
+			position: absolute;
+			top: -4px;
+			right: 0;
+			display: none;
+			a {
+				color: @gray-light;
+			}
+			a:hover {
+				color: @gray-dark;
+				text-decoration: none;
+			}
+			i.fa {
+				vertical-align: middle;
+			}
+			.name {
+				padding: 4px;
+				background-color: white;
+			}
+		}
+		&:hover {
+			.download-controls {
+				display: block;
 			}
 		}
 		
-		.output-file-download-link {
-			margin-top: @line-height-computed / 2;
-		}
+		// .output-file-page-header {
+		// 	margin-bottom: 0;
+		// 	padding-bottom: @line-height-computed / 4;
+		// }
+		// 
+		// iframe {
+		// 	width: 100%;
+		// 	height: 700px;
+		// 	border: none;
+		// }
+		// 
+		// .output-file-text {
+		// 	pre {
+		// 		margin: 0;
+		// 		font-size: 14px;
+		// 		white-space: pre-wrap;
+		// 		word-wrap: break-word;
+		// 	}
+		// }
+		// 
+		// .output-file-download-link {
+		// 	margin-top: @line-height-computed / 2;
+		// }
+	}
+	
+	.output:first-of-type .output-file {
+		margin-top: 0;
 	}
 }
 
