@@ -13,7 +13,7 @@ logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
-	compile: (project_id, user_id, options = {}, _callback = (error) ->) ->
+	compile: (project_id, user_id, session_id, options = {}, _callback = (error) ->) ->
 		timer = new Metrics.Timer("editor.compile")
 		callback = (args...) ->
 			timer.done()
@@ -36,7 +36,7 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, output) ->
+							ClsiManager.sendRequest project_id, session_id, options, (error, status, outputFiles, output) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, output, limits)
