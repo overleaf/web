@@ -22,11 +22,12 @@ describe "ClsiManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"request": @request = {}
 		@project_id = "project-id"
+		@session_id = "mock-session-123"
 		@callback = sinon.stub()
 
 	describe "sendRequest", ->
 		beforeEach ->
-			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @request = "mock-request")
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(3, null, @request = "mock-request")
 
 		describe "with a successful compile", ->
 			beforeEach ->
@@ -44,11 +45,11 @@ describe "ClsiManager", ->
 						}]
 						output: @output = "mock output"
 				})
-				@ClsiManager.sendRequest @project_id, {compileGroup:"standard"}, @callback
+				@ClsiManager.sendRequest @project_id, @session_id, {compileGroup:"standard"}, @callback
 
 			it "should build the request", ->
 				@ClsiManager._buildRequest
-					.calledWith(@project_id)
+					.calledWith(@project_id, @session_id)
 					.should.equal true
 
 			it "should send the request to the CLSI", ->
@@ -74,7 +75,7 @@ describe "ClsiManager", ->
 					compile:
 						status: @status = "failure"
 				})
-				@ClsiManager.sendRequest @project_id, {}, @callback
+				@ClsiManager.sendRequest @project_id, @session_id, {}, @callback
 			
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
@@ -146,7 +147,7 @@ describe "ClsiManager", ->
 					processes:  @processes = 57
 					cpu_shares: @cpu_shares = 456
 				}
-				@ClsiManager._buildRequest @project_id, options, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @session_id, options, (error, request) =>
 					@request = request
 					done()
 
@@ -168,8 +169,11 @@ describe "ClsiManager", ->
 			it "should build up the CLSI request", ->
 				expect(@request).to.deep.equal(
 					compile:
+						session_id: @session_id
 						options:
 							compiler: @compiler
+							command: undefined
+							env: undefined
 							timeout : @timeout
 							memory:     @memory
 							processes:  @processes
@@ -191,7 +195,7 @@ describe "ClsiManager", ->
 
 		describe "when root doc override is valid", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @session_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
 					@request = request
 					done()
 
@@ -201,7 +205,7 @@ describe "ClsiManager", ->
 
 		describe "when root doc override is invalid", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, {rootDoc_id:"invalid-id"}, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @session_id, {rootDoc_id:"invalid-id"}, (error, request) =>
 					@request = request
 					done()
 
@@ -213,21 +217,24 @@ describe "ClsiManager", ->
 		describe "when the project has an invalid compiler", ->
 			beforeEach (done) ->
 				@project.compiler = "context"
-				@ClsiManager._buildRequest @project, null, (error, request) =>
+				@ClsiManager._buildRequest @project, @session_id, null, (error, request) =>
 					@request = request
 					done()
 
 			it "should set the compiler to pdflatex", ->
 				@request.compile.options.compiler.should.equal "pdflatex"
 
-		describe "when there is no valid root document", ->
-			beforeEach (done) ->
-				@project.rootDoc_id = "not-valid"
-				@ClsiManager._buildRequest @project, null, (@error, @request) =>
-					done()
+		# Not applicable in datajoy:
+		# we don't want it to be a problem if we just want to run a standalone command (i.e. conda install PACKAGE)
+		#
+		# describe "when there is no valid root document", ->
+		# 	beforeEach (done) ->
+		# 		@project.rootDoc_id = "not-valid"
+		# 		@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
+		# 			done()
 			
-			it "should return an error", ->
-				expect(@error).to.exist
+		# 	it "should return an error", ->
+		# 		expect(@error).to.exist
 				
 		describe "with a python file as the root doc", ->
 			beforeEach (done) ->
@@ -248,7 +255,7 @@ describe "ClsiManager", ->
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
 				
-				@ClsiManager._buildRequest @project, null, (@error, @request) =>
+				@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
 					done()
 					
 			it "should set the compiler to python", ->

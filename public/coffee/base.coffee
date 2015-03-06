@@ -15,6 +15,7 @@ define [
 		"ipCookie"
 		"ErrorCatcher"
 		"localStorage"
+		"luegg.directives" # Scroll glue
 	])
 
 	return App
