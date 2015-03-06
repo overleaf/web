@@ -30,6 +30,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
+		@session_id = "mock-session-id"
 		@user = 
 			features:
 				compileGroup: "premium"
@@ -45,8 +46,10 @@ describe "CompileController", ->
 				@req.params =
 					Project_id: @project_id
 				@req.session = {}
+				@req.body =
+					session_id: @session_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
-				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
+				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
 				@CompileController.compile @req, @res, @next
 
 			it "should look up the user id", ->
@@ -56,7 +59,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: false })
+					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: false })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -78,13 +81,15 @@ describe "CompileController", ->
 					Project_id: @project_id
 				@req.query =
 					auto_compile: "true"
+				@req.body =
+					session_id: @session_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
-				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
+				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"])
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: true })
+					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: true })
 					.should.equal true
 
 	describe "downloadPdf", ->

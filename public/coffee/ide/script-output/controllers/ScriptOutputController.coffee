@@ -9,6 +9,7 @@ define [
 			$scope.running = false
 			$scope.error = false
 			$scope.timedout = false
+			$scope.session_id = Math.random().toString().slice(2)
 		reset()
 			
 		$scope.uncompiled = true
@@ -17,6 +18,9 @@ define [
 			$scope.run()
 			
 		ide.socket.on "clsiOutput", (message) ->
+			# We get messages from other user's compiles in this project. Ignore them
+			return if message.header?.session != $scope.session_id
+
 			output = parseOutputMessage(message)
 			if output?
 				$scope.output.push output
@@ -54,6 +58,7 @@ define [
 					# Always compile the open doc in this case
 					rootDoc_id: rootDoc_id
 					compiler: compiler
+					session_id: $scope.session_id
 				})
 					
 		parseAndLoadOutputFiles = (files = []) ->
