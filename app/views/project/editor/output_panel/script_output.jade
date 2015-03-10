@@ -24,15 +24,15 @@ div.full-size(ng-controller="ScriptOutputController")
 			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 			| &nbsp;&nbsp;Click here to run your script!
 
-		span.output(ng-repeat="part in output track by $index")
+		span.output(ng-repeat="part in output | orderBy:'msg_id' track by $index ")
 			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
 			span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
-			div.output-file(ng-if="part.output_type == 'file'")
+			div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
 				div.text-center(ng-show="running")
 					i.fa.fa-2x.fa-spin.fa-spinner
 				
 				.download-controls
-					span.name(ng-show="part.file_type == 'image'") {{ part.path }}
+					span.name(ng-show="part.file_type == 'image' && !part.path.slice(0,7) == '.output'") {{ part.path }}
 					a(
 						ng-href="{{part.url}}",
 						target="_blank",

@@ -73,14 +73,17 @@ define [
 				output = {
 					output_type: message.content.name # 'stdout' or 'stderr'
 					text: message.content.text
+					msg_id: message.header.msg_id
 				}
-			else if message.msg_type == "display_data"
+			else if message.msg_type == "file_modified"
 				path = message.content.data['text/path']
 				output = {
 					output_type: "file"
 					url: "/project/#{$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
 					file_type: "unknown"
 					path: path
+					ignore: shouldIgnorePath(path)
+					msg_id: message.header.msg_id
 				}
 				parts = path.split(".")
 				if parts.length == 1
@@ -98,3 +101,6 @@ define [
 				output = null
 			return output
 			
+		shouldIgnorePath = (path) ->
+			return true if path.match(/\.pyc$/)
+			return false
