@@ -73,7 +73,7 @@ define [
 				output = {
 					output_type: message.content.name # 'stdout' or 'stderr'
 					text: message.content.text
-					msg_id: message.header.msg_id
+					msg_id: parseInt(message.header.msg_id, 10)
 				}
 			else if message.msg_type == "file_modified"
 				path = message.content.data['text/path']
@@ -83,7 +83,7 @@ define [
 					file_type: "unknown"
 					path: path
 					ignore: shouldIgnorePath(path)
-					msg_id: message.header.msg_id
+					msg_id: parseInt(message.header.msg_id, 10)
 				}
 				parts = path.split(".")
 				if parts.length == 1
