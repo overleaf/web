@@ -32,7 +32,7 @@ div.full-size(ng-controller="ScriptOutputController")
 					i.fa.fa-2x.fa-spin.fa-spinner
 				
 				.download-controls
-					span.name(ng-show="part.file_type == 'image' && !part.path.slice(0,7) == '.output'") {{ part.path }}
+					span.name(ng-show="part.file_type == 'image' && part.path.slice(0,7) != '.output'") {{ part.path }}
 					a(
 						ng-href="{{part.url}}",
 						target="_blank",
