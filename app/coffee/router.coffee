@@ -180,7 +180,7 @@ module.exports = class Router
 			sendRes = _.once (statusCode, message)->
 				res.writeHead statusCode
 				res.end message
-			CompileManager.compile req.params.Project_id, "test-compile", {}, () ->
+			CompileManager.compile req.params.Project_id, "test-compile", "test_compile_session_id", {}, () ->
 				sendRes 200, "Compiler returned in less than 10 seconds"
 			setTimeout (() ->
 				sendRes 500, "Compiler timed out"
