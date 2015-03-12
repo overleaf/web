@@ -23,6 +23,12 @@ div.full-size(ng-controller="ScriptOutputController")
 			| &nbsp;
 			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 			| &nbsp;&nbsp;Click here to run your script!
+			
+		.alert.alert-info(ng-show="running && stillIniting && !inited")
+			p
+				i.fa.fa-spinner.fa-spin.fa-fw 
+				|  Initializing environment...
+			p.small (This can take a while the first time you run a script)
 
 		span.output(ng-repeat="part in output | orderBy:'msg_id' track by $index ")
 			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}

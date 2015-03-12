@@ -10,6 +10,8 @@ define [
 			$scope.error = false
 			$scope.timedout = false
 			$scope.session_id = Math.random().toString().slice(2)
+			$scope.stillIniting = false
+			$scope.inited = false
 		reset()
 			
 		$scope.uncompiled = true
@@ -20,17 +22,25 @@ define [
 		ide.socket.on "clsiOutput", (message) ->
 			# We get messages from other user's compiles in this project. Ignore them
 			return if message.header?.session != $scope.session_id
-
-			output = parseOutputMessage(message)
-			if output?
-				$scope.output.push output
+			
+			if message.msg_type == "system_status" and message.content.status == "starting_run"
+				$scope.inited = true
 				$scope.$apply()
+			else
+				output = parseOutputMessage(message)
+				if output?
+					$scope.output.push output
+					$scope.$apply()
 
 		$scope.run = () ->
 			return if $scope.running
 			return if $scope.needToUpgrade
 			
 			reset()
+			initing = setTimeout () ->
+				$scope.stillIniting = true
+				$scope.$apply()
+			, 1000
 			$scope.running = true
 			$scope.uncompiled = false
 			
@@ -42,11 +52,13 @@ define [
 				
 			doCompile(rootDoc_id, compiler)
 				.success (data) ->
+					clearTimeout(initing)
 					$scope.running = false
 					if data?.status == "timedout"
 						$scope.timedout = true
 
 				.error () ->
+					clearTimeout(initing)
 					$scope.running = false
 					$scope.error = true
 					
