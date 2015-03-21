@@ -11,6 +11,7 @@ define [
 			$scope.session_id = Math.random().toString().slice(2)
 			$scope.stillIniting = false
 			$scope.inited = false
+			$scope.stopping = false
 		reset()
 			
 		$scope.uncompiled = true
@@ -52,13 +53,25 @@ define [
 				.success (data) ->
 					clearTimeout(initing)
 					$scope.running = false
+					$scope.stopping = false
 					if data?.status == "timedout"
 						$scope.timedout = true
 
 				.error () ->
 					clearTimeout(initing)
 					$scope.running = false
+					$scope.stopping = false
 					$scope.error = true
+		
+		$scope.stop = () ->
+			url = "/project/#{$scope.project_id}/compile/#{$scope.session_id}/stop"
+			$scope.stopping = true
+			$http
+				.post(url, {
+					_csrf: window.csrfToken
+				})
+				.error () ->
+					$scope.stopping = false
 					
 		doCompile = (rootDoc_id, compiler) ->
 			url = "/project/#{$scope.project_id}/compile"
