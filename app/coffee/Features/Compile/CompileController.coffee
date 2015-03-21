@@ -35,6 +35,9 @@ module.exports = CompileController =
 					compileGroup: limits?.compileGroup
 					output: output
 				}
+	
+	stopCompile: (req, res, next = (error) ->) ->
+		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"

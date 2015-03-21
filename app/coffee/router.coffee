@@ -100,6 +100,7 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
 
 		webRouter.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
+		webRouter.post '/project/:Project_id/compile/:session_id/stop', SecurityManager.requestCanAccessProject, CompileController.stopCompile
 		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
