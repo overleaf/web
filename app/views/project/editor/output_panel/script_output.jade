@@ -9,8 +9,16 @@ div.full-size(ng-controller="ScriptOutputController")
 				ng-class="{'fa-refresh fa-spin': running, 'fa-play': !running }"
 			)
 			| &nbsp;&nbsp;
-			span(ng-show="!running") Run
-			span(ng-show="running") Running...
+			span(ng-show="!running && !stopping") Run
+			span(ng-show="running && !stopping") Running...
+			span(ng-show="stopping") Stopping...
+		a(
+			href,
+			ng-click="stop()",
+			ng-show="running && !stopping"
+		).small
+			.i.fa.fa-fw.fa-stop
+			|  Stop
 			
 	div.script-output(scroll-glue)
 		.alert.alert-info(ng-if="needToUpgrade", ng-controller="FreeTrialModalController")
