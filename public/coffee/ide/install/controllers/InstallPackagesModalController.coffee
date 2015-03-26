@@ -7,10 +7,13 @@ define [
 				$scope.$broadcast "open"
 			, 200
 		
-		$scope.install = () ->
+		$scope.install = (autoStart) ->
 			return if $scope.inputs.packageName == ""
 			$scope.installedPackage = $scope.inputs.packageName
-			$scope.inputs.packageName = ""
+			
+			# Don't clear the name on autostart so it's still clear what is going on.
+			if !autoStart
+				$scope.inputs.packageName = ""
 
 			env = {}
 			if $scope.selectedTab.python
@@ -39,6 +42,9 @@ define [
 				command: command
 				env: env
 			}
+		
+		if $scope.autoStart
+			$scope.install(true)
 	
 		$scope.stop = () ->
 			return if !$scope.output.currentRun?

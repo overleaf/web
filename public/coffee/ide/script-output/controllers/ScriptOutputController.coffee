@@ -25,3 +25,6 @@ define [
 		$scope.stop = () ->
 			return if !$scope.currentRun?
 			commandRunner.stop $scope.currentRun
+		
+		$scope.installPackage = (packageName, language) ->
+			ide.$scope.$broadcast "installPackage", packageName, language

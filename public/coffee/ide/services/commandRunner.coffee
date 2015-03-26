@@ -46,6 +46,7 @@ define [
 						run.stopping = false
 						if data?.status == "timedout"
 							run.timedout = true
+						@_parseErrors(run)
 						@_clearRun(run)
 					.error () =>
 						$timeout.cancel(initing)
@@ -78,6 +79,7 @@ define [
 					inited: false
 					stopping: false
 					exitCode: null
+					parsedErrors: []
 				}
 				return run
 			
@@ -127,5 +129,23 @@ define [
 			_shouldIgnorePath: (path) ->
 				return true if path.match(/\.pyc$/)
 				return false
-
+				
+			_parseErrors: (run) ->
+				stderr = ""
+				for output in run.output
+					if output.output_type == "stderr"
+						stderr += output.text
+				stderr.replace /ImportError: No module named ([^ ]*)/g, (match, packageName) ->
+					run.parsedErrors.push {
+						type: "missing_package"
+						package: packageName
+						language: "python"
+					}
+				stderr.replace /there is no package called ‘(.*)’/, (match, packageName) ->
+					run.parsedErrors.push {
+						type: "missing_package"
+						package: packageName
+						language: "R"
+					}
+				
 		return commandRunner

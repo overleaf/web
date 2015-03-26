@@ -14,10 +14,21 @@ define [
 		
 		$scope.output = {}
 	
-		$scope.openInstallPackagesModal = () ->
+		$scope.openInstallPackagesModal = (autoStart) ->
+			$scope.autoStart = !!autoStart
 			$modal.open {
 				templateUrl: "installPackagesModalTemplate"
 				controller: "InstallPackagesModalController"
 				size: "lg"
 				scope: $scope
 			}
+		
+		$scope.$on "installPackage", (e, packageName, language) ->
+			$scope.inputs.packageName = packageName
+			if language == "python"
+				$scope.selectedTab.python = true
+				$scope.selectedTab.R = false
+			else if language == "R"
+				$scope.selectedTab.python = false
+				$scope.selectedTab.R = true
+			$scope.openInstallPackagesModal(true)

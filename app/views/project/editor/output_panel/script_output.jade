@@ -61,6 +61,11 @@ div.full-size(ng-controller="ScriptOutputController")
 					.small File written
 					div
 						a(ng-href="{{part.url}}", target="_blank") {{ part.path }}
+		
+		.alert.alert-info.row-spaced-small.text-center(ng-repeat="error in currentRun.parsedErrors")
+			div(ng-if="error.type == 'missing_package'")
+				p The '{{ error.package }}' package is not installed.
+				a(href, ng-click="installPackage(error.package, error.language)").btn.btn-info Install now
 						
 		.alert.alert-danger.row-spaced-small(ng-show="currentRun.error")
 			strong #{translate("server_error")} 
