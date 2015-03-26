@@ -1,4 +1,4 @@
-.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled, .script-output {
+.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled, .main-script-output {
 	.full-size;
 	top: 58px;
 }
@@ -235,6 +235,30 @@
 	
 	.output:first-of-type .output-file {
 		margin-top: 0;
+	}
+}
+
+.install-packages-modal {
+	.install-script-output {
+		height: 300px;
+		overflow: auto;
+		border: 1px solid @toolbar-border-color;
+	}
+	form {
+		select {
+			border-color: transparent;
+			box-shadow: none;
+			&:hover {
+				cursor: pointer;
+				border: 1px solid #cccccc;
+				box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+			}
+		}
+		input.package-name {
+			width: 400px;
+			padding: 0 10px;
+			margin-top: -2px;
+		}
 	}
 }
 

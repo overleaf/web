@@ -1,0 +1,91 @@
+li(ng-controller="InstallPackagesController")
+	a(
+		href,
+		ng-click="openInstallPackagesModal()"
+	)
+		i.fa.fa-fw.fa-archive
+		| &nbsp;&nbsp; Install packages
+
+script(type='text/ng-template', id='installPackagesModalTemplate')
+	.modal-header
+		h3 Install modules and packages
+	.modal-body.install-packages-modal
+		tabset
+			
+			
+			tab(heading="Python", active="selectedTab.python")
+			tab(heading="R", active="selectedTab.R")
+			li.pull-right(style="margin-top: 8px;")
+				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.installer == 'conda'")
+					| (Python packages will be installed with 
+					span.text-monospace conda install
+					| . 
+					a(href, ng-click="inputs.installer = 'pip'") Use pip instead.
+					| )
+				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.installer == 'pip'")
+					| (Python packages will be installed with 
+					span.text-monospace pip install
+					| . 
+					a(href, ng-click="inputs.installer = 'conda'") Use conda instead.
+					| )
+				span.small.row-spaced-small(ng-show="selectedTab.R")
+					| (R packages will be installed with 
+					span.text-monospace install.packages('...')
+					| )
+
+		form.form-inline.toolbar.toolbar-borderless.row-spaced
+			span.text-monospace
+				input.form-control.package-name#packageName(
+					ng-model="inputs.packageName",
+					placeholder="package-name",
+					on-enter="install()",
+					focus-on="open"
+				)
+			| &nbsp;&nbsp;
+			button(
+				ng-click="install()"
+				ng-disabled="output.currentRun.running"
+			).btn.btn-primary
+				span(ng-show="!output.currentRun.running && !output.currentRun.stopping") Install
+				span(ng-show="output.currentRun.running && !output.currentRun.stopping")
+					i.fa.fa-refresh.fa-spin.fa-fw
+					|  Installing...
+				span(ng-show="output.currentRun.stopping") 
+					i.fa.fa-refresh.fa-spin.fa-fw
+					|  Stopping...
+			| &nbsp;
+			a(
+				href,
+				ng-click="stop()",
+				ng-show="output.currentRun.running && !output.currentRun.stopping"
+			).small
+				.i.fa.fa-fw.fa-stop
+				|  Stop
+
+		div.script-output.install-script-output.row-spaced(scroll-glue, ng-show="output.currentRun")
+			.alert.alert-info(ng-show="output.currentRun.running && output.currentRun.stillIniting && !output.currentRun.inited")
+				p
+					i.fa.fa-spinner.fa-spin.fa-fw 
+					|  Initializing environment...
+				p.small (This can take a while the first time you run a script)
+
+			span.output(ng-repeat="part in output.currentRun.output | orderBy:'msg_id' track by $index ")
+				span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
+				span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
+				
+			.alert.alert-danger.row-spaced-small(ng-show="output.currentRun.error")
+				strong #{translate("server_error")} 
+				span #{translate("somthing_went_wrong_compiling")}
+
+			.alert.alert-danger.row-spaced-small(ng-show="output.currentRun.timedout")
+				strong #{translate("timedout")}. 
+				span Sorry, your script took too long to run and timed out.
+				
+			div.alert.alert-success.row-spaced(ng-show="output.currentRun.exitCode == 0") Success! '{{ installedPackage }}' was installed.
+			div.alert.alert-danger.row-spaced(ng-show="output.currentRun.exitCode") Failed to install '{{ installedPackage }}', sorry.
+
+	.modal-footer
+		.pull-left.small
+			| Trouble installing a package? 
+			a(href, ng-click="help()") Contact Us!
+		button.btn.btn-primary(ng-click="$close()") Done
