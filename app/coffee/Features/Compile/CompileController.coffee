@@ -25,6 +25,10 @@ module.exports = CompileController =
 				options.rootDoc_id = req.body.settingsOverride.rootDoc_id
 			if req.body?.compiler
 				options.compiler = req.body.compiler
+			if req.body?.command
+				options.command = req.body.command
+			if req.body?.env?
+				options.env = req.body.env
 			logger.log {options, project_id}, "got compile request"
 			CompileManager.compile project_id, user_id, session_id, options, (error, status, outputFiles, output, limits) ->
 				return next(error) if error?

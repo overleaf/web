@@ -58,7 +58,7 @@ module.exports = ClsiManager =
 				build: file.build
 		return outputFiles
 
-	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r"]
+	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r", "command"]
 	_buildRequest: (project_id, session_id, options={}, callback = (error, request) ->) ->
 		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
 			return callback(error) if error?
@@ -92,30 +92,29 @@ module.exports = ClsiManager =
 							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
 							modified: file.created?.getTime()
 
-					if !rootResourcePath?
-						callback new Error("no root document exists")
-					else
-						compiler = project.compiler
-						if options.compiler?
-							compiler = options.compiler
-						else if rootResourcePath.match(/\.R$/)
-							compiler = "r"
-						else if rootResourcePath.match(/\.py$/)
-							compiler = "python"
+					compiler = project.compiler
+					if options.compiler?
+						compiler = options.compiler
+					else if rootResourcePath.match(/\.R$/)
+						compiler = "r"
+					else if rootResourcePath.match(/\.py$/)
+						compiler = "python"
 
-						if compiler not in ClsiManager.VALID_COMPILERS
-							compiler = "pdflatex"
+					if compiler not in ClsiManager.VALID_COMPILERS
+						compiler = "pdflatex"
 
-						callback null, {
-							compile:
-								session_id: session_id
-								options:
-									compiler:   compiler
-									timeout:    options.timeout
-									memory:     options.memory
-									cpu_shares: options.cpu_shares
-									processes:  options.processes
-								rootResourcePath: rootResourcePath
-								resources: resources
-						}
+					callback null, {
+						compile:
+							session_id: session_id
+							options:
+								compiler:   compiler
+								command:    options.command
+								env:        options.env
+								timeout:    options.timeout
+								memory:     options.memory
+								cpu_shares: options.cpu_shares
+								processes:  options.processes
+							rootResourcePath: rootResourcePath
+							resources: resources
+					}
 		
