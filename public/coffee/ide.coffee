@@ -18,6 +18,7 @@ define [
 	"ide/install/index"
 	"ide/directives/layout"
 	"ide/services/ide"
+	"ide/services/commandRunner"
 	"__IDE_CLIENTSIDE_INCLUDES__"
 	"analytics/AbTestingManager"
 	"directives/focus"

@@ -17,13 +17,7 @@ aside#left-menu.full-size(
 	span(ng-show="!anonymous")
 		h4 #{translate("actions")}
 		ul.list-unstyled.nav
-			li(ng-controller="InstallPackagesController")
-				a(
-					href,
-					ng-click="openInstallPackagesModal()"
-				)
-					i.fa.fa-fw.fa-archive
-					| &nbsp;&nbsp; Install packages
+			include ./install-packages
 			li(ng-controller="CloneProjectController")
 				a(
 					href,
@@ -116,29 +110,3 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		)
 			span(ng-hide="state.inflight") #{translate("copy")}
 			span(ng-show="state.inflight") #{translate("copying")}...
-
-script(type='text/ng-template', id='installPackagesModalTemplate')
-	.modal-header
-		h3 Install libraries and packages
-	.modal-body
-		h2 Python
-		p
-			| DataJoy uses <code>conda</code> to manage Python packages.
-			| Many packages can be installed with:
-		pre.alert.alert-info
-			| import os
-			| os.system("sudo conda install PACKAGE")
-		p
-			| If the package is not present in <code>conda</code>,
-			| try installing it with <code>pip</code>:
-		pre.alert.alert-info
-			| import os
-			| os.system("sudo pip install PACKAGE")
-		h2 R
-		p
-			| Packages in R can be installed with the built in package manager:
-		pre.alert.alert-info
-			| system("sudo Rscript -e 'install.packages(c(\"PACKAGE\"), dependencies=TRUE)'")
-		
-	.modal-footer
-		button.btn.btn-primary(ng-click="$close()") OK
