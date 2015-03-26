@@ -2,25 +2,25 @@ div.full-size(ng-controller="ScriptOutputController")
 	.toolbar.toolbar-tall
 		a.btn.btn-info(
 			href,
-			ng-disabled="running || needToUpgrade",
+			ng-disabled="currentRun.running || needToUpgrade",
 			ng-click="run()"
 		)
 			i.fa.fa-fw(
-				ng-class="{'fa-refresh fa-spin': running, 'fa-play': !running }"
+				ng-class="{'fa-refresh fa-spin': currentRun.running, 'fa-play': !currentRun.running }"
 			)
 			| &nbsp;&nbsp;
-			span(ng-show="!running && !stopping") Run
-			span(ng-show="running && !stopping") Running...
-			span(ng-show="stopping") Stopping...
+			span(ng-show="!currentRun.running && !currentRun.stopping") Run
+			span(ng-show="currentRun.running && !currentRun.stopping") Running...
+			span(ng-show="currentRun.stopping") Stopping...
 		a(
 			href,
 			ng-click="stop()",
-			ng-show="running && !stopping"
+			ng-show="currentRun.running && !currentRun.stopping"
 		).small
 			.i.fa.fa-fw.fa-stop
 			|  Stop
 			
-	div.script-output(scroll-glue)
+	div.script-output.main-script-output(scroll-glue)
 		.alert.alert-info(ng-if="needToUpgrade", ng-controller="FreeTrialModalController")
 			p.text-center
 				| Your free trial has expired. You need to upgrade to run scripts.
@@ -32,13 +32,13 @@ div.full-size(ng-controller="ScriptOutputController")
 			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 			| &nbsp;&nbsp;Click here to run your script!
 			
-		.alert.alert-info(ng-show="running && stillIniting && !inited")
+		.alert.alert-info(ng-show="currentRun.running && currentRun.stillIniting && !currentRun.inited")
 			p
 				i.fa.fa-spinner.fa-spin.fa-fw 
 				|  Initializing environment...
 			p.small (This can take a while the first time you run a script)
 
-		span.output(ng-repeat="part in output | orderBy:'msg_id' track by $index ")
+		span.output(ng-repeat="part in currentRun.output | orderBy:'msg_id' track by $index ")
 			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
 			span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
 			div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
@@ -62,10 +62,10 @@ div.full-size(ng-controller="ScriptOutputController")
 					div
 						a(ng-href="{{part.url}}", target="_blank") {{ part.path }}
 						
-		.alert.alert-danger.row-spaced-small(ng-show="error")
+		.alert.alert-danger.row-spaced-small(ng-show="currentRun.error")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
 
-		.alert.alert-danger.row-spaced-small(ng-show="timedout")
+		.alert.alert-danger.row-spaced-small(ng-show="currentRun.timedout")
 			strong #{translate("timedout")}. 
 			span Sorry, your script took too long to run and timed out.
