@@ -104,10 +104,10 @@ define [
 					path = message.content.data['text/path']
 					output = {
 						output_type: "file"
-						url: "/project/#{$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
+						url: "/project/#{ide.$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
 						file_type: "unknown"
 						path: path
-						ignore: shouldIgnorePath(path)
+						ignore: @_shouldIgnorePath(path)
 						msg_id: parseInt(message.header.msg_id, 10)
 					}
 					parts = path.split(".")
