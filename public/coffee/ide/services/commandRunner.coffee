@@ -16,9 +16,12 @@ define [
 				ide.$scope.$apply()
 			else if message.msg_type == "command_exited"
 				run.exitCode = message.content.exitCode
+				commandRunner._parseErrors(run)
+				commandRunner._displayErrors(run)
 			else
 				output = commandRunner._parseOutputMessage(message)
 				if output?
+					output = commandRunner._filterOutputMessage(output)
 					run.output.push output
 					ide.$scope.$apply()
 		
@@ -46,7 +49,6 @@ define [
 						run.stopping = false
 						if data?.status == "timedout"
 							run.timedout = true
-						@_parseErrors(run)
 						@_clearRun(run)
 					.error () =>
 						$timeout.cancel(initing)
@@ -125,11 +127,17 @@ define [
 				else
 					output = null
 				return output
-				
+
 			_shouldIgnorePath: (path) ->
 				return true if path.match(/\.pyc$/)
 				return false
-				
+
+			_filterOutputMessage: (output) ->
+				if output.output_type == 'stderr'
+					# strip call stack from R error output
+					output.text = output.text.replace /Calls: source -> withVisible -> eval -> eval.*\n/, ''
+				return output
+
 			_parseErrors: (run) ->
 				stderr = ""
 				for output in run.output
@@ -147,5 +155,29 @@ define [
 						package: packageName
 						language: "R"
 					}
-				
+				stderr.replace /(.*\S) \(from (\S+\.[rR])#(\d+)\)\s*(.*)/, (match, message1, fileName, lineNumber, message2) ->
+					message = message1 + message2
+					run.parsedErrors.push {
+						type: "error"
+						file: fileName
+						line: +lineNumber
+						message: message
+						language: "R"
+					}
+
+			_displayErrors: (run) ->
+				$scope = ide.$scope
+				$scope.pdf.logEntryAnnotations ?= {}
+				for error in run.parsedErrors
+					entity = ide.fileTreeManager.findEntityByPath(error.file)
+					if entity?
+						$scope.pdf.logEntryAnnotations[entity.id] ||= []
+						$scope.pdf.logEntryAnnotations[entity.id].push {
+							row: error.line-1
+							type: "error"
+							text: error.message
+						}
+				$scope.$evalAsync()
+
+
 		return commandRunner
