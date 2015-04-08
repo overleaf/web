@@ -164,17 +164,26 @@ define [
 						message: message
 						language: "R"
 					}
+				stderr.replace /^(\d+:.*) at (\S+\.[rR])#(\d+)$/m, (match, stackFrame, fileName, lineNumber) ->
+					run.parsedErrors.push {
+						type: "stackframe"
+						file: fileName
+						line: +lineNumber
+						message: stackFrame
+						language: "R"
+					}
+
 
 			_displayErrors: (run) ->
 				$scope = ide.$scope
-				$scope.pdf.logEntryAnnotations ?= {}
+				$scope.pdf.logEntryAnnotations = {}
 				for error in run.parsedErrors
 					entity = ide.fileTreeManager.findEntityByPath(error.file)
 					if entity?
 						$scope.pdf.logEntryAnnotations[entity.id] ||= []
 						$scope.pdf.logEntryAnnotations[entity.id].push {
 							row: error.line-1
-							type: "error"
+							type: if error.type == "stackframe" then "warning" else "error"
 							text: error.message
 						}
 				$scope.$evalAsync()
