@@ -155,37 +155,65 @@ define [
 						package: packageName
 						language: "R"
 					}
-				stderr.replace /(.*\S) \(from (\S+\.[rR])#(\d+)\)\s*(.*)/, (match, message1, fileName, lineNumber, message2) ->
-					message = message1 + message2
-					run.parsedErrors.push {
-						type: "error"
-						file: fileName
-						line: +lineNumber
-						message: message
-						language: "R"
-					}
-				stderr.replace /^(\d+:.*) at (\S+\.[rR])#(\d+)$/m, (match, stackFrame, fileName, lineNumber) ->
-					run.parsedErrors.push {
-						type: "stackframe"
-						file: fileName
-						line: +lineNumber
-						message: stackFrame
-						language: "R"
-					}
-
+				stderr.replace ///^
+					(.*\S\s\(from\s\S+\.[rR]\#\d+\)\s*.*) # first line has "Error in foo (from file.R#8) blah"
+					\n
+					((\s*\d+:.*\s at\s\S+\.[rR]\#\d+\n)*) # stack frames (repeated) have "1: foo() at lib.R#2"
+				///m, (match, error, stack) ->
+					result = error.match /\(from (\S+\.[rR])#(\d+)\)/
+					if result?
+						# the top-level error
+						fileName = result[1]
+						lineNumber = parseInt result[2], 10
+						parsedError = {
+							type: "error"
+							file: fileName
+							line: parseInt lineNumber, 10
+							# strip any default error text coming from wrapper script
+							message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error')
+							language: "R"
+						}
+						# parse the stack lines (if any)
+						stackLines = stack.split '\n'
+						stackFrames = []
+						for s, i in stackLines
+							s.replace /at (\S+\.[rR])#(\d+)/, (match, fileName, lineNumber) ->
+								stackFrames.push {
+									file: fileName
+									line: parseInt lineNumber, 10
+									message: s
+								}
+						# add the stack frame to the error object
+						parsedError.stack = stackFrames if stackFrames.length
+						run.parsedErrors.push parsedError
 
 			_displayErrors: (run) ->
 				$scope = ide.$scope
 				$scope.pdf.logEntryAnnotations = {}
-				for error in run.parsedErrors
+
+				addError = (error, message = error.message, type = error.typeparent) ->
 					entity = ide.fileTreeManager.findEntityByPath(error.file)
 					if entity?
 						$scope.pdf.logEntryAnnotations[entity.id] ||= []
 						$scope.pdf.logEntryAnnotations[entity.id].push {
 							row: error.line-1
-							type: if error.type == "stackframe" then "warning" else "error"
-							text: error.message
+							type: type
+							text: message || "error"
 						}
+
+				formatStackTrace = (error, depth) ->
+					formatLine = (frame, i, j) ->
+						if i == j then "*" + frame.message else frame.message
+					error.message + "\n" + (formatLine(s, i, depth) for s, i in error.stack).join("\n")
+
+				for error in run.parsedErrors
+					if error.stack?
+						addError error, formatStackTrace(error, -1), "error"
+						for frame, i in error.stack
+							addError frame, formatStackTrace(error, i), "warning"
+					else
+						addError error
+
 				$scope.$evalAsync()
 
 
