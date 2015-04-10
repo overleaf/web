@@ -191,7 +191,7 @@ define [
 				$scope = ide.$scope
 				$scope.pdf.logEntryAnnotations = {}
 
-				addError = (error, message = error.message, type = error.typeparent) ->
+				addError = (error, message = error.message, type = "error") ->
 					entity = ide.fileTreeManager.findEntityByPath(error.file)
 					if entity?
 						$scope.pdf.logEntryAnnotations[entity.id] ||= []
