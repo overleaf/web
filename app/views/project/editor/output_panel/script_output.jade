@@ -66,6 +66,12 @@ div.full-size(ng-controller="ScriptOutputController")
 			div(ng-if="error.type == 'missing_package'")
 				p The '{{ error.package }}' package is not installed.
 				a(href, ng-click="installPackage(error.package, error.language)").btn.btn-info Install now
+			div(ng-if="error.type == 'runtime_error'",ng-controller="PdfLogEntryController")
+				p Runtime error '{{ error.message }}'
+				a(href, ng-click="openInEditor(error)").btn.btn-info Show me
+				div(ng-repeat="frame in error.stack")
+					p Stack frame {{frame}}
+					a(href, ng-click="openInEditor(frame)").btn.btn-info Show me
 						
 		.alert.alert-danger.row-spaced-small(ng-show="currentRun.error")
 			strong #{translate("server_error")} 

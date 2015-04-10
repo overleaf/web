@@ -166,7 +166,7 @@ define [
 						fileName = result[1]
 						lineNumber = parseInt result[2], 10
 						parsedError = {
-							type: "error"
+							type: "runtime_error"
 							file: fileName
 							line: parseInt lineNumber, 10
 							# strip any default error text coming from wrapper script
@@ -198,7 +198,7 @@ define [
 						$scope.pdf.logEntryAnnotations[entity.id].push {
 							row: error.line-1
 							type: type
-							text: message || "error"
+							text: message
 						}
 
 				formatStackTrace = (error, depth) ->
