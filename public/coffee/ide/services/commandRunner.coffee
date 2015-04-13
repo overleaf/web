@@ -143,46 +143,48 @@ define [
 				for output in run.output
 					if output.output_type == "stderr"
 						stderr += output.text
-				stderr.replace /ImportError: No module named ([^ ]*)/g, (match, packageName) ->
+				stderr = stderr.replace /ImportError: No module named ([^ ]*)/g, (match, packageName) ->
 					run.parsedErrors.push {
 						type: "missing_package"
 						package: packageName
 						language: "python"
 					}
-				stderr.replace /there is no package called ‘(.*)’/, (match, packageName) ->
+					return match
+				stderr = stderr.replace /there is no package called ['‘](.*)[’']/, (match, packageName) ->
 					run.parsedErrors.push {
 						type: "missing_package"
 						package: packageName
 						language: "R"
 					}
-				stderr.replace ///^
-					(.*\S\s\(from\s\S+\.[rR]\#\d+\)\s*.*) # first line has "Error in foo (from file.R#8) blah"
+					return "DONE"
+				stderr = stderr.replace ///^
+					(Error.*(\(from\s\S+\.[rR]\#\d+\))?.*) # first line has "Error in foo (from file.R#8) blah"
 					\n
-					((\s*\d+:.*\s at\s\S+\.[rR]\#\d+\n)*) # stack frames (repeated) have "1: foo() at lib.R#2"
-				///m, (match, error, stack) ->
+					((\s*\d+:.*(\s at\s\S+\.[rR]\#\d+)?\n|\s.*\n)*) # stack frames (repeated) have "1: foo() at lib.R#2"
+				///m, (match, error, line, stack) ->
+					# the top-level error
+					parsedError = {
+						type: "runtime_error"
+						# strip any default error text coming from wrapper script
+						message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error')
+						language: "R"
+					}
 					result = error.match /\(from (\S+\.[rR])#(\d+)\)/
 					if result?
-						# the top-level error
 						fileName = result[1]
 						lineNumber = parseInt result[2], 10
-						parsedError = {
-							type: "runtime_error"
-							file: fileName
-							line: parseInt lineNumber, 10
-							# strip any default error text coming from wrapper script
-							message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error')
-							language: "R"
-						}
-						# parse the stack lines (if any)
-						stackLines = stack.split '\n'
+						parsedError.file = fileName
+						parsedError.line = lineNumber
+					# parse the stack lines (if any)
+					stackLines = stack?.replace(/\s?\n^\s/mg,' ').split '\n'
+					if stackLines?
 						stackFrames = []
 						for s, i in stackLines
+							frame = { message: s }
 							s.replace /at (\S+\.[rR])#(\d+)/, (match, fileName, lineNumber) ->
-								stackFrames.push {
-									file: fileName
-									line: parseInt lineNumber, 10
-									message: s
-								}
+								frame.file = fileName
+								frame.line = parseInt lineNumber, 10
+							stackFrames.push frame
 						# add the stack frame to the error object
 						parsedError.stack = stackFrames if stackFrames.length
 						run.parsedErrors.push parsedError
@@ -192,6 +194,7 @@ define [
 				$scope.pdf.logEntryAnnotations = {}
 
 				addError = (error, message = error.message, type = "error") ->
+					return unless error.file?
 					entity = ide.fileTreeManager.findEntityByPath(error.file)
 					if entity?
 						$scope.pdf.logEntryAnnotations[entity.id] ||= []
