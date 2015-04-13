@@ -224,14 +224,17 @@ describe "ClsiManager", ->
 			it "should set the compiler to pdflatex", ->
 				@request.compile.options.compiler.should.equal "pdflatex"
 
-		describe "when there is no valid root document", ->
-			beforeEach (done) ->
-				@project.rootDoc_id = "not-valid"
-				@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
-					done()
+		# Not applicable in datajoy:
+		# we don't want it to be a problem if we just want to run a standalone command (i.e. conda install PACKAGE)
+		#
+		# describe "when there is no valid root document", ->
+		# 	beforeEach (done) ->
+		# 		@project.rootDoc_id = "not-valid"
+		# 		@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
+		# 			done()
 			
-			it "should return an error", ->
-				expect(@error).to.exist
+		# 	it "should return an error", ->
+		# 		expect(@error).to.exist
 				
 		describe "with a python file as the root doc", ->
 			beforeEach (done) ->
