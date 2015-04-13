@@ -68,10 +68,10 @@ div.full-size(ng-controller="ScriptOutputController")
 				a(href, ng-click="installPackage(error.package, error.language)").btn.btn-info Install now
 			div.text-left(ng-if="error.type == 'runtime_error'",ng-controller="PdfLogEntryController")
 				p.entry-message
-					a(href,ng-click="openInEditor(error)",style="white-space:normal").btn.btn-info {{ error.message }}
+					{{ error.message }} {{ error.file }} {{ error.line }}
 				p.entry-content(ng-if="error.stack") Stack trace
 					div(ng-repeat="frame in error.stack")
-						a(href, ng-click="openInEditor(frame)").btn.btn-info {{frame.message}}
+						{{frame.message}} {{frame.file}} {{frame.line}}
 
 		.alert.alert-danger.row-spaced-small(ng-show="currentRun.error")
 			strong #{translate("server_error")} 
