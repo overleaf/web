@@ -163,7 +163,7 @@ define [
 					((\s*\d+:.*(\s at\s\S+\.[rR]\#\d+)?\n|\s.*\n)*) # stack frames (repeated) have "1: foo() at lib.R#2"
 				///m, (match, error, line, stack) ->
 					R_FILE_LINE_REGEX = /\(from (\S+\.[rR])#(\d+)\)/
-					R_STACK_REGEX = /at (\S+\.[rR])#(\d+)/
+					R_STACK_REGEX = /\s+at (\S+\.[rR])#(\d+)/
 					R_WRAPPER_REGEX = /^Error in eval\(expr, envir, enclos\)/
 					# the top-level error
 					parsedError = {
