@@ -172,6 +172,8 @@ describe "ClsiManager", ->
 						session_id: @session_id
 						options:
 							compiler: @compiler
+							command: undefined
+							env: undefined
 							timeout : @timeout
 							memory:     @memory
 							processes:  @processes
