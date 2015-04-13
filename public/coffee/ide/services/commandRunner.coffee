@@ -213,9 +213,11 @@ define [
 
 				for error in run.parsedErrors
 					if error.stack?
-						addError error, formatStackTrace(error, -1), "error"
+						status = "error"
+						addError error, formatStackTrace(error, -1), status
 						for frame, i in error.stack
-							addError frame, formatStackTrace(error, i), "warning"
+							addError frame, formatStackTrace(error, i), status
+							status = "warning" if frame.line?
 					else
 						addError error
 
