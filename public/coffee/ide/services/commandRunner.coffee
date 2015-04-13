@@ -166,7 +166,7 @@ define [
 					parsedError = {
 						type: "runtime_error"
 						# strip any default error text coming from wrapper script
-						message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error')
+						message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error').replace(/\(from (\S+\.[rR])#(\d+)\)/, '')
 						language: "R"
 					}
 					result = error.match /\(from (\S+\.[rR])#(\d+)\)/
@@ -176,15 +176,17 @@ define [
 						parsedError.file = fileName
 						parsedError.line = lineNumber
 					# parse the stack lines (if any)
-					stackLines = stack?.replace(/\s?\n^\s/mg,' ').split '\n'
+					stackLines = stack?.replace(/\s?\n^\s+/mg,' ').replace(/\n+$/, '').split '\n'
 					if stackLines?
 						stackFrames = []
+						seenLocation = false # whether we've got a file/line yet
 						for s, i in stackLines
-							frame = { message: s }
+							frame = { message: s.replace(/at (\S+\.[rR])#(\d+)/, '') }
 							s.replace /at (\S+\.[rR])#(\d+)/, (match, fileName, lineNumber) ->
 								frame.file = fileName
 								frame.line = parseInt lineNumber, 10
-							stackFrames.push frame
+								seenLocation = true
+							stackFrames.push frame if seenLocation
 						# add the stack frame to the error object
 						parsedError.stack = stackFrames if stackFrames.length
 						run.parsedErrors.push parsedError
