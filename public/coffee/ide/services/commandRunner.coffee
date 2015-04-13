@@ -162,14 +162,17 @@ define [
 					\n
 					((\s*\d+:.*(\s at\s\S+\.[rR]\#\d+)?\n|\s.*\n)*) # stack frames (repeated) have "1: foo() at lib.R#2"
 				///m, (match, error, line, stack) ->
+					R_FILE_LINE_REGEX = /\(from (\S+\.[rR])#(\d+)\)/
+					R_STACK_REGEX = /at (\S+\.[rR])#(\d+)/
+					R_WRAPPER_REGEX = /^Error in eval\(expr, envir, enclos\)/
 					# the top-level error
 					parsedError = {
 						type: "runtime_error"
 						# strip any default error text coming from wrapper script
-						message: error.replace(/^Error in eval\(expr, envir, enclos\)/,'Error').replace(/\(from (\S+\.[rR])#(\d+)\)/, '')
+						message: error.replace(R_WRAPPER_REGEX, 'Error').replace(R_FILE_LINE_REGEX, '')
 						language: "R"
 					}
-					result = error.match /\(from (\S+\.[rR])#(\d+)\)/
+					result = error.match R_FILE_LINE_REGEX
 					if result?
 						fileName = result[1]
 						lineNumber = parseInt result[2], 10
@@ -181,8 +184,8 @@ define [
 						stackFrames = []
 						seenLocation = false # whether we've got a file/line yet
 						for s, i in stackLines
-							frame = { message: s.replace(/at (\S+\.[rR])#(\d+)/, '') }
-							s.replace /at (\S+\.[rR])#(\d+)/, (match, fileName, lineNumber) ->
+							frame = { message: s.replace(R_STACK_REGEX, '') }
+							s.replace R_STACK_REGEX, (match, fileName, lineNumber) ->
 								frame.file = fileName
 								frame.line = parseInt lineNumber, 10
 								seenLocation = true
