@@ -157,7 +157,6 @@ module.exports = class Router
 		app.get  /learn(\/.*)?/, WikiController.getPage
     
     #API
-    
 		app.get '/api/project', AuthenticationManager.authenticateApi, ProjectApiController.getProjectList
 		app.post '/api/project/:Project_id/compile', AuthenticationManager.authenticateApi, SecurityManager.requestCanAccessProject, CompileController.compile
 		app.ignoreCsrf('post', '/api/project/:Project_id/compile')

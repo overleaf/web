@@ -5,8 +5,6 @@ async = require("async")
 Project = require('../../models/Project').Project
 TagsHandler = require("../Tags/TagsHandler")
 ProjectController = require("./ProjectController")
-LimitationsManager = require("../Subscription/LimitationsManager")
-User = require('../../models/User').User
 
 module.exports = 
 
@@ -21,13 +19,20 @@ module.exports =
       
 	getProjectList : (req, res)->
 		user_id = req.user._id
-		Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', (err, myProjects, collaborations, readOnlyProjects) ->
-			if err?
-				logger.err err:err, "error getting data for project list"
-				return next(err)
-				
-			allProjects = myProjects.concat collaborations.concat readOnlyProjects
-			logger.log projects: allProjects, "getting all projects"
-			res.json({
-				projects: allProjects 
-			})
+		async.parallel {
+			tags: (cb)->
+				TagsHandler.getAllTags user_id, cb
+			projects: (cb)->
+				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+			}, (err, results)->
+				if err?
+					logger.err err:err, "error getting data for project list"
+					return res.send 500
+				logger.log results:results, user_id:user_id, "building project list"
+				tags = results.tags[0]
+				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+				logger.log projects: projects, "final project list"
+				res.json({
+					projects: projects 
+					tags: tags
+				})
