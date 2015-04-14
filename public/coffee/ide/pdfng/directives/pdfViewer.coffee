@@ -6,7 +6,7 @@ define [
 	"ide/pdfng/directives/pdfRenderer"
 	"ide/pdfng/directives/pdfPage"
 	"ide/pdfng/directives/pdfSpinner"
-	"libs/pdf"  # needs pdfjs-1.0.712, override the path in require.js to get it
+	"libs/pdf"
 ], (
 	App
 	pdfTextLayer
@@ -386,7 +386,7 @@ define [
 					#console.log 'page size change event', pageNum, delta
 					origposition = angular.copy scope.position
 					#console.log 'orig position', JSON.stringify(origposition)
-					if pageNum - 1 < origposition.page && delta != 0
+					if origposition? && pageNum - 1 < origposition.page && delta != 0
 						currentScrollTop =  element.scrollTop()
 						#console.log 'adjusting scroll from', currentScrollTop, 'by', delta
 						scope.adjustingScroll = true

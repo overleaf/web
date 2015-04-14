@@ -55,8 +55,8 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
+		# Left as a placeholder for implementing a public register page
 		app.get  '/register', UserPagesController.registerPage
-		app.post '/register', UserController.register
 
 		EditorRouter.apply(app, httpAuth)
 		CollaboratorsRouter.apply(app)
@@ -165,6 +165,8 @@ module.exports = class Router
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
+		app.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
+		app.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
 		app.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
 		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription

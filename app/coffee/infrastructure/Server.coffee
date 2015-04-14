@@ -34,9 +34,6 @@ else
 
 app = express()
 
-cookieKey = Settings.cookieName
-cookieSessionLength = 5 * oneDayInMilliseconds
-
 csrf = express.csrf()
 ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
@@ -51,7 +48,6 @@ app.configure () ->
 	app.set 'view engine', 'jade'
 	Modules.loadViewIncludes app
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
-	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
 	app.use translations.expressMiddlewear
 	app.use translations.setLangBasedOnDomainMiddlewear
 	app.use cookieParser
@@ -59,10 +55,10 @@ app.configure () ->
 		proxy: Settings.behindProxy
 		cookie:
 			domain: Settings.cookieDomain
-			maxAge: cookieSessionLength
+			maxAge: Settings.cookieSessionLength
 			secure: Settings.secureCookie
 		store: sessionStore
-		key: cookieKey
+		key: Settings.cookieName
 	
 	# Measure expiry from last request, not last login
 	app.use (req, res, next) ->

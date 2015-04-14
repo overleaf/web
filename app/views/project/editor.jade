@@ -81,7 +81,6 @@ block content
 	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
 		window.project_id = "!{project_id}";
-		window.websocketsUrl = "!{settings.websocketsUrl}";
 		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
 		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
@@ -89,16 +88,14 @@ block content
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
-				"moment": "libs/moment-2.7.0"
+				"moment": "libs/moment-2.7.0",
+				"libs/pdf": "libs/pdfjs-1.0.1040/pdf"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
-				"libs/pdfListView/PdfListView": {
-					deps: ["libs/pdf"]
-				},
 				"libs/pdf": {
-					deps: ["libs/compatibility"]
+					deps: ["libs/pdfjs-1.0.1040/compatibility"]
 				},
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
@@ -117,20 +114,11 @@ block content
 
 	- locals.suppressDefaultJs = true
 
-	- // user.featureSwitches = {} // override
-	- var usePdfNG = user.featureSwitches && user.featureSwitches.pdfng;
-	- var pdfPath = 'libs/pdf.worker.js';
-	- if (usePdfNG) { pdfPath = 'libs/pdfjs-1.0.712/pdf.worker.js'; }
+	- var pdfPath = 'libs/pdfjs-1.0.1040/pdf.worker.js'
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
 	- var pdfJsWorkerPath = jsPath+pdfPath+'?fingerprint='+fingerprintedPath
 	script(type='text/javascript').
 		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
-
-	// when using pdfng we need a different pdfjs version
-	if usePdfNG
-		script(type='text/javascript').
-			window.requirejs.paths['libs/pdf'] = 'libs/pdfjs-1.0.712/pdf'
-			window.requirejs.paths['libs/compatibility'] = 'libs/pdfjs-1.0.712/compatibility'
 
 	script(
 		data-main=jsPath+"ide.js",

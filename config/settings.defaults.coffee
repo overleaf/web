@@ -105,14 +105,8 @@ module.exports =
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
-		
-	# The websocket layer of ShareLaTeX runs as separate service.
-	# When running locally or in development, you can point the client to this
-	# service directly. If you are running behind a reverse proxy (Nginx, etc)
-	# then websocketsUrl should be the same as siteUrl, with your reverse
-	# proxy responible for sending websocket traffic to the websocket service
-	# rather than connecting directly.
-	websocketsUrl: "http://localhost:3026"
+		showSocialButtons: false
+		showComments: false
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
@@ -235,6 +229,9 @@ module.exports =
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
 	behindProxy: false
+	
+	# Cookie max age (in milliseconds). Set to false for a browser session.
+	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
 
 	# Internal configs
 	# ----------------
@@ -266,6 +263,7 @@ module.exports =
 	# 	projectId: ""
 	
 	appName: "ShareLaTeX (Community Edition)"
+	adminEmail: "placeholder@example.com"
 
 	nav:
 		title: "ShareLaTeX Community Edition"
