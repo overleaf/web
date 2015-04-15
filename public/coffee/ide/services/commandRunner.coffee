@@ -16,12 +16,15 @@ define [
 				ide.$scope.$apply()
 			else if message.msg_type == "command_exited"
 				run.exitCode = message.content.exitCode
-				commandRunner._parseErrors(run)
 				commandRunner._displayErrors(run)
 			else
 				output = commandRunner._parseOutputMessage(message)
 				if output?
 					output = commandRunner._filterOutputMessage(output)
+					if output.output_type == 'stderr'
+						parsedErrors = commandRunner._parseChunk output
+						if parsedErrors?.length
+							output.parsedErrors = parsedErrors
 					run.output.push output
 					ide.$scope.$apply()
 		
@@ -138,25 +141,23 @@ define [
 					output.text = output.text.replace /Calls: source -> withVisible -> eval -> eval.*\n/, ''
 				return output
 
-			_parseErrors: (run) ->
-				stderr = ""
-				for output in run.output
-					if output.output_type == "stderr"
-						stderr += output.text
+			_parseChunk: (output) ->
+				stderr = output.text
+				parsedErrors = []
 				stderr = stderr.replace /ImportError: No module named ([^ ]*)/g, (match, packageName) ->
-					run.parsedErrors.push {
+					parsedErrors.push {
 						type: "missing_package"
 						package: packageName
 						language: "python"
 					}
 					return match
-				stderr = stderr.replace /there is no package called ['‘](.*)[’']/, (match, packageName) ->
-					run.parsedErrors.push {
+				stderr = stderr.replace /.*there is no package called ['‘](.*)[’']/, (match, packageName) ->
+					parsedErrors.push {
 						type: "missing_package"
 						package: packageName
 						language: "R"
 					}
-					return "DONE"
+					return match
 				stderr = stderr.replace ///^
 					(Error.*(\(from\s\S+\.[rR]\#\d+\))?.*) # first line has "Error in foo (from file.R#8) blah"
 					\n
@@ -171,6 +172,7 @@ define [
 						# strip any default error text coming from wrapper script
 						message: error.replace(R_WRAPPER_REGEX, 'Error').replace(R_FILE_LINE_REGEX, '')
 						language: "R"
+						raw: match
 					}
 					result = error.match R_FILE_LINE_REGEX
 					if result?
@@ -192,7 +194,11 @@ define [
 							stackFrames.push frame if seenLocation
 						# add the stack frame to the error object
 						parsedError.stack = stackFrames if stackFrames.length
-						run.parsedErrors.push parsedError
+						delete parsedError.raw if stackFrames.length == stackLines.length
+						parsedErrors.push parsedError
+					return ''
+				output.text = stderr
+				return parsedErrors
 
 			_displayErrors: (run) ->
 				$scope = ide.$scope
@@ -214,15 +220,16 @@ define [
 						if i == j then "*" + frame.message else frame.message
 					error.message + "\n" + (formatLine(s, i, depth) for s, i in error.stack).join("\n")
 
-				for error in run.parsedErrors
-					if error.stack?
-						status = "error"
-						addError error, formatStackTrace(error, -1), status
-						for frame, i in error.stack
-							addError frame, formatStackTrace(error, i), status
-							status = "warning" if frame.line?
-					else
-						addError error
+				for output in run.output when output.parsedErrors?
+					for error in output.parsedErrors
+						if error.stack?
+							status = "error"
+							addError error, formatStackTrace(error, -1), status
+							for frame, i in error.stack
+								addError frame, formatStackTrace(error, i), status
+								status = "warning" if frame.line?
+						else
+							addError error
 
 				$scope.$evalAsync()
 
