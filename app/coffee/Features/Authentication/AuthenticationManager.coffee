@@ -3,6 +3,7 @@ User = require("../../models/User").User
 {db, ObjectId} = require("../../infrastructure/mongojs")
 crypto = require 'crypto'
 bcrypt = require 'bcrypt'
+logger = require("logger-sharelatex")
 
 module.exports = AuthenticationManager =
 	authenticate: (query, password, callback = (error, user) ->) ->
@@ -52,3 +53,32 @@ module.exports = AuthenticationManager =
 		crypto.randomBytes 48, (error, buffer) ->
 			return callback(error) if error?
 			callback null, buffer.toString("hex")
+
+	authenticateApi : (req, res, next)->
+		auth = req.headers['authorization']
+		if !auth
+			res.statusCode = 401
+			res.setHeader 'WWW-Authenticate', 'Basic realm="User you ShareLaTeX credentials"'
+			res.end 'Unauthorized'
+		else if auth
+			tmp = auth.split(' ')
+			buf = new Buffer(tmp[1], 'base64')
+			plain_auth = buf.toString()
+
+			creds = plain_auth.split(':')
+			email = creds[0].toLowerCase()
+			password = creds[1]
+
+			AuthenticationManager.authenticate email: email, password, (error, user) ->
+				if error?
+					res.statusCode = 500
+					res.end 'An error occurred'
+					logger.err error:error, "an error occurred"         
+				else if user?
+					res.statusCode = 200
+					req.user = user
+					next()
+				else
+					logger.err email:email, password:password, "invalid login details"
+					res.statusCode = 403
+					res.end 'Unauthorized, forbidden.'
