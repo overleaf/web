@@ -15,6 +15,7 @@ metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
+AuthenticationManager = require ("./Features/Authentication/AuthenticationManager")
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
@@ -154,6 +155,12 @@ module.exports = class Router
 		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 		
 		app.get  /learn(\/.*)?/, WikiController.getPage
+    
+    #API
+		app.get '/api/project', AuthenticationManager.authenticateApi, ProjectApiController.getProjectList
+		app.post '/api/project/:Project_id/compile', AuthenticationManager.authenticateApi, SecurityManager.requestCanAccessProject, CompileController.compile
+		app.ignoreCsrf('post', '/api/project/:Project_id/compile')
+		app.get '/api/project/:Project_id/output/output.pdf', AuthenticationManager.authenticateApi, SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
