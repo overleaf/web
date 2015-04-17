@@ -226,6 +226,8 @@ define [
 							status = "error"
 							addError error, formatStackTrace(error, -1), status
 							for frame, i in error.stack
+								# avoid duplicating the error annotation if the first stack frame is at the same place
+								continue if i == 0 and frame.line == error.line and frame.file == error.file
 								addError frame, formatStackTrace(error, i), status
 								status = "warning" if frame.line?
 						else
