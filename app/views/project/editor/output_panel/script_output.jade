@@ -43,17 +43,23 @@ div.full-size(ng-controller="ScriptOutputController")
 				div(ng-if="error.type == 'missing_package'")
 					p The '{{ error.package }}' package is not installed.
 					a(href, ng-click="installPackage(error.package, error.language)").btn.btn-info Install now
-				div.text-left(ng-if="error.type == 'runtime_error'",ng-controller="PdfLogEntryController")
+				div.text-left(ng-if="error.type == 'runtime_error'")
 					p.entry-message
-						{{ error.message }}
-						a(href,ng-click="openInEditor(error)"){{error.file}}\#{{error.line}}
+						stack-frame(error="error")
 					p.entry-content(ng-if="error.stack") Stack trace
 						div(ng-repeat="frame in error.stack")
-							{{frame.message}}
-							a(href,ng-click="openInEditor(frame)"){{frame.file}}\#{{frame.line}}
-					p.entry-content() Full message
-						div
-							{{error.raw}}
+							stack-frame(error="frame")
+					div.entry-content(ng-if="error.raw")
+						p
+							div(ng-hide="show")
+								i.fa.fa-caret-right
+								| &nbsp;
+								a(href="#",ng-click="show = !show") See full message
+							div(ng-show="show")
+								i.fa.fa-caret-down
+								| &nbsp;
+								a(href="#",ng-click="show = !show") Hide full message
+								div {{error.raw}}
 
 			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
 			span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
