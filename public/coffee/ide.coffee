@@ -100,7 +100,7 @@ define [
 		]
 		$scope.darkTheme = false
 		$scope.$watch "settings.theme", (theme) ->
-			$("#left-menu-mask").hide(100).delay(1000).show(100);
+			$("#left-menu-mask").fadeIn(100).delay(1000).fadeOut(100);
 			if theme in DARK_THEMES
 				$scope.darkTheme = true
 			else
