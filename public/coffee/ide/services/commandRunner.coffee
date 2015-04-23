@@ -158,6 +158,65 @@ define [
 						language: "R"
 					}
 					return match
+				# Examples of python error messages:
+				#
+				# Traceback (most recent call last):
+				#   File "/usr/bin/datajoy-wrapper.py", line 15, in <module>
+				#     execfile(script)
+				#   File "main.py", line 8, in <module>
+				#     print i/0
+				# ZeroDivisionError: integer division or modulo by zero
+				#
+				# Traceback (most recent call last):
+				#   File "/usr/bin/datajoy-wrapper.py", line 15, in <module>
+				#     execfile(script)
+				#   File "main.py", line 8
+				#     prinxt i
+				#            ^
+				# SyntaxError: invalid syntax
+				stderr = stderr.replace ///^
+					Traceback.\(most.recent.call.last\):
+					\n
+					((\s\s\s*[a-zA-Z].*\n)+)(\s+\^\n)?
+					(.*:.*)
+				///m, (match, stack, lastLine, pointer, error) ->
+					PYTHON_STACK_REGEX = /File "(.*)", line (\d+),?/
+					PYTHON_WRAPPER_REGEX = /File "\/usr\/bin\/datajoy-wrapper\.py", line (\d+),/
+					PYTHON_WRAPPER_FULL_REGEX = /File "\/usr\/bin\/datajoy-wrapper\.py", line (\d+), .*\n.*\n/
+					parsedError = {
+						type: "runtime_error"
+						message: error
+						language: "python"
+						raw: match.replace(PYTHON_WRAPPER_FULL_REGEX, '')
+					}
+					# parse the stack lines (if any)
+					stackLines = stack?.replace(/^  /mg,'').replace(/\s?\n^\s+/mg, ', ').replace(/\n+$/, '').split('\n')
+					if stackLines?
+						# strip off stack frame from the wrapper script
+						if stackLines?[0].match(PYTHON_WRAPPER_REGEX)
+							stackLines.shift()
+						stackFrames = []
+						seenLocation = false # whether we've got a file/line yet
+						errorFrameIndex = null
+						for s, i in stackLines
+							frame = { message: (i+1) + ": " + s.replace(PYTHON_STACK_REGEX, '') }
+							s.replace PYTHON_STACK_REGEX, (match, fileName, lineNumber) ->
+								frame.file = fileName
+								frame.line = parseInt lineNumber, 10
+								seenLocation = true
+								errorFrameIndex = i
+							if seenLocation  # probably not necessary for python
+								stackFrames.push frame
+								parsedError.file = frame.file
+								parsedError.line = frame.line
+						if errorFrameIndex?
+							stackFrames[errorFrameIndex].type = "error"
+						# add the stack frame to the error object
+						parsedError.stack = stackFrames if stackFrames.length
+						# delete parsedError.raw if stackFrames.length == stackLines.length
+						parsedErrors.push parsedError
+					return ''
+
 				stderr = stderr.replace ///^
 					(Error.*(\(from\s\S+\.[rR]\#\d+\))?.*) # first line has "Error in foo (from file.R#8) blah"
 					\n
@@ -190,6 +249,8 @@ define [
 							s.replace R_STACK_REGEX, (match, fileName, lineNumber) ->
 								frame.file = fileName
 								frame.line = parseInt lineNumber, 10
+								if !seenLocation
+									frame.type = "error"
 								seenLocation = true
 							stackFrames.push frame if seenLocation
 						# add the stack frame to the error object
@@ -223,13 +284,9 @@ define [
 				for output in run.output when output.parsedErrors?
 					for error in output.parsedErrors
 						if error.stack?
-							status = "error"
-							addError error, formatStackTrace(error, -1), status
 							for frame, i in error.stack
-								# avoid duplicating the error annotation if the first stack frame is at the same place
-								continue if i == 0 and frame.line == error.line and frame.file == error.file
+								status = if frame.type? then frame.type else "warning"
 								addError frame, formatStackTrace(error, i), status
-								status = "warning" if frame.line?
 						else
 							addError error
 
