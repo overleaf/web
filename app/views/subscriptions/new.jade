@@ -18,7 +18,7 @@ block content
 	.content.content-alt
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
-				.col-md-5.col-md-push-4
+				.col-md-6.col-md-offset-1
 					.card.card-highlighted
 						.page-header
 							.row
@@ -174,43 +174,56 @@ block content
 												strong {{price.currency.symbol}}{{price.next.total}}
 
 
-				.col-md-3.col-md-pull-4
+				.col-md-5
 					if showStudentPlan == 'true'
 						a.btn-primary.btn.plansPageStudentLink(
 							href,
 							ng-click="switchToStudent()"
 						) #{translate("half_price_student")} 
 
-					.card.card-first
+					.card
 						.paymentPageFeatures
-							.page-header
-								h3 #{translate("features")}
-							h3 #{translate("unlimited_projects")}
-							p #{translate("create_unlimited_projects")}
-						
-							h3
-								if plan.features.collaborators == -1
-									- var collaboratorCount = 'Unlimited'
-								else
-									- var collaboratorCount = plan.features.collaborators
-								| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
-							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
+							//- .page-header
+							//- 	h3 Enjoy DataJoy Pro!
+							.row
+								.col-xs-2
+									i.fa.fa-fw.fa-globe.fa-3x.subdued
+								.col-xs-10
+									h3 Work from anywhere
+									p Have a consistent and complete Python and/or R environment to work with, even if you regularly hop between computers.
 							
-							h3 #{translate("full_doc_history")}
-							p #{translate("see_what_has_been")} 
-								span.added #{translate("added")} 
-								| #{translate("and")} 
-								span.removed #{translate("removed")}. 
-								| #{translate("restore_to_any_older_version")}.
+							.row.row-spaced
+								.col-xs-2
+									i.fa.fa-fw.fa-archive.fa-3x.subdued
+								.col-xs-10
+									h3 No installation problems
+									p Use our collection of common packages, or install your own packages easily.
 							
-							h3 #{translate("sync_to_dropbox")}
-							p
-								| #{translate("acces_work_from_anywhere")}. 
-								| #{translate("work_offline_and_sync_with_dropbox")}.
+							.row.row-spaced
+								.col-xs-2
+									i.fa.fa-fw.fa-group.fa-3x.subdued
+								.col-xs-10
+									h3 Collaborate in a consistent environment
+									p Everyone can access the same project, so you'll always be up to date. No package or version conflicts between collaborators.
+							
+							.row.row-spaced
+								.col-xs-2
+									i.fa.fa-fw.fa-history.fa-3x.subdued
+								.col-xs-10
+									h3 Full version history
+									p See what has been added and removed since your last visit. Restore to any older version.
+							
+							.row.row-spaced
+								.col-xs-2
+									i.fa.fa-fw.fa-dropbox.fa-3x.subdued
+								.col-xs-10
+									h3 Sync to Dropbox and GitHub
+									p
+										| #{translate("work_offline_and_sync_with_dropbox")}.
 								
 							hr
 							
-							p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
+							p.small.text-center We're confident that you'll love DataJoy, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
 
 
 	script(type="text/javascript").
