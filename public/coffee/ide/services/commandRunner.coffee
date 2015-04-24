@@ -183,11 +183,12 @@ define [
 					PYTHON_STACK_REGEX = /File "(.*)", line (\d+),?/
 					PYTHON_WRAPPER_REGEX = /File "\/usr\/bin\/datajoy-wrapper\.py", line (\d+),/
 					PYTHON_WRAPPER_FULL_REGEX = /File "\/usr\/bin\/datajoy-wrapper\.py", line (\d+), .*\n.*\n/
+					PYTHON_PATH_REGEX = /\/home\/user\/project\//
 					parsedError = {
 						type: "runtime_error"
 						message: error
 						language: "python"
-						raw: match.replace(PYTHON_WRAPPER_FULL_REGEX, '')
+						raw: match.replace(PYTHON_WRAPPER_FULL_REGEX, '').replace(PYTHON_PATH_REGEX, '')
 					}
 					# parse the stack lines (if any)
 					stackLines = stack?.replace(/^  /mg,'').replace(/\s?\n^\s+/mg, ', ').replace(/\n+$/, '').split('\n')
@@ -201,11 +202,13 @@ define [
 						for s, i in stackLines
 							frame = { message: (i+1) + ": " + s.replace(PYTHON_STACK_REGEX, '') }
 							s.replace PYTHON_STACK_REGEX, (match, fileName, lineNumber) ->
+								fileName = fileName.replace(PYTHON_PATH_REGEX, '')
+								return if fileName.match(/^\//) # skip libraries
 								frame.file = fileName
 								frame.line = parseInt lineNumber, 10
 								seenLocation = true
 								errorFrameIndex = i
-							if seenLocation  # probably not necessary for python
+							if frame.file?
 								stackFrames.push frame
 								parsedError.file = frame.file
 								parsedError.line = frame.line
@@ -213,7 +216,7 @@ define [
 							stackFrames[errorFrameIndex].type = "error"
 						# add the stack frame to the error object
 						parsedError.stack = stackFrames if stackFrames.length
-						# delete parsedError.raw if stackFrames.length == stackLines.length
+						delete parsedError.raw if stackFrames.length == stackLines.length
 						parsedErrors.push parsedError
 					return ''
 
