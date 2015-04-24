@@ -84,5 +84,15 @@ div.full-size(ng-controller="ScriptOutputController")
 			span #{translate("somthing_went_wrong_compiling")}
 
 		.alert.alert-danger.row-spaced-small(ng-show="currentRun.timedout")
-			strong #{translate("timedout")}. 
-			span Sorry, your script took too long to run and timed out.
+			p
+				strong #{translate("timedout")}. 
+				span Sorry, your script took too long to run and timed out.
+			p(ng-if="project.features.compileTimeout < 60 && permissions.admin")
+				| Please upgrade your account to run longer scripts.
+				div(ng-controller="FreeTrialModalController")
+					a.btn.btn-info(
+						href
+						ng-click="startFreeTrial('timeout')"
+					) #{translate("start_free_trial")}
+			p(ng-if="project.features.compileTimeout >= 60")
+				| Please get in touch if you need a longer timeout.
