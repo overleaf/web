@@ -38,9 +38,10 @@ define [
 				return
 
 			$scope.output.currentRun = commandRunner.run {
-				compiler: "command",
+				compiler: "command"
 				command: command
 				env: env
+				timeout: 360
 			}
 		
 		if $scope.autoStart
