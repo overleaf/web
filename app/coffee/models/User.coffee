@@ -34,6 +34,8 @@ UserSchema = new Schema
 							github:        { type:Boolean, default: Settings.defaultFeatures.github }
 							compileTimeout: { type:Number, default: Settings.defaultFeatures.compileTimeout }
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
+							compileMemory: { type:Number,  default: Settings.defaultFeatures.compileMemory }
+							compileCpuShares: { type:Number,  default: Settings.defaultFeatures.compileCpuShares }
 						}
 	featureSwitches	  : {
 		pdfng: { type: Boolean }
