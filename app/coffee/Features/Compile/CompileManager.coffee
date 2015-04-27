@@ -35,7 +35,8 @@ module.exports = CompileManager =
 						CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 							return callback(error) if error?
 							for key, value of limits
-								options[key] = value
+								if !options[key]?
+									options[key] = value
 							ClsiManager.sendRequest project_id, session_id, options, (error, status, outputFiles, output) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
