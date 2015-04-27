@@ -24,7 +24,6 @@ sessionStore = new RedisStore(client:rclient)
 Mongoose = require("./Mongoose")
 
 oneDayInMilliseconds = 86400000
-ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
 translations = require("translations-sharelatex").setup(Settings.i18n)
