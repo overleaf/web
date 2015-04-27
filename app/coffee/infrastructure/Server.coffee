@@ -16,7 +16,6 @@ sessionStore = new RedisStore(client:rclient)
 
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
-ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
 translations = require("translations-sharelatex").setup(Settings.i18n)
@@ -73,7 +72,6 @@ app.configure () ->
 				return next()
 		csrf(req, res, next)
 
-	app.use ReferalConnect.use
 	app.use express.methodOverride()
 
 expressLocals(app)
