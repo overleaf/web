@@ -21,7 +21,7 @@ define [
 				output = commandRunner._parseOutputMessage(message)
 				if output?
 					output = commandRunner._filterOutputMessage(output)
-					if output.output_type == 'stderr'
+					if output.output_type == 'stderr' and run.parseErrors
 						parsedErrors = commandRunner._parseChunk output
 						if parsedErrors?.length
 							output.parsedErrors = parsedErrors
@@ -40,6 +40,10 @@ define [
 				, 2000
 				run.running = true
 				run.uncompiled = false
+				
+				if options.parseErrors?
+					run.parseErrors = options.parseErrors
+					delete options.parseErrors
 				
 				url = "/project/#{ide.$scope.project_id}/compile"
 				options._csrf = window.csrfToken
@@ -85,6 +89,7 @@ define [
 					stopping: false
 					exitCode: null
 					parsedErrors: []
+					parseErrors: true
 				}
 				return run
 			

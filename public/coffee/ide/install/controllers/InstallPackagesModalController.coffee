@@ -42,6 +42,7 @@ define [
 				command: command
 				env: env
 				timeout: 360
+				parseErrors: false
 			}
 		
 		if $scope.autoStart
