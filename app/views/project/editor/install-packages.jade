@@ -16,21 +16,27 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 			tab(heading="Python", active="selectedTab.python")
 			tab(heading="R", active="selectedTab.R")
 			li.pull-right(style="margin-top: 8px;")
-				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.installer == 'conda'")
-					| (Python packages will be installed with 
+				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.pythonInstaller == 'conda'")
+					| (Packages will be installed with 
 					span.text-monospace conda install
 					| . 
-					a(href, ng-click="inputs.installer = 'pip'") Use pip instead.
+					a(href, ng-click="inputs.pythonInstaller = 'pip'") Use pip instead.
 					| )
-				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.installer == 'pip'")
-					| (Python packages will be installed with 
+				span.small.row-spaced-small(ng-show="selectedTab.python && inputs.pythonInstaller == 'pip'")
+					| (Packages will be installed with 
 					span.text-monospace pip install
 					| . 
-					a(href, ng-click="inputs.installer = 'conda'") Use conda instead.
+					a(href, ng-click="inputs.pythonInstaller = 'conda'") Use conda instead.
 					| )
-				span.small.row-spaced-small(ng-show="selectedTab.R")
-					| (R packages will be installed with 
+				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'apt-get'")
+					| (Packages will be installed as binary packages. 
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") Install from source instead.
+					| )
+				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'install.packages'")
+					| (Packages will be installed with 
 					span.text-monospace install.packages('...')
+					| . 
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") Use binary packages instead.
 					| )
 
 		form.form-inline.toolbar.toolbar-borderless.row-spaced
