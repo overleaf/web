@@ -6,7 +6,8 @@ define [
 		# the modal to it's previous state when we reopen it.
 		$scope.inputs =
 			packageName: ""
-			installer: "conda"
+			pythonInstaller: "conda"
+			rInstaller: "apt-get"
 		
 		$scope.selectedTab =
 			python: true
