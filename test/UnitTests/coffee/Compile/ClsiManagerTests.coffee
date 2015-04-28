@@ -174,6 +174,7 @@ describe "ClsiManager", ->
 							compiler: @compiler
 							command: undefined
 							env: undefined
+							package: undefined
 							timeout : @timeout
 							memory:     @memory
 							processes:  @processes
