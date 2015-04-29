@@ -1,5 +1,15 @@
 extends ../layout
 
+block scripts
+	script.
+		if (ga) {
+			console.log("Google")
+			ga('send', 'event', "help", "view")
+		}
+		if (Intercom) {
+			Intercom("trackEvent", "view-help", { title: "#{title}" })
+		}
+
 block content
 	.content.content-alt(ng-non-bindable)
 		.container.wiki

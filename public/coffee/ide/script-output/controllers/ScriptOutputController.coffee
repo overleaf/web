@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ScriptOutputController", ($scope, $http, ide, $anchorScroll, $location, commandRunner) ->
+	App.controller "ScriptOutputController", ($scope, $http, ide, $anchorScroll, $location, commandRunner, event_tracking) ->
 		reset = () ->
 			$scope.files = []
 			$scope.output = []
@@ -19,8 +19,15 @@ define [
 		$scope.$on "editor:recompile", () ->
 			$scope.run()
 
+		run_count = 0
 		$scope.run = () ->
 			return if $scope.currentRun?.running
+			
+			run_count++
+			if run_count == 1
+				event_tracking.send("script", "run")
+			else if run_count == 5
+				event_tracking.send("script", "multiple-run")
 			
 			$scope.uncompiled = false
 			
