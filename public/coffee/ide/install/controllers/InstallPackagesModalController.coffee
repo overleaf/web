@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner) ->
+	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
@@ -10,6 +10,10 @@ define [
 		$scope.install = (autoStart) ->
 			return if $scope.inputs.packageName == ""
 			$scope.installedPackage = $scope.inputs.packageName
+			
+			event_tracking.send("package", "install", {
+				name: $scope.installedPackage
+			})
 
 			# Don't clear the name on autostart so it's still clear what is going on.
 			if !autoStart
