@@ -3,9 +3,10 @@ define [
 ], (App) ->
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
-	App.factory "ide", ["$http", "$modal", ($http, $modal) ->
+	App.factory "ide", ["$http", "$modal", "event_tracking", ($http, $modal, event_tracking) ->
 		ide = {}
 		ide.$http = $http
+		ide.event_tracking = event_tracking
 
 		@recentEvents = []
 		ide.pushEvent = (type, meta = {}) =>
