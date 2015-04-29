@@ -158,7 +158,7 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 		
-		webRouter.get  /learn(\/.*)?/, WikiController.getPage
+		webRouter.get  /learn(\/.*)?/, AnalyticsMiddlewear.injectIntercomDetails, WikiController.getPage
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index

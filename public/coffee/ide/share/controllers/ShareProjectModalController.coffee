@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ["$scope", "$modalInstance", "$timeout", "projectMembers", "$modal", ($scope, $modalInstance, $timeout, projectMembers, $modal) ->
+	App.controller "ShareProjectModalController", ["$scope", "$modalInstance", "$timeout", "projectMembers", "$modal", "event_tracking", ($scope, $modalInstance, $timeout, projectMembers, $modal, event_tracking) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			email: ""
@@ -24,6 +24,7 @@ define [
 
 		$scope.addMembers = () ->
 			return if !$scope.inputs.email? or $scope.inputs.email == ""
+			event_tracking.send("project", "share")
 
 			emails = $scope.inputs.email.split(/,\s*/)
 			$scope.inputs.email = ""
