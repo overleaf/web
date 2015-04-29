@@ -12,17 +12,10 @@ module.exports = AnalyticsMiddlewear =
 			email: true
 			role: true
 			institution: true
-			signUpDate: true
 		}, (error, user) ->
 			return next(error) if error?
 			SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
 				return next(error) if error?
-				signedUpAt = null
-				if user.signUpDate?
-					signedUpAt = Math.floor(user.signUpDate.getTime() / 1000)
-				freeTrialExpiresAt = null
-				if subscription?.freeTrial?.expiresAt?
-					freeTrialExpiresAt = Math.floor(subscription.freeTrial?.expiresAt?.getTime() / 1000)
 				res.locals.intercom_user = {
 					app_id: Settings.analytics?.intercom?.app_id
 					email: user.email
@@ -30,9 +23,7 @@ module.exports = AnalyticsMiddlewear =
 					name: user.first_name
 					role: user.role
 					institution: user.institution
-					free_trial_expires_at: freeTrialExpiresAt
-					downgraded: subscription?.freeTrial?.downgraded
-					signed_up_at: signedUpAt
+					plan_code: subscription?.planCode
 				}
 				next()
 				

@@ -4,7 +4,7 @@ define [], () ->
 			opened = false
 			@$scope.$on "project:joined", () =>
 				if !opened
-					Intercom?('trackEvent', 'opened-project', {
+					@ide.event_tracking.send('project', 'opened', {
 						project_id: @$scope.project._id
 						name: @$scope.project.name
 					})

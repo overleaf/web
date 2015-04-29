@@ -187,7 +187,7 @@ define [
 				onChange = () ->
 					updateCount++
 					if updateCount == 100
-						event_tracking.send 'editor-interaction', 'multi-doc-update'
+						event_tracking.send 'document', 'significantly-edit'
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
