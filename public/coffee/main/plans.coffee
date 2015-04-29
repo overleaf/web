@@ -52,19 +52,19 @@ define [
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			
-			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
+			event_tracking.send 'sign-up-now-button', 'click', { plan: plan }
 
 		$scope.switchToMonthly = ->
 			$scope.ui.view = "monthly"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'monthly-prices'
+			event_tracking.send 'monthly-prices', 'view'
 		
 		$scope.switchToStudent = ->
 			$scope.ui.view = "student"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
+			event_tracking.send 'student-prices', 'view'
 
 		$scope.switchToAnnual = ->
 			$scope.ui.view = "annual"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
+			event_tracking.send 'annual-prices', 'view'
 			
 		$scope.openGroupPlanModal = () ->
 			$modal.open {
