@@ -129,9 +129,9 @@ define [
 			if !options.isAutoCompile
 				compileCount++
 				if compileCount == 1
-					event_tracking.send('editor-interaction', 'single-compile')
+					event_tracking.send('pdf', 'compile')
 				else if compileCount == 3
-					event_tracking.send('editor-interaction', 'multi-compile')
+					event_tracking.send('pdf', 'compile-regularly')
 
 			options.rootDocOverride_id = getRootDocOverride_id()
 

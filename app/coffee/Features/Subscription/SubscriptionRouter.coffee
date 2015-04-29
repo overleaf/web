@@ -2,12 +2,13 @@ AuthenticationController = require('../Authentication/AuthenticationController')
 SubscriptionController = require('./SubscriptionController')
 SubscriptionGroupController = require './SubscriptionGroupController'
 Settings = require "settings-sharelatex"
+AnalyticsMiddlewear = require "../Analytics/AnalyticsMiddlewear"
 
 module.exports =
 	apply: (app) ->
 		return unless Settings.enableSubscriptions
 
-		app.get  '/user/subscription/plans',      SubscriptionController.plansPage
+		app.get  '/user/subscription/plans',      AnalyticsMiddlewear.injectIntercomDetails, SubscriptionController.plansPage
 
 		app.get  '/user/subscription',            AuthenticationController.requireLogin(), SubscriptionController.userSubscriptionPage
 
