@@ -4,6 +4,9 @@ Settings = require "settings-sharelatex"
 
 module.exports = AnalyticsMiddlewear =
 	injectIntercomDetails: (req, res, next) ->
+		if !req.session.user?
+			return next()
+
 		user_id = req.session.user._id
 		UserGetter.getUser user_id, {
 			_id: true
