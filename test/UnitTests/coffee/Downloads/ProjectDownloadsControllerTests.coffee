@@ -27,7 +27,7 @@ describe "ProjectDownloadsController", ->
 				pipe: sinon.stub()
 			@ProjectZipStreamManager.createZipStreamForProject =
 				sinon.stub().callsArgWith(1, null, @stream)
-			@req.params = Project_id: @project_id
+			@req.params = project_id: @project_id
 			@res.contentType = sinon.stub()
 			@res.header = sinon.stub()
 			@project_name = "project name with accênts"

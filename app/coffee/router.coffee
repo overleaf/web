@@ -124,12 +124,16 @@ module.exports = class Router
 		app.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		app.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
 
+		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		app.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
-		app.get '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
-		# The 'pdf' in this end point is a relic of ShareLaTeX only doing PDFs
-		app.get '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadOutput
-
+		# New 'stable' API end points
+		app.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
+		app.get  '/internal/project/:project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
+		app.post '/internal/project/:Project_id/run', AuthenticationController.httpAuth, CompileController.compile
+		app.ignoreCsrf('post', '/internal/project/:Project_id/run')
+		
+		app.get  '/internal/project/:project_id/content', AuthenticationController.httpAuth, ProjectApiController.getProjectContent
 
 		app.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
 		app.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
