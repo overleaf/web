@@ -6,7 +6,7 @@ DocumentUpdaterHandler  = require "../DocumentUpdater/DocumentUpdaterHandler"
 
 module.exports = ProjectDownloadsController =
 	downloadProject: (req, res, next) ->
-		project_id = req.params.Project_id
+		project_id = req.params.project_id
 		Metrics.inc "zip-downloads"
 		logger.log project_id: project_id, "downloading project"
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error)->
