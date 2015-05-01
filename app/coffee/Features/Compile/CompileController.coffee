@@ -21,8 +21,6 @@ module.exports = CompileController =
 			}
 			if req.body?.rootDoc_id?
 				options.rootDoc_id = req.body.rootDoc_id
-			else if req.body?.settingsOverride?.rootDoc_id? # Can be removed after deploy
-				options.rootDoc_id = req.body.settingsOverride.rootDoc_id
 			if req.body?.compiler
 				options.compiler = req.body.compiler
 			if req.body?.command
