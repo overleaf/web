@@ -63,6 +63,9 @@ public/minjs/
 public/js/main.js
 Gemfile.lock
 
+# Ide generated files
+.kdev4/*
+*.kdev4
 *.swp
 .DS_Store
 
