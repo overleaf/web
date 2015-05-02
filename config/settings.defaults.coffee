@@ -190,7 +190,13 @@ module.exports =
 	#	parameters:
 	#		AWSAccessKeyID: ""
 	#		AWSSecretKey: ""
-
+	email:
+		fromAddress: "sharelatex@temno.eu"
+		replyTo: "sharelatex@temno.eu"
+		lifecycle: true
+		transport: "sendmail"
+		parameters:
+			path:"/usr/local/bin/sendmail.sh"
 
 	# Third party services
 	# --------------------
