@@ -45,7 +45,7 @@ module.exports = class Router
 			app.all '*', AuthenticationController.requireGlobalLogin
 
 		app.use(app.router)
-		
+
 		app.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
@@ -54,17 +54,27 @@ module.exports = class Router
 		app.get  '/restricted', SecurityManager.restricted
 
 		# Left as a placeholder for implementing a public register page
-		app.get  '/register', UserPagesController.registerPage
+		app.get  '/register', UserPagesController.publicRegisterPage
+		app.post '/register', UserController.publicRegister
 		AuthenticationController.addEndpointToLoginWhitelist '/register'
+
+		app.get '/confirm', UserPagesController.confirmRegistrationPage
+		app.post '/confirm', ( (req,res,next) ->
+			UserController.confirmRegistration req, res, (error) ->
+				res.send message:
+					text:error,
+					type: "error"
+		)
 
 		EditorRouter.apply(app)
 		CollaboratorsRouter.apply(app)
+
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		RealTimeProxyRouter.apply(app)
-		
+
 		Modules.applyRouter(app)
 
 		app.get '/blog', BlogController.getIndexPage
@@ -141,7 +151,7 @@ module.exports = class Router
 		app.del  '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
-		
+
 		app.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
 		app.del  '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 		app.ignoreCsrf('post', '/project/:project_id/contents/*')
@@ -152,7 +162,7 @@ module.exports = class Router
 
 		app.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
-		
+
 		app.get  /learn(\/.*)?/, WikiController.getPage
 
 		#Admin Stuff

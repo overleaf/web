@@ -20,6 +20,31 @@ templates.registered =
 <p>If you have any questions or problems, please contact <a href="mailto:#{settings.adminEmail}">#{settings.adminEmail}</a>.</p>
 """
 
+templates.welcome_confirm =
+	subject:  _.template "Welcome to ShareLaTeX"
+	layout: PersonalEmailLayout
+	type:"lifecycle"
+	compiledTemplate: _.template '''
+Hi <%= first_name %>, thanks for signing up to ShareLaTeX.
+<p>
+
+Please use the following <a href="<%= siteUrl %>/confirm?auth_token=<%= auth_token %>">link</a> to confirm your registration.
+Alternatively, you can copy and paste the following confirmation token
+<pre>
+<%= auth_token %>
+</pre>
+into the form located at <a href="<%= siteUrl %>/confirm">http://<%=siteUrl %>/confirm</a>.
+
+<p>
+I’m the co-founder of ShareLaTeX and I love talking to our users about our service. Please feel free to get in touch by replying to this email and I will get back to you within a day.
+
+<p>
+
+Regards, <br>
+Henry <br>
+ShareLaTeX Co-founder
+'''
+
 templates.canceledSubscription = 
 	subject:  _.template "ShareLaTeX thoughts"
 	layout: PersonalEmailLayout
@@ -92,7 +117,10 @@ module.exports =
 	templates: templates
 
 	buildEmail: (templateName, opts)->
-		template = templates[templateName]
+		if settings.requireRegistrationConfirmation and templateName == "welcome"
+			template = templates["welcome_confirm"]
+		else
+			template = templates[templateName]
 		opts.siteUrl = settings.siteUrl
 		opts.body = template.compiledTemplate(opts)
 		return {

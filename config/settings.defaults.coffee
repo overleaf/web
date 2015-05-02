@@ -128,6 +128,32 @@ module.exports =
 
 	httpAuthUsers: httpAuthUsers
 
+
+	# Allow public registration
+	# -------------------------
+	# If set to true, people can use the registration form to register
+	# a new user; otherwise, only admin users can add new users
+	allowPublicRegistration: true
+
+	# Limit Registration
+	# ----------------
+	# If you run sharelatex locally you might want to limit the registration
+	# of new users to users with an email in your domain.
+	signupDomain: "ff.cuni.cz"
+
+	# Require registration confirmation
+	# ----------------
+	# Require users to click on a registration link in the registration email
+	# they receive before their account is activated. This, e.g., proves
+	# that their e-mail address exists and that they have access to it
+	#
+	# Important Note: If you enable this, be sure to configure a mail transport
+	# and set lifcycle to true. Otherwise people won't be able to register
+	# since they will not get their registration links.
+	requireRegistrationConfirmation: true
+
+
+
 	# Default features
 	# ----------------
 	#
@@ -190,7 +216,13 @@ module.exports =
 	#	parameters:
 	#		AWSAccessKeyID: ""
 	#		AWSSecretKey: ""
-
+	email:
+		fromAddress: "sharelatex@temno.eu"
+		replyTo: "sharelatex@temno.eu"
+		lifecycle: true
+		transport: "sendmail"
+		parameters:
+			path:"/usr/local/bin/sendmail.sh"
 
 	# Third party services
 	# --------------------

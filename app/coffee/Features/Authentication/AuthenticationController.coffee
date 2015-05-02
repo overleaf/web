@@ -24,13 +24,15 @@ module.exports = AuthenticationController =
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
 				if user?
-					LoginRateLimiter.recordSuccessfulLogin email
-					AuthenticationController._recordSuccessfulLogin user._id
-					AuthenticationController.establishUserSession req, user, (error) ->
-						return next(error) if error?
-						req.session.justLoggedIn = true
-						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
+					if user.confirmed
+						LoginRateLimiter.recordSuccessfulLogin email
+						AuthenticationController._recordSuccessfulLogin user._id
+						AuthenticationController._establishUserSession req, user, (error) ->
+							return next(error) if error?
+							logger.log email: email, user_id: user._id.toString(), "successful log in"
+							res.send redir: redir
+					else
+						res.send redir: '/confirm'
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
@@ -50,6 +52,9 @@ module.exports = AuthenticationController =
 			callback null, req.session.user._id.toString()
 		else
 			callback null, null
+
+	getUserFromAuthToken: (auth_token, callback = (error,user)->) ->
+		UserGetter.getUser { auth_token: auth_token }, callback
 
 	getLoggedInUser: (req, options = {allow_auth_token: false}, callback = (error, user) ->) ->
 		if typeof(options) == "function"
@@ -78,7 +83,7 @@ module.exports = AuthenticationController =
 					return next()
 			else
 				if !req.session.user?
-					AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
+					AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 				else
 					req.user = req.session.user
 					return next()
@@ -109,9 +114,9 @@ module.exports = AuthenticationController =
 
 	_redirectToLoginOrRegisterPage: (req, res)->
 		if req.query.zipUrl? or req.query.project_name?
-			return AuthenticationController._redirectToRegisterPage(req, res) 
+			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
-			AuthenticationController._redirectToLoginPage(req, res) 
+			AuthenticationController._redirectToLoginPage(req, res)
 
 
 	_redirectToLoginPage: (req, res) ->
