@@ -138,6 +138,9 @@ module.exports =
 	# and set lifcycle to true. Otherwise people won't be able to register
 	# since they will not get their registration links.
 	requireRegistrationConfirmation: true
+
+
+
 	# Default features
 	# ----------------
 	#
