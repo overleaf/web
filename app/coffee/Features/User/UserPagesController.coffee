@@ -18,7 +18,7 @@ module.exports =
 		res.render 'user/register',
 			title: 'register'
 			redir: req.query.redir
-			allowPublicRegistration: settings.allowPublicRegistration
+			allowPublicRegistration: Settings.allowPublicRegistration
 			restrict_domain: Settings.signupDomain?
 			domain: Settings.signupDomain
 			example_email: if Settings.signupDomain? then 'example@' + Settings.signupDomain else 'email@exmaple.com'

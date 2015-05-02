@@ -7,6 +7,7 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+AuthenticationController = require("../Authentication/AuthenticationController")
 UserUpdater = require("./UserUpdater")
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
 EmailHandler = require("../Email/EmailHandler")
@@ -138,7 +139,6 @@ module.exports = UserController =
 				metrics.inc "user.register.success"
 				req.session.user = user
 				req.session.justRegistered = true
-				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
 				if redirect
 					res.redirect redir
 				else
@@ -151,10 +151,11 @@ module.exports = UserController =
 						created: Date.now()
 
 	publicRegister : (req, res, next = (error) ->)->
-		if ! settings.allowPublicRegistration:
-			res.send message:
-				type: 'error'
-				text: 'Public registration disabled by site config.'
+		if ! settings.allowPublicRegistration
+			res.send
+				message:
+					type: 'error'
+					text: 'Public registration disabled by site config.'
 		else
 			logger.log email: req.body.email, "attempted register"
 			UserRegistrationHandler.registerNewUser {
@@ -163,15 +164,16 @@ module.exports = UserController =
 					confirmed: if settings.requireRegistrationConfirmation then false else true
 			}, (err, user)->
 				if err?
-					res.send message:
-						type: 'error'
-						text: err
-					else
-						if settings.requireRegistrationConfirmation
-							res.send
+					res.send
+						message:
+							type: 'error'
+							text: err.message
+				else
+					if settings.requireRegistrationConfirmation
+						res.send
 							redir:'/confirm'
-						else
-							UserController.finishPublicRegistration req, res, user
+					else
+						UserController.finishPublicRegistration req, res, user
 
 
 

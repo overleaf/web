@@ -27,7 +27,7 @@ module.exports = AuthenticationController =
 					if user.confirmed
 						LoginRateLimiter.recordSuccessfulLogin email
 						AuthenticationController._recordSuccessfulLogin user._id
-						AuthenticationController._establishUserSession req, user, (error) ->
+						AuthenticationController.establishUserSession req, user, (error) ->
 							return next(error) if error?
 							logger.log email: email, user_id: user._id.toString(), "successful log in"
 							res.send redir: redir

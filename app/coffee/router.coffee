@@ -65,6 +65,8 @@ module.exports = class Router
 					text:error,
 					type: "error"
 		)
+		AuthenticationController.addEndpointToLoginWhitelist '/confirm'
+
 
 		EditorRouter.apply(app)
 		CollaboratorsRouter.apply(app)

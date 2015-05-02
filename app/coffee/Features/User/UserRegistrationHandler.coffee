@@ -4,6 +4,7 @@ User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
+EmailHandler = require("../Email/EmailHandler")
 async = require("async")
 logger = require("logger-sharelatex")
 
