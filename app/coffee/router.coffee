@@ -61,6 +61,15 @@ module.exports = class Router
 		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.register
 
+		app.get '/confirm', UserPagesController.confirmRegistrationPage
+		app.post '/confirm', ( (req,res,next) ->
+			UserController.confirmRegistration req, res, (error) ->
+				res.send message:
+					text:error,
+					type: "error"
+		)
+
+
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)

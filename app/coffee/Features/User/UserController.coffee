@@ -10,8 +10,9 @@ AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
+Settings = require('settings-sharelatex')
 
-module.exports =
+module.exports = UserController =
 
 	deleteUser: (req, res)->
 		user_id = req.session.user._id
@@ -78,26 +79,54 @@ module.exports =
 				logger.err err: err, 'error destorying session'
 			res.redirect '/login'
 
-	register : (req, res, next = (error) ->)->
-		logger.log email: req.body.email, "attempted register"
+	confirmRegistration : (req, res, next = ((error)->), redirect = false)->
+		logger.log token:req.body.auth_token, "attempted to confirm registration"
+		user = AuthenticationController.getUserFromAuthToken req.body.auth_token, (error,user)->
+			if error?
+				logger.log error:error, "db error"
+				next("DB Error")
+			else if user?
+				AuthenticationManager.clearAuthToken user._id, next
+				UserController.doRegister req, res, user, redirect
+			else
+				logger.log token:req.body.auth_token, "invalid confirmation token"
+				next("Invalid token")
+
+
+	doRegister : (req, res, user, redirect = false )->
 		redir = Url.parse(req.body.redir or "/project").path
-		UserRegistrationHandler.registerNewUser req.body, (err, user)->
-			if err == "EmailAlreadyRegisterd"
-				return AuthenticationController.login req, res
-			else if err?
-				next(err)
+		UserUpdater.updateUser user._id.toString(), {$set: { "confirmed": true} }, (err) ->
+			if err?
+				res.redirect '/confirm'
 			else
 				metrics.inc "user.register.success"
 				req.session.user = user
 				req.session.justRegistered = true
 				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
-				res.send
-					redir:redir
-					id:user._id.toString()
-					first_name: user.first_name
-					last_name: user.last_name
-					email: user.email
-					created: Date.now()
+				if redirect
+					res.redirect redir
+				else
+					res.send
+						redir:redir
+						id:user._id.toString()
+						first_name: user.first_name
+						last_name: user.last_name
+						email: user.email
+						created: Date.now()
+
+	register : (req, res, next = (error) ->)->
+		logger.log email: req.body.email, "attempted register"
+		UserRegistrationHandler.registerNewUser req.body, (err, user)->
+			if err?
+				res.send message:
+					type: 'error'
+					text: err
+			else
+				if Settings.requireRegistrationConfirmation
+					res.send
+						redir:'/confirm'
+				else
+					UserController.doRegister req, res, user
 
 
 	changePassword : (req, res, next = (error) ->)->
@@ -131,5 +160,3 @@ module.exports =
 					  text:'Your old password is wrong'
 
 	changeEmailAddress: (req, res)->
-
-

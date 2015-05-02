@@ -1,4 +1,5 @@
 UserLocator = require("./UserLocator")
+UserController = require("./UserController")
 dropboxHandler = require('../Dropbox/DropboxHandler')
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
@@ -21,6 +22,20 @@ module.exports =
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
+
+	confirmRegistrationPage : (req, res)->
+		if req.query.auth_token?
+			req.body = req.query
+			UserController.confirmRegistration req, res, ((error) ->
+				res.render 'user/confirm',
+					title: 'confirm'
+					error: error
+					redir: req.query.redir
+			), true
+		else
+			res.render 'user/confirm',
+				title: 'confirm'
+				redir: req.query.redir
 
 	loginPage : (req, res)->
 		res.render 'user/login',

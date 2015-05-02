@@ -23,12 +23,15 @@ module.exports = AuthenticationController =
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
 				if user?
-					LoginRateLimiter.recordSuccessfulLogin email
-					AuthenticationController._recordSuccessfulLogin user._id
-					AuthenticationController._establishUserSession req, user, (error) ->
-						return next(error) if error?
-						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
+					if user.confirmed
+						LoginRateLimiter.recordSuccessfulLogin email
+						AuthenticationController._recordSuccessfulLogin user._id
+						AuthenticationController._establishUserSession req, user, (error) ->
+							return next(error) if error?
+							logger.log email: email, user_id: user._id.toString(), "successful log in"
+							res.send redir: redir
+					else
+						res.send redir: '/confirm'
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"

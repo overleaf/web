@@ -32,15 +32,22 @@ module.exports =
 
 	_createNewUserIfRequired: (user, userDetails, callback)->
 		if !user?
-			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email}, callback
+			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email}, (error,user) ->
+				if user? and Settings.requireRegistrationConfirmation
+					AuthenticationManager.getAuthToken user._id, (error, auth_token)->
+						if !error?
+							user.auth_token = auth_token
+						callback error, user
+				else
+					callback error, user
 		else
 			callback null, user
 
 	registerNewUser: (userDetails, callback)->
 		self = @
-		requestIsValid = @_registrationRequestIsValid userDetails
-		if !requestIsValid
-			return callback("request is not valid")
+		validationResult = @_registrationRequestIsValid userDetails
+		if validationResult != "OK"
+			return callback(validationResult)
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
 		User.findOne email:userDetails.email, (err, user)->
 			if err?
@@ -58,6 +65,7 @@ module.exports =
 						emailOpts =
 							first_name:user.first_name
 							to: user.email
+							auth_token:user.auth_token
 						EmailHandler.sendEmail "welcome", emailOpts, cb
 				], (err)->
 					logger.log user: user, "registered"

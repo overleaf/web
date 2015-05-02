@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+					.card
+						.page-header
+							h1 #{translate("Confirm Registration")}
+						form(async-form="confirm", name="confirmForm", action="/confirm", ng-cloak)
+							input(name='_csrf', type='hidden', value=csrfToken)
+							input(name='redir', type='hidden', value=redir)
+							form-messages(for="confirmForm")
+							.form-group
+								label(for='auth_token') #{translate("Confirmation Token")}
+								input.form-control(
+									type='text',
+									name='auth_token',
+									placeholder="",
+									required,
+									ng-model="auth_token"
+								)
+								span.small.text-primary(ng-show="confirmForm.auth_token.$invalid && confirmForm.auth_token.$dirty")
+									| #{translate("required")}
+							.actions
+								button.btn-primary.btn(
+									type='submit'
+									ng-disabled="confirmForm.inflight"
+								)
+									span(ng-show="!confirmForm.inflight") #{translate("Confirm Registration")}
+									span(ng-show="confirmForm.inflight") #{translate("confirming registration")}...

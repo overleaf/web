@@ -1,3 +1,4 @@
+Settings = require('settings-sharelatex')
 User = require("../../models/User").User
 UserLocator = require("./UserLocator")
 
@@ -22,6 +23,10 @@ module.exports =
 		else
 			user.first_name = ""
 		user.last_name = ""
+		if Settings.requireRegistrationConfirmation
+			user.confirmed = false
+		else
+			user.confirmed = true
 
 
 		user.save (err)->

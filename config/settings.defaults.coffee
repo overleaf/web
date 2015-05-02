@@ -122,6 +122,16 @@ module.exports =
 
 	httpAuthUsers: httpAuthUsers
 
+	# Require registration confirmation
+	# ----------------
+	# Require users to click on a registration link in the registration email
+	# they receive before their account is activated. This, e.g., proves
+	# that their e-mail address exists and that they have access to it
+	#
+	# Important Note: If you enable this, be sure to configure a mail transport
+	# and set lifcycle to true. Otherwise people won't be able to register
+	# since they will not get their registration links.
+	requireRegistrationConfirmation: true
 	# Default features
 	# ----------------
 	#
