@@ -19,6 +19,9 @@ module.exports =
 		res.render 'user/register',
 			title: 'register'
 			redir: req.query.redir
+			restrict_domain: Settings.signupDomain?
+			domain: Settings.signupDomain
+			example_email: if Settings.signupDomain? then 'example@' + Settings.signupDomain else 'email@exmaple.com'
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""

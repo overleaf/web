@@ -122,6 +122,12 @@ module.exports =
 
 	httpAuthUsers: httpAuthUsers
 
+	# Limit Registration
+	# ----------------
+	# If you run sharelatex locally you might want to limit the registration
+	# of new users to users with an email in your domain.
+	signupDomain: "ff.cuni.cz"
+
 	# Require registration confirmation
 	# ----------------
 	# Require users to click on a registration link in the registration email

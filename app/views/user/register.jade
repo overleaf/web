@@ -28,7 +28,7 @@ block content
 								input.form-control(
 									type='email',
 									name='email',
-									placeholder="email@example.com"
+									placeholder="#{example_email}",
 									required,
 									ng-model="email",
 									ng-init="email = #{JSON.stringify(new_email)}",
@@ -37,6 +37,8 @@ block content
 								)
 								span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
 									| #{translate("must_be_email_address")}
+								if restrict_domain
+									div.small (Only emails ending with @#{domain} accepted.)
 							.form-group
 								label(for='password') #{translate("password")}
 								input.form-control(
