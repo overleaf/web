@@ -66,12 +66,6 @@ module.exports =
 					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
 					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
 					(cb)-> NewsLetterManager.subscribe user, cb
-					(cb)->
-						emailOpts =
-							first_name:user.first_name
-							to: user.email
-							auth_token:user.auth_token
-						EmailHandler.sendEmail "welcome", emailOpts, cb
 				], (err)->
 					logger.log user: user, "registered"
 					callback(err, user)

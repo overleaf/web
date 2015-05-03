@@ -117,10 +117,7 @@ module.exports =
 	templates: templates
 
 	buildEmail: (templateName, opts)->
-		if settings.requireRegistrationConfirmation and templateName == "welcome"
-			template = templates["welcome_confirm"]
-		else
-			template = templates[templateName]
+		template = templates[templateName]
 		opts.siteUrl = settings.siteUrl
 		opts.body = template.compiledTemplate(opts)
 		return {

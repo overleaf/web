@@ -132,23 +132,31 @@ module.exports = UserController =
 
 	finishPublicRegistration : (req, res, user, redirect = false )->
 		redir = Url.parse(req.body.redir or "/project").path
+		logger.log user:user, "updating user"
 		UserUpdater.updateUser user._id.toString(), {$set: { "confirmed": true} }, (err) ->
-			if err?
+		if err?
+			logger.log error:err, "error updating user"
+			if redirect
 				res.redirect '/confirm'
 			else
-				metrics.inc "user.register.success"
-				req.session.user = user
-				req.session.justRegistered = true
-				if redirect
-					res.redirect redir
-				else
-					res.send
-						redir:redir
-						id:user._id.toString()
-						first_name: user.first_name
-						last_name: user.last_name
-						email: user.email
-						created: Date.now()
+				res.send
+					message:
+						type:'error'
+						text: "Error updating user, please try again"
+		else
+			metrics.inc "user.register.success"
+			req.session.user = user
+			req.session.justRegistered = true
+			if redirect
+				res.redirect redir
+			else
+				res.send
+					redir:redir
+					id:user._id.toString()
+					first_name: user.first_name
+					last_name: user.last_name
+					email: user.email
+					created: Date.now()
 
 	publicRegister : (req, res, next = (error) ->)->
 		if ! settings.allowPublicRegistration
@@ -169,6 +177,12 @@ module.exports = UserController =
 							type: 'error'
 							text: err.message
 				else
+					email_template = if settings.requireRegistrationConfirmation then "welcome_confirm" else "welcome"
+					EmailHandler.sendEmail email_template, {
+							first_name:user.first_name
+							to: user.email
+							auth_token:user.auth_token
+					}, () ->
 					if settings.requireRegistrationConfirmation
 						res.send
 							redir:'/confirm'
