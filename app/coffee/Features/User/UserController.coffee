@@ -109,7 +109,7 @@ module.exports = UserController =
 					to: user.email
 					setNewPasswordUrl: setNewPasswordUrl
 				}, () ->
-						
+				
 				res.json {
 					email: user.email
 					setNewPasswordUrl: setNewPasswordUrl

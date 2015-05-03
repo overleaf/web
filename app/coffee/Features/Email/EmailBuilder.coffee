@@ -6,7 +6,7 @@ settings = require("settings-sharelatex")
 
 templates = {}
 
-templates.registered = 
+templates.registered =	
 	subject:  _.template "Activate your #{settings.appName} Account"
 	layout: PersonalEmailLayout
 	type: "notification"
