@@ -45,7 +45,7 @@ module.exports = class Router
 			app.all '*', AuthenticationController.requireGlobalLogin
 
 		app.use(app.router)
-
+		
 		app.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
@@ -53,7 +53,7 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
-		# Left as a placeholder for implementing a public register page
+		# Public register page
 		app.get  '/register', UserPagesController.publicRegisterPage
 		app.post '/register', UserController.publicRegister
 		AuthenticationController.addEndpointToLoginWhitelist '/register'
@@ -67,16 +67,14 @@ module.exports = class Router
 		)
 		AuthenticationController.addEndpointToLoginWhitelist '/confirm'
 
-
 		EditorRouter.apply(app)
 		CollaboratorsRouter.apply(app)
-
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		RealTimeProxyRouter.apply(app)
-
+		
 		Modules.applyRouter(app)
 
 		app.get '/blog', BlogController.getIndexPage
@@ -164,7 +162,7 @@ module.exports = class Router
 
 		app.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
-
+		
 		app.get  /learn(\/.*)?/, WikiController.getPage
 
 		#Admin Stuff

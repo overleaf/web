@@ -82,7 +82,6 @@ module.exports = UserController =
 				logger.err err: err, 'error destroying session'
 			res.redirect '/login'
 
-
 	register : (req, res, next = (error) ->)->
 		email = req.body.email
 		if !email? or email == ""
@@ -96,21 +95,21 @@ module.exports = UserController =
 		}, (err, user)->
 			if err? and err?.message != "EmailAlreadyRegistered"
 				return next(err)
-
+			
 			if err?.message == "EmailAlreadyRegistered"
 				logger.log {email}, "user already exists, resending welcome email"
 
 			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
 			PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
 				return next(err) if err?
-
+				
 				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
 
 				EmailHandler.sendEmail "registered", {
 					to: user.email
 					setNewPasswordUrl: setNewPasswordUrl
 				}, () ->
-
+								
 				res.json {
 					email: user.email
 					setNewPasswordUrl: setNewPasswordUrl

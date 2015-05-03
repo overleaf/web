@@ -6,7 +6,7 @@ settings = require("settings-sharelatex")
 
 templates = {}
 
-templates.registered =	
+templates.registered =
 	subject:  _.template "Activate your #{settings.appName} Account"
 	layout: PersonalEmailLayout
 	type: "notification"
@@ -45,7 +45,7 @@ Henry <br>
 ShareLaTeX Co-founder
 '''
 
-templates.canceledSubscription = 
+templates.canceledSubscription =
 	subject:  _.template "ShareLaTeX thoughts"
 	layout: PersonalEmailLayout
 	type:"lifecycle"
@@ -62,7 +62,7 @@ ShareLaTeX Co-founder
 </p>
 '''
 
-templates.passwordResetRequested =	
+templates.passwordResetRequested =
 	subject:  _.template "Password Reset - #{settings.appName}"
 	layout: NotificationEmailLayout
 	type:"notification"
@@ -92,7 +92,7 @@ If you didn't request a password reset, let us know.
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
-templates.projectSharedWithYou = 
+templates.projectSharedWithYou =
 	subject: _.template "<%= owner.email %> wants to share <%= project.name %> with you"
 	layout: NotificationEmailLayout
 	type:"notification"
@@ -125,4 +125,3 @@ module.exports =
 			html: template.layout(opts)
 			type:template.type
 		}
-

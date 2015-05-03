@@ -83,7 +83,7 @@ module.exports = AuthenticationController =
 					return next()
 			else
 				if !req.session.user?
-					AuthenticationController._redirectToLoginOrRegisterPage(req, res)
+					AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
 				else
 					req.user = req.session.user
 					return next()
@@ -114,9 +114,9 @@ module.exports = AuthenticationController =
 
 	_redirectToLoginOrRegisterPage: (req, res)->
 		if req.query.zipUrl? or req.query.project_name?
-			return AuthenticationController._redirectToRegisterPage(req, res)
+			return AuthenticationController._redirectToRegisterPage(req, res) 
 		else
-			AuthenticationController._redirectToLoginPage(req, res)
+			AuthenticationController._redirectToLoginPage(req, res) 
 
 
 	_redirectToLoginPage: (req, res) ->

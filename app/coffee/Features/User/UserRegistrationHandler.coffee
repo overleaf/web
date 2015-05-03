@@ -4,7 +4,6 @@ User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
-EmailHandler = require("../Email/EmailHandler")
 async = require("async")
 logger = require("logger-sharelatex")
 
@@ -65,7 +64,9 @@ module.exports =
 				async.series [
 					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
 					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
-					(cb)-> NewsLetterManager.subscribe user, cb
+					(cb)-> 
+						NewsLetterManager.subscribe user, ->
+						cb() #this can be slow, just fire it off
 				], (err)->
 					logger.log user: user, "registered"
 					callback(err, user)
