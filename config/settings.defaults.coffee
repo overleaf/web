@@ -102,7 +102,7 @@ module.exports =
 			url: "http://localhost:8080/json"
 		realTime:
 			url: "http://localhost:3026"
-
+			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
 		showSocialButtons: false
@@ -175,7 +175,7 @@ module.exports =
 
 	# i18n
 	# ------
-	#
+	# 
 	i18n:
 		subdomainLang:
 			www: {lngCode:"en", url: siteUrl}
@@ -184,7 +184,7 @@ module.exports =
 	# Spelling languages
 	# ------------------
 	#
-	# You must have the corresponding aspell package installed to
+	# You must have the corresponding aspell package installed to 
 	# be able to use a language.
 	languages: [
 		{name: "English", code: "en"},
@@ -216,7 +216,7 @@ module.exports =
 	#	parameters:
 	#		AWSAccessKeyID: ""
 	#		AWSSecretKey: ""
-	
+
 
 	# Third party services
 	# --------------------
@@ -232,7 +232,7 @@ module.exports =
 	# analytics:
 	# 	ga:
 	# 		token: ""
-	#
+	# 
 	# ShareLaTeX's help desk is provided by tenderapp.com
 	# tenderUrl: ""
 	#
@@ -266,10 +266,10 @@ module.exports =
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
 	behindProxy: false
-
+	
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
-
+	
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: false
@@ -282,11 +282,11 @@ module.exports =
 		# them to disk here).
 		dumpFolder: Path.resolve __dirname + "/../data/dumpFolder"
 		uploadFolder: Path.resolve __dirname + "/../data/uploads"
-
+	
 	# Automatic Snapshots
 	# -------------------
 	automaticSnapshots:
-		# How long should we wait after the user last edited to
+		# How long should we wait after the user last edited to 
 		# take a snapshot?
 		waitTimeAfterLastEdit: 5 * minutes
 		# Even if edits are still taking place, this is maximum
@@ -302,13 +302,13 @@ module.exports =
 	# 	user: ""
 	# 	password: ""
 	# 	projectId: ""
-
+	
 	appName: "ShareLaTeX (Community Edition)"
 	adminEmail: "placeholder@example.com"
 
 	nav:
 		title: "ShareLaTeX Community Edition"
-
+		
 		left_footer: [{
 			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2014"
 		}]
@@ -343,7 +343,7 @@ module.exports =
 				url: "/logout"
 			}]
 		}]
-
+	
 #	templates: [{
 #		name : "cv_or_resume",
 #		url : "/templates/cv"
@@ -372,14 +372,14 @@ module.exports =
 		"/templates/index": "/templates/"
 
 	proxyUrls: {}
-
+	
 	reloadModuleViewsOnEachRequest: true
 
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
 	# ----------
 
 
-
+	
 	# ldap:
 	# 	host: 'ldap://ldap.forumsys.com'
 	# 	dnObj: 'uid'

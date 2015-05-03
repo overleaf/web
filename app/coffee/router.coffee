@@ -151,7 +151,7 @@ module.exports = class Router
 		app.del  '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
-
+		
 		app.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
 		app.del  '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 		app.ignoreCsrf('post', '/project/:project_id/contents/*')
