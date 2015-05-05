@@ -20,7 +20,6 @@ module.exports = FileStoreHandler =
 			uri: @_buildUrl(project_id, file_id)
 			timeout:fiveMinsInMs
 		writeStream = request(opts)
-		readStream.pipe writeStream
 		# FIXME: potential double callbacks
 		writeStream.on "end", callback
 		readStream.on "error", (err)->
@@ -29,6 +28,7 @@ module.exports = FileStoreHandler =
 		writeStream.on "error", (err)->
 			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of putFileStream"
 			callback err
+		readStream.pipe writeStream
 
 	getFileStream: (project_id, file_id, query, callback)->
 		logger.log project_id:project_id, file_id:file_id, query:query, "getting file stream from file store"
