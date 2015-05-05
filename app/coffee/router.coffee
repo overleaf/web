@@ -136,7 +136,7 @@ module.exports = class Router
 		apiRouter.post '/internal/deactivateOldProjects', AuthenticationController.httpAuth, InactiveProjectController.deactivateOldProjects
 		apiRouter.post '/internal/project/:project_id/deactivate', AuthenticationController.httpAuth, InactiveProjectController.deactivateProject
 
-		webRouter.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
+		apiRouter.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]
