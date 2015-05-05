@@ -127,13 +127,22 @@ module.exports = class Router
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		app.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
-		# New 'stable' API end points
+		# New 'stable' /internal API end points
 		app.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 		app.get  '/internal/project/:project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
 		app.post '/internal/project/:Project_id/run', AuthenticationController.httpAuth, CompileController.compile
 		app.ignoreCsrf('post', '/internal/project/:Project_id/run')
 		
 		app.get  '/internal/project/:project_id/content', AuthenticationController.httpAuth, ProjectApiController.getProjectContent
+
+		app.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"file":       req.params[1]
+				req.params = params
+				next()
+			), AuthenticationController.httpAuth, CompileController.getFileFromClsi
 
 		app.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
 		app.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
