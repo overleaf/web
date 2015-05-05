@@ -139,6 +139,8 @@ module.exports =
 		versioning: true
 		compileTimeout: 60
 		compileGroup: "standard"
+		compileMemory: 1000
+		compileCpuShares: 10
 
 	plans: plans = [{
 		planCode: "personal"
