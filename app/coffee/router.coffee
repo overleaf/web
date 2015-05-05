@@ -35,6 +35,7 @@ RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
+LinkController = require("./Features/Link/LinkController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -159,6 +160,11 @@ module.exports = class Router
 
 		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
+		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+
+		webRouter.post  "/project/:Project_id/link", SecurityManager.requestCanAccessProject, LinkController.generateLink
+		webRouter.get   "/public/:public_id/*", LinkController.getFile # public image links
 		
 		webRouter.get  /learn(\/.*)?/, AnalyticsMiddlewear.injectIntercomDetails, WikiController.getPage
 

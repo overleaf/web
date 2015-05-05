@@ -16,6 +16,7 @@ define [
 	"ide/clone/index"
 	"ide/hotkeys/index"
 	"ide/install/index"
+	"ide/link-image/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"ide/services/commandRunner"
