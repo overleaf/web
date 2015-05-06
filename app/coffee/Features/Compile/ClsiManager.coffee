@@ -85,6 +85,10 @@ module.exports = ClsiManager =
 
 					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
 
+					# If we have no rootResourcePath by now, just use the first file.
+					if !rootResourcePath?
+						rootResourcePath = resources[0]?.path
+
 					for path, file of files
 						path = path.replace(/^\//, "") # Remove leading /
 						resources.push
