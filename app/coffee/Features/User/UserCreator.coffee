@@ -15,6 +15,7 @@ module.exports =
 		user = new User()
 		user.email = opts.email
 		user.holdingAccount = opts.holdingAccount
+		user.confirmed = opts.confirmed
 
 		username = opts.email.match(/^[^@]*/)
 		if username?

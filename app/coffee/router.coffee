@@ -53,9 +53,19 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
-		# Left as a placeholder for implementing a public register page
-		app.get  '/register', UserPagesController.registerPage
+		# Public register page
+		app.get  '/register', UserPagesController.publicRegisterPage
+		app.post '/register', UserController.publicRegister
 		AuthenticationController.addEndpointToLoginWhitelist '/register'
+
+		app.get '/confirm', UserPagesController.confirmRegistrationPage
+		app.post '/confirm', ( (req,res,next) ->
+			UserController.confirmRegistration req, res, (error) ->
+				res.send message:
+					text:error,
+					type: "error"
+		)
+		AuthenticationController.addEndpointToLoginWhitelist '/confirm'
 
 		EditorRouter.apply(app)
 		CollaboratorsRouter.apply(app)

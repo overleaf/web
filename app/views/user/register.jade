@@ -20,7 +20,47 @@ block content
 					.card
 						.page-header
 							h1 #{translate("register")}
-						p
-							| Please contact 
-							strong #{settings.adminEmail} 
-							| to create an account.
+							if allowPublicRegistration
+									form(async-form="register", name="registerForm", action="/register", ng-cloak)
+										input(name='_csrf', type='hidden', value=csrfToken)
+										input(name='redir', type='hidden', value=redir)
+										form-messages(for="registerForm")
+										.form-group
+											label(for='email') #{translate("email")}
+											input.form-control(
+												type='email',
+												name='email',
+												placeholder="#{example_email}",
+												required,
+												ng-model="email",
+												ng-init="email = #{JSON.stringify(new_email)}",
+												ng-model-options="{ updateOn: 'blur' }",
+												focus="true"
+											)
+											span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
+												| #{translate("must_be_email_address")}
+											if restrict_domain
+												div.small (Only emails ending with @#{domain} accepted.)
+										.form-group
+											label(for='password') #{translate("password")}
+											input.form-control(
+												type='password',
+												name='password',
+												placeholder="********",
+												required,
+												ng-model="password"
+											)
+											span.small.text-primary(ng-show="registerForm.password.$invalid && registerForm.password.$dirty")
+												| #{translate("required")}
+										.actions
+											button.btn-primary.btn(
+												type='submit'
+												ng-disabled="registerForm.inflight"
+											)
+												span(ng-show="!registerForm.inflight") #{translate("register")}
+												span(ng-show="registerForm.inflight") #{translate("registering")}...
+							else
+									p
+										| Please contact
+										strong #{settings.adminEmail}
+										| to create an account.

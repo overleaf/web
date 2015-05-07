@@ -1,4 +1,5 @@
 sanitize = require('sanitizer')
+Settings = require('settings-sharelatex')
 User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
@@ -22,24 +23,35 @@ module.exports =
 		email = sanitize.escape(body.email).trim().toLowerCase()
 		password = body.password
 		username = email.match(/^[^@]*/)
+		domain = email.match(/[^@]*$/)
+		domain = domain[0] if domain?
 		if @hasZeroLengths([password, email])
-			return false
+			return "Password/email cannot be empty"
 		else if !@validateEmail(email)
-			return false
+			return "Invalid email"
+		else if Settings.signupDomain? and Settings.signupDomain != domain
+			return "Invalid domain. Only emails ending with @"+Settings.signupDomain+" accepted."
 		else
-			return true
+			return "OK"
 
 	_createNewUserIfRequired: (user, userDetails, callback)->
 		if !user?
-			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email}, callback
+			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email, confirmed:userDetails.confirmed}, (error,user) ->
+				if user? and Settings.requireRegistrationConfirmation
+					AuthenticationManager.getAuthToken user._id, (error, auth_token)->
+						if !error?
+							user.auth_token = auth_token
+						callback error, user
+				else
+					callback error, user
 		else
 			callback null, user
 
 	registerNewUser: (userDetails, callback)->
 		self = @
-		requestIsValid = @_registrationRequestIsValid userDetails
-		if !requestIsValid
-			return callback(new Error("request is not valid"))
+		validationResult = @_registrationRequestIsValid userDetails
+		if validationResult != "OK"
+			return callback(new Error(validationResult))
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
 		User.findOne email:userDetails.email, (err, user)->
 			if err?
@@ -58,7 +70,3 @@ module.exports =
 				], (err)->
 					logger.log user: user, "registered"
 					callback(err, user)
-
-
-
-

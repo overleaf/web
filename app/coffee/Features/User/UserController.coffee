@@ -7,6 +7,7 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+AuthenticationController = require("../Authentication/AuthenticationController")
 UserUpdater = require("./UserUpdater")
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
 EmailHandler = require("../Email/EmailHandler")
@@ -14,7 +15,7 @@ PasswordResetTokenHandler = require "../PasswordReset/PasswordResetTokenHandler"
 settings = require "settings-sharelatex"
 crypto = require "crypto"
 
-module.exports =
+module.exports = UserController =
 
 	deleteUser: (req, res)->
 		user_id = req.session.user._id
@@ -78,7 +79,7 @@ module.exports =
 		logger.log user: req?.session?.user, "logging out"
 		req.session.destroy (err)->
 			if err
-				logger.err err: err, 'error destorying session'
+				logger.err err: err, 'error destroying session'
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
@@ -90,6 +91,7 @@ module.exports =
 		UserRegistrationHandler.registerNewUser {
 			email: email
 			password: crypto.randomBytes(32).toString("hex")
+			confirmed: true
 		}, (err, user)->
 			if err? and err?.message != "EmailAlreadyRegistered"
 				return next(err)
@@ -107,11 +109,86 @@ module.exports =
 					to: user.email
 					setNewPasswordUrl: setNewPasswordUrl
 				}, () ->
-					
+				
 				res.json {
 					email: user.email
 					setNewPasswordUrl: setNewPasswordUrl
 				}
+
+	confirmRegistration : (req, res, next = ((error)->), redirect = false)->
+		logger.log token:req.body.auth_token, "attempted to confirm registration"
+		user = AuthenticationController.getUserFromAuthToken req.body.auth_token, (error,user)->
+			if error?
+				logger.log error:error, "db error"
+				next("DB Error")
+			else if user?
+				AuthenticationManager.clearAuthToken user._id, next
+				UserController.finishPublicRegistration req, res, user, redirect
+			else
+				logger.log token:req.body.auth_token, "invalid confirmation token"
+				next("Invalid token")
+
+
+	finishPublicRegistration : (req, res, user, redirect = false )->
+		redir = Url.parse(req.body.redir or "/project").path
+		logger.log user:user, "updating user"
+		UserUpdater.updateUser user._id.toString(), {$set: { "confirmed": true} }, (err) ->
+		if err?
+			logger.log error:err, "error updating user"
+			if redirect
+				res.redirect '/confirm'
+			else
+				res.send
+					message:
+						type:'error'
+						text: "Error updating user, please try again"
+		else
+			metrics.inc "user.register.success"
+			req.session.user = user
+			req.session.justRegistered = true
+			if redirect
+				res.redirect redir
+			else
+				res.send
+					redir:redir
+					id:user._id.toString()
+					first_name: user.first_name
+					last_name: user.last_name
+					email: user.email
+					created: Date.now()
+
+	publicRegister : (req, res, next = (error) ->)->
+		if ! settings.allowPublicRegistration
+			res.send
+				message:
+					type: 'error'
+					text: 'Public registration disabled by site config.'
+		else
+			logger.log email: req.body.email, "attempted register"
+			UserRegistrationHandler.registerNewUser {
+					email:req.body.email
+					password:req.body.password
+					confirmed: if settings.requireRegistrationConfirmation then false else true
+			}, (err, user)->
+				if err?
+					res.send
+						message:
+							type: 'error'
+							text: err.message
+				else
+					email_template = if settings.requireRegistrationConfirmation then "welcome_confirm" else "welcome"
+					EmailHandler.sendEmail email_template, {
+							first_name:user.first_name
+							to: user.email
+							auth_token:user.auth_token
+					}, () ->
+					if settings.requireRegistrationConfirmation
+						res.send
+							redir:'/confirm'
+					else
+						UserController.finishPublicRegistration req, res, user
+
+
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"
@@ -144,5 +221,3 @@ module.exports =
 					  text:'Your old password is wrong'
 
 	changeEmailAddress: (req, res)->
-
-
