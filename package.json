@@ -23,6 +23,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "lynx": "0.1.1",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.1.0",
+    "marked": "^0.3.3",
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
     "mongojs": "0.18.2",
