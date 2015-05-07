@@ -8,6 +8,7 @@
 }
 
 .template {
+	padding: 0 @line-height-computed;
 	pre {
 		margin: 0;
 	}
@@ -16,6 +17,9 @@
 	}
 	img {
 		max-width: 100%;
+	}
+	pre {
+		margin-bottom: @line-height-computed / 2;
 	}
 }
 
@@ -49,11 +53,6 @@
 	margin-top: 0px;
 }
 
-
-
-.download-buttons, .social_buttons {
-	padding-top: 20px;
-}
 
 .sample-template {
 	-webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
