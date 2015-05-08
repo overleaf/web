@@ -61,7 +61,6 @@ define [
 				return ""
 
 		$scope.searchProjects = ->
-			event_tracking.send 'projects', 'search'
 			$scope.updateVisibleProjects()
 
 		$scope.clearSearchText = () ->
