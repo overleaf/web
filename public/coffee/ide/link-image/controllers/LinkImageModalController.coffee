@@ -16,11 +16,9 @@ define [
 				_csrf: window.csrfToken
 			}
 			request.success (data, status, headers, config) ->
-				console.log "success", data, status, headers, config
 				$scope.generating = false
 				$scope.output.url = data?.link
 				$scope.$broadcast "generate-link-done"
 			request.error  (data, status, headers, config) ->
-				console.log "error", data, status, headers, config
 				$scope.generating = false
 				$scope.error = true
