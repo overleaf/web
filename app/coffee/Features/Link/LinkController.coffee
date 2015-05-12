@@ -5,6 +5,7 @@ LinkCreator = require("./LinkCreator")
 Settings = require "settings-sharelatex"
 request = require "request"
 Link = require("../../models/Link").Link
+Path = require "path"
 
 module.exports =
 	generateLink : (req, res) ->
@@ -47,21 +48,34 @@ module.exports =
 					srcStream.resume()
 
 	getFile : (req, res) ->
-		# need to be able to put this on a cdn, so allow for a separate subdomain
+		# We need to be able to put this on a cdn, so we allow for a separate subdomain
+		if Settings.publicLinkRestrictions?
+			# hash of key value pairs which must match the request headers
+			for key, value of Settings.publicLinkRestrictions
+				if req.headers[key] != value
+					return res.send(403)
+		# Check that the public id is valid
 		public_id = req.params.public_id
-		if not public_id.match(/^[0-9a-zA-Z]+$/)
-			return res.status(404).send("Invalid link id")
+		if not public_id? or not public_id.match(/^[0-9a-zA-Z]+$/)
+			return res.send(404, "Invalid link id")
+		# Look up the link from its public id
 		Link.findOne {public_id: public_id}, (err, link) ->
 			if err? or !link?
-				return res.status(404).send(err)
+				return res.send(404, err)
 			url = "#{Settings.apis.filestore.url}/project/#{link.project_id}/public/#{link._id}"
 			oneMinute = 60 * 1000
 			options = { url: url, method: req.method,	timeout: oneMinute }
 			proxy = request.get url
 			proxy.on "error", (err) ->
 				logger.warn err: err, url: url, "filestore proxy error"
-				res.status(500).end()
-			res.setHeader "Cache-Control", "public, max-age=86400"
-			res.setHeader "Last-Modified", link.created.toUTCString()
-			res.setHeader "ETag", link._id
+				res.send(500)
+			# Force plain treatment of other file types to prevent hosting of HTTP/JS files
+			# that could be used in same-origin/XSS attacks.
+			switch Path.extname(link.path)
+				when "png" then res.set "Content-Type", "image/png"
+				when "jpg" then res.set "Content-Type", "image/jpeg"
+				else res.set "Content-Type", "text/plain"
+			res.set "Cache-Control", "public, max-age=86400"
+			res.set "Last-Modified", link.created.toUTCString()
+			res.set "ETag", link._id
 			proxy.pipe(res)
