@@ -12,10 +12,11 @@ LinkSchema = new Schema
 	created       :     { type:Date, default: () -> new Date() }
 	project_id    :     { type:ObjectId }
 	user_id       :     { type:ObjectId }
+	public_id     :     { type:String }
 
-LinkSchema.plugin autoIncrement.plugin, { model: 'Link', field: 'public_id', startAt: 100 }
+LinkSchema.plugin autoIncrement.plugin, { model: 'Link', field: 'count_id', startAt: 100 }
 
-LinkSchema.index {public_id : 1}, {unique: true}
+LinkSchema.index {public_id : 1}, {unique: true, sparse: true}
 
 Link = mongoose.model 'Link', LinkSchema
 
