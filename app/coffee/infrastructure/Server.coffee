@@ -14,6 +14,8 @@ rclient = redis.createClient(Settings.redis.web)
 RedisStore = require('connect-redis')(express)
 sessionStore = new RedisStore(client:rclient)
 
+Mongoose = require("./Mongoose")
+
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 RedirectManager = require("./RedirectManager")

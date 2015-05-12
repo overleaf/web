@@ -20,6 +20,8 @@ div.full-size(ng-controller="ScriptOutputController")
 			.i.fa.fa-fw.fa-stop
 			|  Stop
 
+	include ../link-image
+
 	div.script-output.main-script-output(scroll-glue)
 		.script-uncompiled(ng-show="uncompiled")
 			| &nbsp;
@@ -61,7 +63,7 @@ div.full-size(ng-controller="ScriptOutputController")
 				div.text-center(ng-show="currentRun.running")
 					i.fa.fa-2x.fa-spin.fa-spinner
 				
-				.download-controls
+				.download-controls(ng-controller="LinkImageController")
 					span.name(ng-show="part.file_type == 'image' && part.path.slice(0,7) != '.output'") {{ part.path }}
 					a(
 						ng-href="{{part.url}}",
@@ -71,6 +73,16 @@ div.full-size(ng-controller="ScriptOutputController")
 						tooltip-placement="bottom"
 					)
 						i.fa.fa-download
+
+					a(
+						ng-href="",
+						ng-click="linkImage(part)"
+						tooltip="Share",
+						tooltip-append-to-body="true",
+						tooltip-placement="bottom"
+					)
+						i.fa.fa-link
+
 
 				img(ng-if="part.file_type == 'image' && !currentRun.running", ng-src="{{part.url}}")
 				div(ng-if="part.file_type != 'image' && !currentRun.running")
