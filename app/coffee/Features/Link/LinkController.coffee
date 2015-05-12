@@ -35,9 +35,13 @@ module.exports =
 						if err? or response.statusCode != 200
 							res.status(response?.statusCode || 500).send { error: body }
 						else
-							short_id = link.public_id.toString(36)  # use base 36 for shortened url
+							short_id = link.public_id
+							if Settings.publicLinkUrl?
+								link_url = "#{Settings.publicLinkUrl}/#{short_id}/#{link.path}"
+							else
+								link_url = "#{Settings.siteUrl}/public/#{short_id}/#{link.path}"
 							res.send {
-								link: "#{Settings.publicLinkUrl || Settings.siteUrl}/public/#{short_id}/#{link.path}"
+								link: link_url
 							}
 					srcStream.pipe(destStream)
 					srcStream.resume()
@@ -47,8 +51,8 @@ module.exports =
 		public_id = req.params.public_id
 		if not public_id.match(/^[0-9a-zA-Z]+$/)
 			return res.status(404).send("Invalid link id")
-		Link.findOne {public_id: parseInt(public_id, 36)}, (err, link) ->
-			if err?
+		Link.findOne {public_id: public_id}, (err, link) ->
+			if err? or !link?
 				return res.status(404).send(err)
 			url = "#{Settings.apis.filestore.url}/project/#{link.project_id}/public/#{link._id}"
 			oneMinute = 60 * 1000
