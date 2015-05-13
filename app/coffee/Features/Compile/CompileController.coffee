@@ -80,6 +80,9 @@ module.exports = CompileController =
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
+		if req.query.download?
+				logger.log project_id: project_id, "download output file directly from link"
+				res.header('Content-Disposition', "attachment")
 		CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/#{req.params.file}", req, res, next)
 
 	proxySync: (req, res, next = (error) ->) ->
