@@ -24,7 +24,8 @@ module.exports =
 				# N.B. make sure the srcStream/response stream are discard if needed
 				logger.err statusCode:response.statusCode, "get response code"
 				# Create the link in mongo
-				LinkCreator.createNewLink {user_id, project_id, path.replace(/^\.output\//, '')}, (err, link) ->
+				path = path.replace /^\.output\//, '' # strip leading directory for diverted images
+				LinkCreator.createNewLink {user_id, project_id, path}, (err, link) ->
 					if err?
 						srcStream.resume()
 						logger.err err:err, "error creating link"
