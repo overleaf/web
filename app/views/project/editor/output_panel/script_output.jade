@@ -67,7 +67,6 @@ div.full-size(ng-controller="ScriptOutputController")
 					span.name(ng-show="part.file_type == 'image' && part.path.slice(0,7) != '.output'") {{ part.path }}
 					a(
 						ng-href="{{part.url + (part.url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
-						target="_blank",
 						tooltip="Download",
 						tooltip-append-to-body="true",
 						tooltip-placement="bottom"
