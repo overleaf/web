@@ -24,8 +24,7 @@ define [
 			$scope.manualInput = ""
 		
 		$scope.stop = () ->
-			return if !$scope.currentRun?
-			commandRunner.stop $scope.currentRun
+			commandRunner.stop()
 		
 		$scope.installPackage = (packageName, language) ->
 			ide.$scope.$broadcast "installPackage", packageName, language

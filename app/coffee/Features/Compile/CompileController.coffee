@@ -53,6 +53,14 @@ module.exports = CompileController =
 			return next(error) if error?
 			res.send 204
 
+	interruptRequest: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		msg_id = req.params.msg_id
+		logger.log {project_id, msg_id}, "interrupt jupyter request"
+		CompileManager.interruptRequest project_id, msg_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id

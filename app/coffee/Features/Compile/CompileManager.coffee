@@ -46,6 +46,9 @@ module.exports = CompileManager =
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
 			ClsiManager.executeRequest project_id, msg_id, engine, code, limits, callback
+	
+	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
+		ClsiManager.interruptRequest project_id, msg_id, callback
 		
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->

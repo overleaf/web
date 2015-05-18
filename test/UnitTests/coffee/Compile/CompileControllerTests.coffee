@@ -385,3 +385,21 @@ describe "CompileController", ->
 		
 		it "should return 204", ->
 			@res.send.calledWith(204).should.equal true
+
+	describe "interruptRequest", ->
+		beforeEach ->
+			@CompileManager.interruptRequest = sinon.stub().callsArg(2)
+			@req = 
+				params:
+					Project_id: @project_id
+					msg_id: @msg_id = "message-123"
+			@res.send = sinon.stub()
+			@CompileController.interruptRequest @req, @res, @next()
+	
+		it "should interrupt the request", ->
+			@CompileManager.interruptRequest
+				.calledWith(@project_id, @msg_id)
+				.should.equal true
+		
+		it "should return 204", ->
+			@res.send.calledWith(204).should.equal true

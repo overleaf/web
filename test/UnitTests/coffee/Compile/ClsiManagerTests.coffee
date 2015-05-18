@@ -329,4 +329,21 @@ describe "ClsiManager", ->
 		
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+	describe "interruptRequest", ->
+		beforeEach ->
+			@msg_id = "message-123"
+			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, {})
+			@ClsiManager.interruptRequest @project_id, @msg_id, @callback
+		
+		it "should send a request to the CLSI", ->
+			@request.post
+				.calledWith({
+					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/request/#{@msg_id}/interrupt"
+					jar: false
+				})
+				.should.equal true
+		
+		it "should call the callback", ->
+			@callback.called.should.equal true
 			

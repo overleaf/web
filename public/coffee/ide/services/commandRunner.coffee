@@ -71,10 +71,13 @@ define [
 				running: false,
 				stopping: false
 			}
+			
+			current_msg_id: null
 		
 			executeRequest: (code, engine) ->
 				msg_id = Math.random().toString().slice(2)
 				@_createNewCell(msg_id)
+				@current_msg_id = msg_id
 				@status.running = true
 
 				url = "/project/#{ide.$scope.project_id}/execute_request"
@@ -88,9 +91,9 @@ define [
 				$http
 					.post(url, options)
 					.success (data) =>
-						console.log "SUCCESS"
+						@status.running = false
 					.error () =>
-						console.log "ERROR"
+						@status.running = false
 			
 			_createNewCell: (msg_id) ->
 				cell = {
@@ -101,77 +104,14 @@ define [
 				commandRunner.CELLS[msg_id] = cell
 				commandRunner.CELL_LIST.push cell
 			
-			run: (options) ->
-				run = @_createNewRun()
-
-				initing = $timeout () ->
-					# Only show initing message after 2 seconds of delay
-					run.stillIniting = true
-				, 2000
-				run.running = true
-				run.uncompiled = false
-				
-				if options.parseErrors?
-					run.parseErrors = options.parseErrors
-					delete options.parseErrors
-				
-				url = "/project/#{ide.$scope.project_id}/compile"
-				options._csrf = window.csrfToken
-				options.session_id = run.session_id
-				$http
-					.post(url, options)
-					.success (data) =>
-						$timeout.cancel(initing)
-						run.running = false
-						run.stopping = false
-						if data?.status == "timedout"
-							run.timedout = true
-						@_clearRun(run)
-					.error () =>
-						$timeout.cancel(initing)
-						run.running = false
-						run.stopping = false
-						run.error = true
-						@_clearRun(run)
-
-				return run
-			
 			stop: (run) ->
-				url = "/project/#{_ide.$scope.project_id}/compile/#{run.session_id}/stop"
-				run.stopping = true
+				msg_id = @current_msg_id
+				return if !msg_id?
+				url = "/project/#{_ide.$scope.project_id}/request/#{msg_id}/interrupt"
 				$http
 					.post(url, {
 						_csrf: window.csrfToken
 					})
-					.error () ->
-						run.stopping = false
-		
-			_createNewRun: () ->
-				session_id = Math.random().toString().slice(2)
-				run = @INPROGRESS_RUNS[session_id] = {
-					output: []
-					running: false
-					error: false
-					timedout: false
-					session_id: session_id
-					stillIniting: false
-					inited: false
-					stopping: false
-					exitCode: null
-					parsedErrors: []
-					parseErrors: true
-				}
-				return run
-			
-			_clearRun: (run) ->
-				# Once a run has completed, we don't need to keep it hanging
-				# around in our memory for appending messages to it.
-				# Add a short delay to ensure that all real time messages
-				# have been flushed (this delay can be removed if there is a more
-				# reliable way of ensuring we have all the real-time content)
-				setTimeout () =>
-					delete @INPROGRESS_RUNS[run.session_id]
-				, 5000
 			
 			_parseOutputMessage: (message) ->
 				if message.msg_type == "stream"
