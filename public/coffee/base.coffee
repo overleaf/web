@@ -16,6 +16,7 @@ define [
 		"ErrorCatcher"
 		"localStorage"
 		"luegg.directives" # Scroll glue
+		"ansiToHtml"
 	])
 
 	return App

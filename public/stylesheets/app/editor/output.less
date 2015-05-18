@@ -148,92 +148,164 @@
 	}
 }
 
+.script-output-pane {
+	.toolbar {
+		.running-notification {
+			margin-left: @line-height-computed / 2;
+		}
+	}
+}
+
 .script-output {
 	overflow: auto;
 	background-color: white;
 	padding: @line-height-computed / 2;
 	
-	.output {
-		font-family: @font-family-monospace;
-		font-size: 14px;
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		margin: (@line-height-computed / 2) 0;
-		.stderr {
-			color: @brand-danger;
-		}
+	.script-output-inner {
+		position: relative;
+		padding-bottom: 50px;
+		min-height: 100%;
 	}
 	
-	.output-file {
-		border: 1px solid @gray-lighter;
-		background-color: white;
-		margin: 12px 0;
-		padding: 6px 12px;
-		box-shadow: 0 0 5px #ddd;
-		position: relative;
+	@execution-count-width: 60px;
+	@manual-input-height: 50px;
+	
+	.script-uncompiled-bottom {
+		position: absolute;
+		bottom: @manual-input-height;
+		vertical-align: top;
+	}
+	
+	.cell {
+		width: 100%;
+		margin-bottom: @line-height-computed / 2;
+		.input, .output {
+			position: relative;
+			font-family: @font-family-monospace;
+			font-size: 14px;
+			min-height: @line-height-computed;
+		}
 		
-		i.fa {
-			margin: auto;
-			padding: 16px;
-			font-size: 18px;
+		.output {
+			margin-top: @line-height-computed / 4;
+		}
+		
+		.execution-count {
+			position: absolute;
+			top: 1px;
+			left: 0;
+			width: @execution-count-width;
+			font-size: 0.9em;
+			color: @gray-light;
+			text-align: right;
+		}
+		
+		.cell-content {
+			margin-left: @execution-count-width + @line-height-computed / 2;
+		}
+		
+		pre {
+			margin: 0;
 		}
 		
 		img {
-			width: 100%;
+			display: block;
+			border: 1px solid @gray-light;
 		}
 		
-		.download-controls {
+		&.manual-input {
+			padding-top: @line-height-computed / 2;
+			margin-bottom: 0;
 			position: absolute;
-			top: -4px;
-			right: 0;
-			display: none;
-			padding: 16px;
-			a {
-				color: @gray-light;
-			}
-			a:hover {
-				color: @gray-dark;
-				text-decoration: none;
-			}
-			i.fa {
-				padding: 0 0 0 8px;
-				vertical-align: middle;
-			}
-			.name {
-				padding: 4px;
-				background-color: white;
+			bottom: 0;
+			textarea {
+				margin-top: -2px;
+				border: none;
+				width: 100%;
+				height: @line-height-computed;
 			}
 		}
-		&:hover {
-			.download-controls {
-				display: block;
-			}
-		}
-		
-		// .output-file-page-header {
-		// 	margin-bottom: 0;
-		// 	padding-bottom: @line-height-computed / 4;
-		// }
-		// 
-		// iframe {
-		// 	width: 100%;
-		// 	height: 700px;
-		// 	border: none;
-		// }
-		// 
-		// .output-file-text {
-		// 	pre {
-		// 		margin: 0;
-		// 		font-size: 14px;
-		// 		white-space: pre-wrap;
-		// 		word-wrap: break-word;
-		// 	}
-		// }
-		// 
-		// .output-file-download-link {
-		// 	margin-top: @line-height-computed / 2;
-		// }
 	}
+	
+	// .output {
+	// 	white-space: pre-wrap;
+	// 	word-wrap: break-word;
+	// 	margin: (@line-height-computed / 2) 0;
+	// 	.stderr {
+	// 		color: @brand-danger;
+	// 	}
+	// }
+	
+	// .output-file {
+	// 	border: 1px solid @gray-lighter;
+	// 	background-color: white;
+	// 	margin: 12px 0;
+	// 	padding: 6px 12px;
+	// 	box-shadow: 0 0 5px #ddd;
+	// 	position: relative;
+	// 	
+	// 	i.fa {
+	// 		margin: auto;
+	// 		padding: 16px;
+	// 		font-size: 18px;
+	// 	}
+	// 	
+	// 	img {
+	// 		width: 100%;
+	// 	}
+	// 	
+	// 	.download-controls {
+	// 		position: absolute;
+	// 		top: -4px;
+	// 		right: 0;
+	// 		display: none;
+	// 		padding: 16px;
+	// 		a {
+	// 			color: @gray-light;
+	// 		}
+	// 		a:hover {
+	// 			color: @gray-dark;
+	// 			text-decoration: none;
+	// 		}
+	// 		i.fa {
+	// 			padding: 0 0 0 8px;
+	// 			vertical-align: middle;
+	// 		}
+	// 		.name {
+	// 			padding: 4px;
+	// 			background-color: white;
+	// 		}
+	// 	}
+	// 	&:hover {
+	// 		.download-controls {
+	// 			display: block;
+	// 		}
+	// 	}
+		
+	// 	.output-file-page-header {
+	// 		margin-bottom: 0;
+	// 		padding-bottom: @line-height-computed / 4;
+	// 	}
+	// 	
+	// 	iframe {
+	// 		width: 100%;
+	// 		height: 700px;
+	// 		border: none;
+	// 	}
+	// 	
+	// 	.output-file-text {
+	// 		pre {
+	// 			margin: 0;
+	// 			font-size: 14px;
+	// 			white-space: pre-wrap;
+	// 			word-wrap: break-word;
+	// 		}
+	// 	}
+	// 	
+	// 	.output-file-download-link {
+	// 		margin-top: @line-height-computed / 2;
+	// 	}
+	// }
 	
 	.output:first-of-type .output-file {
 		margin-top: 0;

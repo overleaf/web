@@ -96,6 +96,7 @@ module.exports = class Router
 
 		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.post '/project/:Project_id/compile/:session_id/stop', SecurityManager.requestCanAccessProject, CompileController.stopCompile
+		app.post '/project/:Project_id/execute_request', SecurityManager.requestCanAccessProject, CompileController.executeRequest
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->

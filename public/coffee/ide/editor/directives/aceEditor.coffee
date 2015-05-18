@@ -38,6 +38,7 @@ define [
 				navigateHighlights: "="
 				aceMode: "="
 				wrapLines: "="
+				selection: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -182,6 +183,27 @@ define [
 					session.setUseWrapMode(scope.wrapLines)
 					session.setMode("ace/mode/#{scope.aceMode}")
 					session.setAnnotations scope.annotations
+				
+				updatingSelection = false
+				updateSelection = () ->
+					range = editor.selection.getRange()
+					lines = editor.getSession().getDocument().getLines(range.start.row, range.end.row)
+					scope.$apply () ->
+						scope.selection = {
+							lines: lines
+						}
+					
+				onSelectionChange = () ->
+					# the changeSelection event is emitted multiple times
+					# per change, so make sure we only run our update code once.
+					if !updatingSelection
+						updatingSelection = true
+						setTimeout () ->
+							updateSelection()
+							updatingSelection = false
+						, 0
+								
+				editor.on "changeSelection", onSelectionChange
 
 				updateCount = 0
 				onChange = () ->
@@ -206,6 +228,8 @@ define [
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
+					
+					updateSelection()
 
 					editor.focus()
 

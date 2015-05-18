@@ -45,6 +45,14 @@ module.exports = CompileController =
 	stopCompile: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
+	executeRequest: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{code, msg_id, engine} = req.body
+		logger.log {project_id, code, msg_id, engine}, "execute jupyter request"
+		CompileManager.executeRequest project_id, msg_id, engine, code, (error) ->
+			return next(error) if error?
+			res.send 204
+
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id

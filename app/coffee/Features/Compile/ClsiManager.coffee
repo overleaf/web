@@ -21,6 +21,20 @@ module.exports = ClsiManager =
 					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
 					response?.compile?.output
 				)
+	
+	executeRequest: (project_id, msg_id, engine, code, limits, callback = (error) ->) ->
+		request.post {
+			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/execute_request"
+			json: {code, msg_id, engine, limits}
+			jar:  false
+		}, (error, response, body) ->
+			return callback(error) if error?
+			if 200 <= response.statusCode < 300
+				callback null, body
+			else
+				error = new Error("CLSI returned non-success code: #{response.statusCode}")
+				logger.error err: error, project_id: project_id, "CLSI returned failure code"
+				callback error, body
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)

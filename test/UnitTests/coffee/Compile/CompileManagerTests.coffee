@@ -289,3 +289,25 @@ describe "CompileManager", ->
 			}, {
 				path: "bbb.png"
 			}]
+
+	describe "executeRequest", ->
+		beforeEach ->
+			@limits = {mock: "limits"}
+			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
+			@ClsiManager.executeRequest = sinon.stub().callsArg(5)
+			@msg_id = "message-123"
+			@engine = "python"
+			@code = "print 'hello world'"
+			@CompileManager.executeRequest @project_id, @msg_id, @engine, @code, @callback
+			
+		it "should get the limits for the project", ->
+			@CompileManager.getProjectCompileLimits
+				.calledWith(@project_id)
+				.should.equal true
+		
+		it 'should execute the request with the limits', ->
+			@ClsiManager.executeRequest
+				.calledWith(@project_id, @msg_id, @engine, @code, @limits)
+		
+		it 'should call the callback', ->
+			@callback.called.should.equal true

@@ -364,3 +364,24 @@ describe "CompileController", ->
 			@CompileController.compileAndDownloadOutput @req, @res
 			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/main.png", @req, @res).should.equal true
 			done()
+
+	describe "executeRequest", ->
+		beforeEach ->
+			@CompileManager.executeRequest = sinon.stub().callsArg(4)
+			@req = 
+				params:
+					Project_id: @project_id
+				body:
+					msg_id: @msg_id = "message-123"
+					code:   @code = "hello world"
+					engine: @engine = "python"
+			@res.send = sinon.stub()
+			@CompileController.executeRequest @req, @res, @next()
+	
+		it "should execute the request", ->
+			@CompileManager.executeRequest
+				.calledWith(@project_id, @msg_id, @engine, @code)
+				.should.equal true
+		
+		it "should return 204", ->
+			@res.send.calledWith(204).should.equal true

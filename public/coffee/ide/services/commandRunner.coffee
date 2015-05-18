@@ -3,33 +3,103 @@ define [
 ], (App) ->
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
-	App.factory "commandRunner", ($http, $timeout, ide) ->
+	App.factory "commandRunner", ($http, $timeout, ide, ansi2html, $sce) ->
 		ide.socket.on "clsiOutput", (message) ->
-			session_id = message.header?.session
-			return if !session_id?
+			console.log "MESSAGE", message
 			
-			run = commandRunner.INPROGRESS_RUNS[session_id]
-			return if !run?
+			msg_id = message.header?.msg_id
+			return if !msg_id?
 			
-			if message.msg_type == "system_status" and message.content.status == "starting_run"
-				run.inited = true
-				ide.$scope.$apply()
-			else if message.msg_type == "command_exited"
-				run.exitCode = message.content.exitCode
-				commandRunner._displayErrors(run)
-			else
-				output = commandRunner._parseOutputMessage(message)
-				if output?
-					output = commandRunner._filterOutputMessage(output)
-					if output.output_type == 'stderr' and run.parseErrors
-						parsedErrors = commandRunner._parseChunk output
-						if parsedErrors?.length
-							output.parsedErrors = parsedErrors
-					run.output.push output
-					ide.$scope.$apply()
+			cell = commandRunner.CELLS[msg_id]
+			return if !cell?
+			
+			if message.header.msg_type == "execute_input"
+				cell.execution_count = message.content.execution_count
+				cell.input.push message
+			
+			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
+				cell.output.push message
+			
+			if message.header.msg_type == "stream"
+				message.content.text_escaped = ansiToSafeHtml(message.content.text)
+			
+			if message.header.msg_type == "error"
+				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
+			
+			if message.header.msg_type == "display_data"
+				if message.content.data['text/html']?
+					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
+				
+			if message.header.msg_type == "status"
+				if message.content.execution_state == "busy"
+					commandRunner.status.running = true
+				else if message.content.execution_state == "idle"
+					commandRunner.status.running = false
+		
+			ide.$scope.$apply()
+			# if message.msg_type == "system_status" and message.content.status == "starting_run"
+			# 	run.inited = true
+			# 	ide.$scope.$apply()
+			# else if message.msg_type == "command_exited"
+			# 	run.exitCode = message.content.exitCode
+			# 	commandRunner._displayErrors(run)
+			# else
+			# 	output = commandRunner._parseOutputMessage(message)
+			# 	if output?
+			# 		output = commandRunner._filterOutputMessage(output)
+			# 		if output.output_type == 'stderr' and run.parseErrors
+			# 			parsedErrors = commandRunner._parseChunk output
+			# 			if parsedErrors?.length
+			# 				output.parsedErrors = parsedErrors
+			# 		run.output.push output
+			# 		ide.$scope.$apply()
+		
+		ansiToSafeHtml = (input) ->
+			input = input
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;")
+			return $sce.trustAsHtml(ansi2html.toHtml(input))
 		
 		commandRunner =
-			INPROGRESS_RUNS: {}
+			CELL_LIST: []
+			CELLS: {}
+			
+			status: {
+				running: false,
+				stopping: false
+			}
+		
+			executeRequest: (code, engine) ->
+				msg_id = Math.random().toString().slice(2)
+				@_createNewCell(msg_id)
+				@status.running = true
+
+				url = "/project/#{ide.$scope.project_id}/execute_request"
+				options = {
+					code: code
+					engine: engine
+					msg_id: msg_id
+					_csrf: window.csrfToken
+				}
+				console.log "executeRequest", options
+				$http
+					.post(url, options)
+					.success (data) =>
+						console.log "SUCCESS"
+					.error () =>
+						console.log "ERROR"
+			
+			_createNewCell: (msg_id) ->
+				cell = {
+					input: []
+					output: []
+				}
+				cell.msg_id = msg_id
+				commandRunner.CELLS[msg_id] = cell
+				commandRunner.CELL_LIST.push cell
 			
 			run: (options) ->
 				run = @_createNewRun()

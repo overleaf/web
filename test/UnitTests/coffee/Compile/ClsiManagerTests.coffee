@@ -303,3 +303,30 @@ describe "ClsiManager", ->
 					json: @req
 					jar: false
 				}).should.equal true
+	
+	describe "executeRequest", ->
+		beforeEach ->
+			@limits = {mock: "limits"}
+			@msg_id = "message-123"
+			@engine = "python"
+			@code = "print 'hello world'"
+			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
+			@ClsiManager.executeRequest @project_id, @msg_id, @engine, @code, @limits, @callback
+		
+		it "should send a request to the CLSI", ->
+			@request.post
+				.calledWith({
+					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/execute_request"
+					json: {
+						code: @code,
+						msg_id: @msg_id,
+						engine: @engine,
+						limits: @limits
+					}
+					jar: false
+				})
+				.should.equal true
+		
+		it "should call the callback", ->
+			@callback.called.should.equal true
+			
