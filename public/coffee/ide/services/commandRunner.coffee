@@ -7,6 +7,11 @@ define [
 		ide.socket.on "clsiOutput", (message) ->
 			console.log "MESSAGE", message
 			
+			commandRunner.status.initing = false
+			if commandRunner._initingTimeout?
+				$timeout.cancel(commandRunner._initingTimeout)
+				delete commandRunner._initingTimeout
+			
 			engine_and_msg_id = message.header?.msg_id
 			commandRunner.current_msg_id = engine_and_msg_id
 			[engine,msg_id] = engine_and_msg_id?.split(":")
@@ -16,7 +21,6 @@ define [
 			if message.header.msg_type == "execute_input"
 				cell.execution_count = message.content.execution_count
 				cell.input.push message
-				commandRunner._displayCell(cell)
 			
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
 				cell.output.push message
@@ -71,7 +75,8 @@ define [
 			status: {
 				running: false,
 				stopping: false,
-				error: false
+				error: false,
+				initing: false
 			}
 			
 			current_msg_id: null
@@ -81,6 +86,10 @@ define [
 				@current_msg_id = "#{engine}:#{msg_id}"
 				@status.running = true
 				@status.error = false
+				
+				@_initingTimeout = $timeout () =>
+					@status.initing = true
+				, 1000
 
 				url = "/project/#{ide.$scope.project_id}/execute_request"
 				options = {

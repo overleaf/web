@@ -33,12 +33,6 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| &nbsp;
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!
-				
-			.alert.alert-info(ng-show="currentRun.running && currentRun.stillIniting && !currentRun.inited")
-				p
-					i.fa.fa-spinner.fa-spin.fa-fw 
-					|  Initializing environment...
-				p.small (This can take a while the first time you run a script)
 			
 			div.cell(ng-repeat="cell in cells[engine]")
 				div.input
@@ -61,6 +55,12 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
+			
+			.alert.alert-info(ng-show="status.initing")
+				p
+					i.fa.fa-spinner.fa-spin.fa-fw 
+					|  Initializing environment...
+				p.small (This can take a while the first time you run something)
 			
 			.alert.alert-danger(ng-if="status.error")
 				| Sorry, something went wrong running your request. Please try again.
