@@ -61,7 +61,10 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
-								
+			
+			.alert.alert-danger(ng-if="status.error")
+				| Sorry, something went wrong running your request. Please try again.
+			
 			div.cell.manual-input.border-top
 				div.input
 					.execution-count

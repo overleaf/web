@@ -16,6 +16,7 @@ define [
 			if message.header.msg_type == "execute_input"
 				cell.execution_count = message.content.execution_count
 				cell.input.push message
+				commandRunner._displayCell(cell)
 			
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
 				cell.output.push message
@@ -69,7 +70,8 @@ define [
 			
 			status: {
 				running: false,
-				stopping: false
+				stopping: false,
+				error: false
 			}
 			
 			current_msg_id: null
@@ -79,6 +81,7 @@ define [
 				@_createNewCell(msg_id, engine)
 				@current_msg_id = msg_id
 				@status.running = true
+				@status.error = false
 
 				url = "/project/#{ide.$scope.project_id}/execute_request"
 				options = {
@@ -92,15 +95,20 @@ define [
 					.success (data) =>
 						@status.running = false
 					.error () =>
+						@status.error = true
 						@status.running = false
 			
 			_createNewCell: (msg_id, engine) ->
 				cell = {
 					msg_id: msg_id
+					engine: engine
 					input: []
 					output: []
 				}
 				commandRunner.CELLS[msg_id] = cell
+			
+			_displayCell: (cell) ->
+				engine = cell.engine
 				commandRunner.CELL_LIST[engine] ||= []
 				commandRunner.CELL_LIST[engine].push cell
 			
