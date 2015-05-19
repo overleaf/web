@@ -1,10 +1,13 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ScriptOutputController", ($scope, $http, ide, $anchorScroll, $location, commandRunner, event_tracking) ->
+	App.controller "ScriptOutputController", ($scope, $http, ide, commandRunner, event_tracking) ->
 		$scope.status = commandRunner.status
 		$scope.cells = commandRunner.CELL_LIST
 		$scope.uncompiled = true
+		
+		ide.$scope.$watch "editor.ace_mode", () ->
+			$scope.engine = ide.$scope.editor.ace_mode
 		
 		$scope.$on "editor:recompile", () ->
 			$scope.runSelection()
@@ -12,14 +15,14 @@ define [
 		$scope.runSelection = () ->
 			$scope.uncompiled = false
 			code   = ide.$scope.editor.selection.lines.join("\n")
-			engine = ide.$scope.editor.ace_mode
+			engine = $scope.engine
 			commandRunner.executeRequest code, engine
 		
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
 			$scope.uncompiled = false
 			code   = $scope.manualInput
-			engine = ide.$scope.editor.ace_mode
+			engine = $scope.engine
 			commandRunner.executeRequest code, engine
 			$scope.manualInput = ""
 		

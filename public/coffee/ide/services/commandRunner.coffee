@@ -64,7 +64,7 @@ define [
 			return $sce.trustAsHtml(ansi2html.toHtml(input))
 		
 		commandRunner =
-			CELL_LIST: []
+			CELL_LIST: {}
 			CELLS: {}
 			
 			status: {
@@ -76,7 +76,7 @@ define [
 		
 			executeRequest: (code, engine) ->
 				msg_id = Math.random().toString().slice(2)
-				@_createNewCell(msg_id)
+				@_createNewCell(msg_id, engine)
 				@current_msg_id = msg_id
 				@status.running = true
 
@@ -87,7 +87,6 @@ define [
 					msg_id: msg_id
 					_csrf: window.csrfToken
 				}
-				console.log "executeRequest", options
 				$http
 					.post(url, options)
 					.success (data) =>
@@ -95,14 +94,15 @@ define [
 					.error () =>
 						@status.running = false
 			
-			_createNewCell: (msg_id) ->
+			_createNewCell: (msg_id, engine) ->
 				cell = {
+					msg_id: msg_id
 					input: []
 					output: []
 				}
-				cell.msg_id = msg_id
 				commandRunner.CELLS[msg_id] = cell
-				commandRunner.CELL_LIST.push cell
+				commandRunner.CELL_LIST[engine] ||= []
+				commandRunner.CELL_LIST[engine].push cell
 			
 			stop: (run) ->
 				msg_id = @current_msg_id

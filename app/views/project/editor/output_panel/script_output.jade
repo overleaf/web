@@ -40,7 +40,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					|  Initializing environment...
 				p.small (This can take a while the first time you run a script)
 			
-			div.cell(ng-repeat="cell in cells")
+			div.cell(ng-repeat="cell in cells[engine]")
 				div.input
 					.execution-count
 						| In[{{cell.execution_count}}]:
