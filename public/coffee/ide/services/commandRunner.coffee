@@ -7,11 +7,11 @@ define [
 		ide.socket.on "clsiOutput", (message) ->
 			console.log "MESSAGE", message
 			
-			msg_id = message.header?.msg_id
-			return if !msg_id?
-			
-			cell = commandRunner.CELLS[msg_id]
-			return if !cell?
+			engine_and_msg_id = message.header?.msg_id
+			commandRunner.current_msg_id = engine_and_msg_id
+			[engine,msg_id] = engine_and_msg_id?.split(":")
+			return if !msg_id? or !engine?
+			cell = commandRunner.findOrCreateCell(msg_id, engine)
 			
 			if message.header.msg_type == "execute_input"
 				cell.execution_count = message.content.execution_count
@@ -78,8 +78,7 @@ define [
 		
 			executeRequest: (code, engine) ->
 				msg_id = Math.random().toString().slice(2)
-				@_createNewCell(msg_id, engine)
-				@current_msg_id = msg_id
+				@current_msg_id = "#{engine}:#{msg_id}"
 				@status.running = true
 				@status.error = false
 
@@ -87,7 +86,7 @@ define [
 				options = {
 					code: code
 					engine: engine
-					msg_id: msg_id
+					msg_id: "#{engine}:#{msg_id}"
 					_csrf: window.csrfToken
 				}
 				$http
@@ -98,22 +97,23 @@ define [
 						@status.error = true
 						@status.running = false
 			
-			_createNewCell: (msg_id, engine) ->
-				cell = {
-					msg_id: msg_id
-					engine: engine
-					input: []
-					output: []
-				}
-				commandRunner.CELLS[msg_id] = cell
-			
-			_displayCell: (cell) ->
-				engine = cell.engine
-				commandRunner.CELL_LIST[engine] ||= []
-				commandRunner.CELL_LIST[engine].push cell
+			findOrCreateCell: (msg_id, engine) ->
+				if commandRunner.CELLS[msg_id]?
+					return commandRunner.CELLS[msg_id]
+				else
+					cell = {
+						msg_id: msg_id
+						engine: engine
+						input: []
+						output: []
+					}
+					commandRunner.CELLS[msg_id] = cell
+					commandRunner.CELL_LIST[engine] ||= []
+					commandRunner.CELL_LIST[engine].push cell
 			
 			stop: (run) ->
 				msg_id = @current_msg_id
+				console.log "STOPPING", msg_id
 				return if !msg_id?
 				url = "/project/#{_ide.$scope.project_id}/request/#{msg_id}/interrupt"
 				$http

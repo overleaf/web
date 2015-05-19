@@ -25,11 +25,11 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 
 	div.script-output.main-script-output(scroll-glue)
 		.script-output-inner
-			.script-uncompiled(ng-show="uncompiled")
+			.script-uncompiled(ng-show="!cells[engine] && !status.running")
 				| &nbsp;
 				i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Click here to run your script...
-			.script-uncompiled.script-uncompiled-bottom(ng-show="uncompiled")
+			.script-uncompiled.script-uncompiled-bottom(ng-show="!cells[engine] && !status.running")
 				| &nbsp;
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!
