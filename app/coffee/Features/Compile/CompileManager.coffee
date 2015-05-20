@@ -42,10 +42,10 @@ module.exports = CompileManager =
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, output, limits)
 
-	executeRequest: (project_id, msg_id, engine, code, callback = (error) ->) ->
+	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
-			ClsiManager.executeRequest project_id, msg_id, engine, code, limits, callback
+			ClsiManager.sendJupyterRequest project_id, msg_id, engine, msg_type, content, limits, callback
 	
 	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
 		ClsiManager.interruptRequest project_id, msg_id, callback

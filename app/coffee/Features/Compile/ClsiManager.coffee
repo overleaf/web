@@ -22,10 +22,10 @@ module.exports = ClsiManager =
 					response?.compile?.output
 				)
 	
-	executeRequest: (project_id, msg_id, engine, code, limits, callback = (error) ->) ->
+	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, limits, callback = (error) ->) ->
 		request.post {
-			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/execute_request"
-			json: {code, msg_id, engine, limits}
+			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request"
+			json: {msg_type, content, msg_id, engine, limits}
 			jar:  false
 		}, (error, response, body) ->
 			return callback(error) if error?

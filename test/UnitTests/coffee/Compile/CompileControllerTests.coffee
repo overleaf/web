@@ -365,22 +365,23 @@ describe "CompileController", ->
 			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/main.png", @req, @res).should.equal true
 			done()
 
-	describe "executeRequest", ->
+	describe "sendJupyterRequest", ->
 		beforeEach ->
-			@CompileManager.executeRequest = sinon.stub().callsArg(4)
+			@CompileManager.sendJupyterRequest = sinon.stub().callsArg(5)
 			@req = 
 				params:
 					Project_id: @project_id
 				body:
 					msg_id: @msg_id = "message-123"
-					code:   @code = "hello world"
 					engine: @engine = "python"
+					msg_type: @msg_type = "execute_request"
+					content: @content = {mock: "Content"}
 			@res.send = sinon.stub()
-			@CompileController.executeRequest @req, @res, @next()
+			@CompileController.sendJupyterRequest @req, @res, @next()
 	
 		it "should execute the request", ->
-			@CompileManager.executeRequest
-				.calledWith(@project_id, @msg_id, @engine, @code)
+			@CompileManager.sendJupyterRequest
+				.calledWith(@project_id, @msg_id, @engine, @msg_type, @content,)
 				.should.equal true
 		
 		it "should return 204", ->

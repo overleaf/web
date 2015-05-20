@@ -18,6 +18,9 @@ define [
 			return if !msg_id? or !engine?
 			cell = commandRunner.findOrCreateCell(msg_id, engine)
 			
+			if message.header.msg_type == "shutdown_reply"
+				cell.shutdown = true
+			
 			if message.header.msg_type == "execute_input"
 				cell.execution_count = message.content.execution_count
 				cell.input.push message
@@ -91,11 +94,19 @@ define [
 					@status.initing = true
 				, 1000
 
-				url = "/project/#{ide.$scope.project_id}/execute_request"
+				url = "/project/#{ide.$scope.project_id}/request"
 				options = {
-					code: code
-					engine: engine
 					msg_id: "#{engine}:#{msg_id}"
+					msg_type: "execute_request"
+					content: {
+						code: code,
+						silent: false,
+						store_history: true,
+						user_expressions: {},
+						allow_stdin: false,
+						stop_on_error: false
+					}
+					engine: engine
 					_csrf: window.csrfToken
 				}
 				$http
@@ -119,16 +130,36 @@ define [
 					commandRunner.CELLS[msg_id] = cell
 					commandRunner.CELL_LIST[engine] ||= []
 					commandRunner.CELL_LIST[engine].push cell
+					return cell
 			
-			stop: (run) ->
+			stop: () ->
 				msg_id = @current_msg_id
-				console.log "STOPPING", msg_id
 				return if !msg_id?
 				url = "/project/#{_ide.$scope.project_id}/request/#{msg_id}/interrupt"
 				$http
 					.post(url, {
 						_csrf: window.csrfToken
 					})
+			
+			shutdown: (engine) ->
+				msg_id = Math.random().toString().slice(2)
+				@current_msg_id = "#{engine}:#{msg_id}"
+				url = "/project/#{ide.$scope.project_id}/request"
+				options = {
+					msg_id: "#{engine}:#{msg_id}"
+					msg_type: "shutdown_request"
+					content: {
+						restart: true
+					}
+					engine: engine
+					_csrf: window.csrfToken
+				}
+				$http
+					.post(url, options)
+					.success (data) =>
+						console.log "SHUTDOWN REPLY", data
+					.error () =>
+						@status.error = true
 			
 			_parseOutputMessage: (message) ->
 				if message.msg_type == "stream"

@@ -20,6 +20,9 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 			).small
 				.i.fa.fa-fw.fa-stop
 				|  Stop
+		a(href, ng-click="restart()", tooltip-html-unsafe="Restart<br/>Session", tooltip-placement="bottom").pull-right
+			i.fa.fa-fw.fa-refresh
+			
 
 	include ../link-image
 
@@ -35,13 +38,13 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| &nbsp;&nbsp;Or run a command directly!
 			
 			div.cell(ng-repeat="cell in cells[engine]")
-				div.input
+				div.input(ng-if="!cell.shutdown")
 					.execution-count
 						| In[{{cell.execution_count}}]:
 					.cell-content
 						.chunk(ng-repeat="input in cell.input")
 							pre {{ input.content.code }}
-				div.output
+				div.output(ng-if="!cell.shutdown")
 					.execution-count
 						| Out[{{cell.execution_count}}]:
 					pre.cell-content
@@ -55,6 +58,9 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
+				div.alert.alert-info.shutdown(ng-show="cell.shutdown")
+					| Session restarted
+				hr
 			
 			.alert.alert-info(ng-show="status.initing")
 				p

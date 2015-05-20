@@ -290,15 +290,16 @@ describe "CompileManager", ->
 				path: "bbb.png"
 			}]
 
-	describe "executeRequest", ->
+	describe "sendJupyterRequest", ->
 		beforeEach ->
 			@limits = {mock: "limits"}
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
-			@ClsiManager.executeRequest = sinon.stub().callsArg(5)
+			@ClsiManager.sendJupyterRequest = sinon.stub().callsArg(6)
 			@msg_id = "message-123"
 			@engine = "python"
-			@code = "print 'hello world'"
-			@CompileManager.executeRequest @project_id, @msg_id, @engine, @code, @callback
+			@msg_type = "execute_request"
+			@content = {mock: "Content"}
+			@CompileManager.sendJupyterRequest @project_id, @msg_id, @engine, @msg_type, @content, @callback
 			
 		it "should get the limits for the project", ->
 			@CompileManager.getProjectCompileLimits
@@ -306,8 +307,8 @@ describe "CompileManager", ->
 				.should.equal true
 		
 		it 'should execute the request with the limits', ->
-			@ClsiManager.executeRequest
-				.calledWith(@project_id, @msg_id, @engine, @code, @limits)
+			@ClsiManager.sendJupyterRequest
+				.calledWith(@project_id, @msg_id, @engine, @msg_type, @content, @limits)
 		
 		it 'should call the callback', ->
 			@callback.called.should.equal true

@@ -45,11 +45,11 @@ module.exports = CompileController =
 	stopCompile: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
-	executeRequest: (req, res, next = (error) ->) ->
+	sendJupyterRequest: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		{code, msg_id, engine} = req.body
-		logger.log {project_id, code, msg_id, engine}, "execute jupyter request"
-		CompileManager.executeRequest project_id, msg_id, engine, code, (error) ->
+		{msg_id, msg_type, content, engine} = req.body
+		logger.log {project_id, msg_id, msg_type, msg_id, engine}, "execute jupyter request"
+		CompileManager.sendJupyterRequest project_id, msg_id, engine, msg_type, content, (error) ->
 			return next(error) if error?
 			res.send 204
 

@@ -26,5 +26,8 @@ define [
 		$scope.stop = () ->
 			commandRunner.stop()
 		
+		$scope.restart = () ->
+			commandRunner.shutdown($scope.engine)
+		
 		$scope.installPackage = (packageName, language) ->
 			ide.$scope.$broadcast "installPackage", packageName, language
