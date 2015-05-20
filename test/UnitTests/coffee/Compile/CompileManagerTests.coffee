@@ -293,14 +293,20 @@ describe "CompileManager", ->
 	describe "sendJupyterRequest", ->
 		beforeEach ->
 			@limits = {mock: "limits"}
-			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
-			@ClsiManager.sendJupyterRequest = sinon.stub().callsArg(6)
 			@msg_id = "message-123"
 			@engine = "python"
 			@msg_type = "execute_request"
 			@content = {mock: "Content"}
+			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
+			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
+			@ClsiManager.sendJupyterRequest = sinon.stub().callsArg(6)
 			@CompileManager.sendJupyterRequest @project_id, @msg_id, @engine, @msg_type, @content, @callback
-			
+		
+		it "should flush the project to Mongo", ->
+			@DocumentUpdaterHandler.flushProjectToMongo
+				.calledWith(@project_id)
+				.should.equal true
+		
 		it "should get the limits for the project", ->
 			@CompileManager.getProjectCompileLimits
 				.calledWith(@project_id)

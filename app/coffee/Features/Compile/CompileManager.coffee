@@ -43,9 +43,11 @@ module.exports = CompileManager =
 								callback(null, status, outputFiles, output, limits)
 
 	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, callback = (error) ->) ->
-		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
-			ClsiManager.sendJupyterRequest project_id, msg_id, engine, msg_type, content, limits, callback
+			CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+				return callback(error) if error?
+				ClsiManager.sendJupyterRequest project_id, msg_id, engine, msg_type, content, limits, callback
 	
 	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
 		ClsiManager.interruptRequest project_id, msg_id, callback

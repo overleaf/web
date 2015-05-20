@@ -92,7 +92,7 @@ define [
 				
 				@_initingTimeout = $timeout () =>
 					@status.initing = true
-				, 1000
+				, 2000
 
 				url = "/project/#{ide.$scope.project_id}/request"
 				options = {

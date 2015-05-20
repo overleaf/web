@@ -311,8 +311,15 @@ describe "ClsiManager", ->
 			@engine = "python"
 			@msg_type = "execute_request"
 			@content = {mock: "Content"}
+			@resources = ["mock", "resources"]
 			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(1, null, @resources)
 			@ClsiManager.sendJupyterRequest @project_id, @msg_id, @engine, @msg_type, @content, @limits, @callback
+		
+		it "should get the project resources", ->
+			@ClsiManager._buildRequest
+				.calledWith(@project_id)
+				.should.equal true
 		
 		it "should send a request to the CLSI", ->
 			@request.post
@@ -323,7 +330,8 @@ describe "ClsiManager", ->
 						content: @content,
 						msg_id: @msg_id,
 						engine: @engine,
-						limits: @limits
+						limits: @limits,
+						resources: @resources
 					}
 					jar: false
 				})

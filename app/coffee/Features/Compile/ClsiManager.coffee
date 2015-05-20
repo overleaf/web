@@ -23,18 +23,20 @@ module.exports = ClsiManager =
 				)
 	
 	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, limits, callback = (error) ->) ->
-		request.post {
-			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request"
-			json: {msg_type, content, msg_id, engine, limits}
-			jar:  false
-		}, (error, response, body) ->
+		ClsiManager._buildResources project_id, (error, resources) ->
 			return callback(error) if error?
-			if 200 <= response.statusCode < 300
-				callback null, body
-			else
-				error = new Error("CLSI returned non-success code: #{response.statusCode}")
-				logger.error err: error, project_id: project_id, "CLSI returned failure code"
-				callback error, body
+			request.post {
+				url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request"
+				json: {msg_type, content, msg_id, engine, limits, resources}
+				jar:  false
+			}, (error, response, body) ->
+				return callback(error) if error?
+				if 200 <= response.statusCode < 300
+					callback null, body
+				else
+					error = new Error("CLSI returned non-success code: #{response.statusCode}")
+					logger.error err: error, project_id: project_id, "CLSI returned failure code"
+					callback error, body
 	
 	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
 		request.post {
@@ -91,62 +93,73 @@ module.exports = ClsiManager =
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
 
-			ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
+			ClsiManager._buildResources project_id, (error, resources) ->
 				return callback(error) if error?
-				ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
-					return callback(error) if error?
+				
+				rootResourcePath = null
+				rootResourcePathOverride = null
 
-					resources = []
-					rootResourcePath = null
-					rootResourcePathOverride = null
+				for resource of resources
+					if project.rootDoc_id? and resource.id.toString() == project.rootDoc_id.toString()
+						rootResourcePath = path
+					if options.rootDoc_id? and resource.id.toString() == options.rootDoc_id.toString()
+						rootResourcePathOverride = path
+					delete resource.id
 
-					for path, doc of docs
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:    path
-							content: doc.lines.join("\n")
-						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
-							rootResourcePath = path
-						if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
-							rootResourcePathOverride = path
+				rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
 
-					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
+				# If we have no rootResourcePath by now, just use the first file.
+				if !rootResourcePath?
+					rootResourcePath = resources[0]?.path
 
-					# If we have no rootResourcePath by now, just use the first file.
-					if !rootResourcePath?
-						rootResourcePath = resources[0]?.path
+				compiler = project.compiler
+				if options.compiler?
+					compiler = options.compiler
+				else if rootResourcePath.match(/\.R$/)
+					compiler = "r"
+				else if rootResourcePath.match(/\.py$/)
+					compiler = "python"
 
-					for path, file of files
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:     path
-							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
-							modified: file.created?.getTime()
+				if compiler not in ClsiManager.VALID_COMPILERS
+					compiler = "pdflatex"
 
-					compiler = project.compiler
-					if options.compiler?
-						compiler = options.compiler
-					else if rootResourcePath.match(/\.R$/)
-						compiler = "r"
-					else if rootResourcePath.match(/\.py$/)
-						compiler = "python"
+				callback null, {
+					compile:
+						session_id: session_id
+						options:
+							compiler:   compiler
+							command:    options.command
+							package:    options.package
+							env:        options.env
+							timeout:    options.timeout
+							memory:     options.memory
+							cpu_shares: options.cpu_shares
+							processes:  options.processes
+						rootResourcePath: rootResourcePath
+						resources: resources
+				}
+	
+	_buildResources: (project_id, callback = (error) ->) ->
+		ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
+			return callback(error) if error?
+			ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
+				return callback(error) if error?
 
-					if compiler not in ClsiManager.VALID_COMPILERS
-						compiler = "pdflatex"
+				resources = []
 
-					callback null, {
-						compile:
-							session_id: session_id
-							options:
-								compiler:   compiler
-								command:    options.command
-								package:    options.package
-								env:        options.env
-								timeout:    options.timeout
-								memory:     options.memory
-								cpu_shares: options.cpu_shares
-								processes:  options.processes
-							rootResourcePath: rootResourcePath
-							resources: resources
-					}
-		
+				for path, doc of docs
+					path = path.replace(/^\//, "") # Remove leading /
+					resources.push
+						id:      doc._id
+						path:    path
+						content: doc.lines.join("\n")
+				
+				for path, file of files
+					path = path.replace(/^\//, "") # Remove leading /
+					resources.push
+						id:       doc._id
+						path:     path
+						url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
+						modified: file.created?.getTime()
+				
+				callback(null, resources)
