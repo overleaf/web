@@ -99,11 +99,11 @@ module.exports = ClsiManager =
 				rootResourcePath = null
 				rootResourcePathOverride = null
 
-				for resource of resources
+				for resource in resources
 					if project.rootDoc_id? and resource.id.toString() == project.rootDoc_id.toString()
-						rootResourcePath = path
+						rootResourcePath = resource.path
 					if options.rootDoc_id? and resource.id.toString() == options.rootDoc_id.toString()
-						rootResourcePathOverride = path
+						rootResourcePathOverride = resource.path
 					delete resource.id
 
 				rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
@@ -157,9 +157,9 @@ module.exports = ClsiManager =
 				for path, file of files
 					path = path.replace(/^\//, "") # Remove leading /
 					resources.push
-						id:       doc._id
+						id:       file._id
 						path:     path
-						url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
+						url:      "#{Settings.apis.filestore.url}/project/#{project_id}/file/#{file._id}"
 						modified: file.created?.getTime()
 				
 				callback(null, resources)

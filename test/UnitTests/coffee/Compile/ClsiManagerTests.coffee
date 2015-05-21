@@ -218,7 +218,7 @@ describe "ClsiManager", ->
 		describe "when the project has an invalid compiler", ->
 			beforeEach (done) ->
 				@project.compiler = "context"
-				@ClsiManager._buildRequest @project, @session_id, null, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @session_id, null, (error, request) =>
 					@request = request
 					done()
 
@@ -313,18 +313,18 @@ describe "ClsiManager", ->
 			@content = {mock: "Content"}
 			@resources = ["mock", "resources"]
 			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
-			@ClsiManager._buildRequest = sinon.stub().callsArgWith(1, null, @resources)
+			@ClsiManager._buildResources = sinon.stub().callsArgWith(1, null, @resources)
 			@ClsiManager.sendJupyterRequest @project_id, @msg_id, @engine, @msg_type, @content, @limits, @callback
 		
 		it "should get the project resources", ->
-			@ClsiManager._buildRequest
+			@ClsiManager._buildResources
 				.calledWith(@project_id)
 				.should.equal true
 		
 		it "should send a request to the CLSI", ->
 			@request.post
 				.calledWith({
-					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/execute_request"
+					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/request"
 					json: {
 						msg_type: @msg_type
 						content: @content,
