@@ -22,12 +22,12 @@ module.exports = ClsiManager =
 					response?.compile?.output
 				)
 	
-	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, limits, callback = (error) ->) ->
+	sendJupyterRequest: (project_id, request_id, engine, msg_type, content, limits, callback = (error) ->) ->
 		ClsiManager._buildResources project_id, (error, resources) ->
 			return callback(error) if error?
 			request.post {
 				url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request"
-				json: {msg_type, content, msg_id, engine, limits, resources}
+				json: {msg_type, content, request_id, engine, limits, resources}
 				jar:  false
 			}, (error, response, body) ->
 				return callback(error) if error?
@@ -38,9 +38,9 @@ module.exports = ClsiManager =
 					logger.error err: error, project_id: project_id, "CLSI returned failure code"
 					callback error, body
 	
-	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
+	interruptRequest: (project_id, request_id, callback = (error) ->) ->
 		request.post {
-			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request/#{msg_id}/interrupt"
+			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/request/#{request_id}/interrupt"
 			jar:  false
 		}, (error, response, body) ->
 			return callback(error) if error?

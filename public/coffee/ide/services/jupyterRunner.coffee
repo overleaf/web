@@ -5,18 +5,19 @@ define [
 	# from within other parts of the angular app.
 	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce) ->
 		ide.socket.on "clsiOutput", (message) ->
-			console.log "MESSAGE", message
+			engine_and_request_id = message.request_id
+			return if !engine_and_request_id?
+			[engine,request_id] = engine_and_request_id?.split(":")
+			if !request_id? or !engine?
+				# The message isn't a jupyter message, likely from commandRunner instead.
+				return
+			
+			cell = jupyterRunner.findOrCreateCell(request_id, engine)
 			
 			jupyterRunner.status.initing = false
 			if jupyterRunner._initingTimeout?
 				$timeout.cancel(jupyterRunner._initingTimeout)
 				delete jupyterRunner._initingTimeout
-			
-			engine_and_msg_id = message.header?.msg_id
-			jupyterRunner.current_msg_id = engine_and_msg_id
-			[engine,msg_id] = engine_and_msg_id?.split(":")
-			return if !msg_id? or !engine?
-			cell = jupyterRunner.findOrCreateCell(msg_id, engine)
 			
 			if message.header.msg_type == "shutdown_reply"
 				cell.shutdown = true
@@ -66,11 +67,11 @@ define [
 				initing: false
 			}
 			
-			current_msg_id: null
+			current_request_id: null
 		
 			executeRequest: (code, engine) ->
-				msg_id = Math.random().toString().slice(2)
-				@current_msg_id = "#{engine}:#{msg_id}"
+				request_id = Math.random().toString().slice(2)
+				@current_request_id = "#{engine}:#{request_id}"
 				@status.running = true
 				@status.error = false
 				
@@ -80,7 +81,7 @@ define [
 
 				url = "/project/#{ide.$scope.project_id}/request"
 				options = {
-					msg_id: "#{engine}:#{msg_id}"
+					request_id: "#{engine}:#{request_id}"
 					msg_type: "execute_request"
 					content: {
 						code: code,
@@ -101,36 +102,36 @@ define [
 						@status.error = true
 						@status.running = false
 			
-			findOrCreateCell: (msg_id, engine) ->
-				if jupyterRunner.CELLS[msg_id]?
-					return jupyterRunner.CELLS[msg_id]
+			findOrCreateCell: (request_id, engine) ->
+				if jupyterRunner.CELLS[request_id]?
+					return jupyterRunner.CELLS[request_id]
 				else
 					cell = {
-						msg_id: msg_id
+						request_id: request_id
 						engine: engine
 						input: []
 						output: []
 					}
-					jupyterRunner.CELLS[msg_id] = cell
+					jupyterRunner.CELLS[request_id] = cell
 					jupyterRunner.CELL_LIST[engine] ||= []
 					jupyterRunner.CELL_LIST[engine].push cell
 					return cell
 			
 			stop: () ->
-				msg_id = @current_msg_id
-				return if !msg_id?
-				url = "/project/#{_ide.$scope.project_id}/request/#{msg_id}/interrupt"
+				request_id = @current_request_id
+				return if !request_id?
+				url = "/project/#{_ide.$scope.project_id}/request/#{request_id}/interrupt"
 				$http
 					.post(url, {
 						_csrf: window.csrfToken
 					})
 			
 			shutdown: (engine) ->
-				msg_id = Math.random().toString().slice(2)
-				@current_msg_id = "#{engine}:#{msg_id}"
+				request_id = Math.random().toString().slice(2)
+				@current_request_id = "#{engine}:#{request_id}"
 				url = "/project/#{ide.$scope.project_id}/request"
 				options = {
-					msg_id: "#{engine}:#{msg_id}"
+					request_id: "#{engine}:#{request_id}"
 					msg_type: "shutdown_request"
 					content: {
 						restart: true

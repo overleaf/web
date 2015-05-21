@@ -307,14 +307,14 @@ describe "ClsiManager", ->
 	describe "sendJupyterRequest", ->
 		beforeEach ->
 			@limits = {mock: "limits"}
-			@msg_id = "message-123"
+			@request_id = "message-123"
 			@engine = "python"
 			@msg_type = "execute_request"
 			@content = {mock: "Content"}
 			@resources = ["mock", "resources"]
 			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
 			@ClsiManager._buildResources = sinon.stub().callsArgWith(1, null, @resources)
-			@ClsiManager.sendJupyterRequest @project_id, @msg_id, @engine, @msg_type, @content, @limits, @callback
+			@ClsiManager.sendJupyterRequest @project_id, @request_id, @engine, @msg_type, @content, @limits, @callback
 		
 		it "should get the project resources", ->
 			@ClsiManager._buildResources
@@ -328,7 +328,7 @@ describe "ClsiManager", ->
 					json: {
 						msg_type: @msg_type
 						content: @content,
-						msg_id: @msg_id,
+						request_id: @request_id,
 						engine: @engine,
 						limits: @limits,
 						resources: @resources
@@ -342,14 +342,14 @@ describe "ClsiManager", ->
 
 	describe "interruptRequest", ->
 		beforeEach ->
-			@msg_id = "message-123"
+			@request_id = "message-123"
 			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, {})
-			@ClsiManager.interruptRequest @project_id, @msg_id, @callback
+			@ClsiManager.interruptRequest @project_id, @request_id, @callback
 		
 		it "should send a request to the CLSI", ->
 			@request.post
 				.calledWith({
-					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/request/#{@msg_id}/interrupt"
+					url: "#{@settings.apis.clsi.url}/project/#{@project_id}/request/#{@request_id}/interrupt"
 					jar: false
 				})
 				.should.equal true

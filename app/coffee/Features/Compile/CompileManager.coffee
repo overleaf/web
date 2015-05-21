@@ -42,15 +42,15 @@ module.exports = CompileManager =
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, output, limits)
 
-	sendJupyterRequest: (project_id, msg_id, engine, msg_type, content, callback = (error) ->) ->
+	sendJupyterRequest: (project_id, request_id, engine, msg_type, content, callback = (error) ->) ->
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
 			CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 				return callback(error) if error?
-				ClsiManager.sendJupyterRequest project_id, msg_id, engine, msg_type, content, limits, callback
+				ClsiManager.sendJupyterRequest project_id, request_id, engine, msg_type, content, limits, callback
 	
-	interruptRequest: (project_id, msg_id, callback = (error) ->) ->
-		ClsiManager.interruptRequest project_id, msg_id, callback
+	interruptRequest: (project_id, request_id, callback = (error) ->) ->
+		ClsiManager.interruptRequest project_id, request_id, callback
 		
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
