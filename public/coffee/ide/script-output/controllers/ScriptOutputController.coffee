@@ -16,6 +16,18 @@ define [
 			engine = $scope.engine
 			commandRunner.executeRequest code, engine
 		
+		$scope.runAll = () ->
+			engine = $scope.engine
+			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
+			if engine == "python"
+				code = "%run #{path}"
+				commandRunner.executeRequest code, engine
+			else if engine == "r"
+				code = "source('#{path}')"
+				commandRunner.executeRequest code, engine
+			else
+				throw new Error("not implemented yet")
+		
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
 			code   = $scope.manualInput

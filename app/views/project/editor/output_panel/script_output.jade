@@ -3,13 +3,18 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 		span(ng-show="!status.running && !status.stopping")
 			a.btn.btn-info(
 				href,
-				ng-disabled="currentRun.running",
 				ng-click="runSelection()"
 			)
-				i.fa.fa-fw(
-					ng-class="{'fa-refresh fa-spin': currentRun.running, 'fa-play': !currentRun.running }"
-				)
-				| &nbsp; Run Line
+				i.fa.fa-fw.fa-play
+				| &nbsp; 
+				span(ng-show="editor.selection.lines.length == 1") Run Line
+				span(ng-show="editor.selection.lines.length > 1") Run Selection
+		span(ng-show="!status.running && !status.stopping")
+			a.btn.btn-default(
+				href,
+				ng-click="runAll()"
+			)
+				| Run Script
 		span(ng-show="status.running && !status.stopping")
 			a.btn.btn-info(disabled=true)
 				i.fa.fa-fw.fa-refresh.fa-spin
