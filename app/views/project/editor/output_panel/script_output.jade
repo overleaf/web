@@ -31,13 +31,13 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 
 	include ../link-image
 
-	div.script-output.main-script-output(scroll-glue)
-		.script-output-inner
-			.script-uncompiled(ng-show="!cells[engine] && !status.running")
+	div.jupyter-output.main-script-output(scroll-glue)
+		.jupyter-output-inner
+			.jupyter-uncompiled(ng-show="!cells[engine] && !status.running")
 				| &nbsp;
 				i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Click here to run your script...
-			.script-uncompiled.script-uncompiled-bottom(ng-show="!cells[engine] && !status.running")
+			.jupyter-uncompiled.jupyter-uncompiled-bottom(ng-show="!cells[engine] && !status.running")
 				| &nbsp;
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!

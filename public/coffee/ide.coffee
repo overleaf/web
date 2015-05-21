@@ -20,6 +20,7 @@ define [
 	"ide/directives/layout"
 	"ide/services/ide"
 	"ide/services/commandRunner"
+	"ide/services/jupyterRunner"
 	"__IDE_CLIENTSIDE_INCLUDES__"
 	"analytics/AbTestingManager"
 	"directives/focus"

@@ -7,7 +7,7 @@
 	padding: @line-height-computed / 2;
 }
 
-.pdf-uncompiled, .script-uncompiled {
+.pdf-uncompiled, .jupyter-uncompiled {
 	.fa {
 		color: @blue;
 	}
@@ -156,12 +156,14 @@
 	}
 }
 
-.script-output {
+.jupyter-output, .command-output {
 	overflow: auto;
 	background-color: white;
 	padding: @line-height-computed / 2;
-	
-	.script-output-inner {
+}
+
+.jupyter-output {
+	.jupyter-output-inner {
 		position: relative;
 		padding-bottom: 50px;
 		min-height: 100%;
@@ -170,7 +172,7 @@
 	@execution-count-width: 60px;
 	@manual-input-height: 50px;
 	
-	.script-uncompiled-bottom {
+	.jupyter-uncompiled-bottom {
 		position: absolute;
 		bottom: @manual-input-height;
 		vertical-align: top;
@@ -227,94 +229,21 @@
 			}
 		}
 	}
-	
-	// .output {
-	// 	white-space: pre-wrap;
-	// 	word-wrap: break-word;
-	// 	margin: (@line-height-computed / 2) 0;
-	// 	.stderr {
-	// 		color: @brand-danger;
-	// 	}
-	// }
-	
-	// .output-file {
-	// 	border: 1px solid @gray-lighter;
-	// 	background-color: white;
-	// 	margin: 12px 0;
-	// 	padding: 6px 12px;
-	// 	box-shadow: 0 0 5px #ddd;
-	// 	position: relative;
-	// 	
-	// 	i.fa {
-	// 		margin: auto;
-	// 		padding: 16px;
-	// 		font-size: 18px;
-	// 	}
-	// 	
-	// 	img {
-	// 		width: 100%;
-	// 	}
-	// 	
-	// 	.download-controls {
-	// 		position: absolute;
-	// 		top: -4px;
-	// 		right: 0;
-	// 		display: none;
-	// 		padding: 16px;
-	// 		a {
-	// 			color: @gray-light;
-	// 		}
-	// 		a:hover {
-	// 			color: @gray-dark;
-	// 			text-decoration: none;
-	// 		}
-	// 		i.fa {
-	// 			padding: 0 0 0 8px;
-	// 			vertical-align: middle;
-	// 		}
-	// 		.name {
-	// 			padding: 4px;
-	// 			background-color: white;
-	// 		}
-	// 	}
-	// 	&:hover {
-	// 		.download-controls {
-	// 			display: block;
-	// 		}
-	// 	}
-		
-	// 	.output-file-page-header {
-	// 		margin-bottom: 0;
-	// 		padding-bottom: @line-height-computed / 4;
-	// 	}
-	// 	
-	// 	iframe {
-	// 		width: 100%;
-	// 		height: 700px;
-	// 		border: none;
-	// 	}
-	// 	
-	// 	.output-file-text {
-	// 		pre {
-	// 			margin: 0;
-	// 			font-size: 14px;
-	// 			white-space: pre-wrap;
-	// 			word-wrap: break-word;
-	// 		}
-	// 	}
-	// 	
-	// 	.output-file-download-link {
-	// 		margin-top: @line-height-computed / 2;
-	// 	}
-	// }
-	
-	.output:first-of-type .output-file {
-		margin-top: 0;
+}
+
+.command-output {
+	.output {
+		white-space: pre-wrap;
+		font-family: @font-family-monospace;
+		font-size: 14px;
+	}
+	.stderr {
+		color: @red;
 	}
 }
 
 .install-packages-modal {
-	.install-script-output {
+	.install-command-output {
 		height: 300px;
 		overflow: auto;
 		border: 1px solid @toolbar-border-color;

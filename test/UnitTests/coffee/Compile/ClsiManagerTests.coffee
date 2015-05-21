@@ -22,7 +22,7 @@ describe "ClsiManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"request": @request = {}
 		@project_id = "project-id"
-		@session_id = "mock-session-123"
+		@request_id = "mock-session-123"
 		@callback = sinon.stub()
 
 	describe "sendRequest", ->
@@ -45,11 +45,11 @@ describe "ClsiManager", ->
 						}]
 						output: @output = "mock output"
 				})
-				@ClsiManager.sendRequest @project_id, @session_id, {compileGroup:"standard"}, @callback
+				@ClsiManager.sendRequest @project_id, @request_id, {compileGroup:"standard"}, @callback
 
 			it "should build the request", ->
 				@ClsiManager._buildRequest
-					.calledWith(@project_id, @session_id)
+					.calledWith(@project_id, @request_id)
 					.should.equal true
 
 			it "should send the request to the CLSI", ->
@@ -75,7 +75,7 @@ describe "ClsiManager", ->
 					compile:
 						status: @status = "failure"
 				})
-				@ClsiManager.sendRequest @project_id, @session_id, {}, @callback
+				@ClsiManager.sendRequest @project_id, @request_id, {}, @callback
 			
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
@@ -147,7 +147,7 @@ describe "ClsiManager", ->
 					processes:  @processes = 57
 					cpu_shares: @cpu_shares = 456
 				}
-				@ClsiManager._buildRequest @project_id, @session_id, options, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @request_id, options, (error, request) =>
 					@request = request
 					done()
 
@@ -169,7 +169,7 @@ describe "ClsiManager", ->
 			it "should build up the CLSI request", ->
 				expect(@request).to.deep.equal(
 					compile:
-						session_id: @session_id
+						request_id: @request_id
 						options:
 							compiler: @compiler
 							command: undefined
@@ -196,7 +196,7 @@ describe "ClsiManager", ->
 
 		describe "when root doc override is valid", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, @session_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @request_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
 					@request = request
 					done()
 
@@ -206,7 +206,7 @@ describe "ClsiManager", ->
 
 		describe "when root doc override is invalid", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, @session_id, {rootDoc_id:"invalid-id"}, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @request_id, {rootDoc_id:"invalid-id"}, (error, request) =>
 					@request = request
 					done()
 
@@ -218,7 +218,7 @@ describe "ClsiManager", ->
 		describe "when the project has an invalid compiler", ->
 			beforeEach (done) ->
 				@project.compiler = "context"
-				@ClsiManager._buildRequest @project_id, @session_id, null, (error, request) =>
+				@ClsiManager._buildRequest @project_id, @request_id, null, (error, request) =>
 					@request = request
 					done()
 
@@ -231,7 +231,7 @@ describe "ClsiManager", ->
 		# describe "when there is no valid root document", ->
 		# 	beforeEach (done) ->
 		# 		@project.rootDoc_id = "not-valid"
-		# 		@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
+		# 		@ClsiManager._buildRequest @project, @request_id, null, (@error, @request) =>
 		# 			done()
 			
 		# 	it "should return an error", ->
@@ -256,7 +256,7 @@ describe "ClsiManager", ->
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
 				
-				@ClsiManager._buildRequest @project, @session_id, null, (@error, @request) =>
+				@ClsiManager._buildRequest @project, @request_id, null, (@error, @request) =>
 					done()
 					
 			it "should set the compiler to python", ->

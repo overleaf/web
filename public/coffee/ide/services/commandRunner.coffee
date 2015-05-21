@@ -3,172 +3,117 @@ define [
 ], (App) ->
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
-	App.factory "commandRunner", ($http, $timeout, ide, ansi2html, $sce) ->
+	App.factory "commandRunner", ($http, $timeout, ide) ->
 		ide.socket.on "clsiOutput", (message) ->
-			console.log "MESSAGE", message
+			request_id = message.request_id
+			return if !request_id?
 			
-			commandRunner.status.initing = false
-			if commandRunner._initingTimeout?
-				$timeout.cancel(commandRunner._initingTimeout)
-				delete commandRunner._initingTimeout
+			run = commandRunner.INPROGRESS_RUNS[request_id]
+			return if !run?
 			
-			engine_and_msg_id = message.header?.msg_id
-			commandRunner.current_msg_id = engine_and_msg_id
-			[engine,msg_id] = engine_and_msg_id?.split(":")
-			return if !msg_id? or !engine?
-			cell = commandRunner.findOrCreateCell(msg_id, engine)
+			msg_type = message.header?.msg_type
+			return if !msg_type
 			
-			if message.header.msg_type == "shutdown_reply"
-				cell.shutdown = true
-			
-			if message.header.msg_type == "execute_input"
-				cell.execution_count = message.content.execution_count
-				cell.input.push message
-			
-			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
-				cell.output.push message
-			
-			if message.header.msg_type == "stream"
-				message.content.text_escaped = ansiToSafeHtml(message.content.text)
-			
-			if message.header.msg_type == "error"
-				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
-			
-			if message.header.msg_type == "display_data"
-				if message.content.data['text/html']?
-					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
-				
-			if message.header.msg_type == "status"
-				if message.content.execution_state == "busy"
-					commandRunner.status.running = true
-				else if message.content.execution_state == "idle"
-					commandRunner.status.running = false
-		
-			ide.$scope.$apply()
-			# if message.msg_type == "system_status" and message.content.status == "starting_run"
-			# 	run.inited = true
-			# 	ide.$scope.$apply()
-			# else if message.msg_type == "command_exited"
-			# 	run.exitCode = message.content.exitCode
-			# 	commandRunner._displayErrors(run)
-			# else
-			# 	output = commandRunner._parseOutputMessage(message)
-			# 	if output?
-			# 		output = commandRunner._filterOutputMessage(output)
-			# 		if output.output_type == 'stderr' and run.parseErrors
-			# 			parsedErrors = commandRunner._parseChunk output
-			# 			if parsedErrors?.length
-			# 				output.parsedErrors = parsedErrors
-			# 		run.output.push output
-			# 		ide.$scope.$apply()
-		
-		ansiToSafeHtml = (input) ->
-			input = input
-				.replace(/&/g, "&amp;")
-				.replace(/</g, "&lt;")
-				.replace(/>/g, "&gt;")
-				.replace(/"/g, "&quot;")
-				.replace(/'/g, "&#039;")
-			return $sce.trustAsHtml(ansi2html.toHtml(input))
+			if msg_type == "system_status" and message.content.status == "starting_run"
+				run.inited = true
+				ide.$scope.$apply()
+			else if msg_type == "command_exited"
+				run.exitCode = message.content.exitCode
+				commandRunner._displayErrors(run)
+			else
+				output = commandRunner._parseOutputMessage(message)
+				if output?
+					output = commandRunner._filterOutputMessage(output)
+					if output.output_type == 'stderr' and run.parseErrors
+						parsedErrors = commandRunner._parseChunk output
+						if parsedErrors?.length
+							output.parsedErrors = parsedErrors
+					run.output.push output
+					ide.$scope.$apply()
 		
 		commandRunner =
-			CELL_LIST: {}
-			CELLS: {}
+			INPROGRESS_RUNS: {}
 			
-			status: {
-				running: false,
-				stopping: false,
-				error: false,
-				initing: false
-			}
-			
-			current_msg_id: null
-		
-			executeRequest: (code, engine) ->
-				msg_id = Math.random().toString().slice(2)
-				@current_msg_id = "#{engine}:#{msg_id}"
-				@status.running = true
-				@status.error = false
-				
-				@_initingTimeout = $timeout () =>
-					@status.initing = true
-				, 2000
+			run: (options) ->
+				run = @_createNewRun()
 
-				url = "/project/#{ide.$scope.project_id}/request"
-				options = {
-					msg_id: "#{engine}:#{msg_id}"
-					msg_type: "execute_request"
-					content: {
-						code: code,
-						silent: false,
-						store_history: true,
-						user_expressions: {},
-						allow_stdin: false,
-						stop_on_error: false
-					}
-					engine: engine
-					_csrf: window.csrfToken
-				}
+				initing = $timeout () ->
+					# Only show initing message after 2 seconds of delay
+					run.stillIniting = true
+				, 2000
+				run.running = true
+				run.uncompiled = false
+				
+				if options.parseErrors?
+					run.parseErrors = options.parseErrors
+					delete options.parseErrors
+				
+				url = "/project/#{ide.$scope.project_id}/compile"
+				options._csrf = window.csrfToken
+				options.request_id = run.request_id
 				$http
 					.post(url, options)
 					.success (data) =>
-						@status.running = false
+						$timeout.cancel(initing)
+						run.running = false
+						run.stopping = false
+						if data?.status == "timedout"
+							run.timedout = true
+						@_clearRun(run)
 					.error () =>
-						@status.error = true
-						@status.running = false
+						$timeout.cancel(initing)
+						run.running = false
+						run.stopping = false
+						run.error = true
+						@_clearRun(run)
+
+				return run
 			
-			findOrCreateCell: (msg_id, engine) ->
-				if commandRunner.CELLS[msg_id]?
-					return commandRunner.CELLS[msg_id]
-				else
-					cell = {
-						msg_id: msg_id
-						engine: engine
-						input: []
-						output: []
-					}
-					commandRunner.CELLS[msg_id] = cell
-					commandRunner.CELL_LIST[engine] ||= []
-					commandRunner.CELL_LIST[engine].push cell
-					return cell
-			
-			stop: () ->
-				msg_id = @current_msg_id
-				return if !msg_id?
-				url = "/project/#{_ide.$scope.project_id}/request/#{msg_id}/interrupt"
+			stop: (run) ->
+				url = "/project/#{_ide.$scope.project_id}/compile/#{run.request_id}/stop"
+				run.stopping = true
 				$http
 					.post(url, {
 						_csrf: window.csrfToken
 					})
-			
-			shutdown: (engine) ->
-				msg_id = Math.random().toString().slice(2)
-				@current_msg_id = "#{engine}:#{msg_id}"
-				url = "/project/#{ide.$scope.project_id}/request"
-				options = {
-					msg_id: "#{engine}:#{msg_id}"
-					msg_type: "shutdown_request"
-					content: {
-						restart: true
-					}
-					engine: engine
-					_csrf: window.csrfToken
+					.error () ->
+						run.stopping = false
+		
+			_createNewRun: () ->
+				request_id = Math.random().toString().slice(2)
+				run = @INPROGRESS_RUNS[request_id] = {
+					output: []
+					running: false
+					error: false
+					timedout: false
+					request_id: request_id
+					stillIniting: false
+					inited: false
+					stopping: false
+					exitCode: null
+					parsedErrors: []
+					parseErrors: true
 				}
-				$http
-					.post(url, options)
-					.success (data) =>
-						console.log "SHUTDOWN REPLY", data
-					.error () =>
-						@status.error = true
+				return run
+			
+			_clearRun: (run) ->
+				# Once a run has completed, we don't need to keep it hanging
+				# around in our memory for appending messages to it.
+				# Add a short delay to ensure that all real time messages
+				# have been flushed (this delay can be removed if there is a more
+				# reliable way of ensuring we have all the real-time content)
+				setTimeout () =>
+					delete @INPROGRESS_RUNS[run.request_id]
+				, 5000
 			
 			_parseOutputMessage: (message) ->
-				if message.msg_type == "stream"
+				if message.header.msg_type == "stream"
 					output = {
 						output_type: message.content.name # 'stdout' or 'stderr'
 						text: message.content.text
 						msg_id: parseInt(message.header.msg_id, 10)
 					}
-				else if message.msg_type == "file_modified"
+				else if message.header.msg_type == "file_modified"
 					path = message.content.data['text/path']
 					output = {
 						output_type: "file"

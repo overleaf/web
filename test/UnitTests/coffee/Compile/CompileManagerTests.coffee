@@ -30,7 +30,7 @@ describe "CompileManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 		@project_id = "mock-project-id-123"
 		@user_id = "mock-user-id-123"
-		@session_id = "mock-session-id-123"
+		@request_id = "mock-session-id-123"
 		@callback = sinon.stub()
 		@limits = {
 			timeout: 42
@@ -48,7 +48,7 @@ describe "CompileManager", ->
 		describe "succesfully", ->
 			beforeEach ->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
-				@CompileManager.compile @project_id, @user_id, @session_id, {}, @callback
+				@CompileManager.compile @project_id, @user_id, @request_id, {}, @callback
 
 			it "should check the project has not been recently compiled", ->
 				@CompileManager._checkIfRecentlyCompiled
@@ -72,7 +72,7 @@ describe "CompileManager", ->
 
 			it "should run the compile with the compile limits", ->
 				@ClsiManager.sendRequest
-					.calledWith(@project_id, @session_id, {
+					.calledWith(@project_id, @request_id, {
 						timeout: @limits.timeout
 					})
 					.should.equal true
@@ -94,7 +94,7 @@ describe "CompileManager", ->
 			beforeEach ->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
 				@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, true)
-				@CompileManager.compile @project_id, @user_id, @session_id, {}, @callback
+				@CompileManager.compile @project_id, @user_id, @request_id, {}, @callback
 
 			it "should return the callback with an error", ->
 				@callback
@@ -104,7 +104,7 @@ describe "CompileManager", ->
 		describe "should check the rate limit", ->
 			it "should return", (done)->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon.stub().callsArgWith(1, null, false)
-				@CompileManager.compile @project_id, @user_id, @session_id, {}, (err, status)->
+				@CompileManager.compile @project_id, @user_id, @request_id, {}, (err, status)->
 					status.should.equal "autocompile-backoff"
 					done()
 					

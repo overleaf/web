@@ -8,8 +8,8 @@ logger = require "logger-sharelatex"
 url = require("url")
 
 module.exports = ClsiManager =
-	sendRequest: (project_id, session_id, options = {}, callback = (error, success, outputFiles, output) ->) ->
-		ClsiManager._buildRequest project_id, session_id, options, (error, req) ->
+	sendRequest: (project_id, request_id, options = {}, callback = (error, success, outputFiles, output) ->) ->
+		ClsiManager._buildRequest project_id, request_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
@@ -88,7 +88,7 @@ module.exports = ClsiManager =
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r", "command", "apt-get-install"]
-	_buildRequest: (project_id, session_id, options={}, callback = (error, request) ->) ->
+	_buildRequest: (project_id, request_id, options={}, callback = (error, request) ->) ->
 		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
@@ -125,7 +125,7 @@ module.exports = ClsiManager =
 
 				callback null, {
 					compile:
-						session_id: session_id
+						request_id: request_id
 						options:
 							compiler:   compiler
 							command:    options.command

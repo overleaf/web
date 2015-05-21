@@ -30,7 +30,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
-		@session_id = "mock-session-id"
+		@request_id = "mock-session-id"
 		@user = 
 			features:
 				compileGroup: "premium"
@@ -47,7 +47,7 @@ describe "CompileController", ->
 					Project_id: @project_id
 				@req.session = {}
 				@req.body =
-					session_id: @session_id
+					request_id: @request_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
 				@CompileController.compile @req, @res, @next
@@ -59,7 +59,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: false })
+					.calledWith(@project_id, @user_id, @request_id, { isAutoCompile: false })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -82,14 +82,14 @@ describe "CompileController", ->
 				@req.query =
 					auto_compile: "true"
 				@req.body =
-					session_id: @session_id
+					request_id: @request_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"])
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: true })
+					.calledWith(@project_id, @user_id, @request_id, { isAutoCompile: true })
 					.should.equal true
 
 	describe "downloadPdf", ->
