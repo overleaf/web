@@ -48,31 +48,31 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						| In[{{cell.execution_count}}]:
 					.cell-content
 						.chunk(ng-repeat="input in cell.input")
-							pre {{ input.content.code }}
+							span.text-input.text-monospace {{ input.content.code }}
 				div.output(ng-if="!cell.shutdown")
 					.execution-count
 						| Out[{{cell.execution_count}}]:
-					pre.cell-content
-						span.chunk(ng-repeat="output in cell.output")
-							span(ng-if="output.header.msg_type == 'stream'", ng-bind-html="output.content.text_escaped")
+					.cell-content
+						.chunk(ng-repeat="output in cell.output")
+							span.text-output.text-monospace(ng-if="output.header.msg_type == 'stream'", ng-bind-html="output.content.text_escaped")
 							span(ng-if="output.header.msg_type == 'execute_result'")
-								span(ng-if="output.content.data['text/plain' ]") {{ output.content.data['text/plain'] }}
-							span(ng-if="output.header.msg_type == 'display_data' && output.content.image")
+								span.text-output.text-monospace(ng-if="output.content.data['text/plain' ]") {{ output.content.data['text/plain'] }}
+							div(ng-if="output.header.msg_type == 'display_data' && output.content.image")
 								img.image(ng-if="output.content.format == 'image/png'", ng-src="data:image/png;base64,{{output.content.data['image/png']}}")
 								img.image(ng-if="output.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{output.content.data['image/jpeg']}}")
 								span.image(ng-if="output.content.format == 'image/svg+xml'", ng-bind-html="output.content.data['image/svg+xml']")
 								iframe.image(ng-if="output.content.format == 'application/pdf'", ng-src="{{output.content.data['application/pdf+url']}}")
 								.download-controls
 									div(dropdown, dropdown-append-to-body).format-dropdown
-										a(href, dropdown-toggle)
+										a(href, dropdown-toggle, tooltip="Format")
 											i.fa.fa-fw.fa-file-image-o
 											i.fa.fa-fw.fa-caret-down
 										ul.dropdown-menu(role="menu")
 											li(ng-repeat="format in output.content.available_formats")
-												a(href, ng-click="output.content.format = format") {{ format }}
-							span(ng-if="output.header.msg_type == 'display_data' && !output.content.image")
-								span(ng-if="output.content.show_format == 'text/html_escaped'", ng-bind-html="output.content.data['text/html_escaped']")
-							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger
+												a(href, ng-click="showFormat(output, format)") {{ format }}
+							div(ng-if="output.header.msg_type == 'display_data' && !output.content.image")
+								div(ng-if="output.content.show_format == 'text/html_escaped'", ng-bind-html="output.content.data['text/html_escaped']")
+							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger.text-monospace
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
 				div.alert.alert-info.shutdown(ng-show="cell.shutdown")

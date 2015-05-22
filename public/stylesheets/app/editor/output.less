@@ -190,6 +190,16 @@
 		
 		.output {
 			margin-top: @line-height-computed / 4;
+			.chunk {
+				position: relative;
+			}
+			.alert {
+				overflow: auto;
+			}
+		}
+		
+		.text-input, .text-output {
+			white-space: pre-wrap;
 		}
 		
 		.execution-count {
@@ -218,8 +228,8 @@
 		.download-controls {
 			position: absolute;
 			left: 0;
-			top: -4px;
-			padding: 16px;
+			top: 0;
+			padding: 6px;
 			a {
 				color: @gray;
 				&:hover, &:active, &:focus {

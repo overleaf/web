@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ScriptOutputController", ($scope, $http, ide, jupyterRunner, event_tracking) ->
+	App.controller "ScriptOutputController", ($scope, $http, ide, jupyterRunner, event_tracking, localStorage) ->
 		$scope.status = jupyterRunner.status
 		$scope.cells = jupyterRunner.CELL_LIST
 		
@@ -43,3 +43,7 @@ define [
 		
 		$scope.installPackage = (packageName, language) ->
 			ide.$scope.$broadcast "installPackage", packageName, language
+		
+		$scope.showFormat = (message, format) ->
+			message.content.format = format
+			localStorage("preferred_format", format)

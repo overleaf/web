@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
-	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce) ->
+	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce, localStorage) ->
 		# Ordered list of preferred formats
 		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
@@ -45,11 +45,15 @@ define [
 				if message.content.data['application/pdf']?
 					message.content.data['application/pdf+url'] = $sce.trustAsResourceUrl("data:application/pdf;base64," + message.content.data['application/pdf'])
 				
-				# Pick the first format we understand to show.
-				for format in FORMATS
-					if message.content.data[format]?
-						message.content.format = format
-						break
+				preferred_format = localStorage("preferred_format")
+				if preferred_format? and preferred_format in FORMATS and message.content.data[preferred_format]?
+					message.content.format = preferred_format
+				else
+					# Pick the first format we understand to show.
+					for format in FORMATS
+						if message.content.data[format]?
+							message.content.format = format
+							break
 				
 				if message.content.format in IMAGE_FORMATS
 					message.content.image = true
