@@ -25,7 +25,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 			).small
 				.i.fa.fa-fw.fa-stop
 				|  Stop
-		a(href, ng-click="restart()", tooltip-html-unsafe="Restart<br/>Session", tooltip-placement="bottom").pull-right
+		a(href, ng-click="restart()", tooltip-html="'Restart<br/>Session'", tooltip-placement="bottom").pull-right
 			i.fa.fa-fw.fa-refresh
 			
 
@@ -57,9 +57,21 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							span(ng-if="output.header.msg_type == 'stream'", ng-bind-html="output.content.text_escaped")
 							span(ng-if="output.header.msg_type == 'execute_result'")
 								span(ng-if="output.content.data['text/plain' ]") {{ output.content.data['text/plain'] }}
-							span(ng-if="output.header.msg_type == 'display_data'")
-								img(ng-if="output.content.data['image/png']", ng-src="data:image/png;base64,{{output.content.data['image/png']}}")
-								span(ng-if="output.content.data['text/html_escaped']", ng-bind-html="output.content.data['text/html_escaped']")
+							span(ng-if="output.header.msg_type == 'display_data' && output.content.image")
+								img.image(ng-if="output.content.format == 'image/png'", ng-src="data:image/png;base64,{{output.content.data['image/png']}}")
+								img.image(ng-if="output.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{output.content.data['image/jpeg']}}")
+								span.image(ng-if="output.content.format == 'image/svg+xml'", ng-bind-html="output.content.data['image/svg+xml']")
+								iframe.image(ng-if="output.content.format == 'application/pdf'", ng-src="{{output.content.data['application/pdf+url']}}")
+								.download-controls
+									div(dropdown, dropdown-append-to-body).format-dropdown
+										a(href, dropdown-toggle)
+											i.fa.fa-fw.fa-file-image-o
+											i.fa.fa-fw.fa-caret-down
+										ul.dropdown-menu(role="menu")
+											li(ng-repeat="format in output.content.available_formats")
+												a(href, ng-click="output.content.format = format") {{ format }}
+							span(ng-if="output.header.msg_type == 'display_data' && !output.content.image")
+								span(ng-if="output.content.show_format == 'text/html_escaped'", ng-bind-html="output.content.data['text/html_escaped']")
 							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")

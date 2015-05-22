@@ -4,7 +4,12 @@ define [
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
 	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce) ->
+		# Ordered list of preferred formats
+		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain"]
+		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
+		
 		ide.socket.on "clsiOutput", (message) ->
+			
 			engine_and_request_id = message.request_id
 			return if !engine_and_request_id?
 			[engine,request_id] = engine_and_request_id?.split(":")
@@ -14,10 +19,7 @@ define [
 			
 			cell = jupyterRunner.findOrCreateCell(request_id, engine)
 			
-			jupyterRunner.status.initing = false
-			if jupyterRunner._initingTimeout?
-				$timeout.cancel(jupyterRunner._initingTimeout)
-				delete jupyterRunner._initingTimeout
+			jupyterRunner.stopIniting()
 			
 			if message.header.msg_type == "shutdown_reply"
 				cell.shutdown = true
@@ -38,12 +40,28 @@ define [
 			if message.header.msg_type == "display_data"
 				if message.content.data['text/html']?
 					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
+				if message.content.data['image/svg+xml']?
+					message.content.data['image/svg+xml'] = $sce.trustAsHtml(message.content.data['image/svg+xml'])
+				if message.content.data['application/pdf']?
+					message.content.data['application/pdf+url'] = $sce.trustAsResourceUrl("data:application/pdf;base64," + message.content.data['application/pdf'])
+				
+				# Pick the first format we understand to show.
+				for format in FORMATS
+					if message.content.data[format]?
+						message.content.format = format
+						break
+				
+				if message.content.format in IMAGE_FORMATS
+					message.content.image = true
+					message.content.available_formats = _.intersection(Object.keys(message.content.data), IMAGE_FORMATS)
 				
 			if message.header.msg_type == "status"
 				if message.content.execution_state == "busy"
 					jupyterRunner.status.running = true
 				else if message.content.execution_state == "idle"
 					jupyterRunner.status.running = false
+			
+			console.log "MESSAGE", message.request_id, message.header.msg_type, message.content
 		
 			ide.$scope.$apply()
 		
@@ -97,10 +115,18 @@ define [
 				$http
 					.post(url, options)
 					.success (data) =>
+						@stopIniting()
 						@status.running = false
 					.error () =>
+						@stopIniting()
 						@status.error = true
 						@status.running = false
+			
+			stopIniting: () ->
+				if @_initingTimeout?
+					$timeout.cancel(@_initingTimeout)
+					delete @_initingTimeout
+				@status.initing = false
 			
 			findOrCreateCell: (request_id, engine) ->
 				if jupyterRunner.CELLS[request_id]?
