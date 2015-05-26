@@ -53,35 +53,66 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					.execution-count
 						| Out[{{cell.execution_count}}]:
 					.cell-content
-						.chunk(ng-repeat="output in cell.output")
+						.chunk(ng-repeat="msg in cell.output")
 							span.text-output.text-monospace(ng-if="output.header.msg_type == 'stream'", ng-bind-html="output.content.text_escaped")
-							span(ng-if="output.header.msg_type == 'execute_result'")
-								span.text-output.text-monospace(ng-if="output.content.data['text/plain' ]") {{ output.content.data['text/plain'] }}
-							div(ng-if="output.header.msg_type == 'display_data' && output.content.image")
-								img.image(ng-if="output.content.format == 'image/png'", ng-src="data:image/png;base64,{{output.content.data['image/png']}}", download="output.png")
-								img.image(ng-if="output.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{output.content.data['image/jpeg']}}", download="output.jpeg")
-								span.image(ng-if="output.content.format == 'image/svg+xml'", ng-bind-html="output.content.data['image/svg+xml']")
-								iframe.image(ng-if="output.content.format == 'application/pdf'", ng-src="{{output.content.data['application/pdf+url']}}", download="output.pdf")
+							span(ng-if="msg.header.msg_type == 'execute_result'")
+								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
+							div(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
+								img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
+								img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
+								span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
+								iframe.image(ng-if="msg.content.format == 'application/pdf'", ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
 								.download-controls
 									div(dropdown, dropdown-append-to-body).format-dropdown
 										a(href, dropdown-toggle, tooltip="Format")
 											i.fa.fa-fw.fa-file-image-o
 											i.fa.fa-caret-down
 										ul.dropdown-menu(role="menu")
-											li(ng-repeat="format in output.content.available_formats")
-												a(href, ng-click="showFormat(output, format)") {{ format }}
+											li(ng-repeat="format in msg.content.available_formats")
+												a(href, ng-click="showFormat(msg, format)") {{ format }}
 										a(
-											ng-if="output.content.format != 'image/svg+xml'",
-											ng-href="{{output.content.data[output.content.format + '+url']}}",
+											ng-if="msg.content.format != 'image/svg+xml'",
+											ng-href="{{msg.content.data[msg.content.format + '+url']}}",
 											download="output",
 											tooltip="Download"
 										)
 											i.fa.fa-fw.fa-download
-							div(ng-if="output.header.msg_type == 'display_data' && !output.content.image")
-								div(ng-if="output.content.show_format == 'text/html_escaped'", ng-bind-html="output.content.data['text/html_escaped']")
-							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger.text-monospace
-								div {{ output.content.evalue }}
-								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
+							div(ng-if="msg.header.msg_type == 'display_data' && !msg.content.image")
+								div(ng-if="msg.content.show_format == 'text/html_escaped'", ng-bind-html="msg.content.data['text/html_escaped']")
+							div(ng-if="msg.header.msg_type == 'error'").alert.alert-danger.text-monospace
+								div {{ msg.content.evalue }}
+								div(ng-repeat="line in msg.content.traceback_escaped", ng-bind-html="line")
+									div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
+							div.file_modified(ng-if="msg.header.msg_type == 'file_modified'")
+								div.text-center(ng-show="!cell.exported")
+									i.fa.fa-2x.fa-spin.fa-spinner
+								
+								.download-controls(ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
+									span.name {{ path }}
+									a(
+										ng-href="{{url + (url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
+										tooltip="Download",
+										tooltip-append-to-body="true",
+										tooltip-placement="bottom"
+									)
+										i.fa.fa-download
+								
+									a(
+										ng-href="",
+										href="",
+										ng-click="linkImage(url, path)",
+										tooltip="Share",
+										tooltip-append-to-body="true",
+										tooltip-placement="bottom"
+									)
+										i.fa.fa-link
+
+								img(ng-if="msg.content.file_type == 'image' && cell.exported", ng-src="{{msg.content.data['text/url']}}")
+								div(ng-if="msg.content.file_type != 'image' && cell.exported")
+									.small File written
+									div
+										a(ng-href="{{msg.content.data['text/url']}}", target="_blank") {{ msg.content.data['text/path'] }}
+										
 						.alert.alert-danger(ng-if="cell.timed_out")
 							p
 								strong #{translate("timedout")}. 

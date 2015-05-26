@@ -236,11 +236,19 @@
 					color: @gray-dark;
 				}
 			}
+			i.fa {
+				padding: 0 0 0 8px;
+				vertical-align: middle;
+			}
+			.name {
+				padding: 4px;
+				background-color: white;
+			}
 		}
 		
 		.image {
 			display: block;
-			border: 1px solid @gray-light;
+			border: 1px solid @gray-lighter;
 			width: 100%;
 			svg {
 				width: 100%;
@@ -261,6 +269,23 @@
 				border: none;
 				width: 100%;
 				height: @line-height-computed;
+			}
+		}
+		
+		.file_modified {
+			border: 1px solid @gray-lighter;
+			background-color: white;
+			margin: 12px 0;
+			padding: 6px 12px;
+			position: relative;
+			
+			.download-controls {
+				right: 0;
+				left: auto;
+			}
+
+			img {
+				width: 100%;
 			}
 		}
 	}

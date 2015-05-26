@@ -28,7 +28,7 @@ define [
 				cell.execution_count = message.content.execution_count
 				cell.input.push message
 			
-			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
+			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "file_modified"]
 				cell.output.push message
 			
 			if message.header.msg_type == "stream"
@@ -37,8 +37,16 @@ define [
 			if message.header.msg_type == "error"
 				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
 			
-			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
-				cell.timed_out = true
+			if message.header.msg_type == "file_modified"
+				path = message.content.data['text/path']
+				message.content.data['text/url'] = "/project/#{ide.$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
+				parts = path.split(".")
+				if parts.length == 1
+					extension = null
+				else
+					extension = parts[parts.length - 1].toLowerCase()
+				if extension in ["png", "jpg", "jpeg", "svg", "gif"]
+					message.content.file_type = "image"
 			
 			if message.header.msg_type == "display_data"
 				if message.content.data['text/html']?
@@ -70,6 +78,12 @@ define [
 					jupyterRunner.status.running = true
 				else if message.content.execution_state == "idle"
 					jupyterRunner.status.running = false
+			
+			if message.header.msg_type == "system_status" and message.content.status == "exported"
+				cell.exported = true
+		
+			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
+				cell.timed_out = true
 			
 			console.log "MESSAGE", message.request_id, message.header.msg_type, message.content
 		

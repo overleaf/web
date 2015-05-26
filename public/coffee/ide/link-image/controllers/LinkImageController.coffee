@@ -7,10 +7,12 @@ define [
 		$scope.inputs =
 			url: ""
 		$scope.output = {}
+		
+		console.log "LINK IMAGE", $scope, $scope.output
 
-		$scope.linkImage = (part) ->
-			$scope.inputs.path = part.path
-			$scope.inputs.url = part.url
+		$scope.linkImage = (url, path) ->
+			$scope.inputs.path = path
+			$scope.inputs.url = url
 			$modal.open {
 				templateUrl: "linkImageModalTemplate"
 				controller: "LinkImageModalController"
