@@ -82,6 +82,20 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							div(ng-if="output.header.msg_type == 'error'").alert.alert-danger.text-monospace
 								div {{ output.content.evalue }}
 								div(ng-repeat="line in output.content.traceback_escaped", ng-bind-html="line")
+						.alert.alert-danger(ng-if="cell.timed_out")
+							p
+								strong #{translate("timedout")}. 
+								span Sorry, your script took too long to run and timed out.
+							div(ng-if="project.features.compileTimeout <= 60 && permissions.admin")
+								p Please upgrade your account to run longer scripts.
+								p(ng-controller="FreeTrialModalController")
+									a.btn.btn-info(
+										href
+										ng-click="startFreeTrial('timeout')"
+									) #{translate("start_free_trial")}
+							div(ng-if="project.features.compileTimeout > 60")
+								p Please get in touch if you need a longer timeout.
+
 				div.alert.alert-info.shutdown(ng-show="cell.shutdown")
 					| Session restarted
 				hr

@@ -37,6 +37,9 @@ define [
 			if message.header.msg_type == "error"
 				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
 			
+			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
+				cell.timed_out = true
+			
 			if message.header.msg_type == "display_data"
 				if message.content.data['text/html']?
 					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
