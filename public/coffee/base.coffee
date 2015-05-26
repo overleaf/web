@@ -18,5 +18,11 @@ define [
 		"luegg.directives" # Scroll glue
 		"ansiToHtml"
 	])
+	App.config( [
+		'$compileProvider', ($compileProvider) ->
+			# Add data: as an allowed format so that we can download images 
+			# returned by Jupyter kernel
+			$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|data):/);
+	])
 
 	return App
