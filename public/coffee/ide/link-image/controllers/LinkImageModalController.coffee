@@ -13,6 +13,7 @@ define [
 			delete $scope.error
 			request = $http.post "/project/#{ide.$scope.project_id}/link", {
 				path: $scope.inputs.path
+				data: $scope.inputs.data
 				_csrf: window.csrfToken
 			}
 			request.success (data, status, headers, config) ->

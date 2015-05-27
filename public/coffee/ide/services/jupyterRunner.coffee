@@ -9,7 +9,6 @@ define [
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 		
 		ide.socket.on "clsiOutput", (message) ->
-			
 			engine_and_request_id = message.request_id
 			return if !engine_and_request_id?
 			[engine,request_id] = engine_and_request_id?.split(":")
@@ -57,7 +56,9 @@ define [
 					message.content.data['application/pdf+url'] = $sce.trustAsResourceUrl("data:application/pdf;base64," + message.content.data['application/pdf'])
 				
 				for type in ['image/png', 'image/jpeg', 'application/pdf']
-					message.content.data["#{type}+url"] = $sce.trustAsResourceUrl("data:#{type};base64,#{message.content.data[type]}")
+					if message.content.data[type]?
+						message.content.data["#{type}+url"] =
+							$sce.trustAsResourceUrl("data:#{type};base64,#{message.content.data[type]}")
 					
 				preferred_format = localStorage("preferred_format")
 				if preferred_format? and preferred_format in FORMATS and message.content.data[preferred_format]?

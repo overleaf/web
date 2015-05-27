@@ -77,6 +77,15 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 											tooltip="Download"
 										)
 											i.fa.fa-fw.fa-download
+										a(
+											ng-controller="LinkImageController"
+											href
+											ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format])",
+											tooltip="Share",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-link
 							div(ng-if="msg.header.msg_type == 'display_data' && !msg.content.image")
 								div(ng-if="msg.content.show_format == 'text/html_escaped'", ng-bind-html="msg.content.data['text/html_escaped']")
 							div(ng-if="msg.header.msg_type == 'error'").alert.alert-danger.text-monospace

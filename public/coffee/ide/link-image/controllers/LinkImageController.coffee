@@ -10,9 +10,10 @@ define [
 		
 		console.log "LINK IMAGE", $scope, $scope.output
 
-		$scope.linkImage = (url, path) ->
+		$scope.linkImage = (url, path, data) ->
 			$scope.inputs.path = path
 			$scope.inputs.url = url
+			$scope.inputs.data = data
 			$modal.open {
 				templateUrl: "linkImageModalTemplate"
 				controller: "LinkImageModalController"
