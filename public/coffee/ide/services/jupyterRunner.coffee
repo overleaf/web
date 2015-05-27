@@ -24,8 +24,11 @@ define [
 				cell.shutdown = true
 			
 			if message.header.msg_type == "execute_input"
-				cell.execution_count = message.content.execution_count
 				cell.input.push message
+			
+			if message.header.msg_type in ["execute_input", "execute_reply", "execute_result"]
+				if message.content.execution_count?
+					cell.execution_count = message.content.execution_count
 			
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "file_modified"]
 				cell.output.push message
