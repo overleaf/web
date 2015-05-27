@@ -163,7 +163,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 
 				div.alert.alert-info.shutdown(ng-show="cell.shutdown")
 					| Session restarted
-				hr
+				hr(ng-show="!$last")
 			
 			.alert.alert-info(ng-show="status.initing")
 				p
@@ -174,7 +174,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 			.alert.alert-danger(ng-if="status.error")
 				| Sorry, something went wrong running your request. Please try again.
 			
-			div.cell.manual-input.border-top
+			div.manual-input.border-top
 				div.input
 					.execution-count
 						| In[]:

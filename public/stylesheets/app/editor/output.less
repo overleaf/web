@@ -178,7 +178,7 @@
 		vertical-align: top;
 	}
 	
-	.cell {
+	.cell, .manual-input {
 		width: 100%;
 		margin-bottom: @line-height-computed / 2;
 		.input, .output {
@@ -186,22 +186,6 @@
 			font-family: @font-family-monospace;
 			font-size: 14px;
 			min-height: @line-height-computed;
-		}
-		
-		.output {
-			margin-top: @line-height-computed / 2;
-			.chunk {
-				position: relative;
-				display: inline;
-			}
-			.alert {
-				margin: @line-height-computed / 2 0;
-				overflow: auto;
-			}
-		}
-		
-		.text-input, .text-output {
-			white-space: pre-wrap;
 		}
 		
 		.execution-count {
@@ -217,6 +201,37 @@
 		.cell-content {
 			margin-left: @execution-count-width + @line-height-computed / 2;
 			position: relative;
+		}
+	}
+	
+	.manual-input {
+		padding-top: @line-height-computed / 2;
+		margin-bottom: 0;
+		position: absolute;
+		bottom: 0;
+		textarea {
+			margin-top: -2px;
+			border: none;
+			width: 100%;
+			height: @line-height-computed;
+		}
+	}
+	
+	.cell {
+		.output {
+			margin-top: @line-height-computed / 2;
+			.chunk {
+				position: relative;
+				display: inline;
+			}
+			.alert {
+				margin: @line-height-computed / 2 0;
+				overflow: auto;
+			}
+		}
+		
+		.text-input, .text-output {
+			white-space: pre-wrap;
 		}
 		
 		pre {
@@ -306,17 +321,9 @@
 			}
 		}
 		
-		&.manual-input {
-			padding-top: @line-height-computed / 2;
-			margin-bottom: 0;
-			position: absolute;
-			bottom: 0;
-			textarea {
-				margin-top: -2px;
-				border: none;
-				width: 100%;
-				height: @line-height-computed;
-			}
+		hr {
+			margin-top: @line-height-computed / 2;
+			margin-bottom: @line-height-computed / 2;
 		}
 	}
 }
