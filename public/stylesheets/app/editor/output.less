@@ -189,11 +189,13 @@
 		}
 		
 		.output {
-			margin-top: @line-height-computed / 4;
+			margin-top: @line-height-computed / 2;
 			.chunk {
 				position: relative;
+				display: inline;
 			}
 			.alert {
+				margin: @line-height-computed / 2 0;
 				overflow: auto;
 			}
 		}
@@ -226,10 +228,11 @@
 		}
 		
 		.download-controls {
+			display: none;
 			position: absolute;
 			left: 0;
 			top: 0;
-			padding: 6px;
+			padding: 4px;
 			a {
 				color: @gray;
 				&:hover, &:active, &:focus {
@@ -237,19 +240,33 @@
 				}
 			}
 			i.fa {
-				padding: 0 0 0 8px;
 				vertical-align: middle;
 			}
 			.name {
 				padding: 4px;
 				background-color: white;
 			}
+			&.download-controls-right {
+				right: 0;
+				left: auto;
+			}
+		}
+		
+		.image, .file-modified, .file-modified-image-inner {
+			display: block;
+			border: 1px solid @gray-lighter;
+			background-color: white;
+			padding: 6px 12px;
+		}
+		
+		
+		.file-written {
+			width: 100%;
 		}
 		
 		.image {
-			display: block;
-			border: 1px solid @gray-lighter;
-			width: 100%;
+			padding-top: 18px;
+			max-width: 100%;
 			svg {
 				width: 100%;
 				height: 100%;
@@ -257,6 +274,36 @@
 		}
 		iframe.image {
 			min-height: 400px;
+		}
+		
+		.file-modified {
+			position: relative;
+		}
+		
+		.file-modified-image {
+			.file-modified-image-inner {
+				display: inline-block;
+				min-width: 400px;
+				position: relative;
+			}
+			
+			img {
+				width: 100%;
+			}
+		}
+		
+		.display-data-inner {
+			display: inline-block;
+			position: relative;
+		}
+		
+		.display-data, .file-modified, .file-modified-image {
+			margin: @line-height-computed / 2 0;
+			&:hover {
+				.download-controls {
+					display: block;
+				}
+			}
 		}
 		
 		&.manual-input {
@@ -269,23 +316,6 @@
 				border: none;
 				width: 100%;
 				height: @line-height-computed;
-			}
-		}
-		
-		.file_modified {
-			border: 1px solid @gray-lighter;
-			background-color: white;
-			margin: 12px 0;
-			padding: 6px 12px;
-			position: relative;
-			
-			.download-controls {
-				right: 0;
-				left: auto;
-			}
-
-			img {
-				width: 100%;
 			}
 		}
 	}

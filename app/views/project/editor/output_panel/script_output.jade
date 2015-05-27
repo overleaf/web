@@ -54,27 +54,30 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						| Out[{{cell.execution_count}}]:
 					.cell-content
 						.chunk(ng-repeat="msg in cell.output")
-							span.text-output.text-monospace(ng-if="output.header.msg_type == 'stream'", ng-bind-html="output.content.text_escaped")
+							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
 							span(ng-if="msg.header.msg_type == 'execute_result'")
 								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
-							div(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
-								img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
-								img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
-								span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
-								iframe.image(ng-if="msg.content.format == 'application/pdf'", ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
-								.download-controls
-									div(dropdown, dropdown-append-to-body).format-dropdown
-										a(href, dropdown-toggle, tooltip="Format")
-											i.fa.fa-fw.fa-file-image-o
-											i.fa.fa-caret-down
-										ul.dropdown-menu(role="menu")
-											li(ng-repeat="format in msg.content.available_formats")
-												a(href, ng-click="showFormat(msg, format)") {{ format }}
+							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
+								.display-data-inner
+									img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
+									img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
+									span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
+									iframe.image(ng-if="msg.content.format == 'application/pdf'", ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
+									.download-controls(ng-if="msg.content.available_formats.length > 1")
+										div(dropdown, dropdown-append-to-body).format-dropdown
+											a(href, dropdown-toggle, tooltip="Format")
+												i.fa.fa-fw.fa-file-image-o
+												i.fa.fa-caret-down
+											ul.dropdown-menu(role="menu")
+												li(ng-repeat="format in msg.content.available_formats")
+													a(href, ng-click="showFormat(msg, format)") {{ format }}
+									.download-controls.download-controls-right
 										a(
 											ng-if="msg.content.format != 'image/svg+xml'",
 											ng-href="{{msg.content.data[msg.content.format + '+url']}}",
 											download="output",
-											tooltip="Download"
+											tooltip="Download",
+											tooltip-placement="bottom"
 										)
 											i.fa.fa-fw.fa-download
 										a(
@@ -85,19 +88,18 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 											tooltip-append-to-body="true",
 											tooltip-placement="bottom"
 										)
-											i.fa.fa-link
+											i.fa.fa-fw.fa-link
 							div(ng-if="msg.header.msg_type == 'display_data' && !msg.content.image")
 								div(ng-if="msg.content.show_format == 'text/html_escaped'", ng-bind-html="msg.content.data['text/html_escaped']")
 							div(ng-if="msg.header.msg_type == 'error'").alert.alert-danger.text-monospace
 								div {{ msg.content.evalue }}
 								div(ng-repeat="line in msg.content.traceback_escaped", ng-bind-html="line")
 									div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
-							div.file_modified(ng-if="msg.header.msg_type == 'file_modified'")
+							div.file-modified(ng-if="msg.header.msg_type == 'file_modified' && msg.content.file_type != 'image'")
 								div.text-center(ng-show="!cell.exported")
 									i.fa.fa-2x.fa-spin.fa-spinner
-								
-								.download-controls(ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
-									span.name {{ path }}
+									
+								.download-controls.download-controls-right(ng-show="cell.exported", ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
 									a(
 										ng-href="{{url + (url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
 										tooltip="Download",
@@ -107,20 +109,43 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 										i.fa.fa-download
 								
 									a(
-										ng-href="",
-										href="",
+										href
 										ng-click="linkImage(url, path)",
 										tooltip="Share",
 										tooltip-append-to-body="true",
 										tooltip-placement="bottom"
 									)
-										i.fa.fa-link
+										i.fa.fa-fw.fa-link
 
-								img(ng-if="msg.content.file_type == 'image' && cell.exported", ng-src="{{msg.content.data['text/url']}}")
-								div(ng-if="msg.content.file_type != 'image' && cell.exported")
+								.file-written(ng-if="cell.exported")
 									.small File written
 									div
 										a(ng-href="{{msg.content.data['text/url']}}", target="_blank") {{ msg.content.data['text/path'] }}
+							
+							div.file-modified-image(ng-if="msg.header.msg_type == 'file_modified' && msg.content.file_type == 'image'")
+								.file-modified-image-inner
+									div.text-center(ng-show="!cell.exported")
+										i.fa.fa-2x.fa-spin.fa-spinner
+										
+									.download-controls.download-controls-right(ng-show="cell.exported", ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
+										a(
+											ng-href="{{url + (url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
+											tooltip="Download",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-download
+									
+										a(
+											href
+											ng-click="linkImage(url, path)",
+											tooltip="Share",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-link
+										
+									img(ng-if="cell.exported", ng-src="{{msg.content.data['text/url']}}")
 										
 						.alert.alert-danger(ng-if="cell.timed_out")
 							p
