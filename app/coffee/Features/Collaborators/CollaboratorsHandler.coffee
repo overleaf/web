@@ -22,7 +22,7 @@ module.exports =
 	changeUsersPrivilegeLevel: (project_id, user_id, newPrivalageLevel, callback = ->)->
 		@removeUserFromProject project_id, user_id, =>
 		  User.findById user_id, (err, user)=>
-			  @addUserToProject project_id, user_id, newPrivalageLevel, callback
+			  @addUserToProject project_id, user.email, newPrivalageLevel, callback
 
 	addUserToProject: (project_id, email, privilegeLevel, callback)->
 		emails = mimelib.parseAddresses(email)
