@@ -12,6 +12,7 @@ define [
 			$scope.runSelection()
 		
 		$scope.runSelection = () ->
+			ide.$scope.$broadcast("editor:gotoNextLine")
 			code   = ide.$scope.editor.selection.lines.join("\n")
 			engine = $scope.engine
 			jupyterRunner.executeRequest code, engine
