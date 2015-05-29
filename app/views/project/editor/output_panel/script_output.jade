@@ -58,11 +58,12 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							span(ng-if="msg.header.msg_type == 'execute_result'")
 								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
 							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
-								.display-data-inner
+								.display-data-inner(ng-class="{ 'display-data-inner-full-width': (msg.content.format == 'image/svg+xml' || msg.content.format == 'application/pdf') }")
 									img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
 									img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
 									span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
-									iframe.image(ng-if="msg.content.format == 'application/pdf'", ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
+									.iframe-wrapper(ng-if="msg.content.format == 'application/pdf'")
+										iframe(ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
 									.download-controls(ng-if="msg.content.available_formats.length > 1")
 										div(dropdown, dropdown-append-to-body).format-dropdown
 											a(href, dropdown-toggle, tooltip="Format")

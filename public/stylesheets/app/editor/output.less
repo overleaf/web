@@ -289,8 +289,22 @@
 				height: 100%;
 			}
 		}
-		iframe.image {
-			min-height: 400px;
+		
+		.iframe-wrapper {
+			position: relative;
+			width: 100%;
+			&:before {
+				content: "";
+				display: block;
+				padding-top: 100%; 	/* initial ratio of 1:1*/
+			}
+			iframe {
+				border: 1px solid @gray-lighter;
+				position: absolute;
+				top: 0;
+				width: 100%;
+				height: 100%;
+			}
 		}
 		
 		.file-modified {
@@ -312,6 +326,9 @@
 		.display-data-inner {
 			display: inline-block;
 			position: relative;
+			&.display-data-inner-full-width {
+				display: block;
+			}
 		}
 		
 		.display-data, .file-modified, .file-modified-image {
