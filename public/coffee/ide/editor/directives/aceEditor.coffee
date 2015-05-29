@@ -4,10 +4,9 @@ define [
 	"ace/ext-searchbox"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
-	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	
 	# Ace loads its script itself, so we need to hook in to be able to clear
@@ -29,8 +28,6 @@ define [
 				fontSize: "="
 				autoComplete: "="
 				sharejsDoc: "="
-				spellCheckLanguage: "="
-				spellCheckEnabled: "="
 				highlights: "="
 				text: "="
 				readOnly: "="
@@ -58,7 +55,6 @@ define [
 				scope.name = attrs.aceEditor
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
-				spellCheckManager     = new SpellCheckManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
