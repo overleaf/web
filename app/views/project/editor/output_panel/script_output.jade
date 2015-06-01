@@ -67,7 +67,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 									.download-controls(ng-if="msg.content.available_formats.length > 1")
 										div(dropdown, dropdown-append-to-body).format-dropdown
 											a(href, dropdown-toggle, tooltip="Format")
-												i.fa.fa-fw.fa-file-image-o
+												i.fa.fa-fw.fa-cog
 												i.fa.fa-caret-down
 											ul.dropdown-menu(role="menu")
 												li(ng-repeat="format in msg.content.available_formats")
