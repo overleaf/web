@@ -17,14 +17,19 @@ define [
 
 			$scope.generating = true
 			delete $scope.error
-			request = $http.post "/project/#{ide.$scope.project_id}/link", {
+			options = {
 				path: $scope.inputs.path
-				data: $scope.inputs.data
 				_csrf: window.csrfToken
 			}
+			if $scope.inputs.base64
+				options.base64 = $scope.inputs.data
+			else if $scope.inputs.data?
+				options.data = $scope.inputs.data.toString() # for SVG need to convert $sce untrusted value to string
+			request = $http.post "/project/#{ide.$scope.project_id}/link", options
 			request.success (data, status, headers, config) ->
 				$scope.generating = false
-				$scope.output.url = data?.link
+				$scope.output.url ?= {}
+				$scope.output.url[$scope.format] = data?.link
 				$scope.$broadcast "generate-link-done"
 			request.error  (data, status, headers, config) ->
 				$scope.generating = false
