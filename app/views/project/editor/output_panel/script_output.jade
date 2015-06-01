@@ -59,34 +59,37 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
 							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
 								.display-data-inner(ng-class="{ 'display-data-inner-full-width': (msg.content.format == 'image/svg+xml' || msg.content.format == 'application/pdf') }")
-									display-image(format="msg.content.format",data="msg.content.data")
-									.download-controls(ng-if="msg.content.available_formats.length > 1")
-										div(dropdown, dropdown-append-to-body).format-dropdown
-											a(href, dropdown-toggle, tooltip="Format")
-												i.fa.fa-fw.fa-cog
-												i.fa.fa-caret-down
-											ul.dropdown-menu(role="menu")
-												li(ng-repeat="format in msg.content.available_formats")
-													a(href, ng-click="showFormat(msg, format)")
-														show-format-label(format="format") 
-									.download-controls.download-controls-right
-										a(
-											ng-if="msg.content.format != 'image/svg+xml'",
-											ng-href="{{msg.content.data[msg.content.format + '+url']}}",
-											download="output",
-											tooltip="Download",
-											tooltip-placement="bottom"
-										)
-											i.fa.fa-fw.fa-download
-										a(
-											ng-controller="LinkImageController"
-											href
-											ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)",
-											tooltip="Share",
-											tooltip-append-to-body="true",
-											tooltip-placement="bottom"
-										)
-											i.fa.fa-fw.fa-link
+									a(ng-controller="LinkImageController"
+										href
+										ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)")
+										display-image(format="msg.content.format",data="msg.content.data")
+										.download-controls(ng-if="msg.content.available_formats.length > 1")
+											div(dropdown, dropdown-append-to-body).format-dropdown
+												a(href, dropdown-toggle, tooltip="Format")
+													i.fa.fa-fw.fa-cog
+													i.fa.fa-caret-down
+												ul.dropdown-menu(role="menu")
+													li(ng-repeat="format in msg.content.available_formats")
+														a(href, ng-click="showFormat(msg, format)")
+															show-format-label(format="format") 
+										.download-controls.download-controls-right
+											a(
+												ng-if="msg.content.format != 'image/svg+xml'",
+												ng-href="{{msg.content.data[msg.content.format + '+url']}}",
+												download="output",
+												tooltip="Download",
+												tooltip-placement="bottom"
+											)
+												i.fa.fa-fw.fa-download
+											a(
+												ng-controller="LinkImageController"
+												href
+												ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)",
+												tooltip="Share",
+												tooltip-append-to-body="true",
+												tooltip-placement="bottom"
+											)
+												i.fa.fa-fw.fa-link
 							div(ng-if="msg.header.msg_type == 'display_data' && !msg.content.image")
 								div(ng-if="msg.content.show_format == 'text/html_escaped'", ng-bind-html="msg.content.data['text/html_escaped']")
 							div(ng-if="msg.header.msg_type == 'error'").alert.alert-danger.text-monospace
