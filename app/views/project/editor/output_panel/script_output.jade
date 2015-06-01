@@ -59,11 +59,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
 							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
 								.display-data-inner(ng-class="{ 'display-data-inner-full-width': (msg.content.format == 'image/svg+xml' || msg.content.format == 'application/pdf') }")
-									img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
-									img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
-									span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
-									.iframe-wrapper(ng-if="msg.content.format == 'application/pdf'")
-										iframe(ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
+									display-image(format="msg.content.format",data="msg.content.data")
 									.download-controls(ng-if="msg.content.available_formats.length > 1")
 										div(dropdown, dropdown-append-to-body).format-dropdown
 											a(href, dropdown-toggle, tooltip="Format")
@@ -71,7 +67,8 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 												i.fa.fa-caret-down
 											ul.dropdown-menu(role="menu")
 												li(ng-repeat="format in msg.content.available_formats")
-													a(href, ng-click="showFormat(msg, format)") {{ format }}
+													a(href, ng-click="showFormat(msg, format)")
+														show-format-label(format="format") 
 									.download-controls.download-controls-right
 										a(
 											ng-if="msg.content.format != 'image/svg+xml'",
@@ -84,7 +81,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 										a(
 											ng-controller="LinkImageController"
 											href
-											ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format])",
+											ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)",
 											tooltip="Share",
 											tooltip-append-to-body="true",
 											tooltip-placement="bottom"
