@@ -88,8 +88,8 @@ module.exports = LinkController =
 			# Force plain treatment of other file types to prevent hosting of HTTP/JS files
 			# that could be used in same-origin/XSS attacks.
 			switch Path.extname(link.path)
-				when "png" then res.set "Content-Type", "image/png"
-				when "jpg" then res.set "Content-Type", "image/jpeg"
+				when ".png" then res.set "Content-Type", "image/png"
+				when ".jpg" then res.set "Content-Type", "image/jpeg"
 				else res.set "Content-Type", "text/plain"
 			res.set "Cache-Control", "public, max-age=86400"
 			res.set "Last-Modified", link.created.toUTCString()
