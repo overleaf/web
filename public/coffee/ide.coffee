@@ -18,6 +18,7 @@ define [
 	"ide/install/index"
 	"ide/link-image/index"
 	"ide/directives/layout"
+	"ide/directives/commandLine"
 	"ide/services/ide"
 	"ide/services/commandRunner"
 	"ide/services/jupyterRunner"

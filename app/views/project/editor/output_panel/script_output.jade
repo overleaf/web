@@ -180,4 +180,4 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					.execution-count
 						| In[]:
 					.cell-content
-						textarea(ng-model="manualInput", on-enter="runManualInput()", placeholder = "Command...")
+						input(type="text", ng-model="manualInput", command-line, on-run="runManualInput()", placeholder = "Command...")
