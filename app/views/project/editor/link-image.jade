@@ -3,21 +3,24 @@ script(type='text/ng-template', id='linkImageModalTemplate')
 		h3 Publish output file
 	.modal-body.link-image-modal
 		.thumbnail
-			img(ng-src="{{inputs.url}}")
+			display-image(ng-if="inputs.content.data",format="format",data="inputs.content.data")
+			.file(ng-if="!inputs.content.data")
+				i.fa.fa-file-text-o.fa-3x
+				span &nbsp; {{inputs.path}}
 		form.form-inline.toolbar.toolbar-borderless.row-spaced
-			span.text-monospace(ng-if="output.url")
+			span.text-monospace(ng-if="output.url[format]")
 				input.form-control.link-url(
-					ng-model="output.url",
-					focus-on="generat-link-done"
+					ng-model="output.url[format]",
+					focus-on="generate-link-done"
 				)
 			.alert(ng-if="error")
 				span Error generating link
 			button(
-				ng-if="!output.url && !error"
+				ng-if="!output.url[format] && !error"
 				ng-click="generateLink()"
 				ng-disabled="generating"
 			).btn.btn-primary
-				span Generate public link
+				span Generate permanent link
 				span(ng-show="generating") &nbsp;
 					i.fa.fa-refresh(
 						ng-class="{'fa-spin': generating }"

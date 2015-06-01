@@ -7,6 +7,7 @@ request = require "request"
 Link = require("../../models/Link").Link
 Path = require "path"
 base64 = require "base64-stream"
+Readable = require('stream').Readable
 
 module.exports = LinkController =
 	generateLink : (req, res) ->
@@ -49,12 +50,18 @@ module.exports = LinkController =
 				srcStream.resume()
 	
 	_getSrcStream: (project_id, body, callback = (error, srcStream) ->) ->
-		if body.data?
+		if body.base64?
 			stream = base64.decode()
 			stream.pause()
 			callback null, stream
-			stream.write(body.data)
+			stream.write(body.base64)
 			stream.end()
+		else if body.data?
+			stream = new Readable()
+			stream.pause()
+			callback null, stream
+			stream.push body.data
+			stream.push null
 		else
 			CompileController.getClsiStream project_id, body.path, (error, srcStream) ->
 				return callback(error) if error?
@@ -88,8 +95,10 @@ module.exports = LinkController =
 			# Force plain treatment of other file types to prevent hosting of HTTP/JS files
 			# that could be used in same-origin/XSS attacks.
 			switch Path.extname(link.path)
-				when "png" then res.set "Content-Type", "image/png"
-				when "jpg" then res.set "Content-Type", "image/jpeg"
+				when ".png" then res.set "Content-Type", "image/png"
+				when ".jpg" then res.set "Content-Type", "image/jpeg"
+				#when ".svg" then res.set "Content-Type", "image/svg+xml" # disabled for possible XSS
+				when ".pdf" then res.set "Content-Type", "application/pdf"
 				else res.set "Content-Type", "text/plain"
 			res.set "Cache-Control", "public, max-age=86400"
 			res.set "Last-Modified", link.created.toUTCString()
