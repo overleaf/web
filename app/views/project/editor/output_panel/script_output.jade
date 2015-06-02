@@ -42,7 +42,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!
 			
-			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count")
+			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.shutdown")
 				div.input(ng-if="!cell.shutdown")
 					.execution-count
 						| In[{{cell.execution_count}}]:
