@@ -39,7 +39,8 @@ define [
 					cursor = END
 					scope.onRun()
 				
-				element.bind "keydown keypress", (event) ->
+				element.bind "keydown", (event) ->
+					console.log "EVENT", event.which, event
 					if event.which == ENTER
 						event.preventDefault()
 						runCommand()
