@@ -3,7 +3,10 @@ script(type='text/ng-template', id='linkImageModalTemplate')
 		h3 Publish output file
 	.modal-body.link-image-modal
 		.thumbnail
-			display-image(format="format",data="inputs.content.data")
+			display-image(ng-if="inputs.content.data",format="format",data="inputs.content.data")
+			.file(ng-if="!inputs.content.data")
+				i.fa.fa-file-text-o.fa-3x
+				span &nbsp; {{inputs.path}}
 		form.form-inline.toolbar.toolbar-borderless.row-spaced
 			span.text-monospace(ng-if="output.url[format]")
 				input.form-control.link-url(

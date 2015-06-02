@@ -17,7 +17,7 @@ define [
 			}
 			if $scope.inputs.base64
 				options.base64 = $scope.inputs.data
-			else
+			else if $scope.inputs.data?
 				options.data = $scope.inputs.data.toString() # for SVG need to convert $sce untrusted value to string
 			request = $http.post "/project/#{ide.$scope.project_id}/link", options
 			request.success (data, status, headers, config) ->
