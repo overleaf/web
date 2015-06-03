@@ -40,7 +40,6 @@ define [
 					scope.onRun()
 				
 				element.bind "keydown", (event) ->
-					console.log "EVENT", event.which, event
 					if event.which == ENTER
 						event.preventDefault()
 						runCommand()
