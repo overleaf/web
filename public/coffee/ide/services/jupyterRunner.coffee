@@ -88,8 +88,6 @@ define [
 		
 			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
 				cell.timed_out = true
-			
-			console.log "MESSAGE", message.request_id, message.header.msg_type, message.content
 		
 			ide.$scope.$apply()
 		
