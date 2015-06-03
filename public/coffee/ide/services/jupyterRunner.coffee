@@ -38,6 +38,17 @@ define [
 			
 			if message.header.msg_type == "error"
 				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
+				if m = message.content.evalue?.match(/^No module named (.*)$/)
+					packageName = m[1]
+					message.content.type = "missing_package"
+					message.content.package = packageName
+					message.content.language = "python"
+				else if m = message.content.evalue?.match(/there is no package called ‘(.*)’/)
+					packageName = m[1]
+					message.content.type = "missing_package"
+					message.content.package = packageName
+					message.content.language = "R"
+					
 			
 			if message.header.msg_type == "file_modified"
 				path = message.content.data['text/path']
