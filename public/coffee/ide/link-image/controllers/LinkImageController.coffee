@@ -15,7 +15,7 @@ define [
 			$scope.inputs.url = url
 			$scope.inputs.data = data
 			$scope.inputs.content = content
-			$scope.format = content.format
+			$scope.format = content?.format || 'file'
 			if $scope.format in ['image/svg+xml']
 				$scope.inputs.base64 = false
 			else if $scope.format in ['application/pdf', 'image/png', 'image/jpeg']
