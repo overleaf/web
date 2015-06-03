@@ -149,19 +149,6 @@ define [
 					docs.push entity
 			return docs
 
-		getEntityPath: (entity) ->
-			@_getEntityPathInFolder @$scope.rootFolder, entity
-
-		_getEntityPathInFolder: (folder, entity) ->
-			for child in folder.children or []
-				if child == entity
-					return entity.name
-				else if child.type == "folder"
-					path = @_getEntityPathInFolder(child, entity)
-					if path?
-						return child.name + "/" + path
-			return null
-
 		getRootDocDirname: () ->
 			rootDoc = @findEntityById @$scope.project.rootDoc_id
 			return if !rootDoc?
@@ -226,7 +213,9 @@ define [
 
 		_getEntityPathInFolder: (folder, entity) ->
 			for child in folder.children or []
-				if child == entity
+				# Match on id, since on reconnect, the file tree is reloaded
+				# and the objects are no longer the same.
+				if child.id == entity.id
 					return entity.name
 				else if child.type == "folder"
 					path = @_getEntityPathInFolder(child, entity)

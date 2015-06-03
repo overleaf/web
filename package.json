@@ -12,6 +12,7 @@
   "dependencies": {
     "archiver": "0.9.0",
     "async": "0.6.2",
+    "base64-stream": "^0.1.2",
     "bcrypt": "0.7.5",
     "bufferedstream": "1.6.0",
     "connect-redis": "1.4.5",

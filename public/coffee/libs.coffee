@@ -11,4 +11,5 @@ define [
 	"libs/angular-cookie"
 	"libs/autolinker"
 	"libs/angular-scroll-glue"
+	"libs/ansi2html"
 ], () ->

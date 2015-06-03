@@ -5,16 +5,19 @@ define [
 	# from within other parts of the angular app.
 	App.factory "commandRunner", ($http, $timeout, ide) ->
 		ide.socket.on "clsiOutput", (message) ->
-			session_id = message.header?.session
-			return if !session_id?
+			request_id = message.request_id
+			return if !request_id?
 			
-			run = commandRunner.INPROGRESS_RUNS[session_id]
+			run = commandRunner.INPROGRESS_RUNS[request_id]
 			return if !run?
 			
-			if message.msg_type == "system_status" and message.content.status == "starting_run"
+			msg_type = message.header?.msg_type
+			return if !msg_type
+			
+			if msg_type == "system_status" and message.content.status == "starting_run"
 				run.inited = true
 				ide.$scope.$apply()
-			else if message.msg_type == "command_exited"
+			else if msg_type == "command_exited"
 				run.exitCode = message.content.exitCode
 				commandRunner._displayErrors(run)
 			else
@@ -47,7 +50,7 @@ define [
 				
 				url = "/project/#{ide.$scope.project_id}/compile"
 				options._csrf = window.csrfToken
-				options.session_id = run.session_id
+				options.request_id = run.request_id
 				$http
 					.post(url, options)
 					.success (data) =>
@@ -67,7 +70,7 @@ define [
 				return run
 			
 			stop: (run) ->
-				url = "/project/#{_ide.$scope.project_id}/compile/#{run.session_id}/stop"
+				url = "/project/#{_ide.$scope.project_id}/compile/#{run.request_id}/stop"
 				run.stopping = true
 				$http
 					.post(url, {
@@ -77,13 +80,13 @@ define [
 						run.stopping = false
 		
 			_createNewRun: () ->
-				session_id = Math.random().toString().slice(2)
-				run = @INPROGRESS_RUNS[session_id] = {
+				request_id = Math.random().toString().slice(2)
+				run = @INPROGRESS_RUNS[request_id] = {
 					output: []
 					running: false
 					error: false
 					timedout: false
-					session_id: session_id
+					request_id: request_id
 					stillIniting: false
 					inited: false
 					stopping: false
@@ -100,17 +103,17 @@ define [
 				# have been flushed (this delay can be removed if there is a more
 				# reliable way of ensuring we have all the real-time content)
 				setTimeout () =>
-					delete @INPROGRESS_RUNS[run.session_id]
+					delete @INPROGRESS_RUNS[run.request_id]
 				, 5000
 			
 			_parseOutputMessage: (message) ->
-				if message.msg_type == "stream"
+				if message.header.msg_type == "stream"
 					output = {
 						output_type: message.content.name # 'stdout' or 'stderr'
 						text: message.content.text
 						msg_id: parseInt(message.header.msg_id, 10)
 					}
-				else if message.msg_type == "file_modified"
+				else if message.header.msg_type == "file_modified"
 					path = message.content.data['text/path']
 					output = {
 						output_type: "file"

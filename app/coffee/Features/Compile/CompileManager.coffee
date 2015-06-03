@@ -13,7 +13,7 @@ logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
-	compile: (project_id, user_id, session_id, options = {}, _callback = (error) ->) ->
+	compile: (project_id, user_id, request_id, options = {}, _callback = (error) ->) ->
 		timer = new Metrics.Timer("editor.compile")
 		callback = (args...) ->
 			timer.done()
@@ -37,11 +37,21 @@ module.exports = CompileManager =
 							for key, value of limits
 								if !options[key]?
 									options[key] = value
-							ClsiManager.sendRequest project_id, session_id, options, (error, status, outputFiles, output) ->
+							ClsiManager.sendRequest project_id, request_id, options, (error, status, outputFiles, output) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, output, limits)
-								
+
+	sendJupyterRequest: (project_id, request_id, engine, msg_type, content, callback = (error) ->) ->
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+			return callback(error) if error?
+			CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+				return callback(error) if error?
+				ClsiManager.sendJupyterRequest project_id, request_id, engine, msg_type, content, limits, callback
+	
+	interruptRequest: (project_id, request_id, callback = (error) ->) ->
+		ClsiManager.interruptRequest project_id, request_id, callback
+		
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
