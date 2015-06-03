@@ -64,7 +64,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 										ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)")
 										display-image(format="msg.content.format",data="msg.content.data")
 										.download-controls(ng-if="msg.content.available_formats.length > 1")
-											div(dropdown, dropdown-append-to-body).format-dropdown
+											div(dropdown).format-dropdown
 												a(href, dropdown-toggle, tooltip="Format")
 													i.fa.fa-fw.fa-cog
 													i.fa.fa-caret-down
