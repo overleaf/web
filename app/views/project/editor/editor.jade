@@ -19,8 +19,6 @@ div.full-size(
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
 			auto-complete="settings.autoComplete",
-			spell-check-enabled="editor.editor_mode == 'latex'",
-			spell-check-language="project.spellCheckLanguage",
 			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
 			show-print-margin="false",
 			sharejs-doc="editor.sharejs_doc",
@@ -31,7 +29,8 @@ div.full-size(
 			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
 			read-only="!permissions.write",
 			ace-mode="editor.ace_mode",
-			wrap-lines="editor.editor_mode == 'latex'"
+			wrap-lines="editor.editor_mode == 'latex'",
+			selection="editor.selection"
 		)
 
 	.ui-layout-east

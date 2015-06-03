@@ -11,8 +11,6 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 		h3 Install modules and packages
 	.modal-body.install-packages-modal
 		tabset
-			
-			
 			tab(heading="Python", active="selectedTab.python")
 			tab(heading="R", active="selectedTab.R")
 			li.pull-right(style="margin-top: 8px;")
@@ -68,7 +66,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 				.i.fa.fa-fw.fa-stop
 				|  Stop
 
-		div.script-output.install-script-output.row-spaced(scroll-glue, ng-show="output.currentRun")
+		div.command-output.install-command-output.row-spaced(scroll-glue, ng-show="output.currentRun")
 			.alert.alert-info(ng-show="output.currentRun.running && output.currentRun.stillIniting && !output.currentRun.inited")
 				p
 					i.fa.fa-spinner.fa-spin.fa-fw 

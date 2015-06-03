@@ -12,4 +12,5 @@ define [
 	"libs/passfield"
 	"libs/autolinker"
 	"libs/angular-scroll-glue"
+	"libs/ansi2html"
 ], () ->
