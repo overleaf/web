@@ -42,14 +42,20 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!
 			
-			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.shutdown")
-				div.input(ng-if="!cell.shutdown")
+			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.restarted")
+				div.alert.alert-info(ng-show="cell.restarted")
+					p Session restarted
+					p(ng-show="!cell.restart_intentional").small
+						| A collaborator may have restarted your session, or we may be
+						| performing maintenance on the server your session was running on.
+
+				div.input(ng-if="cell.input.length > 0")
 					.execution-count
 						| In[{{cell.execution_count}}]:
 					.cell-content
 						.chunk(ng-repeat="input in cell.input")
 							span.text-input.text-monospace {{ input.content.code }}
-				div.output(ng-if="!cell.shutdown")
+				div.output(ng-if="cell.output.length > 0")
 					.execution-count
 						| Out[{{cell.execution_count}}]:
 					.cell-content
@@ -166,8 +172,6 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							div(ng-if="project.features.compileTimeout > 60")
 								p Please get in touch if you need a longer timeout.
 
-				div.alert.alert-info.shutdown(ng-show="cell.shutdown")
-					| Session restarted
 				hr(ng-show="!$last")
 			
 			.alert.alert-info(ng-show="status.initing")
