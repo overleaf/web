@@ -11,13 +11,23 @@ define [
 		$scope.$on "editor:recompile", () ->
 			$scope.runSelection()
 		
+		run_count = 0
+		trackRun = () ->
+			run_count++
+			if run_count == 1
+				event_tracking.send("script", "run")
+			else if run_count == 5
+				event_tracking.send("script", "multiple-run")
+		
 		$scope.runSelection = () ->
+			trackRun()
 			ide.$scope.$broadcast("editor:gotoNextLine")
 			code   = ide.$scope.editor.selection.lines.join("\n")
 			engine = $scope.engine
 			jupyterRunner.executeRequest code, engine
 		
 		$scope.runAll = () ->
+			trackRun()
 			engine = $scope.engine
 			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
 			if engine == "python"
