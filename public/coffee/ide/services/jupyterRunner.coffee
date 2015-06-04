@@ -19,9 +19,10 @@ define [
 			cell = jupyterRunner.findOrCreateCell(request_id, engine)
 			
 			jupyterRunner.stopIniting()
-			
+
 			if message.header.msg_type == "shutdown_reply"
-				cell.shutdown = true
+				cell.restarted = true
+				cell.restart_intentional = true
 			
 			if message.header.msg_type == "execute_input"
 				cell.input.push message
@@ -29,6 +30,16 @@ define [
 			if message.header.msg_type in ["execute_input", "execute_reply", "execute_result"]
 				if message.content.execution_count?
 					cell.execution_count = message.content.execution_count
+					
+					# If the session has reset, but we didn't do it or haven't been told
+					# about it, then it's likely that the server crashed/reset.
+					# Do this before we create the cell, so we can see if the previous
+					# cell was a shutdown request easily.
+					if cell.execution_count == 1 and # Are we at the start of a session?
+						jupyterRunner.cellCount(engine) > 1 and # Ignore if it's just our first run, this is expected
+						!jupyterRunner.hasJustRestarted(engine) # Ignore if the previous message was a shutdown request, also expected
+							# We've reset for some reason
+							cell.restarted = true
 			
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "file_modified"]
 				cell.output.push message
@@ -180,6 +191,16 @@ define [
 					jupyterRunner.CELL_LIST[engine].push cell
 					return cell
 			
+			cellCount: (engine) ->
+				return jupyterRunner.CELL_LIST[engine]?.length or 0
+			
+			hasJustRestarted: (engine) ->
+				cells = jupyterRunner.CELL_LIST[engine] or []
+				return false if cells.length < 2
+				last_cell = cells[cells.length - 1]
+				second_last_cell = cells[cells.length - 2]
+				return !!last_cell.restarted or !!second_last_cell.restarted
+			
 			stop: () ->
 				request_id = @current_request_id
 				return if !request_id?
@@ -204,8 +225,6 @@ define [
 				}
 				$http
 					.post(url, options)
-					.success (data) =>
-						console.log "SHUTDOWN REPLY", data
 					.error () =>
 						@status.error = true
 
