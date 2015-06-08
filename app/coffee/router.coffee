@@ -69,6 +69,8 @@ module.exports = class Router
 
 		app.get '/blog', BlogController.getIndexPage
 		app.get '/blog/*', BlogController.getPage
+		
+		app.get '/user/usage', AuthenticationController.requireLogin(), UserPagesController.useCasePage
 
 		app.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings

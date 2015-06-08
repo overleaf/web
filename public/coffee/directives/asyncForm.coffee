@@ -43,6 +43,9 @@ define [
 									ga('send', 'event', formName, 'failure', data.message)
 								else
 									ga('send', 'event', formName, 'success')
+							else if attrs.redir?
+								window.location = attrs.redir
+								
 
 						.error (data, status, headers, config) ->
 							scope[attrs.name].inflight = false

@@ -12,6 +12,7 @@ UserSchema = new Schema
 	last_name         : {type : String, default : ''}
 	role  	          : {type : String, default : ''}
 	institution       : {type : String, default : ''}
+	use_case          : {type : String, default : ''}
 	hashedPassword    : String
 	isAdmin           : {type : Boolean, default : false}
 	confirmed         : {type : Boolean, default : false}
