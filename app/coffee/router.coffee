@@ -68,6 +68,10 @@ module.exports = class Router
 		
 		Modules.applyRouter(webRouter, apiRouter)
 
+		webRouter.get '/blog', BlogController.getIndexPage
+		webRouter.get '/blog/*', BlogController.getPage
+		
+		webRouter.get '/user/usage', AuthenticationController.requireLogin(), UserPagesController.useCasePage
 
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings

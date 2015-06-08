@@ -15,6 +15,7 @@ module.exports = AnalyticsMiddlewear =
 			email: true
 			role: true
 			institution: true
+			use_case: true
 		}, (error, user) ->
 			return next(error) if error?
 			SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
@@ -26,6 +27,7 @@ module.exports = AnalyticsMiddlewear =
 					name: user.first_name
 					role: user.role
 					institution: user.institution
+					use_case: user.use_case
 					plan_code: subscription?.planCode
 				}
 				next()

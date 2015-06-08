@@ -35,3 +35,6 @@ module.exports =
 				user: user,
 				languages: Settings.languages,
 				accountSettingsTabActive: true
+	
+	useCasePage: (req, res, next) ->
+		res.render 'user/use_case', title: "Register Step 2 of 2"

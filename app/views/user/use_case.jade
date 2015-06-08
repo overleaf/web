@@ -1,0 +1,50 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					
+					.card
+						.alert.alert-success
+							p
+								| Thanks for registering!
+						.page-header
+							span.subdued.pull-right (Final step)
+							h2 How do you hope to use DataJoy?
+						form(
+							async-form="user-use-case",
+							name="useCaseForm"
+							action="/user/settings",
+							method="POST",
+							redir="/project",
+							ng-cloak
+						)
+							input(type="hidden", name="_csrf", value=csrfToken)
+							input(type="hidden", name="use_case", ng-value="use_case")
+								
+							p
+								button.btn.btn-primary.btn-use-case(
+									type='submit',
+									ng-click="use_case = 'learner'"
+								)
+									i.fa.fa-fw.fa-4x.fa-book
+									| To learn Python and/or R
+							
+							p
+								button.btn.btn-primary.btn-use-case(
+									type='submit',
+									ng-click="use_case = 'researcher'"
+								)
+									i.fa.fa-fw.fa-4x.fa-flask
+									| To do my work and research
+							
+							p
+								button.btn.btn-primary.btn-use-case(
+									type='submit',
+									ng-click="use_case = 'teacher'"
+								)
+									i.fa.fa-fw.fa-4x.fa-graduation-cap
+									| To teach students
+
