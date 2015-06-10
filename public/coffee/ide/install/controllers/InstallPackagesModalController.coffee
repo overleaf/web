@@ -54,6 +54,13 @@ define [
 						compiler: "apt-get-install"
 						package: "r-cran-#{$scope.installedPackage.toLowerCase()}"
 					}
+				else if $scope.inputs.rInstaller == "git"
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "Rscript", "-e", "library(devtools); install_github('#{$scope.installedPackage}')"
+						]
+					}
 				else
 					console.error "Unknown R installer: ", $scope.inputs.rInstaller
 					return

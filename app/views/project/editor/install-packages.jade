@@ -27,15 +27,28 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					a(href, ng-click="inputs.pythonInstaller = 'conda'") Use conda instead.
 					| )
 				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'apt-get'")
-					| (Packages will be installed as binary packages. 
-					a(href, ng-click="inputs.rInstaller = 'install.packages'") Install from source instead.
-					| )
+					| (Packages will be installed from CRAN. 
+					| Install from 
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					|  or 
+					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
+					|  instead.)
 				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'install.packages'")
 					| (Packages will be installed with 
 					span.text-monospace install.packages('...')
 					| . 
-					a(href, ng-click="inputs.rInstaller = 'apt-get'") Use binary packages instead.
-					| )
+					| Install from 
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					|  or 
+					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
+					|  instead.)
+				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'git'")
+					| (Packages will be installed from GitHub. 
+					| Install from 
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					|  or 
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					|  instead.)
 
 		form.form-inline.toolbar.toolbar-borderless.row-spaced
 			span.text-monospace
