@@ -156,33 +156,35 @@
 	}
 }
 
-.jupyter-output, .command-output {
+.command-output {
 	overflow: auto;
 	background-color: white;
 	padding: @line-height-computed / 2;
 }
 
 .jupyter-output {
-	.jupyter-output-inner {
-		position: relative;
-		padding-bottom: 50px;
-		min-height: 100%;
-	}
-	
 	@execution-count-width: 60px;
 	@manual-input-height: 50px;
+
+	.jupyter-output-inner {
+		padding: @line-height-computed / 2;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: @manual-input-height;
+		overflow: auto;
+	}
 	
 	.jupyter-uncompiled-bottom {
 		position: absolute;
-		bottom: @manual-input-height;
-		left: @execution-count-width + 10px;
+		bottom: @line-height-computed / 2;
+		left: @execution-count-width + 36px;
 		line-height: 0.8;
 		vertical-align: top;
 	}
 	
 	.cell, .manual-input {
-		width: 100%;
-		margin-bottom: @line-height-computed / 2;
 		.input, .output {
 			position: relative;
 			font-family: @font-family-monospace;
@@ -207,10 +209,14 @@
 	}
 	
 	.manual-input {
-		padding-top: @line-height-computed / 2;
-		margin-bottom: 0;
 		position: absolute;
 		bottom: 0;
+		left: @line-height-computed / 2;
+		right: @line-height-computed / 2;
+		height: @manual-input-height;
+		.input {
+			margin-top: @line-height-computed / 2;
+		}
 		input[type="text"] {
 			margin-top: -2px;
 			border: none;
@@ -220,6 +226,8 @@
 	}
 	
 	.cell {
+		width: 100%;
+		margin-bottom: @line-height-computed / 2;
 		.output {
 			margin-top: @line-height-computed / 2;
 			.chunk {
