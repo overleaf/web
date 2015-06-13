@@ -134,9 +134,8 @@ module.exports = class Router
 
 		# New 'stable' /internal API end points
 		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
-		apiRouter.get  '/internal/project/:project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
+		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
 		apiRouter.post '/internal/project/:Project_id/run', AuthenticationController.httpAuth, CompileController.compile
-		apiRouter.ignoreCsrf('post', '/internal/project/:Project_id/run')
 		
 		apiRouter.get  '/internal/project/:project_id/content', AuthenticationController.httpAuth, ProjectApiController.getProjectContent
 
