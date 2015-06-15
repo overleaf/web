@@ -162,9 +162,9 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							p
 								strong #{translate("timedout")}. 
 								span Sorry, your script took too long to run and timed out.
-							div(ng-if="project.features.compileTimeout <= 60 && permissions.admin")
+							div(ng-if="project.features.compileTimeout <= 60 && permissions.admin", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('timeout')")
 								p Please upgrade your account to run longer scripts.
-								p(ng-controller="FreeTrialModalController")
+								p
 									a.btn.btn-info(
 										href
 										ng-click="startFreeTrial('timeout')"
