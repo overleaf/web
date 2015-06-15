@@ -105,12 +105,20 @@ define [
 							text = editor.getCopyText()
 							editor.insert("\\textit{" + text + "}")
 					readOnly: false
+				
+				editor.commands.addCommand
+					name: "run-all",
+					bindKey: win: "Ctrl-Shift-Enter", mac: "Command-Shift-Enter"
+					exec: (editor) =>
+						event = "#{scope.name}:run-all"
+						$rootScope.$broadcast event
+					readOnly: true
 
 				editor.commands.addCommand
-					name: "compile",
+					name: "run-line",
 					bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
 					exec: (editor) =>
-						event = "#{scope.name}:recompile"
+						event = "#{scope.name}:run-line"
 						$rootScope.$broadcast event
 					readOnly: true
 

@@ -8,8 +8,11 @@ define [
 		ide.$scope.$watch "editor.ace_mode", () ->
 			$scope.engine = ide.$scope.editor.ace_mode
 		
-		$scope.$on "editor:recompile", () ->
+		$scope.$on "editor:run-line", () ->
 			$scope.runSelection()
+		
+		$scope.$on "editor:run-all", () ->
+			$scope.runAll()
 		
 		run_count = 0
 		trackRun = () ->

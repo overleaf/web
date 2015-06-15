@@ -11,11 +11,14 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 		.row
 			.col-xs-6
 				.hotkey
+					span.combination {{ctrl}} + Enter
+					span.description Run Line
+				.hotkey
+					span.combination {{ctrl}} + Shift + Enter
+					span.description Run All
+				.hotkey
 					span.combination {{ctrl}} + F
 					span.description Find (and replace)
-				.hotkey
-					span.combination {{ctrl}} + Enter
-					span.description Compile
 			.col-xs-6
 				.hotkey
 					span.combination {{ctrl}} + Z
@@ -29,10 +32,10 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 			.col-xs-6
 				.hotkey
 					span.combination {{ctrl}} + Home
-					span.description  Beginning of document
+					span.description Beginning of file
 				.hotkey
 					span.combination {{ctrl}} + End
-					span.description End of document
+					span.description End of file
 			.col-xs-6
 				.hotkey
 					span.combination {{ctrl}} + L
