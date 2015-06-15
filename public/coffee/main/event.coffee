@@ -3,7 +3,17 @@ define [
 ], (App) ->
 	send = (category, action, attributes = {})->
 		ga('send', 'event', category, action)
-		Intercom?("trackEvent", "#{action}-#{category}", attributes)
+		event_name = "#{action}-#{category}"
+		Intercom?("trackEvent", event_name, attributes)
+		$.ajax {
+			url: "/event/#{event_name}",
+			method: "POST",
+			data: attributes,
+			dataType: "json",
+			headers: {
+				"X-CSRF-Token": window.csrfToken
+			}
+		}
 
 	App.factory "event_tracking", ->
 		return send: send

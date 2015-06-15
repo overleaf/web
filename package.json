@@ -12,8 +12,8 @@
   "dependencies": {
     "archiver": "0.9.0",
     "async": "0.6.2",
-    "bcrypt": "0.8.3",
     "base64-stream": "^0.1.2",
+    "bcrypt": "0.8.3",
     "bufferedstream": "1.6.0",
     "connect-redis": "1.4.5",
     "dateformat": "1.0.4-1.2.3",
@@ -39,6 +39,7 @@
     "request": "2.34.0",
     "rimraf": "2.2.6",
     "sanitizer": "0.1.1",
+    "sequelize": "^3.2.0",
     "session.socket.io": "0.1.4",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "socket.io": "0.9.16",

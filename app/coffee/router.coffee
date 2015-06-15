@@ -35,6 +35,7 @@ RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 LinkController = require("./Features/Link/LinkController")
+AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -64,6 +65,7 @@ module.exports = class Router
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		RealTimeProxyRouter.apply(app)
+		AnalyticsRouter.apply(app)
 		
 		Modules.applyRouter(app)
 
