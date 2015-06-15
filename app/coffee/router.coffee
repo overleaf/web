@@ -36,6 +36,7 @@ RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 LinkController = require("./Features/Link/LinkController")
+AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -65,6 +66,7 @@ module.exports = class Router
 		PasswordResetRouter.apply(webRouter, apiRouter)
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
+		AnalyticsRouter.apply(webRouter, apiRouter)
 		
 		Modules.applyRouter(webRouter, apiRouter)
 
