@@ -1,8 +1,11 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FreeTrialModalController", ($scope, abTestManager)->
+	App.controller "FreeTrialModalController", ($scope, event_tracking)->
 		$scope.startFreeTrial = (source) ->
-			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
+			event_tracking.send("free-trial", "clicked_#{source}")
 			window.open("/user/subscription/new?planCode=datajoy")
 			$scope.startedFreeTrial = true
+		
+		$scope.recordFreeTrialShown = (source) ->
+			event_tracking.send("free-trial", "shown_#{source}")

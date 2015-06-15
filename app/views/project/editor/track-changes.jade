@@ -1,8 +1,9 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
-	.upgrade-prompt(ng-show="!project.features.versioning")
+	//- Check again for ui.view == track-changes so we don't trigger recordFreeTrialShown until actually shown
+	.upgrade-prompt(ng-if="ui.view == 'track-changes' && !project.features.versioning", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('track-changes')")
 		.message(ng-show="project.owner._id == user.id")
 			p #{translate("need_to_upgrade_for_history")}
-			p(ng-controller="FreeTrialModalController")
+			p
 				a.btn(
 					href
 					ng-class="buttonClass"

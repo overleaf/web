@@ -66,10 +66,10 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 								type="submit"
 								ng-click="addMember()"
 							) #{translate("share")}
-				div.text-center(ng-hide="canAddCollaborators")
+				div.text-center(ng-if="!canAddCollaborators", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('collaboration')")
 					p #{translate("need_to_upgrade_for_more_collabs")}.
-					p(ng-controller="FreeTrialModalController")
-						a.btn(href, ng-click="startFreeTrial('projectMembers')", ng-class="buttonClass") #{translate("start_free_trial")}
+					p
+						a.btn(href, ng-click="startFreeTrial('collaboration')", ng-class="buttonClass") #{translate("start_free_trial")}
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}.
 
