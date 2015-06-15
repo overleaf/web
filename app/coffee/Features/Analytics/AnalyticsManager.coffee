@@ -2,19 +2,19 @@ Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 
-if !Settings.mysql.metrics?
+if !Settings.mysql.analytics?
 	module.exports =
 		recordEvent: (user_id, event, metadata, callback) ->
 			logger.log {user_id, event, metadata}, "no event tracking configured, logging event"
 			callback()
 else
 	Sequelize = require "sequelize"
-	options = _.extend {logging:false}, Settings.mysql.metrics
+	options = _.extend {logging:false}, Settings.mysql.analytics
 
 	sequelize = new Sequelize(
-		Settings.mysql.metrics.database,
-		Settings.mysql.metrics.username,
-		Settings.mysql.metrics.password,
+		Settings.mysql.analytics.database,
+		Settings.mysql.analytics.username,
+		Settings.mysql.analytics.password,
 		options
 	)
 	
