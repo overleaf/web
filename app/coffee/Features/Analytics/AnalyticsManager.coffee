@@ -28,11 +28,15 @@ else
 		recordEvent: (user_id, event, metadata = {}, callback = (error) ->) ->
 			if typeof(metadata) != "string"
 				metadata = JSON.stringify(metadata)
+			if user_id? and typeof(user_id) != "string"
+				user_id = user_id.toString()
 			Event
 				.create({ user_id, event, metadata })
 				.then(
 					(result) -> callback(),
-					(error) -> callback(error)
+					(error) ->
+						logger.err {err: error, user_id, event, metadata}, "error recording analytics event"
+						callback(error)
 				)
 			
 		sync: () -> sequelize.sync()
