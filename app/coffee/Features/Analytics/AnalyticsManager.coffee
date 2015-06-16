@@ -30,6 +30,9 @@ else
 				metadata = JSON.stringify(metadata)
 			if user_id? and typeof(user_id) != "string"
 				user_id = user_id.toString()
+			if user_id == Settings.smokeTest?.userId
+				# Don't record smoke tests analytics
+				return callback()
 			Event
 				.create({ user_id, event, metadata })
 				.then(
