@@ -18,6 +18,7 @@ describe "AuthenticationController", ->
 			"../User/UserUpdater" : @UserUpdater = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
+			"../Analytics/AnalyticsManager": @AnalyticsManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"settings-sharelatex": {}
 		@user =
@@ -39,6 +40,7 @@ describe "AuthenticationController", ->
 
 	describe "login", ->
 		beforeEach ->
+			@AnalyticsManager.recordEvent = sinon.stub()
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
 			@AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
@@ -82,6 +84,11 @@ describe "AuthenticationController", ->
 			it "should record the successful login", ->
 				@AuthenticationController._recordSuccessfulLogin
 					.calledWith(@user._id)
+					.should.equal true
+
+			it "should sent the event to analytics", ->
+				@AnalyticsManager.recordEvent
+					.calledWith(@user._id, "log-in")
 					.should.equal true
 
 			it "should tell the rate limiter that there was a success for that email", ->
