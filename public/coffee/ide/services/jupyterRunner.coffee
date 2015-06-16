@@ -42,7 +42,8 @@ define [
 							cell.restarted = true
 			
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "file_modified"]
-				cell.output.push message
+				if not cell.restart_intentional # suppress any errors from the restart
+					cell.output.push message
 			
 			if message.header.msg_type == "stream"
 				message.content.text_escaped = ansiToSafeHtml(message.content.text)
