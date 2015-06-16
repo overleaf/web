@@ -4,7 +4,7 @@ _ = require "underscore"
 
 if !Settings.mysql.analytics?
 	module.exports =
-		recordEvent: (user_id, event, metadata, callback) ->
+		recordEvent: (user_id, event, metadata, callback = () ->) ->
 			logger.log {user_id, event, metadata}, "no event tracking configured, logging event"
 			callback()
 else
@@ -25,7 +25,7 @@ else
 	})
 
 	module.exports =
-		recordEvent: (user_id, event, metadata, callback = (error) ->) ->
+		recordEvent: (user_id, event, metadata = {}, callback = (error) ->) ->
 			if typeof(metadata) != "string"
 				metadata = JSON.stringify(metadata)
 			Event

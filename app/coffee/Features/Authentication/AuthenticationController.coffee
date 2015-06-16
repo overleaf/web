@@ -3,6 +3,7 @@ LoginRateLimiter = require("../Security/LoginRateLimiter")
 UserGetter = require "../User/UserGetter"
 UserUpdater = require "../User/UserUpdater"
 Metrics = require('../../infrastructure/Metrics')
+AnalyticsManager = require "../Analytics/AnalyticsManager"
 logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
@@ -28,6 +29,7 @@ module.exports = AuthenticationController =
 				if user?
 					LoginRateLimiter.recordSuccessfulLogin email
 					AuthenticationController._recordSuccessfulLogin user._id
+					AnalyticsManager.recordEvent user._id, "log-in"
 					AuthenticationController.establishUserSession req, user, (error) ->
 						return next(error) if error?
 						req.session.justLoggedIn = true
