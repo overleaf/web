@@ -159,6 +159,7 @@ describe "ProjectEditorHandler", ->
 					collaborators: 3
 					compileGroup:"priority"
 					compileTimeout: 96
+					compileMemory: 2048
 				@result = @handler.buildProjectModelView @project
 			
 			it "should copy the owner features to the project", ->
@@ -166,6 +167,7 @@ describe "ProjectEditorHandler", ->
 				@result.features.collaborators.should.equal @project.owner_ref.features.collaborators
 				@result.features.compileGroup.should.equal @project.owner_ref.features.compileGroup
 				@result.features.compileTimeout.should.equal @project.owner_ref.features.compileTimeout
+				@result.features.compileMemory.should.equal @project.owner_ref.features.compileMemory
 
 
 		describe "without owners and members", ->

@@ -43,7 +43,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| &nbsp;&nbsp;Or run a command directly!
 			
 			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.restarted")
-				div.alert.alert-info(ng-show="cell.restarted")
+				div.alert.alert-info(ng-show="cell.restarted && !cell.memory_limit_exceeded")
 					p Session restarted
 					p(ng-show="!cell.restart_intentional").small
 						| A collaborator may have restarted your session, or we may be
@@ -158,20 +158,35 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 										
 									img(ng-if="cell.exported", ng-src="{{msg.content.data['text/url']}}")
 										
-						.alert.alert-danger(ng-if="cell.timed_out")
-							p
-								strong #{translate("timedout")}. 
-								span Sorry, your script took too long to run and timed out.
-							div(ng-if="project.features.compileTimeout <= 60 && permissions.admin", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('timeout')")
-								p Please upgrade your account to run longer scripts.
-								p
-									a.btn.btn-info(
-										href
-										ng-click="startFreeTrial('timeout')"
-									) #{translate("start_free_trial")}
-							div(ng-if="project.features.compileTimeout > 60")
-								p Please get in touch if you need a longer timeout.
-
+				.alert.alert-danger(ng-if="cell.timed_out")
+					p
+						strong #{translate("timedout")}. 
+						span Sorry, your script took too long to run and timed out.
+					p.text-center(ng-if="project.features.compileTimeout <= 60 && permissions.admin", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('timeout')")
+						| Please upgrade your account to run longer scripts.
+						br
+						a.btn.btn-info.row-spaced-small(
+							href
+							ng-click="startFreeTrial('timeout')"
+						) #{translate("start_free_trial")}
+					p(ng-if="project.features.compileTimeout > 60")
+						| Please get in touch if you need a longer timeout.
+				
+				.alert.alert-danger(ng-if="cell.memory_limit_exceeded")
+					p
+						strong Memory limit exceeded. 
+						span Sorry, your project exceeded your memory limit of {{project.features.compileMemory}}Mb. 
+						span(ng-show="cell.restarted") Your session has been restarted.
+					p.text-center(ng-if="project.features.compileMemory <= 1024 && permissions.admin", ng-controller="FreeTrialModalController", ng-init="recordFreeTrialShown('memory')")
+						| Please upgrade your account for a larger memory limit.
+						br
+						a.btn.btn-info.row-spaced-small(
+							href
+							ng-click="startFreeTrial('memory')"
+						) #{translate("start_free_trial")}
+					p(ng-if="project.features.compileMemory > 1024")
+						| Please get in touch if you need a higher limit.
+						
 				hr(ng-show="!$last")
 			
 			.alert.alert-info(ng-show="status.initing")
