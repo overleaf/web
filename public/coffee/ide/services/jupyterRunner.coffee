@@ -22,7 +22,10 @@ define [
 
 			if message.header.msg_type == "shutdown_reply"
 				cell.restarted = true
-				cell.restart_intentional = true
+				if message.content.exit_code == 137 # SIGKILL
+					cell.memory_limit_exceeded = true
+				else
+					cell.restart_intentional = true
 			
 			if message.header.msg_type == "execute_input"
 				cell.input.push message
@@ -60,7 +63,8 @@ define [
 					message.content.type = "missing_package"
 					message.content.package = packageName
 					message.content.language = "R"
-					
+				else if m = message.content.ename == "MemoryError"
+					cell.memory_limit_exceeded = true
 			
 			if message.header.msg_type == "file_modified"
 				path = message.content.data['text/path']

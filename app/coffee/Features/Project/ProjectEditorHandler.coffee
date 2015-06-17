@@ -38,6 +38,8 @@ module.exports = ProjectEditorHandler =
 					result.features.compileTimeout = project.owner_ref.features.compileTimeout
 				if project.owner_ref.features.compileGroup?
 					result.features.compileGroup = project.owner_ref.features.compileGroup	
+				if project.owner_ref.features.compileMemory?
+					result.features.compileMemory = project.owner_ref.features.compileMemory
 
 					
 			result.owner = @buildUserModelView project.owner_ref, "owner"
