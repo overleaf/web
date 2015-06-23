@@ -1,30 +1,42 @@
 script(type='text/ng-template', id='linkImageModalTemplate')
 	.modal-header
-		h3 Publish output file
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="$close()"
+		) &times;
+		h3 Output Image
 	.modal-body.link-image-modal
 		.thumbnail
 			display-image(ng-if="inputs.content.data",format="format",data="inputs.content.data")
 			.file(ng-if="!inputs.content.data")
 				i.fa.fa-file-text-o.fa-3x
 				span &nbsp; {{inputs.path}}
-		form.form-inline.toolbar.toolbar-borderless.row-spaced
-			span.text-monospace(ng-if="output.url[format]")
+		form.form-inline
+			div.text-monospace.row-spaced-small(ng-show="output.url[format]")
+				span.small Public URL: 
 				input.form-control.link-url(
 					ng-model="output.url[format]",
 					focus-on="generate-link-done"
 				)
-			.alert(ng-if="error")
+			.alert.alert-danger.row-spaced-small(ng-show="error")
 				span Error generating link
-			button(
-				ng-if="!output.url[format] && !error"
-				ng-click="generateLink()"
-				ng-disabled="generating"
-			).btn.btn-primary
-				span Generate permanent link
-				span(ng-show="generating") &nbsp;
-					i.fa.fa-refresh(
-						ng-class="{'fa-spin': generating }"
-					)
+			.row-spaced-small
+				button(
+					ng-show="!output.url[format] && !error"
+					ng-click="generateLink()"
+					ng-disabled="generating"
+				).btn.btn-primary
+					span(ng-hide="generating")
+						i.fa.fa-globe
+						| &nbsp;&nbsp;Share publicly
+					span(ng-show="generating")
+						i.fa.fa-spin.fa-refresh
+						| &nbsp;&nbsp;Generating URL
+				| &nbsp;&nbsp;
+				a(ng-href="{{inputs.url}}", target="_blank").btn.btn-default
+					i.fa.fa-download
+					| &nbsp;&nbsp;Download
 
 	.modal-footer
-		button.btn.btn-primary(ng-click="$close()") Done
+		button.btn.btn-default(ng-click="$close()") Done
