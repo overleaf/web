@@ -8,6 +8,7 @@
 }
 
 .pdf-uncompiled, .jupyter-uncompiled {
+	padding-top: @line-height-computed / 2;
 	.fa {
 		color: @blue;
 	}
@@ -167,7 +168,7 @@
 	@manual-input-height: 50px;
 
 	.jupyter-output-inner {
-		padding: @line-height-computed / 2;
+		padding: 0 @line-height-computed / 2;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -233,7 +234,7 @@
 	
 	.cell {
 		width: 100%;
-		margin-bottom: @line-height-computed / 2;
+		margin: @line-height-computed / 2 0;
 		.output {
 			margin-top: @line-height-computed / 2;
 			.chunk {
