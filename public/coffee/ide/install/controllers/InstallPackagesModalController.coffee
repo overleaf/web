@@ -53,6 +53,9 @@ define [
 					options = {
 						compiler: "apt-get-install"
 						package: "r-cran-#{$scope.installedPackage.toLowerCase()}"
+						env: {
+							DEBIAN_FRONTEND: "noninteractive"
+						}
 					}
 				else if $scope.inputs.rInstaller == "git"
 					options = {
