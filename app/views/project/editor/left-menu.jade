@@ -42,6 +42,14 @@ aside#left-menu.full-size(
 					ng-model="settings.autoComplete"
 					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
 				)
+				
+			.form-controls
+				label(for="lineWrap") Line Wrap
+				select(
+					name="lineWrap"
+					ng-model="settings.lineWrap"
+					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
+				)
 
 			.form-controls
 				label(for="theme") #{translate("theme")}

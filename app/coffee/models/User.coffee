@@ -27,6 +27,7 @@ UserSchema = new Schema
 							autoComplete:   {type : Boolean, default: true}
 							spellCheckLanguage :   {type : String, default: "en"}
 							pdfViewer   :   {type : String, default: "pdfjs"}
+							lineWrap    :   {type: Boolean, default: false}
 						}
 	features		  : {
 							collaborators: { type:Number,  default: Settings.defaultFeatures.collaborators }

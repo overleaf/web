@@ -58,6 +58,8 @@ module.exports =
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			if req.body.pdfViewer?
 				user.ace.pdfViewer = req.body.pdfViewer
+			if req.body.lineWrap?
+				user.ace.lineWrap = req.body.lineWrap
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email
