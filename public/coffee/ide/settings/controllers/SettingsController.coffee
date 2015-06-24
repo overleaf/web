@@ -28,6 +28,10 @@ define [
 			if pdfViewer != oldPdfViewer
 				settings.saveSettings({pdfViewer: pdfViewer})
 
+		$scope.$watch "settings.lineWrap", (lineWrap, oldLineWrap) =>
+			if lineWrap != oldLineWrap
+				settings.saveSettings({lineWrap: lineWrap})
+
 		$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
 			return if @ignoreUpdates
 			if oldLanguage? and language != oldLanguage

@@ -27,6 +27,7 @@ define [
 				keybindings: "="
 				fontSize: "="
 				autoComplete: "="
+				lineWrap: "="
 				sharejsDoc: "="
 				highlights: "="
 				text: "="
@@ -179,6 +180,10 @@ define [
 
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
+			
+				scope.$watch "lineWrap", (lineWrap) =>
+					if lineWrap?
+						editor.getSession().setUseWrapMode(lineWrap)
 
 				editor.setOption("scrollPastEnd", true)
 
@@ -221,6 +226,9 @@ define [
 					editor.setSession(new EditSession(lines))
 					resetSession()
 					session = editor.getSession()
+					
+					if scope.lineWrap
+						editor.getSession().setUseWrapMode(true)
 
 					doc = session.getDocument()
 					doc.on "change", onChange

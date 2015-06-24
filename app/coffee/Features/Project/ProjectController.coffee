@@ -237,6 +237,7 @@ module.exports = ProjectController =
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
+						lineWrap  : user.ace.lineWrap
 					}
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
