@@ -33,6 +33,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 		
 		meta(itemprop="image", name="image", content="https://www.sharelatex.com/favicon.ico")
 
+		block scripts
+		script(src="#{jsPath}libs/jquery-1.11.1.min.js")
+		script(src="#{jsPath}libs/angular-1.3.15.min.js")
+
 		- if (typeof(gaToken) != "undefined")
 			script(type='text/javascript').
 				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -59,19 +63,19 @@ html(itemscope, itemtype='http://schema.org/Product')
 				script(type='text/javascript').
 					window.intercomSettings = { app_id: '!{settings.analytics.intercom.app_id}' };
 			script(type='text/javascript').
-				window.intercomSettings.widget = {
-					"activator": ".js-intercom"
-				};
+				$(function() {
+					$(".js-intercom").on("click", function(e) {
+						Intercom("showNewMessage");
+						e.preventDefault();
+					})
+				});
 			script.
 				(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/!{settings.analytics.intercom.app_id}';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()
 
 
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
-			
-		block scripts
-		script(src="#{jsPath}libs/jquery-1.11.1.min.js")
-		script(src="#{jsPath}libs/angular-1.3.15.min.js")
+		
 		include sentry
 		script.
 			window.sharelatex = {
