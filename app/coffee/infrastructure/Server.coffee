@@ -69,6 +69,7 @@ app.use OldAssetProxy
 webRouter.use cookieParser(Settings.security.sessionSecret)
 webRouter.use session
 	resave: false
+	saveUninitialized:false
 	secret:Settings.security.sessionSecret
 	proxy: Settings.behindProxy
 	cookie:
