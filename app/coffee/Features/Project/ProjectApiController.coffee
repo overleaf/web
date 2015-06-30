@@ -7,7 +7,6 @@ logger = require("logger-sharelatex")
 module.exports = 
 	getProjectDetails : (req, res, next)->
 		{project_id} = req.params
-		req.session.destroy()
 		ProjectDetailsHandler.getDetails project_id, (err, projDetails)->
 			if err?
 				logger.log err:err, project_id:project_id, "something went wrong getting project details"
@@ -16,7 +15,6 @@ module.exports =
 
 	getProjectContent: (req, res, next) ->
 		{project_id} = req.params
-		req.session.destroy()
 		ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
 			return callback(error) if error?
 			ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->

@@ -42,13 +42,6 @@ describe 'ProjectApiController', ->
 			@ProjectDetailsHandler.getDetails.callsArgWith(1, @error = "error")
 			@controller.getProjectDetails @req, @res, @next
 			@next.calledWith(@error).should.equal true
-
-		it "should destroy the session", (done)->
-			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, @projDetails)
-			@res.json = (data)=>
-				@req.session.destroy.called.should.equal true
-				done()
-			@controller.getProjectDetails @req, @res
 	
 	describe "getProjectContent", ->
 		beforeEach ->
@@ -71,5 +64,3 @@ describe 'ProjectApiController', ->
 				])
 				.should.equal true
 				
-		it "shoudl destroy the session", ->
-			@req.session.destroy.called.should.equal true
