@@ -1,5 +1,5 @@
 AnalyticsController = require('./AnalyticsController')
 
 module.exports =
-	apply: (app) ->
-		app.post '/event/:event', AnalyticsController.recordEvent
+	apply: (webRouter, apiRouter) ->
+		webRouter.post '/event/:event', AnalyticsController.recordEvent
