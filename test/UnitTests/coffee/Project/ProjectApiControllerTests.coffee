@@ -45,13 +45,6 @@ describe 'ProjectApiController', ->
 				resCode.should.equal 500
 				done()
 			@controller.getProjectDetails @req, @res
-
-		it "should destroy the session", (done)->
-			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, @projDetails)
-			@res.json = (data)=>
-				@req.session.destroy.called.should.equal true
-				done()
-			@controller.getProjectDetails @req, @res
 	
 	describe "getProjectContent", ->
 		beforeEach ->
@@ -73,6 +66,3 @@ describe 'ProjectApiController', ->
 					{ path: "image.png", url: "#{@Settings.apis.filestore.url}/project/#{@project_id}/file/#{@file_id}"}
 				])
 				.should.equal true
-				
-		it "shoudl destroy the session", ->
-			@req.session.destroy.called.should.equal true
