@@ -45,6 +45,9 @@ module.exports = CompileController =
 	stopCompile: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
+	listFiles: (req, res, next = (error) ->) ->
+		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
+
 	sendJupyterRequest: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		{request_id, msg_type, content, engine} = req.body
