@@ -12,11 +12,16 @@ define [
 			@$scope.$on "project:joined", =>
 				@loadRootFolder()
 				@loadDeletedDocs()
+				@loadOutputFiles()
 				@$scope.$emit "file-tree:initialized"
 				
 			@$scope.$watch "rootFolder", (rootFolder) =>
 				if rootFolder?
 					@recalculateDocList()
+
+			@$scope.$watch "project.outputFiles", (outputFiles) =>
+				if outputFiles?
+					@loadOutputFiles()
 
 			@_bindToSocketEvents()
 
@@ -132,6 +137,9 @@ define [
 			for entity in @$scope.deletedDocs or []
 				callback(entity)
 
+			for entity in @$scope.outputFiles or []
+				callback(entity)
+
 		_forEachEntityInFolder: (folder, path, callback) ->
 			for entity in folder.children or []
 				if path?
@@ -198,6 +206,17 @@ define [
 					type: "doc"
 					deleted: true
 				}
+
+		loadOutputFiles: () ->
+			@$scope.outputFiles = []
+			for doc in @$scope.project.outputFiles or []
+				if not @findEntityByPath(doc.name)
+					@$scope.outputFiles.push {
+						name: doc.name
+						id: doc.name
+						type: "file"
+						url: "/project/#{@ide.project_id}/output/#{doc.name}"
+					}
 				
 		recalculateDocList: () ->
 			@$scope.docs = []
