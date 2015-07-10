@@ -45,6 +45,8 @@ define [
 				ide.fileTreeManager
 					.deleteEntity($scope.entity)
 					.success () ->
+						if $scope.entity?.type == "output"
+							ide.$scope.$broadcast 'reload-output-files'
 						$scope.state.inflight = false
 						$modalInstance.close()
 

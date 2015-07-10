@@ -214,7 +214,7 @@ define [
 					@$scope.outputFiles.push {
 						name: doc.name
 						id: doc.name
-						type: "file"
+						type: "output"
 						url: "/project/#{@ide.project_id}/output/#{doc.name}"
 					}
 				
