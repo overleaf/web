@@ -83,6 +83,13 @@ module.exports = CompileController =
 			return next(error) if error?
 			res.send(200)
 
+	deleteOutputFile: (req, res, next) ->
+		project_id = req.params.Project_id
+		file = req.params.file
+		CompileManager.deleteOutputFile project_id, file, (error) ->
+			return next(error) if error?
+			res.send(200)
+
 	compileAndDownloadOutput: (req, res, next)->
 		project_id = req.params.project_id
 		logger.log {project_id}, "compiling and downloading project"

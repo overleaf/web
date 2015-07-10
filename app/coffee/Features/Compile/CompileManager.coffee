@@ -57,6 +57,11 @@ module.exports = CompileManager =
 			return callback(error) if error?
 			ClsiManager.deleteAuxFiles project_id, limits, callback
 
+	deleteOutputFile: (project_id, file, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.deleteOutputFile project_id, file, limits, callback
+
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
 		Project.findById project_id, {owner_ref: 1}, (error, project) ->
 			return callback(error) if error?
