@@ -112,8 +112,8 @@ module.exports = class Router
 				next()
 			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
 
-		webRouter.del '/project/:Project_id/output/:file', SecurityManager.requestCanAccessProject, CompileController.deleteOutputFile
-		webRouter.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
+		webRouter.delete '/project/:Project_id/output/:file', SecurityManager.requestCanAccessProject, CompileController.deleteOutputFile
+		webRouter.delete "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
 		webRouter.get '/project/:Project_id/output', SecurityManager.requestCanAccessProject, CompileController.listFiles
 		webRouter.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
 		webRouter.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
