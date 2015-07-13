@@ -26,6 +26,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 			a(
 				href,
 				ng-click="startRenamingSelected()",
+				ng-hide="selected.type == 'output'"
 				tooltip="#{translate('rename')}",
 				tooltip-placement="bottom"
 			)

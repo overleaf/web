@@ -39,6 +39,9 @@ define [
 
 		$scope.openDeleteModalForSelected = () ->
 			$scope.$broadcast "delete:selected"
+
+		$scope.$on "entity:selected", (event, entity) ->
+			$scope.selected = entity
 	]
 
 	App.controller "NewDocModalController", [
