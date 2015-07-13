@@ -4,7 +4,7 @@ define [
 	class BinaryFilesManager
 		constructor: (@ide, @$scope) ->
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view != "track-changes" and entity.type == "file")
+				if (@$scope.ui.view != "track-changes" and entity.type in ["file", "output"])
 					@openFile(entity)
 
 		openFile: (file) ->

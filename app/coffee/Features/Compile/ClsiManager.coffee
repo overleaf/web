@@ -55,6 +55,10 @@ module.exports = ClsiManager =
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
 		request.del "#{compilerUrl}/project/#{project_id}", callback
 
+	deleteOutputFile: (project_id, file, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup)
+		request.del "#{compilerUrl}/project/#{project_id}/output/#{file}", callback
+
 	_getCompilerUrl: (compileGroup) ->
 		if compileGroup == "priority"
 			return Settings.apis.clsi_priority.url

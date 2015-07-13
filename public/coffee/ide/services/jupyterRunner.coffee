@@ -65,7 +65,17 @@ define [
 					message.content.language = "R"
 				else if m = message.content.ename == "MemoryError"
 					cell.memory_limit_exceeded = true
-			
+
+			if message.header.msg_type.match(/^file_(created|moved|deleted)/)
+				# need to refresh the output file listing when files change
+				# but wait until final reply is received before updating
+				cell?.refresh_output_files = true
+
+			if message.header.msg_type in ["execute_reply"] and cell?.refresh_output_files
+				console.log 'sending event "reload-output-files"'
+				ide.$scope.$broadcast "reload-output-files"
+				delete cell.refresh_output_files
+
 			if message.header.msg_type == "file_modified"
 				path = message.content.data['text/path']
 				message.content.data['text/url'] = "/project/#{ide.$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"

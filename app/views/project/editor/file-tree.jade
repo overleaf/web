@@ -26,6 +26,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 			a(
 				href,
 				ng-click="startRenamingSelected()",
+				ng-hide="selected.type == 'output'"
 				tooltip="#{translate('rename')}",
 				tooltip-placement="bottom"
 			)
@@ -88,9 +89,24 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 							i.fa.fa-fw.fa-file
 
 							span  {{ entity.name }}
-							
-		
 
+		div(ng-show="outputFiles.length > 0")
+			h3 Output Files
+			ul.list-unstyled.file-tree-list.deleted-docs
+				li(
+					ng-class="{ 'selected': entity.selected }",
+					ng-repeat="entity in outputFiles | orderBy:'name'",
+					ng-controller="FileTreeEntityController"
+				)
+					.entity
+						.entity-name(
+							ng-click="select()"
+						)
+							//- Just a spacer to align with folders
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file
+
+							span  {{ entity.name }}
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
@@ -112,6 +128,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 
 				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
 				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
+				i.fa.fa-fw.fa-image(ng-if="entity.type == 'output'")
 
 				span(
 					ng-hide="entity.renaming"
