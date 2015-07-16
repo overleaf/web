@@ -23,6 +23,10 @@ define [
 				if outputFiles?
 					@loadOutputFiles()
 
+			@$scope.$on 'first-cell-execution', () =>
+				if @$scope.outputFiles?.length == 0
+					@$scope.$broadcast 'reload-output-files'
+
 			@_bindToSocketEvents()
 
 		_bindToSocketEvents: () ->

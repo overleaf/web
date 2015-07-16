@@ -71,10 +71,14 @@ define [
 				# but wait until final reply is received before updating
 				cell?.refresh_output_files = true
 
-			if message.header.msg_type in ["execute_reply"] and cell?.refresh_output_files
-				console.log 'sending event "reload-output-files"'
-				ide.$scope.$broadcast "reload-output-files"
-				delete cell.refresh_output_files
+			if message.header.msg_type in ["execute_reply"]
+				if cell?.refresh_output_files
+					ide.$scope.$broadcast "reload-output-files"
+					delete cell.refresh_output_files
+				else if cell.execution_count == 1
+					# If the container has just inited we may need to update the
+					# output file list
+					ide.$scope.$broadcast "first-cell-execution"
 
 			if message.header.msg_type == "file_modified"
 				path = message.content.data['text/path']
