@@ -131,6 +131,9 @@ define [
 		
 			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
 				cell.timed_out = true
+
+			if message.header.msg_type == "system_status" and message.content.status == "killed_by_user"
+				cell.killed_by_user = true
 		
 			ide.$scope.$apply()
 		
