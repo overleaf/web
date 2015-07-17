@@ -43,7 +43,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| &nbsp;&nbsp;Or run a command directly!
 			
 			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.restarted")
-				div.alert.alert-info(ng-show="cell.restarted && !cell.memory_limit_exceeded")
+				div.alert.alert-info(ng-show="cell.restarted && !cell.memory_limit_exceeded && !cell.killed_by_user && !cell.timed_out")
 					p Session restarted
 					p(ng-show="!cell.restart_intentional").small
 						| A collaborator may have restarted your session, or we may be
