@@ -37,7 +37,7 @@ define [
 				code = "%run #{path}"
 				jupyterRunner.executeRequest code, engine
 			else if engine == "r"
-				code = "source('#{path}')"
+				code = "source('#{path}', print.eval=TRUE)"
 				jupyterRunner.executeRequest code, engine
 			else
 				throw new Error("not implemented yet")
