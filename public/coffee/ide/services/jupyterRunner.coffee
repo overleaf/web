@@ -23,7 +23,10 @@ define [
 			if message.header.msg_type == "shutdown_reply"
 				cell.restarted = true
 				if message.content.exit_code == 137 # SIGKILL
-					cell.memory_limit_exceeded = true
+					if !cell.killed_by_user && !cell.timed_out
+						cell.memory_limit_exceeded = true
+					else
+						cell.killed = true
 				else
 					cell.restart_intentional = true
 			
