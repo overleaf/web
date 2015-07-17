@@ -86,7 +86,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 						)
 							//- Just a spacer to align with folders
 							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file
+							i.fa.fa-fw(ng-class="'fa-' + iconTypeFromName(entity.name)")
 
 							span  {{ entity.name }}
 
@@ -104,7 +104,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 						)
 							//- Just a spacer to align with folders
 							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file
+							i.fa.fa-fw(ng-class="'fa-' + iconTypeFromName(entity.name)")
 
 							span  {{ entity.name }}
 
@@ -126,9 +126,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
 
-				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
-				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
-				i.fa.fa-fw.fa-image(ng-if="entity.type == 'output'")
+				i.fa.fa-fw(ng-if="entity.type != 'folder'", ng-class="'fa-' + iconTypeFromName(entity.name)")
 
 				span(
 					ng-hide="entity.renaming"

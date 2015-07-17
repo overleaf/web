@@ -50,13 +50,13 @@ aside#file-tree {
 				}
 			}
 
-			i.fa-folder-open, i.fa-folder {
-				color: lighten(desaturate(@link-color, 10%), 5%);
+			i.fa {
+				color: @gray-light;
 				font-size: 14px;
 			}
 
-			i.fa-file, i.fa-image, i.fa-file-pdf-o {
-				color: @gray-light;
+			i.fa-folder-open, i.fa-folder {
+				color: lighten(desaturate(@link-color, 10%), 5%);
 				font-size: 14px;
 			}
 
@@ -72,7 +72,7 @@ aside#file-tree {
 					color: @link-color;
 					border-right: 4px solid @link-color;
 					font-weight: bold;
-					i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image, i.fa-file-pdf-o {
+					i.fa {
 						color: @link-color;
 					}
 					padding-right: 32px;
