@@ -214,7 +214,7 @@ define [
 		loadOutputFiles: () ->
 			@$scope.outputFiles = []
 			for doc in @$scope.project.outputFiles or []
-				if not @findEntityByPath(doc.name)
+				if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
 					@$scope.outputFiles.push {
 						name: doc.name
 						id: doc.name
