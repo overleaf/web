@@ -157,7 +157,12 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 											i.fa.fa-fw.fa-link
 										
 									img(ng-if="cell.exported", ng-src="{{msg.content.data['text/url']}}")
-										
+
+				.alert.alert-danger(ng-if="cell.killed_by_user")
+					p
+						strong #{translate("Command terminated")}.
+						span(ng-show="cell.restarted") Your session has been restarted.
+
 				.alert.alert-danger(ng-if="cell.timed_out")
 					p
 						strong #{translate("timedout")}. 
