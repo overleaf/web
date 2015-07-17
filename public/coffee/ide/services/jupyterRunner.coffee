@@ -44,7 +44,7 @@ define [
 							# We've reset for some reason
 							cell.restarted = true
 			
-			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "file_modified"]
+			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
 				if not cell.restart_intentional # suppress any errors from the restart
 					cell.output.push message
 			
@@ -82,14 +82,16 @@ define [
 
 			if message.header.msg_type == "file_modified"
 				path = message.content.data['text/path']
-				message.content.data['text/url'] = "/project/#{ide.$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
-				parts = path.split(".")
-				if parts.length == 1
-					extension = null
-				else
-					extension = parts[parts.length - 1].toLowerCase()
-				if extension in ["png", "jpg", "jpeg", "svg", "gif"]
-					message.content.file_type = "image"
+				if !ide.shouldIgnoreOutputFile(path)
+					message.content.data['text/url'] = "/project/#{ide.$scope.project_id}/output/#{path}?cache_bust=#{Date.now()}"
+					parts = path.split(".")
+					if parts.length == 1
+						extension = null
+					else
+						extension = parts[parts.length - 1].toLowerCase()
+					if extension in ["png", "jpg", "jpeg", "svg", "gif"]
+						message.content.file_type = "image"
+					cell.output.push message
 			
 			if message.header.msg_type == "display_data"
 				if message.content.data['text/html']?

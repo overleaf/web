@@ -117,5 +117,11 @@ define [
 				$scope.darkTheme = false
 
 		ide.localStorage = localStorage
+		
+		IGNORE_OUTPUT_FILE_EXTENSIONS = ["pyc"]	
+		ide.shouldIgnoreOutputFile = (path) ->
+			return true if path[0] == "." # don't show dot files
+			ext = path.split(".").pop()
+			return (ext in IGNORE_OUTPUT_FILE_EXTENSIONS)
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
