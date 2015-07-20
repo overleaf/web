@@ -90,7 +90,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 
 							span  {{ entity.name }}
 
-		div(ng-show="outputFiles.length > 0")
+		div(ng-show="outputFiles.length > 0 && ui.view != 'track-changes'")
 			h3 Output Files
 			ul.list-unstyled.file-tree-list.deleted-docs
 				li(
