@@ -16,5 +16,5 @@ div.binary-file.full-size(
 		ng-if="['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
 	) #{translate("no_preview_available")}
 	a.btn.btn-info(
-		ng-href="{{ openFile.url + '?download=1' || '/project/' + project_id + '/file/' + openFile.id }}"
+		ng-href="{{ openFile.url ? openFile.url + '?download=1' : '/project/' + project_id + '/file/' + openFile.id }}"
 	) #{translate("download")} {{ openFile.name }}
