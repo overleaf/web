@@ -102,7 +102,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 								p The '{{ msg.content.package }}' package is not installed.
 								p
 									a(href, ng-click="installPackage(msg.content.package, msg.content.language)").btn.btn-info Install now
-							div(ng-if="msg.header.msg_type == 'error' && msg.content.type != 'missing_package'").alert.alert-danger.text-monospace
+							div(ng-if="msg.header.msg_type == 'error' && msg.content.type != 'missing_package'").alert.alert-danger.text-monospace.text-output.ansi-error
 								div {{ msg.content.evalue }}
 								div(ng-repeat="line in msg.content.traceback_escaped", ng-bind-html="line")
 									div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
