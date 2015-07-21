@@ -147,6 +147,10 @@ define [
 				.replace(/>/g, "&gt;")
 				.replace(/"/g, "&quot;")
 				.replace(/'/g, "&#039;")
+				.replace(/-{70,}/g, "<hr/>")
+				.replace(/\n/g, "<br/>")
+				.replace(/\s+Traceback/," Traceback")
+				.replace(/\/home\/user\/project\/(\S+)/g, '$1')
 			return $sce.trustAsHtml(ansi2html.toHtml(input))
 		
 		jupyterRunner =
