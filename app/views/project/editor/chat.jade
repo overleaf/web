@@ -53,6 +53,8 @@ aside.chat(
 			on-enter="sendMessage()",
 			ng-model="newMessageContent",
 			ng-click="resetUnreadMessages()"
+			ng-focus="showInterCom(false)"
+			ng-blur="showInterCom(true)"
 		)
 
 
