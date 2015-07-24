@@ -23,6 +23,7 @@ define [
 				event_tracking.send("script", "multiple-run")
 		
 		$scope.runSelection = () ->
+			ide.$scope.$broadcast("flush-changes")
 			trackRun()
 			ide.$scope.$broadcast("editor:gotoNextLine")
 			code   = ide.$scope.editor.selection.lines.join("\n")
@@ -30,6 +31,7 @@ define [
 			jupyterRunner.executeRequest code, engine
 		
 		$scope.runAll = () ->
+			ide.$scope.$broadcast("flush-changes")
 			trackRun()
 			engine = $scope.engine
 			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
