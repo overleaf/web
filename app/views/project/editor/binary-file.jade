@@ -6,14 +6,14 @@ div.binary-file.full-size(
 )
 	img(
 		ng-src="{{ openFile.url ||  '/project/' + project_id + '/file/' + openFile.id }}"
-		ng-if="['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(openFile)) > -1"
+		ng-if="isImage(openFile)"
 	)
 	img(
 		ng-src="{{ openFile.url ||  '/project/' + project_id + '/file/' + openFile.id }}?format=png"
-		ng-if="['pdf', 'eps'].indexOf(extension(openFile)) > -1"
+		ng-if="isVectorWithPreview(openFile)"
 	)
 	p.no-preview(
-		ng-if="['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
+		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile)"
 	) #{translate("no_preview_available")}
 	a.btn.btn-info(
 		ng-href="{{ openFile.url ? openFile.url + '?download=1' : '/project/' + project_id + '/file/' + openFile.id }}"
