@@ -74,6 +74,14 @@ define [
 
 		$scope.chat = {}
 
+		# we want to hide the intercom button when some chat window is open
+		# and the same for the console input box
+		$scope.showInterCom = (visible = true) ->
+			if visible
+				$('#intercom-container').show()
+			else
+				$('#intercom-container').hide()
+			return null # don't return dom node
 		
 		window._ide = ide
 

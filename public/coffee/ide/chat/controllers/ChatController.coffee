@@ -29,11 +29,3 @@ define [
 		$scope.loadMoreMessages = ->
 			chatMessages.loadMoreMessages()
 			
-		# FIXME: we need an intercom directive instead of putting this here
-		# we want to hide the intercom button when the chat window is open
-		# we could do the same for the console input box
-		$scope.showInterCom = (visible = true) ->
-			if visible
-				$('#intercom-container').show()
-			else
-				$('#intercom-container').hide()
