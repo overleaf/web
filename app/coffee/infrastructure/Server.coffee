@@ -24,6 +24,7 @@ Mongoose = require("./Mongoose")
 
 cookieParser = require('cookie-parser')
 oneDayInMilliseconds = 86400000
+ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
 translations = require("translations-sharelatex").setup(Settings.i18n)
@@ -87,6 +88,7 @@ webRouter.use (req, res, next) ->
 	req.session.touch()
 	next()
 
+webRouter.use ReferalConnect.use
 expressLocals(app, webRouter, apiRouter)
 
 if app.get('env') == 'production'
