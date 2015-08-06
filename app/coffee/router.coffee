@@ -12,6 +12,8 @@ TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
 SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
 UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
+ReferalController = require('./Features/Referal/ReferalController')
+ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
@@ -69,6 +71,9 @@ module.exports = class Router
 		AnalyticsRouter.apply(webRouter, apiRouter)
 		
 		Modules.applyRouter(webRouter, apiRouter)
+
+		if Settings.enableSubscriptions
+			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
 
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage

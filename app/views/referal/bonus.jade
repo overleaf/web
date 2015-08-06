@@ -24,7 +24,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='https://twitter.com/share?text=is%20trying%20out%20ShareLaTeX,%20the%20online%20Python%20and%20R%20editor&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.getdatajoy.com', target="_blank").twitter Tweet
+										a(href='https://twitter.com/share?text=DataJoy%20is%20an%20awesome%20online%20Python%20and%20R%20editor%20for%20data%20and%20stats&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.getdatajoy.com', target="_blank").twitter Tweet
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -39,7 +39,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='mailto:?subject=Online Python and R editor you may like &body=Hey, I have been using DataJoy, an online Python and R editor recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email #{translate("email_us_to_your_friends")}
+										a(href='mailto:?subject=Online Python and R editor you may like &body=Hey, I have been using DataJoy, an online Python and R editor recently and thought you might like to check it out: #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email', target="_blank").email #{translate("email_us_to_your_friends")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -72,10 +72,9 @@ block content
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")
-									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
-									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
-									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
-									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("unlimited_collabs")}
+									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") Increased timeout
+									.perk(style="left: 50%;", class = refered_user_count >= 5 ? "active" : "") More compute resources
+									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") Free Dropbox and Github Sync
 							.row &nbsp;
 
 							.row.ab-bonus
@@ -99,8 +98,8 @@ block content
 
 								p #{translate("can_link_to_sl_with_html")}
 								p
-									textarea.col-md-12(readonly=true)
-										<a href="#{buildReferalUrl("d")}">Online LaTeX Editor ShareLaTeX</a>
+									textarea(readonly=true)
+										<a href="#{buildReferalUrl("d")}">DataJoy, the online Python and R editor</a>
 
 								p #{translate("thanks")}!
 
@@ -125,18 +124,17 @@ block content
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
 	script(src='https://connect.facebook.net/en_US/all.js')
 	script(type='text/javascript').
-		FB.init({appId: "148710621956179", status: true, cookie: true});
+		FB.init({appId: '449712601898285', xfbml: true, version: 'v2.4'});
 
 		function postToFeed() {
-
 			// calling the API ...
 			var obj = {
 				method: 'feed',
-				redirect_uri: 'https://www.getdatajoy.com',
+				redirect_uri: 'https://www.getdatajoy.com/',
 				link: '!{buildReferalUrl("fb")}',
 				picture: 'https://www.getdatajoy.com/img/logo.png',
 				name: 'DataJoy - Online Python and R Editor',
-				caption: 'Free Unlimited Projects and Compiles',
+				caption: 'An Online Python and R Editor',
 				description: 'DataJoy is a free online Python and R Editor. Runs your scripts online and work together in real-time, with full version history.'
 			};
 
