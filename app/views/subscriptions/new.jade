@@ -53,6 +53,15 @@ block content
 										strong {{price.currency.symbol}}{{basePriceWithTax}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
+
+									a.small.subdued.pull-right(href, ng-hide="showCouponField || data.coupon", ng-click="showCouponField = true") Enter a Coupon Code
+
+							.row(ng-if="showCouponField || data.coupon")
+								hr
+								.col-md-6.col-md-offset-3
+									.form-group
+										input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="Coupon Code")
+
 						.row
 							.col-md-12
 								form(ng-show="planName")
@@ -155,11 +164,6 @@ block content
 											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
 												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
 													mixin countries_options()
-									.row
-										.col-md-8
-											if (showCouponField)
-												.form-group
-													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 									.row
 										.col-md-8
 											if (showVatField)
