@@ -53,8 +53,16 @@ define [
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
+			$scope.coupon = pricing.items.coupon
 			$scope.trialLength = pricing.items.plan.trial?.length
 			$scope.monthlyBilling = pricing.items.plan.period.length == 1
+			
+			$scope.basePriceWithTax = parseFloat($scope.price.base.plan.unit)
+			if $scope.price.taxes.length > 0
+				tax = $scope.price.taxes[0]
+				$scope.basePriceWithTax = $scope.basePriceWithTax * (1 + parseFloat(tax.rate))
+			$scope.basePriceWithTax = $scope.basePriceWithTax.toFixed(2)
+
 			$scope.$apply()
 
 		$scope.applyCoupon = ->

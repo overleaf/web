@@ -42,8 +42,15 @@ block content
 							.row
 								.col-md-12.text-center
 									div(ng-if="trialLength") !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
-									div(ng-if="price")
+									div(ng-if="price && coupon.duration != 'temporal'")
 										strong {{price.currency.symbol}}{{price.next.total}} 
+										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
+										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
+									div(ng-if="coupon && coupon.duration == 'temporal'")
+										strong {{price.currency.symbol}}{{price.next.total}} for {{coupon.temporal_amount}} {{coupon.temporal_unit}}s.
+										br
+										span Then 
+										strong {{price.currency.symbol}}{{basePriceWithTax}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
 						.row
