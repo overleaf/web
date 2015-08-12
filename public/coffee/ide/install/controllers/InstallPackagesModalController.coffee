@@ -67,6 +67,22 @@ define [
 							"sudo", "Rscript", "-e", "library(devtools); install_github('#{$scope.installedPackage}')"
 						]
 					}
+				else if $scope.inputs.rInstaller == "biocLite"
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "Rscript", "-e",
+							"if (!require(BiocInstaller,quietly=TRUE)) {
+								source('http://bioconductor.org/biocLite.R')
+							} else {
+								library(BiocInstaller);
+							};
+							biocLite('#{$scope.installedPackage}') ;
+							suppressMessages(suppressWarnings(if(!require('#{$scope.installedPackage}')) {
+								stop('Could not load package', call.=FALSE)
+							}))"
+						]
+					}
 				else
 					console.error "Unknown R installer: ", $scope.inputs.rInstaller
 					return
