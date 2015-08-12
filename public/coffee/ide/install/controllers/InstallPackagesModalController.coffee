@@ -22,10 +22,17 @@ define [
 			options = {}
 			if $scope.selectedTab.python
 				if $scope.inputs.pythonInstaller == "conda"
+					package_name = $scope.installedPackage.toLowerCase()
+					if result = package_name.match(/(.*)\/(.*)/)
+						channel = "https://conda.binstar.org/" + result[1]
+						package_name = result[2]
 					options = {
 						compiler: "command"
-						command: [
-							"sudo", "conda", "install", "--yes", "--quiet", $scope.installedPackage
+						command: if channel? then [
+							"sudo", "conda", "install", "--yes", "--quiet", "--channel", channel, package_name
+						]
+						else [
+							"sudo", "conda", "install", "--yes", "--quiet", package_name
 						]
 					}
 				else if $scope.inputs.pythonInstaller == "pip"
