@@ -46,7 +46,10 @@ define [
 					options = {
 						compiler: "command"
 						command: [
-							"sudo", "Rscript", "-e", "install.packages('#{$scope.installedPackage}')"
+							"sudo", "Rscript", "-e", "install.packages('#{$scope.installedPackage}');
+							suppressMessages(suppressWarnings(if(!require('#{$scope.installedPackage}')) {
+									stop('Could not load package', call.=FALSE)
+							}))"
 						]
 					}
 				else if $scope.inputs.rInstaller == "apt-get"
