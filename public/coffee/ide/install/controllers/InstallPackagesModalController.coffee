@@ -50,9 +50,12 @@ define [
 						]
 					}
 				else if $scope.inputs.rInstaller == "apt-get"
+					package_name = $scope.installedPackage.toLowerCase()
+					if not package_name.match(/^r-/)
+						package_name = "r-cran-#{package_name}"
 					options = {
 						compiler: "apt-get-install"
-						package: "r-cran-#{$scope.installedPackage.toLowerCase()}"
+						package: package_name
 						env: {
 							DEBIAN_FRONTEND: "noninteractive"
 						}
