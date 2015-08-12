@@ -15,7 +15,20 @@ define [
 		
 		$scope.output = {}
 	
-		$scope.openInstallPackagesModal = (autoStart) ->
+		$scope.openInstallPackagesModal = (autoStart, language) ->
+			if not $scope.autoStart?
+				# on the first open, try to guess the project type from the
+				# mode of the currently file in the editor (editor.ace_mode is
+				# passed in, it is either "r" or "python"). TODO: we should
+				# have a project setting for the language.
+				switch language
+					when "python"
+						$scope.selectedTab.python = true
+						$scope.selectedTab.R = false
+					when "r", "R"
+						$scope.selectedTab.python = false
+						$scope.selectedTab.R = true
+
 			$scope.autoStart = !!autoStart
 			$modal.open {
 				templateUrl: "installPackagesModalTemplate"
