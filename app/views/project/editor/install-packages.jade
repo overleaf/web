@@ -1,7 +1,7 @@
 li(ng-controller="InstallPackagesController")
 	a(
 		href,
-		ng-click="openInstallPackagesModal()"
+		ng-click="openInstallPackagesModal(false, editor.ace_mode)"
 	)
 		i.fa.fa-fw.fa-archive
 		| &nbsp;&nbsp; Install packages
