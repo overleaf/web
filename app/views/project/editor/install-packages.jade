@@ -30,6 +30,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					| (Packages will be installed from CRAN. 
 					| Install from 
 					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					| , 
+					a(href, ng-click="inputs.rInstaller = 'biocLite'") Bioconductor
 					|  or 
 					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
 					|  instead.)
@@ -37,8 +39,20 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					| (Packages will be installed with 
 					span.text-monospace install.packages('...')
 					| . 
+					br
 					| Install from 
 					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					| , 
+					a(href, ng-click="inputs.rInstaller = 'biocLite'") Bioconductor
+					|  or 
+					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
+					|  instead.)
+				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'biocLite'")
+					| (Packages will be installed from Bioconductor. 
+					| Install from 
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					| , 
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
 					|  or 
 					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
 					|  instead.)
@@ -46,8 +60,10 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					| (Packages will be installed from GitHub. 
 					| Install from 
 					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
-					|  or 
+					| , 
 					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					|  or 
+					a(href, ng-click="inputs.rInstaller = 'biocLite'") Bioconductor
 					|  instead.)
 
 		form.form-inline.toolbar.toolbar-borderless.row-spaced
