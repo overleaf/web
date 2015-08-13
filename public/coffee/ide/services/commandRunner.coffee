@@ -152,14 +152,14 @@ define [
 			_parseChunk: (output) ->
 				stderr = output.text
 				parsedErrors = []
-				stderr = stderr.replace /ImportError: No module named (\S+)/g, (match, packageName) ->
+				stderr = stderr.replace /ImportError: No module named ['‘]?(\w+)[’']?/g, (match, packageName) ->
 					parsedErrors.push {
 						type: "missing_package"
 						package: packageName
 						language: "python"
 					}
 					return match
-				stderr = stderr.replace /.*there is no package called ['‘](.*)[’']/, (match, packageName) ->
+				stderr = stderr.replace /.*there is no package called ['‘](\w+)[’']/, (match, packageName) ->
 					parsedErrors.push {
 						type: "missing_package"
 						package: packageName

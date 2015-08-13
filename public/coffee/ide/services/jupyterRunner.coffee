@@ -56,12 +56,12 @@ define [
 			
 			if message.header.msg_type == "error"
 				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
-				if m = message.content.evalue?.match(/^No module named (.*)$/)
+				if m = message.content.evalue?.match(/^No module named ['‘]?(\w+)[’']?$/)
 					packageName = m[1]
 					message.content.type = "missing_package"
 					message.content.package = packageName
 					message.content.language = "python"
-				else if m = message.content.evalue?.match(/there is no package called ‘(.*)’/)
+				else if m = message.content.evalue?.match(/there is no package called ['‘]?(\w+)[’']?/)
 					packageName = m[1]
 					message.content.type = "missing_package"
 					message.content.package = packageName
