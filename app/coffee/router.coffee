@@ -39,12 +39,14 @@ RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
+
 module.exports = class Router
-	constructor: (webRouter, apiRouter)->
+	constructor: (webRouter, apiRouter, passport)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-		
+		webRouter.get  '/local_login', UserPagesController.localLoginPage
+
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 

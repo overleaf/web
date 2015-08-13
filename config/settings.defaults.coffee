@@ -13,7 +13,7 @@ httpAuthPass = "password"
 httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
-sessionSecret = "secret-please-change"
+sessionSecret = "$"
 
 module.exports =
 	# File storage
@@ -246,7 +246,7 @@ module.exports =
 	
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
-	allowPublicAccess: false
+	allowPublicAccess: true
 
 	# Internal configs
 	# ----------------

@@ -7,6 +7,12 @@ Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
 UserSchema = new Schema
+	google			  	: {
+		id 			: String
+		token 		: String
+		name 		: String
+		email 		: String
+	}
 	email             : {type : String, default : ''}
 	first_name        : {type : String, default : ''}
 	last_name         : {type : String, default : ''}
