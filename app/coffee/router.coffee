@@ -46,9 +46,16 @@ module.exports = class Router
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
 		webRouter.get  '/local_login', UserPagesController.localLoginPage
+		webRouter.get  '/auth/google', passport.authenticate('google', {scope: ['profile','email']})
+		webRouter.get  '/auth/google/callback', passport.authenticate('google',{
+			successRedirect : '/project'
+			failureRedirect : '/login'
+			})
+
 
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
+		
 
 		webRouter.post '/login', AuthenticationController.login
 		webRouter.get  '/logout', UserController.logout

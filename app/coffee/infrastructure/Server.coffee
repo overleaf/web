@@ -46,10 +46,12 @@ app = express()
 # ===================================
 # =============== PASSPORT ==========
 passport = require('passport')
+# console.log('>> ',passport)
+require('../Features/User/UserPassport')(passport)
 app.use session({secret: Settings.security.sessionSecret})
-app.use passport.initialize
-app.use passport.session
-
+app.use(passport.initialize())
+app.use(passport.session())
+# console.log('>> ',passport)
 
 # =============== PASSPORT ==========
 # ===================================
