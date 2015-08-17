@@ -47,7 +47,7 @@ app = express()
 # =============== PASSPORT ==========
 passport = require('passport')
 # console.log('>> ',passport)
-require('../Features/User/UserPassport')(passport)
+require('../Features/Authentication/AuthenticationPassport')(passport)
 app.use session({secret: Settings.security.sessionSecret})
 app.use(passport.initialize())
 app.use(passport.session())
