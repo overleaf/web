@@ -43,7 +43,20 @@ else
 	staticCacheAge = 0
 
 app = express()
+# ===================================
+# =============== PASSPORT ==========
+passport = require('passport')
+# console.log('>> ',passport)
+require('../Features/Authentication/AuthenticationPassport')(passport)
+app.use session({secret: Settings.security.sessionSecret})
+app.use(passport.initialize())
+app.use(passport.session())
+# console.log('>> ',passport)
 
+# =============== PASSPORT ==========
+# ===================================
+
+# Routes
 webRouter = express.Router()
 apiRouter = express.Router()
 
@@ -65,7 +78,6 @@ app.use methodOverride()
 app.use metrics.http.monitor(logger)
 app.use RedirectManager
 app.use OldAssetProxy
-
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
 webRouter.use session
@@ -129,7 +141,7 @@ server = require('http').createServer(app)
 app.use(apiRouter)
 app.use(webRouter)
 
-router = new Router(webRouter, apiRouter)
+router = new Router(webRouter, apiRouter, passport)
 
 module.exports =
 	app: app

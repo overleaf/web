@@ -26,6 +26,12 @@ module.exports =
 			title: 'login',
 			redir: req.query.redir
 
+	localLoginPage : (req, res)->
+		console.log 'localLogin'
+		res.render 'user/localLogin',
+			title: 'login',
+			redir: req.query.redir
+
 	settingsPage : (req, res, next)->
 		logger.log user: req.session.user, "loading settings page"
 		UserLocator.findById req.session.user._id, (err, user)->

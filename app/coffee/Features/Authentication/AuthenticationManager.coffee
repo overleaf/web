@@ -9,19 +9,28 @@ module.exports = AuthenticationManager =
 		# Using Mongoose for legacy reasons here. The returned User instance
 		# gets serialized into the session and there may be subtle differences
 		# between the user returned by Mongoose vs mongojs (such as default values)
+		# console.log 'in authenticate'
 		User.findOne query, (error, user) =>
 			return callback(error) if error?
 			if user?
-				if user.hashedPassword?
-					bcrypt.compare password, user.hashedPassword, (error, match) ->
-						return callback(error) if error?
-						if match
-							callback null, user
-						else
-							callback null, null
+				console.log 'user? >> true'
+				if user.google?
+					console.log 'user google'
+					callback null, user
 				else
-					callback null, null
+					if user.hashedPassword?
+						bcrypt.compare password, user.hashedPassword, (error, match) ->
+							return callback(error) if error?
+							if match
+								console.log 'match? >> true'
+								callback null, user
+							else
+								console.log 'match? >> false'
+								callback null, null
+					else
+						callback null, null
 			else
+				console.log 'user? >> false'
 				callback null, null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->

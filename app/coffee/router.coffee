@@ -40,14 +40,29 @@ InactiveProjectController = require("./Features/InactiveData/InactiveProjectCont
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
+
 module.exports = class Router
-	constructor: (webRouter, apiRouter)->
+	constructor: (webRouter, apiRouter, passport)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-		
+		webRouter.get  '/local_login', UserPagesController.localLoginPage
+		webRouter.get  '/auth/google', 
+			passport.authenticate('google', {scope: ['profile','email']})
+
+		webRouter.get  '/auth/google/callback', 
+			passport.authenticate('google', {failureRedirect : '/login'}),
+			(req, res)->
+				AuthenticationController.login(req,res)
+
+				
+
+
+
+
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
+		
 
 		webRouter.post '/login', AuthenticationController.login
 		webRouter.get  '/logout', UserController.logout

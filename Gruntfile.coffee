@@ -1,3 +1,4 @@
+
 fs = require "fs"
 
 module.exports = (grunt) ->
@@ -16,6 +17,7 @@ module.exports = (grunt) ->
 		execute:
 			app:
 				src: "app.js"
+
 
 		coffee:
 			app_dir: 

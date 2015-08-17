@@ -13,9 +13,14 @@ httpAuthPass = "password"
 httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
-sessionSecret = "secret-please-change"
+sessionSecret = "$"
 
 module.exports =
+	googleAuth	:
+		clientID		: '496201282373-nf8hsmkr29m03pj4aa01qgmg7fedt3b8.apps.googleusercontent.com'
+		clientSecret	: 'bsQJIw-BaEvY3crWfM33qcBq'
+		callbackURL		: 'http://127.0.0.1:3000/auth/google/callback'
+	
 	# File storage
 	# ------------
 	#
@@ -246,7 +251,7 @@ module.exports =
 	
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
-	allowPublicAccess: false
+	allowPublicAccess: true
 
 	# Internal configs
 	# ----------------
