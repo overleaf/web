@@ -10,4 +10,6 @@ define [
 			# only binary files stored in mongo have previews, not output
 			# file on clsi
 			return !file.url? && ['pdf', 'eps'].indexOf(extension(file)) > -1
+		$scope.isCsvWithPreview = (file) ->
+			return !file.url? && ['csv'].indexOf(extension(file)) > -1
 	]
