@@ -38,6 +38,7 @@ RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 LinkController = require("./Features/Link/LinkController")
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
+PreviewController = require('./Features/Previews/PreviewController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -176,6 +177,8 @@ module.exports = class Router
 		webRouter.get   "/public/:public_id/*", LinkController.getFile # public image links
 		
 		webRouter.get  /learn(\/.*)?/, AnalyticsMiddlewear.injectIntercomDetails, WikiController.getPage
+
+		webRouter.get "/preview/csv/:project_id/file/:file_id", SecurityManager.requestCanAccessProject, PreviewController.getPreviewCsv
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
