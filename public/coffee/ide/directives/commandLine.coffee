@@ -40,7 +40,7 @@ define [
 					scope.onRun()
 				
 				element.bind "keydown", (event) ->
-					if event.which == ENTER
+					if event.which == ENTER and not event.shiftKey
 						event.preventDefault()
 						runCommand()
 					else if event.which == UP

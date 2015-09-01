@@ -19,6 +19,7 @@ define [
 	"ide/link-image/index"
 	"ide/directives/layout"
 	"ide/directives/commandLine"
+	"ide/directives/expandToContentHeight"
 	"ide/services/ide"
 	"ide/services/commandRunner"
 	"ide/services/jupyterRunner"

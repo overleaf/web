@@ -208,10 +208,11 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				.execution-count
 					| In[]:
 				.cell-content
-					input(
-						type="text",
+					textarea(
 						ng-model="manualInput",
 						command-line,
+						expand-to-content-height,
+						expand-to-content-height-max="200",
 						on-run="runManualInput()",
 						placeholder = "Command...",
 						ng-focus="ui.chatOpen || showInterCom(false)",
