@@ -16,7 +16,7 @@ module.exports = PreviewHandler =
 		request opts, (err, response, body) ->
 			return callback(err, null) if err?
 			# TODO: handle 404 etc
-			callback(null, {})
+			callback(null, body)
 
 	_build_url: (file_url) ->
 		return "#{settings.apis.previewer.url}/preview/csv?fileUrl=#{file_url}"

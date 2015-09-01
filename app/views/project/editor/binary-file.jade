@@ -12,8 +12,12 @@ div.binary-file.full-size(
 		ng-src="{{ openFile.url ||  '/project/' + project_id + '/file/' + openFile.id }}?format=png"
 		ng-if="isVectorWithPreview(openFile)"
 	)
+	p.csv-preview(
+		ng-if="isCsvWithPreview(openFile)"
+	)
+		| todo: show the csv preview
 	p.no-preview(
-		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile)"
+		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile)"
 	) #{translate("no_preview_available")}
 	a.btn.btn-info(
 		ng-href="{{ openFile.url ? openFile.url + '?download=1' : '/project/' + project_id + '/file/' + openFile.id }}"
