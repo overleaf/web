@@ -178,7 +178,7 @@ module.exports = class Router
 		
 		webRouter.get  /learn(\/.*)?/, AnalyticsMiddlewear.injectIntercomDetails, WikiController.getPage
 
-		webRouter.get "/preview/csv/:project_id/file/:file_id", SecurityManager.requestCanAccessProject, PreviewController.getPreviewCsv
+		webRouter.get "/project/:Project_id/file/:file_id/preview/csv", SecurityManager.requestCanAccessProject, PreviewController.getPreviewCsv
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index

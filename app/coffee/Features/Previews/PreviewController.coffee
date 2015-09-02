@@ -8,7 +8,7 @@ _ = require('underscore')
 module.exports = PreviewController =
 
 	getPreviewCsv: (req, res) ->
-		project_id = req.params.project_id
+		project_id = req.params.Project_id
 		file_id = req.params.file_id
 		logger.log project_id: project_id, file_id: file_id, "getting preview of csv file"
 		ProjectLocator.findElement project_id: project_id, element_id: file_id, type: 'file', (err, file) ->
