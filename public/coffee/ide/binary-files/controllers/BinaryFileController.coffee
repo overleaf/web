@@ -27,7 +27,7 @@ define [
 					console.log ">> success"
 					$scope.state.preview = data
 				.error () ->
-					consale.log ">> failure"
+					console.log ">> failure"
 					$scope.state.message = 'No preview available.'
 					$scope.state.preview = null
 
