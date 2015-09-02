@@ -20,7 +20,10 @@ div.binary-file.full-size(
 	)
 		p(ng-if="state.preview == null") {{state.message}}
 		p(ng-if="state.preview != null")
-			| Preview goes here...
+			table.table.table-bordered
+				tr(ng-repeat="row in state.preview.rows")
+					td(ng-repeat="cell in row") {{cell}}
+				
 	
 	p.no-preview(
 		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile)"
