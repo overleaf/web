@@ -102,7 +102,9 @@ module.exports =
 			url: "http://localhost:8080/json"
 		realTime:
 			url: "http://localhost:3026"
-			
+		previewer:
+			url: "http://localhost:3021"
+
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
 		showSocialButtons: false
