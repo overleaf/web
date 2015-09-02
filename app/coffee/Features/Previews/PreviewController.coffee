@@ -16,7 +16,6 @@ module.exports = PreviewController =
 				logger.log err: err, project_id: project_id, file_id: file_id, "error finding element for file"
 				return res.sendStatus 500
 
-			console.log file
 			file_url = _build_filestore_url(project_id, file_id)
 
 			PreviewHandler.getPreview file_url, (err, preview) ->

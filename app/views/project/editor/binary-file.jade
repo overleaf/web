@@ -18,11 +18,20 @@ div.binary-file.full-size(
 		ng-if="isCsvWithPreview(openFile)"
 		ng-controller="CsvPreviewController"
 	)
-		p(ng-if="state.preview == null") {{state.message}}
-		p(ng-if="state.preview != null")
+		div(ng-if="state.preview == null")
+			p {{state.message}}
+		div.table-responsive(ng-if="state.preview != null", ng-cloak="true")
 			table.table.table-bordered
-				tr(ng-repeat="row in state.preview.rows")
-					td(ng-repeat="cell in row") {{cell}}
+				thead(ng-if="state.preview.labels")
+					tr
+						th #
+						th(ng-repeat="label in state.preview.labels track by $index") {{label}}
+				tbody
+					tr(ng-repeat="row in state.preview.rows track by $index")
+						td {{$index}}
+						td(ng-repeat="cell in row track by $index") {{cell}}
+					tr
+						td ...
 				
 	
 	p.no-preview(
