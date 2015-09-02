@@ -24,7 +24,7 @@ div.binary-file.full-size(
 			table.table.table-bordered
 				thead(ng-if="state.preview.labels")
 					tr
-						th #
+						th(width="80") #
 						th(ng-repeat="label in state.preview.labels track by $index") {{label}}
 				tbody
 					tr(ng-repeat="row in state.preview.rows track by $index")
