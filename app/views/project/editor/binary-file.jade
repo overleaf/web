@@ -36,6 +36,7 @@ div.binary-file.full-size(
 		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile)"
 	) #{translate("no_preview_available")}
 	
-	a.btn.btn-info(
-		ng-href="{{ openFile.url ? openFile.url + '?download=1' : '/project/' + project_id + '/file/' + openFile.id }}"
-	) #{translate("download")} {{ openFile.name }}
+	p
+		a.btn.btn-info(
+			ng-href="{{ openFile.url ? openFile.url + '?download=1' : '/project/' + project_id + '/file/' + openFile.id }}"
+		) #{translate("download")} {{ openFile.name }}
