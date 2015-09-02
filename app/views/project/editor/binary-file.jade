@@ -21,10 +21,10 @@ div.binary-file.full-size(
 		div(ng-if="state.preview == null")
 			p {{state.message}}
 		div.table-responsive(ng-if="state.preview != null", ng-cloak="true")
-			table.table.table-bordered
+			table.table.table-striped
 				thead(ng-if="state.preview.labels")
 					tr
-						th(width="80") #
+						th(width="60") #
 						th(ng-repeat="label in state.preview.labels track by $index") {{label}}
 				tbody
 					tr(ng-repeat="row in state.preview.rows track by $index")
