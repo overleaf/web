@@ -14,22 +14,23 @@ div.binary-file.full-size(
 		ng-if="isVectorWithPreview(openFile)"
 	)
 	
-	div.csv-preview(
+	div.csv-preview-container(
 		ng-if="isCsvWithPreview(openFile)"
 		ng-controller="CsvPreviewController"
 	)
 		div(ng-if="state.preview == null")
 			p {{state.message}}
-		div.table-responsive(ng-if="state.preview != null", ng-cloak="true")
-			table.table.table-striped
-				thead(ng-if="state.preview.labels")
-					tr
-						th(width="60") #
-						th(ng-repeat="label in state.preview.labels track by $index") {{label}}
-				tbody
-					tr(ng-repeat="row in state.preview.rows track by $index")
-						td {{$index}}
-						td(ng-repeat="cell in row track by $index") {{cell}}
+		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
+			div.table-responsive
+				table.table.table-striped
+					thead(ng-if="state.preview.labels")
+						tr
+							th(width="60") #
+							th(ng-repeat="label in state.preview.labels track by $index") {{label}}
+					tbody
+						tr(ng-repeat="row in state.preview.rows track by $index")
+							td {{$index}}
+							td(ng-repeat="cell in row track by $index") {{cell}}
 				
 	
 	p.no-preview(
