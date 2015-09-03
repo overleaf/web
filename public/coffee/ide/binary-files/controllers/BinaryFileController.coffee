@@ -34,11 +34,9 @@ define [
 		$scope.getPreview = () =>
 			$http.get("/project/#{$scope.project_id}/file/#{$scope.file_id}/preview/csv")
 				.success (data) ->
-					console.log ">> success"
 					$scope.state.preview = data
 					$timeout($scope.setHeight, 0)
 				.error () ->
-					console.log ">> failure"
 					$scope.state.message = 'No preview available.'
 					$scope.state.preview = null
 
