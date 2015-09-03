@@ -20,4 +20,5 @@ module.exports = PreviewController =
 			PreviewHandler.getPreviewCsv file_url, (err, preview) ->
 				if err?
 					logger.log err: err, project_id: project_id, file_id: file_id, "error getting preview"
+					return res.sendStatus 500
 				res.send preview
