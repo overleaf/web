@@ -30,7 +30,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
-		@session_id = "mock-session-id"
+		@request_id = "mock-session-id"
 		@user = 
 			features:
 				compileGroup: "premium"
@@ -47,7 +47,7 @@ describe "CompileController", ->
 					Project_id: @project_id
 				@req.session = {}
 				@req.body =
-					session_id: @session_id
+					request_id: @request_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
 				@CompileController.compile @req, @res, @next
@@ -59,7 +59,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: false })
+					.calledWith(@project_id, @user_id, @request_id, { isAutoCompile: false })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -82,14 +82,14 @@ describe "CompileController", ->
 				@req.query =
 					auto_compile: "true"
 				@req.body =
-					session_id: @session_id
+					request_id: @request_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(4, null, @status = "success", @outputFiles = ["mock-output-files"])
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, @session_id, { isAutoCompile: true })
+					.calledWith(@project_id, @user_id, @request_id, { isAutoCompile: true })
 					.should.equal true
 
 	describe "downloadPdf", ->
@@ -363,3 +363,43 @@ describe "CompileController", ->
 			@CompileController.compileAndDownloadOutput @req, @res
 			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/main.png", @req, @res).should.equal true
 			done()
+
+	describe "sendJupyterRequest", ->
+		beforeEach ->
+			@CompileManager.sendJupyterRequest = sinon.stub().callsArg(5)
+			@req = 
+				params:
+					Project_id: @project_id
+				body:
+					request_id: @request_id = "message-123"
+					engine: @engine = "python"
+					msg_type: @msg_type = "execute_request"
+					content: @content = {mock: "Content"}
+			@res.send = sinon.stub()
+			@CompileController.sendJupyterRequest @req, @res, @next()
+	
+		it "should execute the request", ->
+			@CompileManager.sendJupyterRequest
+				.calledWith(@project_id, @request_id, @engine, @msg_type, @content,)
+				.should.equal true
+		
+		it "should return 204", ->
+			@res.send.calledWith(204).should.equal true
+
+	describe "interruptRequest", ->
+		beforeEach ->
+			@CompileManager.interruptRequest = sinon.stub().callsArg(2)
+			@req = 
+				params:
+					Project_id: @project_id
+					request_id: @request_id = "message-123"
+			@res.send = sinon.stub()
+			@CompileController.interruptRequest @req, @res, @next()
+	
+		it "should interrupt the request", ->
+			@CompileManager.interruptRequest
+				.calledWith(@project_id, @request_id)
+				.should.equal true
+		
+		it "should return 204", ->
+			@res.send.calledWith(204).should.equal true

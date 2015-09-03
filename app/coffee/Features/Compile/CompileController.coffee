@@ -13,7 +13,7 @@ module.exports = CompileController =
 		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
-		session_id = req.body.session_id
+		request_id = req.body.request_id
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
 			return next(error) if error?
 			options = {
@@ -32,7 +32,7 @@ module.exports = CompileController =
 			if req.body?.compiler == 'command' and req.body?.timeout?
 				options.timeout = req.body.timeout
 			logger.log {options, project_id}, "got compile request"
-			CompileManager.compile project_id, user_id, session_id, options, (error, status, outputFiles, output, limits) ->
+			CompileManager.compile project_id, user_id, request_id, options, (error, status, outputFiles, output, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
 				res.send 200, JSON.stringify {
@@ -44,6 +44,22 @@ module.exports = CompileController =
 	
 	stopCompile: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
+
+	sendJupyterRequest: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{request_id, msg_type, content, engine} = req.body
+		logger.log {project_id, request_id, msg_type, request_id, engine}, "execute jupyter request"
+		CompileManager.sendJupyterRequest project_id, request_id, engine, msg_type, content, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	interruptRequest: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		request_id = req.params.request_id
+		logger.log {project_id, request_id}, "interrupt jupyter request"
+		CompileManager.interruptRequest project_id, request_id, (error) ->
+			return next(error) if error?
+			res.send 204
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"

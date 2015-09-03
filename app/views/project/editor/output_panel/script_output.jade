@@ -1,109 +1,183 @@
-div.full-size(ng-controller="ScriptOutputController")
+div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 	.toolbar.toolbar-tall
-		a.btn.btn-info(
-			href,
-			ng-disabled="currentRun.running",
-			ng-click="run()"
-		)
-			i.fa.fa-fw(
-				ng-class="{'fa-refresh fa-spin': currentRun.running, 'fa-play': !currentRun.running }"
+		span(ng-show="!status.running && !status.stopping")
+			a.btn.btn-info(
+				href,
+				ng-click="runSelection()"
 			)
-			| &nbsp;&nbsp;
-			span(ng-show="!currentRun.running && !currentRun.stopping") Run
-			span(ng-show="currentRun.running && !currentRun.stopping") Running...
-			span(ng-show="currentRun.stopping") Stopping...
-		a(
-			href,
-			ng-click="stop()",
-			ng-show="currentRun.running && !currentRun.stopping"
-		).small
-			.i.fa.fa-fw.fa-stop
-			|  Stop
+				i.fa.fa-fw.fa-play
+				| &nbsp; 
+				span(ng-show="editor.selection.lines.length == 1") Run Line
+				span(ng-show="editor.selection.lines.length > 1") Run Selection
+		span(ng-show="!status.running && !status.stopping")
+			a.btn.btn-default(
+				href,
+				ng-click="runAll()"
+			)
+				| Run Script
+		span(ng-show="status.running && !status.stopping")
+			a.btn.btn-info(disabled=true)
+				i.fa.fa-fw.fa-refresh.fa-spin
+				| &nbsp; Running
+			a(
+				href,
+				ng-click="stop()"
+			).small
+				.i.fa.fa-fw.fa-stop
+				|  Stop
+		a(href, ng-click="restart()", tooltip-html="'Restart<br/>Session'", tooltip-placement="bottom").pull-right
+			i.fa.fa-fw.fa-refresh
+			
 
 	include ../link-image
 
-	div.script-output.main-script-output(scroll-glue)
-		.script-uncompiled(ng-show="uncompiled")
-			| &nbsp;
-			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
-			| &nbsp;&nbsp;Click here to run your script!
+	div.jupyter-output.main-script-output(scroll-glue)
+		.jupyter-output-inner
+			.jupyter-uncompiled(ng-show="!cells[engine] && !status.running")
+				| &nbsp;
+				i.fa.fa-level-up.fa-flip-horizontal.fa-2x
+				| &nbsp;&nbsp;Click here to run your script...
+			.jupyter-uncompiled.jupyter-uncompiled-bottom(ng-show="!cells[engine] && !status.running")
+				| &nbsp;
+				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
+				| &nbsp;&nbsp;Or run a command directly!
 			
-		.alert.alert-info(ng-show="currentRun.running && currentRun.stillIniting && !currentRun.inited")
-			p
-				i.fa.fa-spinner.fa-spin.fa-fw 
-				|  Initializing environment...
-			p.small (This can take a while the first time you run a script)
+			div.cell(ng-repeat="cell in cells[engine]", ng-if="cell.execution_count || cell.shutdown")
+				div.input(ng-if="!cell.shutdown")
+					.execution-count
+						| In[{{cell.execution_count}}]:
+					.cell-content
+						.chunk(ng-repeat="input in cell.input")
+							span.text-input.text-monospace {{ input.content.code }}
+				div.output(ng-if="!cell.shutdown")
+					.execution-count
+						| Out[{{cell.execution_count}}]:
+					.cell-content
+						.chunk(ng-repeat="msg in cell.output")
+							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
+							span(ng-if="msg.header.msg_type == 'execute_result'")
+								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
+							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
+								.display-data-inner(ng-class="{ 'display-data-inner-full-width': (msg.content.format == 'image/svg+xml' || msg.content.format == 'application/pdf') }")
+									img.image(ng-if="msg.content.format == 'image/png'", ng-src="data:image/png;base64,{{msg.content.data['image/png']}}", download="output.png")
+									img.image(ng-if="msg.content.format == 'image/jpeg'", ng-src="data:image/jpeg;base64,{{msg.content.data['image/jpeg']}}", download="output.jpeg")
+									span.image(ng-if="msg.content.format == 'image/svg+xml'", ng-bind-html="msg.content.data['image/svg+xml']")
+									.iframe-wrapper(ng-if="msg.content.format == 'application/pdf'")
+										iframe(ng-src="{{msg.content.data['application/pdf+url']}}", download="output.pdf")
+									.download-controls(ng-if="msg.content.available_formats.length > 1")
+										div(dropdown, dropdown-append-to-body).format-dropdown
+											a(href, dropdown-toggle, tooltip="Format")
+												i.fa.fa-fw.fa-file-image-o
+												i.fa.fa-caret-down
+											ul.dropdown-menu(role="menu")
+												li(ng-repeat="format in msg.content.available_formats")
+													a(href, ng-click="showFormat(msg, format)") {{ format }}
+									.download-controls.download-controls-right
+										a(
+											ng-if="msg.content.format != 'image/svg+xml'",
+											ng-href="{{msg.content.data[msg.content.format + '+url']}}",
+											download="output",
+											tooltip="Download",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-download
+										a(
+											ng-controller="LinkImageController"
+											href
+											ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format])",
+											tooltip="Share",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-link
+							div(ng-if="msg.header.msg_type == 'display_data' && !msg.content.image")
+								div(ng-if="msg.content.show_format == 'text/html_escaped'", ng-bind-html="msg.content.data['text/html_escaped']")
+							div(ng-if="msg.header.msg_type == 'error'").alert.alert-danger.text-monospace
+								div {{ msg.content.evalue }}
+								div(ng-repeat="line in msg.content.traceback_escaped", ng-bind-html="line")
+									div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
+							div.file-modified(ng-if="msg.header.msg_type == 'file_modified' && msg.content.file_type != 'image'")
+								div.text-center(ng-show="!cell.exported")
+									i.fa.fa-2x.fa-spin.fa-spinner
+									
+								.download-controls.download-controls-right(ng-show="cell.exported", ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
+									a(
+										ng-href="{{url + (url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
+										tooltip="Download",
+										tooltip-append-to-body="true",
+										tooltip-placement="bottom"
+									)
+										i.fa.fa-download
+								
+									a(
+										href
+										ng-click="linkImage(url, path)",
+										tooltip="Share",
+										tooltip-append-to-body="true",
+										tooltip-placement="bottom"
+									)
+										i.fa.fa-fw.fa-link
 
-		span.output(ng-repeat="part in currentRun.output | orderBy:'msg_id' track by $index ")
-			.alert.alert-info.row-spaced-small.text-center(ng-repeat="error in part.parsedErrors")
-				div(ng-if="error.type == 'missing_package'")
-					p The '{{ error.package }}' package is not installed.
-					a(href, ng-click="installPackage(error.package, error.language)").btn.btn-info Install now
-				div.text-left(ng-if="error.type == 'runtime_error'")
-					p.entry-message
-						stack-frame(error="error")
-					p.entry-content(ng-if="error.stack") Stack trace
-						div(ng-repeat="frame in error.stack")
-							stack-frame(error="frame")
-					div.entry-content(ng-if="error.raw")
-						p
-							div(ng-hide="show")
-								i.fa.fa-caret-right
-								| &nbsp;
-								a(href="#",ng-click="show = !show") See full message
-							div(ng-show="show")
-								i.fa.fa-caret-down
-								| &nbsp;
-								a(href="#",ng-click="show = !show") Hide full message
-								div {{error.raw}}
+								.file-written(ng-if="cell.exported")
+									.small File written
+									div
+										a(ng-href="{{msg.content.data['text/url']}}", target="_blank") {{ msg.content.data['text/path'] }}
+							
+							div.file-modified-image(ng-if="msg.header.msg_type == 'file_modified' && msg.content.file_type == 'image'")
+								.file-modified-image-inner
+									div.text-center(ng-show="!cell.exported")
+										i.fa.fa-2x.fa-spin.fa-spinner
+										
+									.download-controls.download-controls-right(ng-show="cell.exported", ng-controller="LinkImageController", ng-init="url = msg.content.data['text/url']; path = msg.content.data['text/path']")
+										a(
+											ng-href="{{url + (url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
+											tooltip="Download",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-download
+									
+										a(
+											href
+											ng-click="linkImage(url, path)",
+											tooltip="Share",
+											tooltip-append-to-body="true",
+											tooltip-placement="bottom"
+										)
+											i.fa.fa-fw.fa-link
+										
+									img(ng-if="cell.exported", ng-src="{{msg.content.data['text/url']}}")
+										
+						.alert.alert-danger(ng-if="cell.timed_out")
+							p
+								strong #{translate("timedout")}. 
+								span Sorry, your script took too long to run and timed out.
+							div(ng-if="project.features.compileTimeout <= 60 && permissions.admin")
+								p Please upgrade your account to run longer scripts.
+								p(ng-controller="FreeTrialModalController")
+									a.btn.btn-info(
+										href
+										ng-click="startFreeTrial('timeout')"
+									) #{translate("start_free_trial")}
+							div(ng-if="project.features.compileTimeout > 60")
+								p Please get in touch if you need a longer timeout.
 
-			span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
-			span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
-			div.output-file(ng-if="part.output_type == 'file' && !part.ignore")
-				div.text-center(ng-show="currentRun.running")
-					i.fa.fa-2x.fa-spin.fa-spinner
-				
-				.download-controls(ng-controller="LinkImageController")
-					span.name(ng-show="part.file_type == 'image' && part.path.slice(0,7) != '.output'") {{ part.path }}
-					a(
-						ng-href="{{part.url + (part.url.indexOf('?') == -1 ? '?' : '&') + 'download=1'}}",
-						tooltip="Download",
-						tooltip-append-to-body="true",
-						tooltip-placement="bottom"
-					)
-						i.fa.fa-download
-
-					a(
-						ng-href="",
-						ng-click="linkImage(part)"
-						tooltip="Share",
-						tooltip-append-to-body="true",
-						tooltip-placement="bottom"
-					)
-						i.fa.fa-link
-
-
-				img(ng-if="part.file_type == 'image' && !currentRun.running", ng-src="{{part.url}}")
-				div(ng-if="part.file_type != 'image' && !currentRun.running")
-					.small File written
-					div
-						a(ng-href="{{part.url}}", target="_blank") {{ part.path }}
-		
-
-		.alert.alert-danger.row-spaced-small(ng-show="currentRun.error")
-			strong #{translate("server_error")} 
-			span #{translate("somthing_went_wrong_compiling")}
-
-		.alert.alert-danger.row-spaced-small(ng-show="currentRun.timedout")
-			p
-				strong #{translate("timedout")}. 
-				span Sorry, your script took too long to run and timed out.
-			div(ng-if="project.features.compileTimeout <= 60 && permissions.admin")
-				p Please upgrade your account to run longer scripts.
-				p(ng-controller="FreeTrialModalController")
-					a.btn.btn-info(
-						href
-						ng-click="startFreeTrial('timeout')"
-					) #{translate("start_free_trial")}
-			div(ng-if="project.features.compileTimeout > 60")
-				p Please get in touch if you need a longer timeout.
+				div.alert.alert-info.shutdown(ng-show="cell.shutdown")
+					| Session restarted
+				hr(ng-show="!$last")
+			
+			.alert.alert-info(ng-show="status.initing")
+				p
+					i.fa.fa-spinner.fa-spin.fa-fw 
+					|  Initializing environment...
+				p.small (This can take a while the first time you run something)
+			
+			.alert.alert-danger(ng-if="status.error")
+				| Sorry, something went wrong running your request. Please try again.
+			
+			div.manual-input.border-top
+				div.input
+					.execution-count
+						| In[]:
+					.cell-content
+						input(type="text", ng-model="manualInput", command-line, on-run="runManualInput()", placeholder = "Command...")

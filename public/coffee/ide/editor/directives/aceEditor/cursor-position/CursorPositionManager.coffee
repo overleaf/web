@@ -28,6 +28,9 @@ define [], () ->
 					setTimeout () =>
 						@gotoLine(value)
 					, 10 # Hack: Must happen after @gotoStoredPosition
+			
+			@$scope.$on "#{@$scope.name}:gotoNextLine", () =>
+				@gotoNextLine()
 
 		storeScrollTopPosition: (session) ->
 			if @doc_id?
@@ -56,3 +59,13 @@ define [], () ->
 		gotoLine: (line) ->
 			@editor.gotoLine(line)
 			@editor.focus()
+		
+		gotoNextLine: () ->
+			session = @editor.getSession()
+			row = session.selection.getRange().end.row
+			lastLine = session.getLength() - 1
+			while (row <= lastLine)
+				row++
+				if session.getLine(row) != ""
+					break
+			@editor.gotoLine(row + 1, 0)

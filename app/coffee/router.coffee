@@ -94,6 +94,8 @@ module.exports = class Router
 
 		webRouter.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		webRouter.post '/project/:Project_id/compile/:session_id/stop', SecurityManager.requestCanAccessProject, CompileController.stopCompile
+		webRouter.post '/project/:Project_id/request', SecurityManager.requestCanAccessProject, CompileController.sendJupyterRequest
+		webRouter.post '/project/:Project_id/request/:request_id/interrupt', SecurityManager.requestCanAccessProject, CompileController.interruptRequest
 		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
