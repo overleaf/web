@@ -7,7 +7,7 @@ fiveMinsInMs = oneMinInMs * 5
 
 module.exports = PreviewHandler =
 
-	getPreview: (file_url, callback) ->
+	getPreviewCsv: (file_url, callback) ->
 		logger.log file_url: file_url, "getting preview of file"
 		opts =
 			method: 'get'

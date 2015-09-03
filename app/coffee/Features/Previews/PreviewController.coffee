@@ -2,7 +2,6 @@ logger = require('logger-sharelatex')
 ProjectLocator = require("../Project/ProjectLocator")
 PreviewHandler = require('./PreviewHandler')
 _build_filestore_url = require('../FileStore/FileStoreHandler')._buildUrl
-_ = require('underscore')
 
 
 module.exports = PreviewController =
@@ -18,7 +17,7 @@ module.exports = PreviewController =
 
 			file_url = _build_filestore_url(project_id, file_id)
 
-			PreviewHandler.getPreview file_url, (err, preview) ->
+			PreviewHandler.getPreviewCsv file_url, (err, preview) ->
 				if err?
 					logger.log err: err, project_id: project_id, file_id: file_id, "error getting preview"
 				res.send preview
