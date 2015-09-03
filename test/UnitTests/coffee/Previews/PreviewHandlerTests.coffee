@@ -43,3 +43,17 @@ describe "PreviewHandler", ->
 				expect(data).to.be.Object
 				expect(data).to.equal @preview
 				done()
+
+		describe "when the remote service responds with an error", ->
+
+			[500, 502, 404, 410, 307].forEach (bad_status_code) ->
+
+				beforeEach ->
+					@response.statusCode = bad_status_code
+
+				it "should produce an error", (done) ->
+					@PreviewHandler.getPreviewCsv @file_url, (err, data) =>
+						expect(data).to.equal null
+						expect(err).to.not.equal null
+						expect(err instanceof Error).to.equal true
+						done()
