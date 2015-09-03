@@ -167,8 +167,6 @@ module.exports = class Router
 
 		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
-		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
-		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 
 		webRouter.post  "/project/:Project_id/link", SecurityManager.requestCanAccessProject, LinkController.generateLink
 		webRouter.get   "/public/:public_id/*", LinkController.getFile # public image links
