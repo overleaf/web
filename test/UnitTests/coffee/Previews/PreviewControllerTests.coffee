@@ -43,8 +43,56 @@ describe "PreviewController", ->
 			@ProjectLocator.findElement.callsArgWith(1, null, @file)
 			@PreviewHandler.getPreviewCsv.callsArgWith(1, null, @preview)
 
-		it "should use FileStoreHandler._buildUrld to build a url", (done)->
+
+		it "should send back some data", (done) ->
+			@res.send = (data) =>
+				expect(data).to.not.equal null
+				data.should.be.Object
+				done()
+			@controller.getPreviewCsv @req, @res
+
+
+		it "should use FileStoreHandler._buildUrld to build a url", (done) ->
 			@res.send = (data) =>
 				@FileStoreHandler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
 			@controller.getPreviewCsv @req, @res
+
+
+		it "should use the ProjectLocator to check if the resource exists", (done) ->
+			@res.send = (data) =>
+				expected_options=
+					project_id: @project_id
+					element_id: @file_id
+					type: 'file'
+				@ProjectLocator.findElement.calledWith(expected_options).should.equal true
+				done()
+			@controller.getPreviewCsv @req, @res
+
+		it "should use the PreviewHandler to get the preview object", (done) ->
+			@res.send = (data) =>
+				@PreviewHandler.getPreviewCsv.calledOnce.should.equal true
+				done()
+			@controller.getPreviewCsv @req, @res
+
+		describe "when the ProjectLocator can't find the file", ->
+
+			beforeEach ->
+				@ProjectLocator.findElement.callsArgWith(1, new Error('not found'), null)
+
+			it "should respond with a 500", (done) ->
+				@res.sendStatus = (code) ->
+					code.should.equal 500
+					done()
+				@controller.getPreviewCsv @req, @res
+
+		describe "when the PreviewHandler produces an error", ->
+
+			beforeEach ->
+				@PreviewHandler.getPreviewCsv.callsArgWith(1, new Error('not found'), null)
+
+			it "should respond with a 500", (done) ->
+				@res.sendStatus = (code) ->
+					code.should.equal 500
+					done()
+				@controller.getPreviewCsv @req, @res
