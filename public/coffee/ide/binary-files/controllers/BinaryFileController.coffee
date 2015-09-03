@@ -25,7 +25,7 @@ define [
 			# Behold, a ghastly hack
 			guide = document.querySelector('.file-tree-inner')
 			table_wrap = document.querySelector('.scroll-container')
-			desired_height = guide.offsetHeight - 50
+			desired_height = guide.offsetHeight - 48
 			if table_wrap.offsetHeight > desired_height
 				table_wrap.style.height = desired_height + 'px'
 				table_wrap.style['max-height'] = desired_height + 'px'
