@@ -51,8 +51,16 @@ module.exports = CompileController =
 	sendJupyterRequest: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		{request_id, msg_type, content, engine} = req.body
-		logger.log {project_id, request_id, msg_type, request_id, engine}, "execute jupyter request"
+		logger.log {project_id, request_id, msg_type, engine}, "execute jupyter request"
 		CompileManager.sendJupyterRequest project_id, request_id, engine, msg_type, content, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	sendJupyterReply: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{msg_type, content, engine} = req.body
+		logger.log {project_id, msg_type, engine}, "send jupyter reply"
+		CompileManager.sendJupyterReply project_id, engine, msg_type, content, (error) ->
 			return next(error) if error?
 			res.send 204
 

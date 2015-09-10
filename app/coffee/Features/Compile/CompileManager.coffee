@@ -48,6 +48,9 @@ module.exports = CompileManager =
 			CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 				return callback(error) if error?
 				ClsiManager.sendJupyterRequest project_id, request_id, engine, msg_type, content, limits, callback
+
+	sendJupyterReply: (project_id, engine, msg_type, content, callback = (error) ->) ->
+		ClsiManager.sendJupyterReply project_id, engine, msg_type, content, callback
 	
 	interruptRequest: (project_id, request_id, callback = (error) ->) ->
 		ClsiManager.interruptRequest project_id, request_id, callback

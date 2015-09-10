@@ -66,6 +66,14 @@ define [
 					$timeout ->
 						element[0].focus()
 
+	# The HTML5 autofocus attribute doesn't work with dynamically loaded elements,
+	# so create out own directive. See https://gist.github.com/mlynch/dd407b93ed288d499778
+	App.directive 'autofocus', ($timeout) ->
+		restrict: 'A'
+		link: (scope, element) ->
+			$timeout () ->
+				element[0].focus()
+
 	selectName = (element) ->
 		# Select up to last '.'. I.e. everything
 		# except the file extension

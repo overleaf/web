@@ -362,6 +362,25 @@
 			margin-top: @line-height-computed / 2;
 			margin-bottom: @line-height-computed / 2;
 		}
+		
+		.input_request {
+			display: -webkit-box;
+			display: -moz-box;
+			display: -ms-flexbox;
+			display: -webkit-flex;
+			display: flex;
+			.prompt {
+				max-width: 50%;
+				padding-right: @line-height-computed / 4;
+			}
+			.input {
+				width: 100%;
+				input {
+					width: 100%;
+					border: none;
+				}
+			}
+		}
 	}
 }
 

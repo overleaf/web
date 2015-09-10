@@ -380,7 +380,28 @@ describe "CompileController", ->
 	
 		it "should execute the request", ->
 			@CompileManager.sendJupyterRequest
-				.calledWith(@project_id, @request_id, @engine, @msg_type, @content,)
+				.calledWith(@project_id, @request_id, @engine, @msg_type, @content)
+				.should.equal true
+		
+		it "should return 204", ->
+			@res.send.calledWith(204).should.equal true
+
+	describe "sendJupyterReply", ->
+		beforeEach ->
+			@CompileManager.sendJupyterReply = sinon.stub().callsArg(4)
+			@req = 
+				params:
+					Project_id: @project_id
+				body:
+					engine: @engine = "python"
+					msg_type: @msg_type = "execute_request"
+					content: @content = {mock: "Content"}
+			@res.send = sinon.stub()
+			@CompileController.sendJupyterReply @req, @res, @next()
+	
+		it "should execute the request", ->
+			@CompileManager.sendJupyterReply
+				.calledWith(@project_id, @engine, @msg_type, @content)
 				.should.equal true
 		
 		it "should return 204", ->

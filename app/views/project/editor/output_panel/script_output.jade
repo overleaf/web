@@ -157,6 +157,17 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 											i.fa.fa-fw.fa-link
 										
 									img(ng-if="cell.exported", ng-src="{{msg.content.data['text/url']}}")
+							
+							div.input_request(ng-controller="InputRequestController", ng-if="msg.header.msg_type == 'input_request'")
+								div.prompt {{ msg.content.prompt }}
+								div.input
+									input(
+										type="text",
+										autofocus,
+										ng-model="rawInput",
+										on-enter="replyWithInput(rawInput)",
+										ng-disabled="sentInput || !status.running"
+									)
 
 				.alert.alert-danger(ng-if="cell.killed_by_user")
 					p

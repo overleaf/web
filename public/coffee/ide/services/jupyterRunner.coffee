@@ -47,7 +47,7 @@ define [
 							# We've reset for some reason
 							cell.restarted = true
 			
-			if message.header.msg_type in ["error", "stream", "display_data", "execute_result"]
+			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "input_request"]
 				if not cell.restart_intentional # suppress any errors from the restart
 					cell.output.push message
 			
@@ -137,7 +137,7 @@ define [
 
 			if message.header.msg_type == "system_status" and message.content.status == "killed_by_user"
 				cell.killed_by_user = true
-		
+
 			ide.$scope.$apply()
 		
 		ansiToSafeHtml = (input) ->
@@ -185,7 +185,7 @@ define [
 						silent: false,
 						store_history: true,
 						user_expressions: {},
-						allow_stdin: false,
+						allow_stdin: true,
 						stop_on_error: false
 					}
 					engine: engine
@@ -201,6 +201,21 @@ define [
 						@status.error = true
 						@status.running = false
 			
+			sendInput: (value, engine) ->
+				url = "/project/#{ide.$scope.project_id}/reply"
+				options = {
+					msg_type: "input_reply"
+					content: {
+						value: value
+					}
+					engine: engine
+					_csrf: window.csrfToken
+				}
+				$http
+					.post(url, options)
+					.error () =>
+						@status.error = true
+
 			stopIniting: () ->
 				if @_initingTimeout?
 					$timeout.cancel(@_initingTimeout)

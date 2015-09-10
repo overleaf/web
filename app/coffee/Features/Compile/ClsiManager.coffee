@@ -37,6 +37,20 @@ module.exports = ClsiManager =
 					error = new Error("CLSI returned non-success code: #{response.statusCode}")
 					logger.error err: error, project_id: project_id, "CLSI returned failure code"
 					callback error, body
+
+	sendJupyterReply: (project_id, engine, msg_type, content, callback = (error) ->) ->
+		request.post {
+			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/reply"
+			json: {msg_type, content, engine}
+			jar:  false
+		}, (error, response, body) ->
+			return callback(error) if error?
+			if 200 <= response.statusCode < 300
+				callback null, body
+			else
+				error = new Error("CLSI returned non-success code: #{response.statusCode}")
+				logger.error err: error, project_id: project_id, "CLSI returned failure code"
+				callback error, body
 	
 	interruptRequest: (project_id, request_id, callback = (error) ->) ->
 		request.post {

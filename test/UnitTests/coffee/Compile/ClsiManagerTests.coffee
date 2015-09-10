@@ -340,6 +340,43 @@ describe "ClsiManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
+	describe "sendJupyterReply", ->
+		beforeEach ->
+			@engine = "python"
+			@msg_type = "execute_request"
+			@content = {mock: "Content"}
+			@resources = ["mock", "resources"]
+		
+		describe "with a successful response", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
+				@ClsiManager.sendJupyterRequest @project_id, @engine, @msg_type, @content, @callback
+			
+			it "should send a request to the CLSI", ->
+				@request.post
+					.calledWith({
+						url: "#{@settings.apis.clsi.url}/project/#{@project_id}/reply"
+						json: {
+							msg_type: @msg_type
+							content: @content,
+							request_id: @request_id,
+							engine: @engine
+						}
+						jar: false
+					})
+					.should.equal true
+			
+			it "should call the callback", ->
+				@callback.calledWith(null).should.equal true
+		
+		describe "with a non-success response", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
+				@ClsiManager.sendJupyterRequest @project_id, @engine, @msg_type, @content, @callback
+			
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("CLSI returned non-success code: 500")).should.equal true
+
 	describe "interruptRequest", ->
 		beforeEach ->
 			@request_id = "message-123"
