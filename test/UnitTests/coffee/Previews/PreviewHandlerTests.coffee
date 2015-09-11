@@ -23,7 +23,7 @@ describe "PreviewHandler", ->
 			source: @file_url
 			labels: []
 			rows: []
-
+			truncated: false
 
 	describe "_build_url", ->
 

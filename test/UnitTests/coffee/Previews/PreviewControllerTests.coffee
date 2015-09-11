@@ -36,6 +36,7 @@ describe "PreviewController", ->
 			source: "somewhere"
 			labels: []
 			rows: []
+			truncated: false
 
 	describe "getPreviewCsv", ->
 
