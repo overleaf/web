@@ -185,7 +185,7 @@ define [
 						silent: false,
 						store_history: true,
 						user_expressions: {},
-						allow_stdin: false,
+						allow_stdin: true,
 						stop_on_error: false
 					}
 					engine: engine

@@ -179,10 +179,13 @@
 	
 	.jupyter-uncompiled-bottom {
 		position: absolute;
-		bottom: @line-height-computed / 2;
+		bottom: @line-height-computed;
 		left: @execution-count-width + 36px;
-		line-height: 0.8;
 		vertical-align: top;
+		i.fa-level-down {
+			position: relative;
+			top: @line-height-computed / 2;
+		}
 	}
 	
 	.cell, .manual-input {
