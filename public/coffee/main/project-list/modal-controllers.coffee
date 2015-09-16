@@ -95,10 +95,11 @@ define [
 			$modalInstance.dismiss('cancel')
 
 
-	App.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout) ->
+	App.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout, event_tracking) ->
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
 
 		$scope.onComplete = (error, name, response) ->
+			event_tracking.send 'project', 'upload'
 			if response.project_id?
 				window.location = '/project/' + response.project_id
