@@ -13,7 +13,7 @@ module.exports = FileTypeManager =
 		# Bibtex
 		"bbl", "blg"
 		# Misc/bad
-		"doc", "docx", "gz"
+		"doc", "docx"
 	]
 
 	IGNORE_FILENAMES : [

@@ -109,5 +109,11 @@ describe "FileTypeManager", ->
 		it "should ignore the case of the extension", ->
 			@FileTypeManager.shouldIgnore "file.AUX", (error, ignore) ->
 				ignore.should.equal true
-			
 
+		it "should not ignore .gz files", ->
+			@FileTypeManager.shouldIgnore "example.gz", (err, ignore) ->
+				ignore.should.equal false
+
+		it "should not ignore tar.gz files", ->
+			@FileTypeManager.shouldIgnore "example.tar.gz", (err, ignore) ->
+				ignore.should.equal false
