@@ -43,14 +43,22 @@ define [
 				jupyterRunner.executeRequest code, engine
 			else
 				throw new Error("not implemented yet")
-		
+
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
 			code   = $scope.manualInput
 			engine = $scope.engine
 			jupyterRunner.executeRequest code, engine
+			$scope._scrollOutput()
 			$scope.manualInput = ""
-		
+
+		$scope._scrollOutput = () ->
+			try
+				container = document.querySelector('.jupyter-output-inner')
+				container.scrollTop = container.scrollHeight
+			catch error
+				console.log error
+
 		$scope.stop = () ->
 			jupyterRunner.stop()
 		
