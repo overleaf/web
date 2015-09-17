@@ -118,13 +118,26 @@ define [
 				return "script"
 			else
 				return "latex"
-				
+
+		# Ace Syntax Highlighting Modes
 		_getAceModeFromDoc: (doc) ->
 			extension = doc.name.split(".").pop()?.toLowerCase()
 			if extension == "py"
 				return "python"
 			else if extension == "r"
 				return "r"
+			else if extension in ["cpp", "c"]
+				return "c_cpp"
+			else if extension == "json"
+				return "json"
+			else if extension in ["md", "markdown"]
+				return "markdown"
+			else if extension == "sh"
+				return "sh"
+			else if extension == "xml"
+				return "xml"
+			else if extension in ["yaml", "yml"]
+				return "yaml"
 			else
 				return "latex"
 
