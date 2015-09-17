@@ -102,8 +102,8 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "event_tracking",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, event_tracking) ->
 			$scope.parent_folder_id = parent_folder?.id
 
 			uploadCount = 0
@@ -111,6 +111,7 @@ define [
 				uploadCount++
 
 			$scope.onComplete = (error, name, response) ->
+				event_tracking.send "file", "upload", {name}
 				$timeout (() ->
 					uploadCount--
 					if uploadCount == 0 and response? and response.success

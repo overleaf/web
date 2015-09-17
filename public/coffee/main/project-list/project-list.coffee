@@ -215,8 +215,9 @@ define [
 			)
 
 		$scope.createProject = (name, template = "none") ->
-			deferred = $q.defer()
+			event_tracking.send 'project', 'create', { type: template }
 
+			deferred = $q.defer()
 			queuedHttp
 				.post("/project/new", {
 					_csrf: window.csrfToken
@@ -241,7 +242,6 @@ define [
 			return deferred.promise
 
 		$scope.openCreateProjectModal = (template = "none") ->
-			event_tracking.send 'project', 'create', { type: template }
 			modalInstance = $modal.open(
 				templateUrl: "newProjectModalTemplate"
 				controller: "NewProjectModalController"
