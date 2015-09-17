@@ -111,13 +111,9 @@ define [
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
-			
+
 		_getEditorModeFromDoc: (doc) ->
-			extension = doc.name.split(".").pop()?.toLowerCase()
-			if extension in ["py", "r"]
-				return "script"
-			else
-				return "latex"
+			return "script"
 
 		# Ace Syntax Highlighting Modes
 		_getAceModeFromDoc: (doc) ->

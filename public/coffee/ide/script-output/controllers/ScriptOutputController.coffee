@@ -6,8 +6,10 @@ define [
 		$scope.cells = jupyterRunner.CELL_LIST
 		
 		ide.$scope.$watch "editor.ace_mode", () ->
-			$scope.engine = ide.$scope.editor.ace_mode
-		
+			ace_mode = ide.$scope.editor.ace_mode
+			if ace_mode in ['r', 'python']
+				$scope.engine = ace_mode
+
 		$scope.$on "editor:run-line", () ->
 			$scope.runSelection()
 		
