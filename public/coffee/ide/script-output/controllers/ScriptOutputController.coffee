@@ -29,7 +29,8 @@ define [
 			code   = ide.$scope.editor.selection.lines.join("\n")
 			engine = $scope.engine
 			jupyterRunner.executeRequest code, engine
-		
+			$scope._scrollOutput()
+
 		$scope.runAll = () ->
 			ide.$scope.$broadcast("flush-changes")
 			trackRun()
@@ -43,6 +44,7 @@ define [
 				jupyterRunner.executeRequest code, engine
 			else
 				throw new Error("not implemented yet")
+			$scope._scrollOutput()
 
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
