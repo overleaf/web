@@ -39,42 +39,89 @@ describe "FileTypeManager", ->
 		beforeEach ->
 			@stat = { size: 100 }
 			@fs.stat = sinon.stub().callsArgWith(1, null, @stat)
-			
-		it "should return .tex files as not binary", ->
-			@FileTypeManager.isBinary "file.tex", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
 
-		it "should return .bib files as not binary", ->
-			@FileTypeManager.isBinary "file.bib", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
+		describe "not binary", ->
 
-		it "should return .bibtex files as not binary", ->
-			@FileTypeManager.isBinary "file.bibtex", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
+			it "should return .tex files as not binary", ->
+				@FileTypeManager.isBinary "file.tex", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .cls files as not binary", ->
-			@FileTypeManager.isBinary "file.cls", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
+			it "should return .bib files as not binary", ->
+				@FileTypeManager.isBinary "file.bib", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .sty files as not binary", ->
-			@FileTypeManager.isBinary "file.sty", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
+			it "should return .bibtex files as not binary", ->
+				@FileTypeManager.isBinary "file.bibtex", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .bst files as not binary", ->
-			@FileTypeManager.isBinary "file.bst", "/path/on/disk", (error, binary) ->
-				binary.should.equal false
+			it "should return .cls files as not binary", ->
+				@FileTypeManager.isBinary "file.cls", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .eps files as binary", ->
-			@FileTypeManager.isBinary "file.eps", "/path/on/disk", (error, binary) ->
-				binary.should.equal true
+			it "should return .sty files as not binary", ->
+				@FileTypeManager.isBinary "file.sty", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .dvi files as binary", ->
-			@FileTypeManager.isBinary "file.dvi", "/path/on/disk", (error, binary) ->
-				binary.should.equal true
+			it "should return .bst files as not binary", ->
+				@FileTypeManager.isBinary "file.bst", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
 
-		it "should return .png files as binary", ->
-			@FileTypeManager.isBinary "file.png", "/path/on/disk", (error, binary) ->
-				binary.should.equal true
+			it "should return .py files as not binary", ->
+				@FileTypeManager.isBinary "file.py", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .r files as not binary", ->
+				@FileTypeManager.isBinary "file.r", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .c files as not binary", ->
+				@FileTypeManager.isBinary "file.c", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .cpp files as not binary", ->
+				@FileTypeManager.isBinary "file.cpp", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .json files as not binary", ->
+				@FileTypeManager.isBinary "file.json", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .sh files as not binary", ->
+				@FileTypeManager.isBinary "file.sh", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .xml files as not binary", ->
+				@FileTypeManager.isBinary "file.xml", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .yaml files as not binary", ->
+				@FileTypeManager.isBinary "file.yaml", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .yml files as not binary", ->
+				@FileTypeManager.isBinary "file.yml", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .md files as not binary", ->
+				@FileTypeManager.isBinary "file.md", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+			it "should return .markdown files as not binary", ->
+				@FileTypeManager.isBinary "file.markdown", "/path/on/disk", (error, binary) ->
+					binary.should.equal false
+
+		describe "binary", ->
+			it "should return .eps files as binary", ->
+				@FileTypeManager.isBinary "file.eps", "/path/on/disk", (error, binary) ->
+					binary.should.equal true
+
+			it "should return .dvi files as binary", ->
+				@FileTypeManager.isBinary "file.dvi", "/path/on/disk", (error, binary) ->
+					binary.should.equal true
+
+			it "should return .png files as binary", ->
+				@FileTypeManager.isBinary "file.png", "/path/on/disk", (error, binary) ->
+					binary.should.equal true
 
 		it "should return files without extensions as binary", ->
 			@FileTypeManager.isBinary "tex", "/path/on/disk", (error, binary) ->
@@ -83,7 +130,7 @@ describe "FileTypeManager", ->
 		it "should ignore the case of an extension", ->
 			@FileTypeManager.isBinary "file.TEX", "/path/on/disk", (error, binary) ->
 				binary.should.equal false
-		
+
 		it "should return large text files as binary", ->
 			@stat.size = 2 * 1024 * 1024 # 2Mb
 			@FileTypeManager.isBinary "file.tex", "/path/on/disk", (error, binary) ->

@@ -3,7 +3,8 @@ Path = require("path")
 
 module.exports = FileTypeManager =
 	TEXT_EXTENSIONS : [
-		"tex", "latex", "sty", "cls", "bst", "bib", "bibtex", "txt", "tikz", "rtex", "md", "py", "r"
+		"tex", "latex", "sty", "cls", "bst", "bib", "bibtex", "txt", "tikz", "rtex", "md", "markdown",
+		"py", "r", "c", "cpp", "json", "sh", "xml", "yaml", "yml"
 	]
 
 	IGNORE_EXTENSIONS : [
