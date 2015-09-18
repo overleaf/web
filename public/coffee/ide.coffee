@@ -6,7 +6,6 @@ define [
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
 	"ide/permissions/PermissionsManager"
-	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/script-output/ScriptOutputManager"
 	"ide/analytics/AnalyticsManager"
@@ -42,7 +41,6 @@ define [
 	OnlineUsersManager
 	TrackChangesManager
 	PermissionsManager
-	PdfManager
 	BinaryFilesManager
 	ScriptOutputManager
 	AnalyticsManager
@@ -94,12 +92,11 @@ define [
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
-		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 		ide.scriptOutputManager = new ScriptOutputManager(ide, $scope)
 		ide.analyticsManager = new AnalyticsManager(ide, $scope)
-		
+
 		inited = false
 		$scope.$on "project:joined", () ->
 			return if inited

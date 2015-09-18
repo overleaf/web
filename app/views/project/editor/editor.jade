@@ -35,32 +35,5 @@ div.full-size(
 		)
 
 	.ui-layout-east
-		div(ng-if="ui.pdfLayout == 'sideBySide'")
+		div
 			include ./output_panel/main
-
-	.ui-layout-resizer-controls.synctex-controls(
-		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
-		ng-controller="PdfSynctexController"
-	)
-		a.btn.btn-default.btn-xs(
-			tooltip="#{translate('go_to_code_location_in_pdf')}"
-			tooltip-placement="right"
-			tooltip-append-to-body="true"
-			ng-click="syncToPdf()"
-		)
-			i.fa.fa-long-arrow-right
-		br
-		a.btn.btn-default.btn-xs(
-			tooltip-html="'#{translate('go_to_pdf_location_in_code')}'"
-			tooltip-placement="right"
-			tooltip-append-to-body="true"
-			ng-click="syncToCode()"
-		)
-			i.fa.fa-long-arrow-left
-			
-div.full-size(
-	ng-if="ui.pdfLayout == 'flat'"
-	ng-show="ui.view == 'pdf'"
-)
-	include ./output_panel/main
-	
