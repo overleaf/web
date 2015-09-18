@@ -7,6 +7,10 @@ define [
 		
 		ide.$scope.$watch "editor.ace_mode", () ->
 			ace_mode = ide.$scope.editor.ace_mode
+			# If the selected file mode is either R or Python set the engine type.
+			# This way we remember the last selected 'valid' engine,
+			# so that the user can (for example) run python code while looking
+			# at a Json file in the editor.
 			if ace_mode in ['r', 'python']
 				$scope.engine = ace_mode
 
