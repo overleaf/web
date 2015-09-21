@@ -4,7 +4,20 @@ define [
 	App.controller "ScriptOutputController", ($scope, $http, ide, jupyterRunner, event_tracking, localStorage) ->
 		$scope.status = jupyterRunner.status
 		$scope.cells = jupyterRunner.CELL_LIST
-		
+		$scope.engine = 'python'
+
+		$scope.determineDefaultEngine = () ->
+			# check all document extensions in the project,
+			# if .r files outnumber .py files, set the engine to 'r'
+			# otherwise leave it as the default 'python'
+			filenames = ide.fileTreeManager.getAllActiveDocs().map((doc) -> doc.name.toLowerCase())
+			extensions = filenames.map((filename) -> filename.split('.').pop())
+			py_count = extensions.filter( (ext) -> ext == 'py').length
+			r_count = extensions.filter(  (ext) -> ext == 'r' ).length
+			if r_count > py_count
+				$scope.engine = 'r'
+		$scope.determineDefaultEngine()
+
 		ide.$scope.$watch "editor.ace_mode", () ->
 			ace_mode = ide.$scope.editor.ace_mode
 			# If the selected file mode is either R or Python set the engine type.
