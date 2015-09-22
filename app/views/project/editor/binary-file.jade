@@ -18,7 +18,10 @@ div.binary-file.full-size(
 		ng-if="isTextWithPreview(openFile)"
 		ng-controller="TextPreviewController"	
 	)
-		p Wat
+		div(ng-if="state.preview == null")
+			p {{state.message}}
+		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
+			pre {{state.preview.data}}
 	
 	div.csv-preview-container(
 		ng-if="isCsvWithPreview(openFile)"
@@ -46,7 +49,7 @@ div.binary-file.full-size(
 				
 	
 	p.no-preview(
-		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile)"
+		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile) && !isTextWithPreview(openFile)"
 	) #{translate("no_preview_available")}
 	
 	p.download-button-container
