@@ -17,7 +17,7 @@ module.exports = PreviewController =
 
 			file_url = _build_filestore_url(project_id, file_id)
 
-			PreviewHandler.getPreviewCsv file_url, (err, preview) ->
+			PreviewHandler.getPreview file_url, 'csv', (err, preview) ->
 				if err?
 					logger.log err: err, project_id: project_id, file_id: file_id, "error getting preview"
 					return res.sendStatus 500
@@ -34,7 +34,7 @@ module.exports = PreviewController =
 
 			file_url = _build_filestore_url(project_id, file_id)
 
-			PreviewHandler.getPreviewText file_url, (err, preview) ->
+			PreviewHandler.getPreview file_url, 'text', (err, preview) ->
 				if err?
 					logger.log err: err, project_id: project_id, file_id: file_id, "error getting preview"
 					return res.sendStatus 500
