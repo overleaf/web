@@ -27,7 +27,22 @@ div.binary-file.full-size(
 		div(ng-if="state.preview == null")
 			p {{state.message}}
 		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			pre {{state.preview.data}}
+			div.table-responsive
+				table.table.table-striped
+					thead(ng-if="state.preview.labels")
+						tr
+							th(width="60") #
+							th(ng-repeat="label in state.preview.labels track by $index") {{label}}
+					tbody
+						tr(ng-repeat="row in state.preview.rows track by $index")
+							td {{$index + 1}}
+							td(ng-repeat="cell in row track by $index") {{cell}}
+						tr(ng-if="state.preview.truncated == true")
+							td(colspan="999")
+								div.text-center
+									| ... only first {{state.preview.rows.length}} lines are shown
+	
+			
 				
 	
 	p.no-preview(
