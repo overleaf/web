@@ -13,7 +13,7 @@ define [
 		$scope.isCsvWithPreview = (file) ->
 			return !file.url? && ['csv'].indexOf(extension(file)) > -1
 		$scope.isTextWithPreview = (file) ->
-			return !file.url? && ['txt'].indexOf(extension(file)) > -1
+			return !file.url? && (!$scope.isImage(file) && !$scope.isVectorWithPreview(file) && !$scope.isCsvWithPreview(file))
 	]
 
 	App.controller "CsvPreviewController", ['$scope', '$http', '$timeout', ($scope, $http, $timeout) ->
