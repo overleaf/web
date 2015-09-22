@@ -14,23 +14,15 @@ div.binary-file.full-size(
 		ng-if="isVectorWithPreview(openFile)"
 	)
 	
-	div.text-preview-container(
-		ng-if="isTextWithPreview(openFile)"
-		ng-controller="TextPreviewController"	
+	div.smart-preview-container(
+		ng-if="isSmartPreview(openFile)"
+		ng-controller="SmartPreviewController"	
 	)
 		div(ng-if="state.preview == null")
 			p {{state.message}}
 		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			pre {{state.preview.data}}
-	
-	div.csv-preview-container(
-		ng-if="isCsvWithPreview(openFile)"
-		ng-controller="CsvPreviewController"
-	)
-		div(ng-if="state.preview == null")
-			p {{state.message}}
-		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			div.table-responsive
+			pre(ng-if="file_type == 'text'") {{state.preview.data}}
+			div.table-responsive(ng-if="file_type == 'csv'")
 				table.table.table-striped
 					thead(ng-if="state.preview.labels")
 						tr
@@ -45,11 +37,8 @@ div.binary-file.full-size(
 								div.text-center
 									| ... only first {{state.preview.rows.length}} lines are shown
 	
-			
-				
-	
 	p.no-preview(
-		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile) && !isTextWithPreview(openFile)"
+		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isSmartPreview(openFile)"
 	) #{translate("no_preview_available")}
 	
 	p.download-button-container
