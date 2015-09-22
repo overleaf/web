@@ -42,6 +42,7 @@ define [
 				event_tracking.send("script", "multiple-run")
 		
 		$scope.runSelection = () ->
+			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
 			trackRun()
 			ide.$scope.$broadcast("editor:gotoNextLine")
@@ -51,6 +52,7 @@ define [
 			$scope._scrollOutput()
 
 		$scope.runAll = () ->
+			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
 			trackRun()
 			engine = $scope.engine

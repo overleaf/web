@@ -187,6 +187,9 @@ define [
 
 				editor.setOption("scrollPastEnd", true)
 
+				scope.$on "#{scope.name}:focus", () ->
+					editor.focus()
+
 				resetSession = () ->
 					session = editor.getSession()
 					session.setUseWrapMode(scope.wrapLines)
