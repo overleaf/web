@@ -21,7 +21,11 @@ div.binary-file.full-size(
 		div(ng-if="state.preview == null")
 			p {{state.message}}
 		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			pre(ng-if="file_type == 'text'") {{state.preview.data}}
+			pre(ng-if="file_type == 'text'")
+				div {{state.preview.data}}
+				div(ng-if="state.preview.truncated == true")
+					<br>
+					| ... only first 16k of file shown above
 			div.table-responsive(ng-if="file_type == 'csv'")
 				table.table.table-striped
 					thead(ng-if="state.preview.labels")
