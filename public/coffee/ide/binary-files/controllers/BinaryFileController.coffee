@@ -26,9 +26,6 @@ define [
 
 		$scope.file = $scope.$parent.openFile
 		$scope.file_id = $scope.file.id
-		$scope.file_type = switch $scope.file.name.split('.').pop()
-			when 'csv' then 'csv'
-			else 'text'
 
 		$scope.setHeight = () ->
 			# Behold, a ghastly hack
@@ -40,9 +37,10 @@ define [
 				table_wrap.style['max-height'] = desired_height + 'px'
 
 		$scope.getPreview = () =>
-			$http.get("/project/#{$scope.project_id}/file/#{$scope.file_id}/preview/#{$scope.file_type}")
+			$http.get("/project/#{$scope.project_id}/file/#{$scope.file_id}/preview")
 				.success (data) ->
 					$scope.state.preview = data
+					console.log data
 					$timeout($scope.setHeight, 0)
 				.error () ->
 					$scope.state.message = 'No preview available.'
