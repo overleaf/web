@@ -64,7 +64,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							span(ng-if="msg.header.msg_type == 'execute_result'")
 								span.text-output.text-monospace(ng-if="msg.content.data['text/plain' ]") {{ msg.content.data['text/plain'] }}
 							div.display-data(ng-if="msg.header.msg_type == 'display_data' && msg.content.image")
-								.display-data-inner(ng-class="{ 'display-data-inner-full-width': (msg.content.format == 'image/svg+xml' || msg.content.format == 'application/pdf') }")
+								.display-data-inner
 									a(ng-controller="LinkImageController"
 										href
 										ng-click="linkImage(msg.content.data[msg.content.format + '+url'], 'output.' + msg.content.format.split('/')[1], msg.content.data[msg.content.format], msg.content)")
