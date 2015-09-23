@@ -10,7 +10,7 @@ describe "PreviewController", ->
 
 	beforeEach ->
 		@PreviewHandler =
-			getPreviewCsv: sinon.stub()
+			getPreview: sinon.stub()
 		@ProjectLocator =
 			findElement: sinon.stub()
 		@FileStoreHandler =
@@ -38,11 +38,11 @@ describe "PreviewController", ->
 			rows: []
 			truncated: false
 
-	describe "getPreviewCsv", ->
+	describe "getPreview", ->
 
 		beforeEach ->
 			@ProjectLocator.findElement.callsArgWith(1, null, @file)
-			@PreviewHandler.getPreviewCsv.callsArgWith(1, null, @preview)
+			@PreviewHandler.getPreview.callsArgWith(2, null, @preview)
 
 
 		it "should send back some data", (done) ->
@@ -50,15 +50,14 @@ describe "PreviewController", ->
 				expect(data).to.not.equal null
 				data.should.be.Object
 				done()
-			@controller.getPreviewCsv @req, @res
+			@controller.getPreview @req, @res
 
 
 		it "should use FileStoreHandler._buildUrld to build a url", (done) ->
 			@res.send = (data) =>
 				@FileStoreHandler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
-			@controller.getPreviewCsv @req, @res
-
+			@controller.getPreview @req, @res
 
 		it "should use the ProjectLocator to check if the resource exists", (done) ->
 			@res.send = (data) =>
@@ -68,13 +67,20 @@ describe "PreviewController", ->
 					type: 'file'
 				@ProjectLocator.findElement.calledWith(expected_options).should.equal true
 				done()
-			@controller.getPreviewCsv @req, @res
+			@controller.getPreview @req, @res
 
 		it "should use the PreviewHandler to get the preview object", (done) ->
 			@res.send = (data) =>
-				@PreviewHandler.getPreviewCsv.calledOnce.should.equal true
+				@PreviewHandler.getPreview.calledOnce.should.equal true
 				done()
-			@controller.getPreviewCsv @req, @res
+			@controller.getPreview @req, @res
+
+		it 'should pass the file name to PreviewHandler.getPreview', (done) ->
+			@res.send = (data) =>
+				@PreviewHandler.getPreview.lastCall.args[1].should.equal @file.name
+				done()
+			@controller.getPreview @req, @res
+
 
 		describe "when the ProjectLocator can't find the file", ->
 
@@ -85,15 +91,15 @@ describe "PreviewController", ->
 				@res.sendStatus = (code) ->
 					code.should.equal 500
 					done()
-				@controller.getPreviewCsv @req, @res
+				@controller.getPreview @req, @res
 
 		describe "when the PreviewHandler produces an error", ->
 
 			beforeEach ->
-				@PreviewHandler.getPreviewCsv.callsArgWith(1, new Error('not found'), null)
+				@PreviewHandler.getPreview.callsArgWith(2, new Error('not found'), null)
 
 			it "should respond with a 500", (done) ->
 				@res.sendStatus = (code) ->
 					code.should.equal 500
 					done()
-				@controller.getPreviewCsv @req, @res
+				@controller.getPreview @req, @res
