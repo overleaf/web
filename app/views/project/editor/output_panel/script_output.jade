@@ -26,8 +26,8 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				.i.fa.fa-fw.fa-stop
 				|  Stop
 		span.pull-right.small-controls
-			a(href, ng-click="clearCells()", tooltip-html="'Clear<br/>Output'", tooltip-placement="bottom")
-				i.fa.fa-fw.fa-minus-square-o
+			a(href, ng-click="clearCells()", ng-if="cells[engine].length > 0", tooltip-html="'Clear<br/>Output'", tooltip-placement="bottom")
+				i.fa.fa-fw.fa-times-circle-o
 			a(href, ng-click="restart()", tooltip-html="'Restart<br/>Session'", tooltip-placement="bottom")
 				i.fa.fa-fw.fa-refresh
 			
