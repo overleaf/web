@@ -17,6 +17,7 @@ describe "PreviewHandler", ->
 					previewer:
 						url: "previewerservice:3000"
 		@file_url = "http://example.com/somefile.csv"
+		@file_name = 'somefile.csv'
 		@response =
 			statusCode: 200
 		@preview =
@@ -28,17 +29,17 @@ describe "PreviewHandler", ->
 	describe "_build_url", ->
 
 		it "should build a url for the previewer service", (done) ->
-			url = @PreviewHandler._build_url(@file_url)
-			url.should.match(new RegExp("^#{@settings.apis.previewer.url}.*$"))
+			url = @PreviewHandler._build_url(@file_url, @file_name)
+			url.should.match(new RegExp("^#{@settings.apis.previewer.url}.*#{@file_url}.*#{@file_name}$"))
 			done()
 
-	describe "getPreviewCsv", ->
+	describe "getPreview", ->
 
 		beforeEach ->
 			@request.callsArgWith(1, null, @response, @preview)
 
 		it "should send back the right data", (done) ->
-			@PreviewHandler.getPreviewCsv @file_url, (err, data) =>
+			@PreviewHandler.getPreview @file_url, @file_name, (err, data) =>
 				expect(data).to.not.equal null
 				expect(data).to.be.Object
 				expect(data).to.equal @preview
@@ -52,7 +53,7 @@ describe "PreviewHandler", ->
 					@response.statusCode = bad_status_code
 
 				it "should produce an error", (done) ->
-					@PreviewHandler.getPreviewCsv @file_url, (err, data) =>
+					@PreviewHandler.getPreview @file_url, @file_name, (err, data) =>
 						expect(data).to.equal null
 						expect(err).to.not.equal null
 						expect(err instanceof Error).to.equal true
