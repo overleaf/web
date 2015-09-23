@@ -40,7 +40,6 @@ define [
 			$http.get("/project/#{$scope.project_id}/file/#{$scope.file_id}/preview")
 				.success (data) ->
 					$scope.state.preview = data
-					console.log data
 					$timeout($scope.setHeight, 0)
 				.error () ->
 					$scope.state.message = 'No preview available.'

@@ -20,28 +20,29 @@ div.binary-file.full-size(
 	)
 		div(ng-if="state.preview == null")
 			p {{state.message}}
-		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			div(ng-if="state.preview.type == 'binary' || state.preview.type == 'unknown'")
-				div FIXME: Nope
-			pre(ng-if="state.preview.type == 'text'")
-				div {{state.preview.data}}
-				div(ng-if="state.preview.truncated == true")
-					<br>
-					| ... only first 16k of file shown above
-			div.table-responsive(ng-if="state.preview.type == 'csv'")
-				table.table.table-striped
-					thead(ng-if="state.preview.data.labels")
-						tr
-							th(width="60") #
-							th(ng-repeat="label in state.preview.data.labels track by $index") {{label}}
-					tbody
-						tr(ng-repeat="row in state.preview.data.rows track by $index")
-							td {{$index + 1}}
-							td(ng-repeat="cell in row track by $index") {{cell}}
-						tr(ng-if="state.preview.truncated == true")
-							td(colspan="999")
-								div.text-center
-									| ... only first {{state.preview.data.rows.length}} lines are shown
+		div(ng-if="state.preview != null", ng-cloak="true")
+			div(ng-if="state.preview.type == 'binary'")
+				| #{translate("no_preview_available")}
+			div.scroll-container(ng-if="state.preview.type != 'binary'", ng-cloak="true")
+				div(ng-if="state.preview.type == 'text'")
+					pre {{state.preview.data}}
+						div(ng-if="state.preview.truncated == true")
+							<br>
+							| ... only first 16k of file shown above
+				div.table-responsive(ng-if="state.preview.type == 'csv'")
+					table.table.table-striped
+						thead(ng-if="state.preview.data.labels")
+							tr
+								th(width="60") #
+								th(ng-repeat="label in state.preview.data.labels track by $index") {{label}}
+						tbody
+							tr(ng-repeat="row in state.preview.data.rows track by $index")
+								td {{$index + 1}}
+								td(ng-repeat="cell in row track by $index") {{cell}}
+							tr(ng-if="state.preview.truncated == true")
+								td(colspan="999")
+									div.text-center
+										| ... only first {{state.preview.data.rows.length}} lines are shown
 	
 	p.no-preview(
 		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isSmartPreview(openFile)"
