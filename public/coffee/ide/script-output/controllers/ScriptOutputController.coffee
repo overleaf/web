@@ -4,7 +4,7 @@ define [
 	App.controller "ScriptOutputController", ($scope, $http, ide, jupyterRunner, event_tracking, localStorage) ->
 		$scope.status = jupyterRunner.status
 		$scope.cells = jupyterRunner.CELL_LIST
-		$scope.engine = 'python'
+		ide.$scope.engine = 'python'
 
 		$scope.determineDefaultEngine = () ->
 			# check all document extensions in the project,
@@ -15,7 +15,7 @@ define [
 			py_count = extensions.filter( (ext) -> ext == 'py').length
 			r_count = extensions.filter(  (ext) -> ext == 'r' ).length
 			if r_count > py_count
-				$scope.engine = 'r'
+				ide.$scope.engine = 'r'
 		$scope.determineDefaultEngine()
 
 		ide.$scope.$watch "editor.ace_mode", () ->
@@ -25,7 +25,7 @@ define [
 			# so that the user can (for example) run python code while looking
 			# at a Json file in the editor.
 			if ace_mode in ['r', 'python']
-				$scope.engine = ace_mode
+				ide.$scope.engine = ace_mode
 
 		$scope.$on "editor:run-line", () ->
 			$scope.runSelection()
@@ -47,7 +47,7 @@ define [
 			trackRun()
 			ide.$scope.$broadcast("editor:gotoNextLine")
 			code   = ide.$scope.editor.selection.lines.join("\n")
-			engine = $scope.engine
+			engine = ide.$scope.engine
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
 
@@ -55,7 +55,7 @@ define [
 			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
 			trackRun()
-			engine = $scope.engine
+			engine = ide.$scope.engine
 			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
 			if engine == "python"
 				code = "%run #{path}"
@@ -70,7 +70,7 @@ define [
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
 			code   = $scope.manualInput
-			engine = $scope.engine
+			engine = ide.$scope.engine
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
 			$scope.manualInput = ""
@@ -86,7 +86,7 @@ define [
 			jupyterRunner.stop()
 		
 		$scope.restart = () ->
-			jupyterRunner.shutdown($scope.engine)
+			jupyterRunner.shutdown(ide.$scope.engine)
 		
 		$scope.installPackage = (packageName, language) ->
 			ide.$scope.$broadcast "installPackage", packageName, language

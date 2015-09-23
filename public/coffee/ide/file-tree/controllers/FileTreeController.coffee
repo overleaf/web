@@ -47,8 +47,16 @@ define [
 	App.controller "NewDocModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+			engine = ide.$scope.engine
+			if engine == 'r'
+				name = 'script.R'
+			else if engine == 'python'
+				name = 'script.py'
+			else
+				# Fallback to Python
+				name = 'script.py'
 			$scope.inputs = 
-				name: "script.py"
+				name: name
 			$scope.state =
 				inflight: false
 
