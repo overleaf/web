@@ -9,6 +9,10 @@ define [
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 		
 		ide.socket.on "clsiOutput", (message) ->
+			if !message.content? and !message.header? and !message.header.msg_type?
+				console.warn "Malformed message: expected content, header and header.msg_type", message
+				return
+
 			engine_and_request_id = message.request_id
 			return if !engine_and_request_id?
 			[engine,request_id] = engine_and_request_id?.split(":")
@@ -51,11 +55,12 @@ define [
 				if not cell.restart_intentional # suppress any errors from the restart
 					cell.output.push message
 			
-			if message.header.msg_type == "stream"
+			if message.header.msg_type == "stream" and message.content.text?
 				message.content.text_escaped = ansiToSafeHtml(message.content.text)
 			
 			if message.header.msg_type == "error"
-				message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
+				if message.content.traceback?
+					message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
 				if m = message.content.evalue?.match(/^No module named ['‘]?(\w+)[’']?$/)
 					packageName = m[1]
 					message.content.type = "missing_package"
@@ -66,7 +71,7 @@ define [
 					message.content.type = "missing_package"
 					message.content.package = packageName
 					message.content.language = "R"
-				else if m = message.content.ename == "MemoryError"
+				else if message.content.ename == "MemoryError"
 					cell.memory_limit_exceeded = true
 
 			if message.header.msg_type.match(/^file_(created|moved|deleted)/)
@@ -96,7 +101,7 @@ define [
 						message.content.file_type = "image"
 					cell.output.push message
 			
-			if message.header.msg_type == "display_data"
+			if message.header.msg_type == "display_data" and message.content.data?
 				if message.content.data['text/html']?
 					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
 				if message.content.data['image/svg+xml']?
@@ -141,6 +146,7 @@ define [
 			ide.$scope.$apply()
 		
 		ansiToSafeHtml = (input) ->
+			return "" if !input?
 			input = input
 				.replace(/&/g, "&amp;")
 				.replace(/</g, "&lt;")
