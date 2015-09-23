@@ -246,6 +246,14 @@ define [
 			cellCount: (engine) ->
 				return jupyterRunner.CELL_LIST[engine]?.length or 0
 			
+			clearCells: () ->
+				for request_id, cell of jupyterRunner.CELLS
+					if request_id != jupyterRunner.current_request_id
+						jupyterRunner.CELLS[request_id] = null
+				
+				for engine, cell_list of jupyterRunner.CELL_LIST
+					jupyterRunner.CELL_LIST[engine] = []
+			
 			hasJustRestarted: (engine) ->
 				cells = jupyterRunner.CELL_LIST[engine] or []
 				return false if cells.length < 2

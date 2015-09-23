@@ -94,3 +94,6 @@ define [
 		$scope.showFormat = (message, format) ->
 			message.content.format = format
 			localStorage("preferred_format", format)
+		
+		$scope.clearCells = () ->
+			jupyterRunner.clearCells()
