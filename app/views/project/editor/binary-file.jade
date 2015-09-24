@@ -14,31 +14,38 @@ div.binary-file.full-size(
 		ng-if="isVectorWithPreview(openFile)"
 	)
 	
-	div.csv-preview-container(
-		ng-if="isCsvWithPreview(openFile)"
-		ng-controller="CsvPreviewController"
+	div.smart-preview-container(
+		ng-if="isSmartPreview(openFile)"
+		ng-controller="SmartPreviewController"	
 	)
 		div(ng-if="state.preview == null")
 			p {{state.message}}
-		div.scroll-container(ng-if="state.preview != null", ng-cloak="true")
-			div.table-responsive
-				table.table.table-striped
-					thead(ng-if="state.preview.labels")
-						tr
-							th(width="60") #
-							th(ng-repeat="label in state.preview.labels track by $index") {{label}}
-					tbody
-						tr(ng-repeat="row in state.preview.rows track by $index")
-							td {{$index + 1}}
-							td(ng-repeat="cell in row track by $index") {{cell}}
-						tr(ng-if="state.preview.truncated == true")
-							td(colspan="999")
-								div.text-center
-									| ... only first {{state.preview.rows.length}} lines are shown
-				
+		div(ng-if="state.preview != null", ng-cloak="true")
+			div(ng-if="state.preview.type == 'binary'")
+				| #{translate("no_preview_available")}
+			div.scroll-container(ng-if="state.preview.type != 'binary'", ng-cloak="true")
+				div(ng-if="state.preview.type == 'text'")
+					pre {{state.preview.data}}
+						div(ng-if="state.preview.truncated == true")
+							<br>
+							| ... only first 16k of file shown above
+				div.table-responsive(ng-if="state.preview.type == 'csv'")
+					table.table.table-striped
+						thead(ng-if="state.preview.data.labels")
+							tr
+								th(width="60") #
+								th(ng-repeat="label in state.preview.data.labels track by $index") {{label}}
+						tbody
+							tr(ng-repeat="row in state.preview.data.rows track by $index")
+								td {{$index + 1}}
+								td(ng-repeat="cell in row track by $index") {{cell}}
+							tr(ng-if="state.preview.truncated == true")
+								td(colspan="999")
+									div.text-center
+										| ... only first {{state.preview.data.rows.length}} lines are shown
 	
 	p.no-preview(
-		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isCsvWithPreview(openFile)"
+		ng-if="!isImage(openFile) && !isVectorWithPreview(openFile) && !isSmartPreview(openFile)"
 	) #{translate("no_preview_available")}
 	
 	p.download-button-container

@@ -6,18 +6,20 @@ _build_filestore_url = require('../FileStore/FileStoreHandler')._buildUrl
 
 module.exports = PreviewController =
 
-	getPreviewCsv: (req, res) ->
+	getPreview: (req, res) ->
 		project_id = req.params.Project_id
 		file_id = req.params.file_id
-		logger.log project_id: project_id, file_id: file_id, "getting preview of csv file"
+		logger.log project_id: project_id, file_id: file_id, "getting preview of file"
 		ProjectLocator.findElement project_id: project_id, element_id: file_id, type: 'file', (err, file) ->
 			if err?
 				logger.log err: err, project_id: project_id, file_id: file_id, "error finding element for file"
 				return res.sendStatus 500
 
 			file_url = _build_filestore_url(project_id, file_id)
+			file_name = file.name
 
-			PreviewHandler.getPreviewCsv file_url, (err, preview) ->
+			logger.log project_id: project_id, file_id: file_id, file_name: file_name, "requesting preview from Previewer service"
+			PreviewHandler.getPreview file_url, file_name, (err, preview) ->
 				if err?
 					logger.log err: err, project_id: project_id, file_id: file_id, "error getting preview"
 					return res.sendStatus 500
