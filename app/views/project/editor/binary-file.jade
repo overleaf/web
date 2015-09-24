@@ -25,7 +25,7 @@ div.binary-file.full-size(
 				| #{translate("no_preview_available")}
 			div.scroll-container(ng-if="state.preview.type != 'binary'", ng-cloak="true")
 				div(ng-if="state.preview.type == 'text'")
-					pre {{state.preview.data}}
+					div.pre {{state.preview.data}}
 						div(ng-if="state.preview.truncated == true")
 							<br>
 							| ... only first 16k of file shown above
