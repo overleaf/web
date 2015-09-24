@@ -27,8 +27,7 @@ div.binary-file.full-size(
 				div(ng-if="state.preview.type == 'text'")
 					div.pre {{state.preview.data}}
 						div(ng-if="state.preview.truncated == true")
-							<br>
-							| ... only first 16k of file shown above
+							| <br /> ... only first 16k of file shown above
 				div.table-responsive(ng-if="state.preview.type == 'csv'")
 					table.table.table-striped
 						thead(ng-if="state.preview.data.labels")
