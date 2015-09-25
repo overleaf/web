@@ -89,7 +89,7 @@ define [
 		ide.$scope = $scope
 
 		ide.connectionManager = new ConnectionManager(ide, $scope)
-		ide.fileTreeManager = new FileTreeManager(ide, $scope, $http)
+		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)

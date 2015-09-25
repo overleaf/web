@@ -8,11 +8,10 @@ define [
 	"ide/file-tree/controllers/FileTreeRootFolderController"
 ], () ->
 	class FileTreeManager
-		constructor: (@ide, @$scope, @$http) ->
+		constructor: (@ide, @$scope) ->
 			@$scope.$on "project:joined", =>
 				@loadRootFolder()
 				@loadDeletedDocs()
-				@loadOutputFiles()
 				@$scope.$emit "file-tree:initialized"
 
 			@$scope.$watch "rootFolder", (rootFolder) =>
@@ -27,8 +26,9 @@ define [
 				if @$scope.outputFiles?.length == 0
 					@$scope.$broadcast 'reload-output-files'
 
-			@$scope.$on 'reload-output-files', () =>
-				@loadOutputFiles()
+			@$scope.$on 'updateOutputFiles', (event, files) =>
+				if files
+					@loadOutputFiles files
 
 			@_bindToSocketEvents()
 
@@ -217,19 +217,16 @@ define [
 					deleted: true
 				}
 
-		loadOutputFiles: () ->
-			@$http.get "/project/#{@$scope.project_id}/output"
-				.success (files) =>
-					loadedFiles = files?.outputFiles
-					@$scope.outputFiles = []
-					for doc in loadedFiles or []
-						if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
-							@$scope.outputFiles.push {
-								name: doc.name
-								id: doc.name
-								type: "output"
-								url: "/project/#{@ide.project_id}/output/#{doc.name}"
-							}
+		loadOutputFiles: (files) ->
+			@$scope.outputFiles = []
+			for doc in files or []
+				if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
+					@$scope.outputFiles.push {
+						name: doc.name
+						id: doc.name
+						type: "output"
+						url: "/project/#{@ide.project_id}/output/#{doc.name}"
+					}
 
 		recalculateDocList: () ->
 			@$scope.docs = []
