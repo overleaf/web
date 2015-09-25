@@ -68,6 +68,9 @@ define [
 					entity.name = name
 					@recalculateDocList()
 
+			@ide.socket.on "reconnect", () =>
+				@$scope.$broadcast 'reload-output-files'
+
 			@ide.socket.on "removeEntity", (entity_id) =>
 				entity = @findEntityById(entity_id)
 				return if !entity?
@@ -212,7 +215,9 @@ define [
 				}
 
 		loadOutputFiles: () ->
-			@$scope.outputFiles = []
+			# only blank the existing list if there are files to copy in
+			if @$scope.project.outputFiles?
+				@$scope.outputFiles = []
 			for doc in @$scope.project.outputFiles or []
 				if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
 					@$scope.outputFiles.push {
