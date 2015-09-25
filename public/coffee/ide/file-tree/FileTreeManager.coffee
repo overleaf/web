@@ -8,24 +8,27 @@ define [
 	"ide/file-tree/controllers/FileTreeRootFolderController"
 ], () ->
 	class FileTreeManager
-		constructor: (@ide, @$scope) ->
+		constructor: (@ide, @$scope, @$http) ->
 			@$scope.$on "project:joined", =>
 				@loadRootFolder()
 				@loadDeletedDocs()
 				@loadOutputFiles()
 				@$scope.$emit "file-tree:initialized"
-				
+
 			@$scope.$watch "rootFolder", (rootFolder) =>
 				if rootFolder?
 					@recalculateDocList()
 
-			@$scope.$watch "project.outputFiles", (outputFiles) =>
-				if outputFiles?
-					@loadOutputFiles()
+			# @$scope.$watch "project.outputFiles", (outputFiles) =>
+			# 	if outputFiles?
+			# 		@loadOutputFiles()
 
 			@$scope.$on 'first-cell-execution', () =>
 				if @$scope.outputFiles?.length == 0
 					@$scope.$broadcast 'reload-output-files'
+
+			@$scope.$on 'reload-output-files', () =>
+				@loadOutputFiles()
 
 			@_bindToSocketEvents()
 
@@ -49,7 +52,7 @@ define [
 						type: "file"
 					}
 					@recalculateDocList()
-					
+
 			@ide.socket.on "reciveNewFolder", (parent_folder_id, folder) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
 				@$scope.$apply () =>
@@ -126,7 +129,7 @@ define [
 			parts = path.split("/")
 			name = parts.shift()
 			rest = parts.join("/")
-			
+
 			if name == "."
 				return @_findEntityByPathInFolder(folder, rest)
 
@@ -215,18 +218,19 @@ define [
 				}
 
 		loadOutputFiles: () ->
-			# only blank the existing list if there are files to copy in
-			if @$scope.project.outputFiles?
-				@$scope.outputFiles = []
-			for doc in @$scope.project.outputFiles or []
-				if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
-					@$scope.outputFiles.push {
-						name: doc.name
-						id: doc.name
-						type: "output"
-						url: "/project/#{@ide.project_id}/output/#{doc.name}"
-					}
-				
+			@$http.get "/project/#{@$scope.project_id}/output"
+				.success (files) =>
+					loadedFiles = files?.outputFiles
+					@$scope.outputFiles = []
+					for doc in loadedFiles or []
+						if not @findEntityByPath(doc.name) and !@ide.shouldIgnoreOutputFile(doc.name)
+							@$scope.outputFiles.push {
+								name: doc.name
+								id: doc.name
+								type: "output"
+								url: "/project/#{@ide.project_id}/output/#{doc.name}"
+							}
+
 		recalculateDocList: () ->
 			@$scope.docs = []
 			@forEachEntity (entity, parentFolder, path) =>
@@ -235,7 +239,7 @@ define [
 						doc:  entity
 						path: path
 					}
-			
+
 		getEntityPath: (entity) ->
 			@_getEntityPathInFolder @$scope.rootFolder, entity
 
@@ -299,7 +303,7 @@ define [
 			}
 
 		deleteEntity: (entity, callback = (error) ->) ->
-			# We'll wait for the socket.io notification to 
+			# We'll wait for the socket.io notification to
 			# delete from scope.
 			return @ide.$http {
 				method: "DELETE"
@@ -317,7 +321,7 @@ define [
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
 			}
-			
+
 		_isChildFolder: (parent_folder, child_folder) ->
 			parent_path = @getEntityPath(parent_folder) or "" # null if root folder
 			child_path = @getEntityPath(child_folder) or "" # null if root folder

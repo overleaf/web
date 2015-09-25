@@ -46,7 +46,7 @@ define [
 	AnalyticsManager
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, $http) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -72,6 +72,7 @@ define [
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
+		$scope.outputFiles = []
 
 		# we want to hide the intercom button when some chat window is open
 		# and the same for the console input box
@@ -81,14 +82,14 @@ define [
 			else
 				$('#intercom-container').hide()
 			return null # don't return dom node
-		
+
 		window._ide = ide
 
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
 
 		ide.connectionManager = new ConnectionManager(ide, $scope)
-		ide.fileTreeManager = new FileTreeManager(ide, $scope)
+		ide.fileTreeManager = new FileTreeManager(ide, $scope, $http)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
@@ -107,7 +108,7 @@ define [
 					We don't want to delete your data on ShareLaTeX, so this project still contains your history and collaborators.
 					If the project has been renamed please look in your project list for a new project under the new name.
 				""")
-				
+
 		DARK_THEMES = [
 			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",
 			"merbivore", "merbivore_soft", "mono_industrial", "monokai",
@@ -123,8 +124,8 @@ define [
 				$scope.darkTheme = false
 
 		ide.localStorage = localStorage
-		
-		IGNORE_OUTPUT_FILE_EXTENSIONS = ["pyc"]	
+
+		IGNORE_OUTPUT_FILE_EXTENSIONS = ["pyc"]
 		ide.shouldIgnoreOutputFile = (path) ->
 			return true if path[0] == "." # don't show dot files
 			ext = path.split(".").pop()
