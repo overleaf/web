@@ -34,17 +34,29 @@ define [
 			$scope.runAll()
 		
 		run_count = 0
-		trackRun = () ->
+		EVENT_COOL_DOWN = ONE_MINUTE = 60 * 1000
+		last_script_event = null
+		trackScriptRun = () ->
 			run_count++
-			if run_count == 1
-				event_tracking.send("script", "run")
-			else if run_count == 5
+			if run_count == 5
 				event_tracking.send("script", "multiple-run")
+			
+			now = new Date()
+			if !last_script_event? or now - last_script_event > EVENT_COOL_DOWN
+				event_tracking.send("script", "run")
+				last_script_event = now
+		
+		last_command_event = null
+		trackCommandRun = () ->
+			now = new Date()
+			if !last_command_event? or now - last_command_event > EVENT_COOL_DOWN
+				event_tracking.send("command", "run")
+				last_command_event = now
 		
 		$scope.runSelection = () ->
 			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
-			trackRun()
+			trackScriptRun()
 			ide.$scope.$broadcast("editor:gotoNextLine")
 			code   = ide.$scope.editor.selection.lines.join("\n")
 			engine = ide.$scope.engine
@@ -54,7 +66,7 @@ define [
 		$scope.runAll = () ->
 			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
-			trackRun()
+			trackScriptRun()
 			engine = ide.$scope.engine
 			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
 			if engine == "python"
@@ -69,6 +81,7 @@ define [
 
 		$scope.manualInput = ""
 		$scope.runManualInput = () ->
+			trackCommandRun()
 			code   = $scope.manualInput
 			engine = ide.$scope.engine
 			jupyterRunner.executeRequest code, engine
