@@ -103,3 +103,58 @@ describe "PreviewController", ->
 					code.should.equal 500
 					done()
 				@controller.getPreview @req, @res
+
+	describe "_build_clsi_url", ->
+
+		it "should produce a url string", ->
+			result = @controller._build_clsi_url(@project_id, @file_id)
+			result.should.be.String
+			result.should.match(new RegExp("^.*#{@project_id}.*#{@file_id}"))
+
+	describe "getOutputFilePreview", ->
+
+		beforeEach ->
+			sinon.spy(@controller, '_build_clsi_url')
+			@PreviewHandler.getPreview.callsArgWith(2, null, @preview)
+
+		it "should send back some data", (done) ->
+			@res.send = (data) =>
+				expect(data).to.not.equal null
+				data.should.be.Object
+				done()
+			@controller.getOutputFilePreview @req, @res
+
+		it "should use _build_clsi_url to build a url", (done) ->
+			@res.send = (data) =>
+				@controller._build_clsi_url.calledWith(@project_id, @file_id).should.equal true
+				done()
+			@controller.getOutputFilePreview @req, @res
+
+		it "should not use the ProjectLocator", (done) ->
+			@res.send = (data) =>
+				@ProjectLocator.findElement.calledOnce.should.equal false
+				done()
+			@controller.getOutputFilePreview @req, @res
+
+		it "should use the PreviewHandler to get the preview object", (done) ->
+			@res.send = (data) =>
+				@PreviewHandler.getPreview.calledOnce.should.equal true
+				done()
+			@controller.getOutputFilePreview @req, @res
+
+		it 'should pass the original file_id as the filename to PreviewHandler.getPreview', (done) ->
+			@res.send = (data) =>
+				@PreviewHandler.getPreview.lastCall.args[1].should.equal @file_id
+				done()
+			@controller.getOutputFilePreview @req, @res
+
+		describe "when the PreviewHandler produces an error", ->
+
+			beforeEach ->
+				@PreviewHandler.getPreview.callsArgWith(2, new Error('not found'), null)
+
+			it "should respond with a 500", (done) ->
+				@res.sendStatus = (code) ->
+					code.should.equal 500
+					done()
+				@controller.getOutputFilePreview @req, @res

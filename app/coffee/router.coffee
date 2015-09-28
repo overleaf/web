@@ -110,7 +110,15 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/reply', SecurityManager.requestCanAccessProject, CompileController.sendJupyterReply
 		webRouter.post '/project/:Project_id/request/:request_id/interrupt', SecurityManager.requestCanAccessProject, CompileController.interruptRequest
 		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
-		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
+		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)\/preview$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"file_id":       req.params[1]
+				req.params = params
+				next()
+			), SecurityManager.requestCanAccessProject, PreviewController.getOutputFilePreview
+		webRouter.get  /^\/project\/([^\/]*)\/output\/([^\/]*)$/,
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]

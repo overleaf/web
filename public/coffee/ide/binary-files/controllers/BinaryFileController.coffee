@@ -9,11 +9,11 @@ define [
 		$scope.isVectorWithPreview = (file) ->
 			# only binary files stored in mongo have previews, not output
 			# file on clsi
-			return !file.url? && ['pdf', 'eps'].indexOf(extension(file)) > -1
+			return ['pdf', 'eps'].indexOf(extension(file)) > -1
 		$scope.isCsvWithPreview = (file) ->
-			return !file.url? && ['csv'].indexOf(extension(file)) > -1
+			return ['csv'].indexOf(extension(file)) > -1
 		$scope.isTextWithPreview = (file) ->
-			return !file.url? && (!$scope.isImage(file) && !$scope.isVectorWithPreview(file) && !$scope.isCsvWithPreview(file))
+			return (!$scope.isImage(file) && !$scope.isVectorWithPreview(file) && !$scope.isCsvWithPreview(file))
 
 		$scope.isSmartPreview = (file) ->
 			return $scope.isCsvWithPreview(file) or $scope.isTextWithPreview(file)
@@ -26,6 +26,7 @@ define [
 
 		$scope.file = $scope.$parent.openFile
 		$scope.file_id = $scope.file.id
+		$scope.is_output_file = $scope.file.type == 'output'
 
 		$scope.setHeight = () ->
 			# Behold, a ghastly hack
@@ -38,7 +39,12 @@ define [
 					table_wrap.style['max-height'] = desired_height + 'px'
 
 		$scope.getPreview = () =>
-			$http.get("/project/#{$scope.project_id}/file/#{$scope.file_id}/preview")
+			url =
+				if $scope.is_output_file
+					"#{$scope.file.url}/preview"
+				else
+					"/project/#{$scope.project_id}/file/#{$scope.file_id}/preview"
+			$http.get(url)
 				.success (data) ->
 					$scope.state.preview = data
 					$timeout($scope.setHeight, 0)

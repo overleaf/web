@@ -190,10 +190,19 @@ define [
 				editor.on "changeSelection", onSelectionChange
 
 				updateCount = 0
+				last_sent_event = null
 				onChange = () ->
 					updateCount++
 					if updateCount == 100
 						event_tracking.send 'document', 'significantly-edit'
+						
+					# Send 'document-edit' events at a max rate of one per minute
+					ONE_MINUTE = 60 * 1000
+					now = new Date()
+					if !last_sent_event? or now - last_sent_event > ONE_MINUTE
+						event_tracking.send 'document', 'edit'
+						last_sent_event = now
+						
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
