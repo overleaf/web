@@ -18,10 +18,6 @@ define [
 				if rootFolder?
 					@recalculateDocList()
 
-			# @$scope.$watch "project.outputFiles", (outputFiles) =>
-			# 	if outputFiles?
-			# 		@loadOutputFiles()
-
 			@$scope.$on 'first-cell-execution', () =>
 				if @$scope.outputFiles?.length == 0
 					@$scope.$broadcast 'reload-output-files'
