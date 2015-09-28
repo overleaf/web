@@ -70,7 +70,7 @@ define [
 			engine = ide.$scope.engine
 			path = ide.fileTreeManager.getEntityPath(ide.$scope.editor.open_doc)
 			if engine == "python"
-				code = "%run #{path}"
+				code = "%run '#{path}'"
 				jupyterRunner.executeRequest code, engine
 			else if engine == "r"
 				code = "source('#{path}', print.eval=TRUE)"
