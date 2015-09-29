@@ -67,9 +67,6 @@ define [
 					entity.name = name
 					@recalculateDocList()
 
-			@ide.socket.on "reconnect", () =>
-				@$scope.$broadcast 'reload-output-files'
-
 			@ide.socket.on "removeEntity", (entity_id) =>
 				entity = @findEntityById(entity_id)
 				return if !entity?
