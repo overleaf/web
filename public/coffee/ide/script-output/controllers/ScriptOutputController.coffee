@@ -110,3 +110,7 @@ define [
 		
 		$scope.clearCells = () ->
 			jupyterRunner.clearCells()
+
+		$scope.preventTabFocus = (event) ->
+			if event.keyCode == 9  # TAB key
+				event.preventDefault()

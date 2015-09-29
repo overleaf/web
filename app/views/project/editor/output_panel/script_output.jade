@@ -231,4 +231,5 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						placeholder = "Command...",
 						ng-focus="ui.chatOpen || showInterCom(false)",
 						ng-blur="showInterCom(true)"
+						ng-keydown="preventTabFocus($event)"
 					)
