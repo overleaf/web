@@ -35,7 +35,7 @@ module.exports = ProjectDownloadsController =
 				return next(error) if error?
 				res.header(
 					"Content-Disposition",
-					"attachment; filename=ShareLaTeX Projects (#{project_ids.length} items).zip"
+					"attachment; filename=DataJoy Projects (#{project_ids.length} items).zip"
 				)
 				res.contentType('application/zip')
 				stream.pipe(res)

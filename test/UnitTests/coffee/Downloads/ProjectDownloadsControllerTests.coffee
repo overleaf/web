@@ -111,7 +111,7 @@ describe "ProjectDownloadsController", ->
 			@res.header
 				.calledWith(
 					"Content-Disposition",
-					"attachment; filename=ShareLaTeX Projects (2 items).zip")
+					"attachment; filename=DataJoy Projects (2 items).zip")
 				.should.equal true
 
 		it "should record the action via Metrics", ->

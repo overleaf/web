@@ -159,10 +159,14 @@ module.exports = CompileController =
 	getClsiStream: (project_id, path, callback) ->
 		# quick and dirty version
 		compilerUrl = Settings.apis.clsi.url
-		url = "#{compilerUrl}/project/#{project_id}/output/#{path}"
-		logger.log url: url, "proxying to CLSI"
 		oneMinute = 60 * 1000
 		# the base request
-		options = { url: url, method: 'GET',	timeout: oneMinute }
+		options = { method: 'GET',	timeout: oneMinute }
+		if path.format?
+			options.url = "#{compilerUrl}/project/#{project_id}/output"
+			options.qs = {format: path.format}
+		else
+			options.url = "#{compilerUrl}/project/#{project_id}/output/#{path}"
+		logger.log options, "proxying to CLSI"
 		proxy = request(options)
 		callback null, proxy

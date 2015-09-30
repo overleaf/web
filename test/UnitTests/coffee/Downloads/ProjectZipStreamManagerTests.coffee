@@ -2,6 +2,7 @@ sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
 expect = chai.expect
+Stream = require "stream"
 modulePath = "../../../../app/js/Features/Downloads/ProjectZipStreamManager.js"
 SandboxedModule = require('sandboxed-module')
 EventEmitter = require("events").EventEmitter
@@ -15,6 +16,7 @@ describe "ProjectZipStreamManager", ->
 			append: sinon.stub()
 		@ProjectZipStreamManager = SandboxedModule.require modulePath, requires:
 			"archiver": @archiver = sinon.stub().returns @archive
+			"gunzip-maybe": @gunzip = sinon.stub().returns new Stream.PassThrough()
 			"logger-sharelatex": @logger = {error: sinon.stub(), log: sinon.stub()}
 			"../Project/ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
@@ -80,6 +82,7 @@ describe "ProjectZipStreamManager", ->
 			beforeEach ->
 				@ProjectZipStreamManager.addAllDocsToArchive = sinon.stub().callsArg(2)
 				@ProjectZipStreamManager.addAllFilesToArchive = sinon.stub().callsArg(2)
+				@ProjectZipStreamManager.addOutputFilesToArchive = sinon.stub().callsArg(2)
 				@archive.finalize = sinon.stub()
 				@ProjectZipStreamManager.createZipStreamForProject @project_id, @callback
 
@@ -101,6 +104,11 @@ describe "ProjectZipStreamManager", ->
 					.calledWith(@project_id, @archive)
 					.should.equal true
 
+			it "should add all of the output files to the zip", ->
+				@ProjectZipStreamManager.addOutputFilesToArchive
+					.calledWith(@project_id, @archive)
+					.should.equal true
+
 			it "should finalise the stream", ->
 				@archive.finalize.called.should.equal true
 
@@ -109,6 +117,7 @@ describe "ProjectZipStreamManager", ->
 				@ProjectZipStreamManager.addAllDocsToArchive =
 					sinon.stub().callsArgWith(2, new Error("something went wrong"))
 				@ProjectZipStreamManager.addAllFilesToArchive = sinon.stub().callsArg(2)
+				@ProjectZipStreamManager.addOutputFilesToArchive = sinon.stub().callsArg(2)
 				@archive.finalize = sinon.stub()
 				@ProjectZipStreamManager.createZipStreamForProject @project_id, @callback
 
@@ -119,6 +128,7 @@ describe "ProjectZipStreamManager", ->
 			it "should continue with the process", ->
 				@ProjectZipStreamManager.addAllDocsToArchive.called.should.equal true
 				@ProjectZipStreamManager.addAllFilesToArchive.called.should.equal true
+				@ProjectZipStreamManager.addOutputFilesToArchive.called.should.equal true
 				@archive.finalize.called.should.equal true
 
 		describe "with an error adding files", ->
@@ -126,6 +136,7 @@ describe "ProjectZipStreamManager", ->
 				@ProjectZipStreamManager.addAllDocsToArchive = sinon.stub().callsArg(2)
 				@ProjectZipStreamManager.addAllFilesToArchive =
 					sinon.stub().callsArgWith(2, new Error("something went wrong"))
+				@ProjectZipStreamManager.addOutputFilesToArchive = sinon.stub().callsArg(2)
 				@archive.finalize = sinon.stub()
 				@ProjectZipStreamManager.createZipStreamForProject @project_id, @callback
 
@@ -136,6 +147,7 @@ describe "ProjectZipStreamManager", ->
 			it "should continue with the process", ->
 				@ProjectZipStreamManager.addAllDocsToArchive.called.should.equal true
 				@ProjectZipStreamManager.addAllFilesToArchive.called.should.equal true
+				@ProjectZipStreamManager.addOutputFilesToArchive.called.should.equal true
 				@archive.finalize.called.should.equal true
 
 	describe "addAllDocsToArchive", ->
