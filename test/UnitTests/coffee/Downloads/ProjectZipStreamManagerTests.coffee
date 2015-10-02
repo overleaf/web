@@ -20,6 +20,7 @@ describe "ProjectZipStreamManager", ->
 			"logger-sharelatex": @logger = {error: sinon.stub(), log: sinon.stub()}
 			"../Project/ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
+			"../Compile/CompileController": @CompileController = {}
 			"../../models/Project": Project: @Project = {}
 
 
