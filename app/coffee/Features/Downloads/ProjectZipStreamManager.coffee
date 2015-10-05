@@ -94,10 +94,14 @@ module.exports = ProjectZipStreamManager =
 				# header is the tar header
 				# stream is the content body (might be an empty stream)
 				# call cb when you are done with this entry
-				logger.log {project_id, name: header.name}, "adding tar file entry"
+				logger.log {project_id, header_name: header.name}, "adding tar file entry"
 				archive.append stream, name: header.name
+				stream.on "error", () ->
+					logger.error {project_id}, "error unpacking tar file entry"
 				stream.on "end", () ->
 					cb() # ready for next entry
+			extract.on "error", (err) ->
+				logger.log {err}, "error unpacking tar file"
 			extract.on "finish", () ->
 				logger.log {project_id}, "end of tar file"
 				callback()
