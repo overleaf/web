@@ -15,7 +15,7 @@ module.exports = PackageIndexHandler =
 			body:
 				language: language
 				query: query
-			uri: "#{settings.apis.packageindex.url}/search"
+			uri: "#{settings.apis.packageindexer.url}/search"
 			timeout: fiveMinsInMs
 		request opts, (err, response, body) ->
 			return callback(err, null) if err?
