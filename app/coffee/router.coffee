@@ -40,6 +40,7 @@ AnalyticsMiddlewear = require "./Features/Analytics/AnalyticsMiddlewear"
 LinkController = require("./Features/Link/LinkController")
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 PreviewController = require('./Features/Previews/PreviewController')
+PackageIndexController = require('./Features/PackageIndex/PackageIndexController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -192,6 +193,8 @@ module.exports = class Router
 		webRouter.get  /learn(\/.*)?/, AnalyticsMiddlewear.injectIntercomDetails, WikiController.getPage
 
 		webRouter.get "/project/:Project_id/file/:file_id/preview", SecurityManager.requestCanAccessProject, PreviewController.getPreview
+
+		webRouter.post "/packages/search", PackageIndexController.search
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
