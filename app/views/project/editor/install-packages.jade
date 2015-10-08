@@ -9,9 +9,30 @@ li(ng-controller="InstallPackagesController")
 script(type='text/ng-template', id='installPackagesModalTemplate')
 	.modal-header
 		h3 Install modules and packages
+
 	div.modal-body.package-search-modal(ng-if="state.simpleMode == true")
-		| Search
+		div(ng-controller="PackageSearchController")
+			.row.package-search-form
+				.col-md-12
+					form.form-inline.toolbar.toolbar-borderless.row-spaced
+						span.text-monospace
+							input.form-control#packageSearch(
+								ng-model="state.searchInput",
+								placeholder="package-name",
+								on-enter="search()",
+								focus-on="open"
+							)
+						| &nbsp;&nbsp;
+						button(
+							ng-click="search()"
+							ng-disabled="state.searching"
+						).btn.btn-primary
+							| Search
+						| &nbsp;
+
+
 	div.modal-body.install-packages-modal(ng-if="state.simpleMode == false")
+		div.package-search(ng-if="state.simpleMode == true")
 		tabset
 			tab(heading="Python", active="selectedTab.python")
 			tab(heading="R", active="selectedTab.R")
@@ -118,14 +139,15 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 				
 			div.alert.alert-success.row-spaced(ng-show="output.currentRun.exitCode == 0") Success! '{{ installedPackage }}' was installed.
 			div.alert.alert-danger.row-spaced(ng-show="output.currentRun.exitCode") Failed to install '{{ installedPackage }}', sorry.
-
+	
 	.modal-footer
-		.pull-left.small
-			| Trouble installing a package? 
-			a(href, ng-click="help()") Contact Us!
-		.pull-left.small
+		span.pull-left.small
 			a(href, ng-click="toggleMode()").mode-toggle
-				span &nbsp;&nbsp;
 				span(ng-if="state.simpleMode == true") Advanced Mode
 				span(ng-if="state.simpleMode == false") Simple Mode
+		span.pull-left
+			| &nbsp;&nbsp;&nbsp;&nbsp;
+		spane.pull-left.small
+			| Trouble installing a package? 
+			a(href, ng-click="help()") Contact Us!
 		button.btn.btn-primary(ng-click="$close()") Done

@@ -2,6 +2,17 @@ define [
 	"base"
 ], (App) ->
 
+	App.controller "PackageSearchController", ($scope, $timeout, $http) ->
+		$scope.state =
+			searchInput: ""
+			searching: false
+			searchResult: null
+
+		console.log ">> here"
+
+		$scope.search = () ->
+			console.log ">> searching: #{$scope.state.searchInput}"
+
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
 			$timeout () ->
