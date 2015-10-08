@@ -3,27 +3,25 @@ define [
 ], (App) ->
 
 	App.controller "PackageSearchController", ($scope, $timeout, $http) ->
-		$scope.state =
-			searchInput: ""
-			searching: false
-			searchResult: null
 
 		console.log ">> here"
 
 		$scope.search = () ->
-			console.log ">> searching: #{$scope.state.searchInput}"
+			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
+			post_data =
+				language: $scope.selectedTab.toLowerCase()
+				query: $scope.state.searchInput
+			$http.post("/packages/search", post_data)
+				.success (data) ->
+					console.log ">> seach success"
+				.error () ->
+					console.log ">> seach fail"
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
 			, 200
-
-		$scope.state =
-			simpleMode: true
-
-		$scope.toggleMode = () ->
-			$scope.state.simpleMode = !$scope.state.simpleMode
 
 		$scope.install = (autoStart) ->
 			return if $scope.inputs.packageName == ""

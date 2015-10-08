@@ -10,7 +10,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 	.modal-header
 		h3 Install modules and packages
 
-	div.modal-body.package-search-modal(ng-if="state.simpleMode == true")
+	div.modal-body.package-search-modal(ng-if="simpleMode == true")
 		div(ng-controller="PackageSearchController")
 			.row.package-search-form
 				.col-md-12
@@ -31,8 +31,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						| &nbsp;
 
 
-	div.modal-body.install-packages-modal(ng-if="state.simpleMode == false")
-		div.package-search(ng-if="state.simpleMode == true")
+	div.modal-body.install-packages-modal(ng-if="simpleMode == false")
 		tabset
 			tab(heading="Python", active="selectedTab.python")
 			tab(heading="R", active="selectedTab.R")
@@ -143,8 +142,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 	.modal-footer
 		span.pull-left.small
 			a(href, ng-click="toggleMode()").mode-toggle
-				span(ng-if="state.simpleMode == true") Advanced Mode
-				span(ng-if="state.simpleMode == false") Simple Mode
+				span(ng-if="simpleMode == true") Advanced Mode
+				span(ng-if="simpleMode == false") Simple Mode
 		span.pull-left
 			| &nbsp;&nbsp;&nbsp;&nbsp;
 		spane.pull-left.small

@@ -8,13 +8,23 @@ define [
 			packageName: ""
 			pythonInstaller: "conda"
 			rInstaller: "apt-get"
-		
+
 		$scope.selectedTab =
 			python: true
 			R: false
-		
+
 		$scope.output = {}
-	
+
+		$scope.simpleMode = true
+
+		$scope.simpleModeState =
+			searchInput: ""
+			searching: false
+			searchResult: null
+
+		$scope.toggleMode = () ->
+			$scope.simpleMode = !$scope.simpleMode
+
 		$scope.openInstallPackagesModal = (autoStart, language) ->
 			if not $scope.autoStart?
 				# on the first open, try to guess the project type from the
@@ -36,7 +46,7 @@ define [
 				size: "lg"
 				scope: $scope
 			}
-		
+
 		$scope.$on "installPackage", (e, packageName, language) ->
 			$scope.inputs.packageName = packageName
 			if language == "python"
