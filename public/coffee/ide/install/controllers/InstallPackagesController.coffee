@@ -21,6 +21,8 @@ define [
 			searchInput: ""
 			searching: false
 			searchResults: null
+			install:
+				currentRun: {}
 
 		$scope.toggleMode = () ->
 			$scope.simpleMode = !$scope.simpleMode

@@ -36,8 +36,16 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							span.package-name
 								| {{item.name}}
 							span.pull-right
-								button(href, ng-click="simpleInstall(item)").btn.btn-sm.btn-primary
-									| Install
+								button(
+									href,
+									ng-click="simpleInstall(item)"
+									ng-disabled="simpleModeState.install.currentRun.running"
+								).btn.btn-sm.btn-primary
+									span(ng-switch, on="")
+										span(ng-if="simpleModeState.install.currentRun.running && simpleModeState.install.currentRun.packageName == item.name")
+											| Installing
+										span(ng-if="!(simpleModeState.install.currentRun.running && simpleModeState.install.currentRun.packageName == item.name)")
+											| Install
 						div
 							div(ng-if="item.summary") {{item.summary}}
 							div(ng-if="item.url").small

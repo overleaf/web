@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "PackageSearchController", ($scope, $timeout, $http) ->
+	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner) ->
 
 		$scope.search = () ->
 			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
@@ -24,6 +24,66 @@ define [
 		$scope.simpleInstall = (item) ->
 			console.log ">> installing"
 			console.log item
+
+			options = null
+			switch item.provider.source
+				when 'conda'
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "conda", "install", "--yes", "--quiet", item.name
+						]
+					}
+				when 'pip'
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "pip", "install", "#{item.name}"
+						]
+					}
+				when 'cran'
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "Rscript", "-e", "install.packages('#{item.name}');
+							suppressMessages(suppressWarnings(if(!require('#{item.name}')) {
+									stop('Could not load package', call.=FALSE)
+							}))"
+						]
+					}
+				when 'apt'
+					options = {
+						compiler: "apt-get-install"
+						package: "#{item.name}"
+						env: {
+							DEBIAN_FRONTEND: "noninteractive"
+						}
+					}
+				when 'bioconductor'
+					options = {
+						compiler: "command"
+						command: [
+							"sudo", "Rscript", "-e",
+							"if (!require(BiocInstaller,quietly=TRUE)) {
+								source('http://bioconductor.org/biocLite.R')
+							} else {
+								library(BiocInstaller);
+							};
+							biocLite('#{item.name}') ;
+							suppressMessages(suppressWarnings(if(!require('#{item.name}')) {
+								stop('Could not load package', call.=FALSE)
+							}))"
+						]
+					}
+				else
+					throw new Error("Unrecognized provider source: #{item.provider.source} for #{item.name}")
+
+			console.log options
+			currentRun = commandRunner.run options
+			currentRun.packageName = item.name
+			$scope.simpleModeState.install.currentRun = currentRun
+
+
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
