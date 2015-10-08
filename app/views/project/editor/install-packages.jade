@@ -9,7 +9,9 @@ li(ng-controller="InstallPackagesController")
 script(type='text/ng-template', id='installPackagesModalTemplate')
 	.modal-header
 		h3 Install modules and packages
-	.modal-body.install-packages-modal
+	div.modal-body.package-search-modal(ng-if="state.simpleMode == true")
+		| Search
+	div.modal-body.install-packages-modal(ng-if="state.simpleMode == false")
 		tabset
 			tab(heading="Python", active="selectedTab.python")
 			tab(heading="R", active="selectedTab.R")
@@ -121,4 +123,9 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 		.pull-left.small
 			| Trouble installing a package? 
 			a(href, ng-click="help()") Contact Us!
+		.pull-left.small
+			a(href, ng-click="toggleMode()").mode-toggle
+				span &nbsp;&nbsp;
+				span(ng-if="state.simpleMode == true") Advanced Mode
+				span(ng-if="state.simpleMode == false") Simple Mode
 		button.btn.btn-primary(ng-click="$close()") Done

@@ -23,4 +23,4 @@ module.exports = PackageIndexHandler =
 				callback(null, body)
 			else
 				logger.log file_url: file_url, status_code: response.statusCode, "Got non-ok response from package index search"
-				callback(new Error("Got non-ok response from package index search"}), null)
+				callback(new Error("Got non-ok response from package index search"), null)

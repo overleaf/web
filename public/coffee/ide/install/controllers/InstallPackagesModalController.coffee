@@ -1,16 +1,23 @@
 define [
 	"base"
 ], (App) ->
+
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
 			, 200
-		
+
+		$scope.state =
+			simpleMode: true
+
+		$scope.toggleMode = () ->
+			$scope.state.simpleMode = !$scope.state.simpleMode
+
 		$scope.install = (autoStart) ->
 			return if $scope.inputs.packageName == ""
 			$scope.installedPackage = $scope.inputs.packageName
-			
+
 			event_tracking.send("package", "install", {
 				name: $scope.installedPackage
 			})
@@ -107,11 +114,11 @@ define [
 
 		if $scope.autoStart
 			$scope.install(true)
-	
+
 		$scope.stop = () ->
 			return if !$scope.output.currentRun?
 			commandRunner.stop($scope.output.currentRun)
-		
+
 		$scope.help = () ->
 			if $scope.installedPackage?
 				message = "I'm having trouble installing the '#{$scope.installedPackage}' package."
