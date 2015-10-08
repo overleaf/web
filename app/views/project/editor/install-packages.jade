@@ -17,7 +17,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					form.form-inline.toolbar.toolbar-borderless.row-spaced
 						span.text-monospace
 							input.form-control#searchBox(
-								ng-model="state.searchInput",
+								ng-model="simpleModeState.searchInput",
 								placeholder="package-name",
 								on-enter="search()",
 								focus-on="open"
@@ -25,7 +25,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						| &nbsp;&nbsp;
 						button(
 							ng-click="search()"
-							ng-disabled="state.searching"
+							ng-disabled="simpleModeState.searching"
 						).btn.btn-primary
 							| Search
 						| &nbsp;

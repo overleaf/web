@@ -9,8 +9,8 @@ define [
 		$scope.search = () ->
 			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
 			post_data =
-				language: $scope.selectedTab.toLowerCase()
-				query: $scope.state.searchInput
+				language: $scope.engine
+				query: $scope.simpleModeState.searchInput
 			$http.post("/packages/search", post_data)
 				.success (data) ->
 					console.log ">> seach success"
