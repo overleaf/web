@@ -20,7 +20,7 @@ define [
 		$scope.simpleModeState =
 			searchInput: ""
 			searching: false
-			searchResult: null
+			searchResults: null
 
 		$scope.toggleMode = () ->
 			$scope.simpleMode = !$scope.simpleMode

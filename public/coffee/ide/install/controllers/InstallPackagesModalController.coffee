@@ -4,18 +4,21 @@ define [
 
 	App.controller "PackageSearchController", ($scope, $timeout, $http) ->
 
-		console.log ">> here"
-
 		$scope.search = () ->
 			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
 			post_data =
 				language: $scope.engine
 				query: $scope.simpleModeState.searchInput
 				_csrf: window.csrfToken
+			$scope.simpleModeState.searching = true
 			$http.post("/packages/search", post_data)
 				.success (data) ->
+					$scope.simpleModeState.searching = false
 					console.log ">> seach success"
+					console.log data
+					$scope.simpleModeState.searchResults = data.results
 				.error () ->
+					$scope.simpleModeState.searching = false
 					console.log ">> seach fail"
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
