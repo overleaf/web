@@ -21,6 +21,10 @@ define [
 					$scope.simpleModeState.searching = false
 					console.log ">> seach fail"
 
+		$scope.simpleInstall = (item) ->
+			console.log ">> installing"
+			console.log item
+
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
 			$timeout () ->

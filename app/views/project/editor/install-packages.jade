@@ -29,6 +29,19 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						).btn.btn-primary
 							| Search
 						| &nbsp;
+			div(ng-if="simpleModeState.searchResults").row.package-search-results
+				div.col-md-10.col-md-offset-1.scroll-container
+					div(ng-repeat="item in simpleModeState.searchResults").search-result-item
+						div.top-row
+							span.package-name
+								| {{item.name}}
+							span.pull-right
+								button(href, ng-click="simpleInstall(item)").btn.btn-sm.btn-primary
+									| Install
+						div
+							div(ng-if="item.summary") {{item.summary}}
+							div(ng-if="item.url").small
+								a(href="{{item.url}}", target="_blank") {{item.url}}
 
 
 	div.modal-body.install-packages-modal(ng-if="simpleMode == false")
