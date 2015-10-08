@@ -8,7 +8,7 @@ fiveMinsInMs = oneMinInMs * 5
 module.exports = PackageIndexHandler =
 
 	search: (language, query, callback) ->
-		logger.log file_url: file_url, file_name: file_name, "calling package index search service"
+		logger.log language: language, query: query, "calling package index search service"
 		opts =
 			method: 'post'
 			json: true
@@ -22,5 +22,5 @@ module.exports = PackageIndexHandler =
 			if 200 <= response.statusCode < 300
 				callback(null, body)
 			else
-				logger.log file_url: file_url, status_code: response.statusCode, "Got non-ok response from package index search"
+				logger.log language: language, query: query, "Got non-ok response from package index search"
 				callback(new Error("Got non-ok response from package index search"), null)

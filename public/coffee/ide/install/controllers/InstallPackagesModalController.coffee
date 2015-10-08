@@ -11,6 +11,7 @@ define [
 			post_data =
 				language: $scope.engine
 				query: $scope.simpleModeState.searchInput
+				_csrf: window.csrfToken
 			$http.post("/packages/search", post_data)
 				.success (data) ->
 					console.log ">> seach success"
