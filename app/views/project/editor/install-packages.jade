@@ -15,36 +15,36 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 			.row.package-search-form
 				.col-md-12
 					form.form-inline.toolbar.toolbar-borderless.row-spaced
-						span.text-monospace
-							input.form-control#searchBox(
-								ng-model="simpleModeState.searchInput",
-								placeholder="package-name",
-								on-enter="search()",
+						div.input-group
+							input.form-control.text-monospace#searchBox(
+								ng-model="simple.state.searchInput",
+								placeholder="Search {{engine}} packages...",
+								on-enter="simple.search()",
 								focus-on="open"
 							)
-						| &nbsp;&nbsp;
-						button(
-							ng-click="search()"
-							ng-disabled="simpleModeState.searching"
-						).btn.btn-primary
-							| Search
-						| &nbsp;
-			div(ng-if="simpleModeState.searchResults").row.package-search-results
+							span.input-group-btn
+								button(
+									ng-click="simple.search()"
+									ng-disabled="simple.state.searching"
+								).btn.btn-primary.search-button
+									| Search
+							| &nbsp;
+			div(ng-if="simple.state.searchResults").row.package-search-results
 				div.col-md-10.col-md-offset-1.scroll-container
-					div(ng-repeat="item in simpleModeState.searchResults").search-result-item
+					div(ng-repeat="item in simple.state.searchResults").search-result-item
 						div.top-row
 							span.package-name
 								| {{item.name}}
 							span.pull-right
 								button(
 									href,
-									ng-click="simpleInstall(item)"
-									ng-disabled="simpleModeState.install.currentRun.running"
+									ng-click="simple.install(item)"
+									ng-disabled="simple.state.install.currentRun.running"
 								).btn.btn-sm.btn-primary
 									span(ng-switch, on="")
-										span(ng-if="simpleModeState.install.currentRun.running && simpleModeState.install.currentRun.packageName == item.name")
+										span(ng-if="simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name")
 											| Installing
-										span(ng-if="!(simpleModeState.install.currentRun.running && simpleModeState.install.currentRun.packageName == item.name)")
+										span(ng-if="!(simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name)")
 											| Install
 						div
 							div(ng-if="item.summary") {{item.summary}}

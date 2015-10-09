@@ -15,14 +15,17 @@ define [
 
 		$scope.output = {}
 
+		# toggle for simple-mode vs advanced-mode (the old package interface)
 		$scope.simpleMode = true
 
-		$scope.simpleModeState =
-			searchInput: ""
-			searching: false
-			searchResults: null
-			install:
-				currentRun: {}
+		# scope namespace for the simple-mode interface
+		$scope.simple =
+			state:
+				searchInput: ""
+				searching: false
+				searchResults: null
+				install:
+					currentRun: {}
 
 		$scope.toggleMode = () ->
 			$scope.simpleMode = !$scope.simpleMode

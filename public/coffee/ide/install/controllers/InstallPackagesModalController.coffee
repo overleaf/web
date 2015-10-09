@@ -4,21 +4,21 @@ define [
 
 	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner, $interval) ->
 
-		$scope.search = () ->
+		$scope.simple.search = () ->
 			post_data =
 				language: $scope.engine
-				query: $scope.simpleModeState.searchInput
+				query: $scope.simple.state.searchInput
 				_csrf: window.csrfToken
-			$scope.simpleModeState.searching = true
+			$scope.simple.state.searching = true
 			$http.post("/packages/search", post_data)
 				.success (data) ->
-					$scope.simpleModeState.searching = false
-					$scope.simpleModeState.searchResults = data.results
+					$scope.simple.state.searching = false
+					$scope.simple.state.searchResults = data.results
 				.error () ->
-					$scope.simpleModeState.searching = false
+					$scope.simple.state.searching = false
 					console.log ">> seach fail"
 
-		$scope._buildCommandOptions = (item) ->
+		$scope.simple._buildCommandOptions = (item) ->
 			options = null
 			switch item.provider.source
 				when 'conda'
@@ -77,13 +77,12 @@ define [
 
 			return options
 
-		$scope.simpleInstall = (item) ->
-
-			options = $scope._buildCommandOptions(item)
+		$scope.simple.install = (item) ->
+			options = $scope.simple._buildCommandOptions(item)
 
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
-			$scope.simpleModeState.install.currentRun = currentRun
+			$scope.simple.state.install.currentRun = currentRun
 			console.log currentRun
 			window._c = currentRun
 
@@ -91,7 +90,7 @@ define [
 
 			# watch the exitCode
 			check_for_completion = () ->
-				exit_code = $scope.simpleModeState.install?.currentRun?.exitCode
+				exit_code = $scope.simple.state.install.currentRun?.exitCode
 				if typeof exit_code == 'number'
 					console.log ">> exit code #{exit_code}"
 					$interval.cancel completion_interval
