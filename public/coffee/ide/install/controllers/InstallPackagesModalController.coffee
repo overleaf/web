@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner) ->
+	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner, $interval) ->
 
 		$scope.search = () ->
 			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
@@ -78,10 +78,26 @@ define [
 				else
 					throw new Error("Unrecognized provider source: #{item.provider.source} for #{item.name}")
 
-			console.log options
+			options.timeout = 400
+			options.parseErrors = false
+
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
 			$scope.simpleModeState.install.currentRun = currentRun
+			console.log currentRun
+			window._c = currentRun
+
+			completion_interval = null
+
+			check_for_completion = () ->
+				exit_code = $scope.simpleModeState.install?.currentRun?.exitCode
+				if typeof exit_code == 'number'
+					console.log ">> exit code #{exit_code}"
+					$interval.cancel completion_interval
+			completion_interval = $interval(check_for_completion, 2000)
+
+			# $scope.$watch 'simpleModeState.install.currentRun.exitCode', (code, old) ->
+			# 	console.log ">> yay, it's done: #{old} -> #{code}"
 
 
 
