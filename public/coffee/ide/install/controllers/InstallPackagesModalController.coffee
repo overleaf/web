@@ -5,7 +5,6 @@ define [
 	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner, $interval) ->
 
 		$scope.search = () ->
-			console.log ">> searching: #{$scope.simpleModeState.searchInput}"
 			post_data =
 				language: $scope.engine
 				query: $scope.simpleModeState.searchInput
@@ -14,17 +13,12 @@ define [
 			$http.post("/packages/search", post_data)
 				.success (data) ->
 					$scope.simpleModeState.searching = false
-					console.log ">> seach success"
-					console.log data
 					$scope.simpleModeState.searchResults = data.results
 				.error () ->
 					$scope.simpleModeState.searching = false
 					console.log ">> seach fail"
 
-		$scope.simpleInstall = (item) ->
-			console.log ">> installing"
-			console.log item
-
+		$scope._buildCommandOptions = (item) ->
 			options = null
 			switch item.provider.source
 				when 'conda'
@@ -81,6 +75,12 @@ define [
 			options.timeout = 400
 			options.parseErrors = false
 
+			return options
+
+		$scope.simpleInstall = (item) ->
+
+			options = $scope._buildCommandOptions(item)
+
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
 			$scope.simpleModeState.install.currentRun = currentRun
@@ -89,16 +89,13 @@ define [
 
 			completion_interval = null
 
+			# watch the exitCode
 			check_for_completion = () ->
 				exit_code = $scope.simpleModeState.install?.currentRun?.exitCode
 				if typeof exit_code == 'number'
 					console.log ">> exit code #{exit_code}"
 					$interval.cancel completion_interval
 			completion_interval = $interval(check_for_completion, 2000)
-
-			# $scope.$watch 'simpleModeState.install.currentRun.exitCode', (code, old) ->
-			# 	console.log ">> yay, it's done: #{old} -> #{code}"
-
 
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
