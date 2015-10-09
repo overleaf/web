@@ -77,8 +77,13 @@ define [
 
 			return options
 
+		$scope.simple._resetMessages = () ->
+			$scope.simple.state.errorMessage = null
+			$scope.simple.state.successMessage = null
+
 		$scope.simple.install = (item) ->
 			options = $scope.simple._buildCommandOptions(item)
+			$scope.simple._resetMessages()
 
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
@@ -91,8 +96,13 @@ define [
 			# watch the exitCode
 			check_for_completion = () ->
 				exit_code = $scope.simple.state.install.currentRun?.exitCode
+				timed_out = $scope.simple.state.install.currentRun?.timedout
 				if typeof exit_code == 'number'
 					console.log ">> exit code #{exit_code}"
+					if exit_code == 0
+						$scope.simple.state.successMessage = "Installed #{item.name}"
+					if exit_code > 0 or timed_out == true
+						$scope.simple.state.errorMessage = "Failed to install #{item.name}"
 					$interval.cancel completion_interval
 			completion_interval = $interval(check_for_completion, 2000)
 

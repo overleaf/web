@@ -30,6 +30,11 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 									| Search
 							| &nbsp;
 			div(ng-if="simple.state.searchResults").row.package-search-results
+				div(ng-if="simple.state.errorMessage || simple.state.successMessage").messages
+					div.alert.alert-success(ng-if="simple.state.successMessage")
+						| {{simple.state.successMessage}}
+					div.alert.alert-warning(ng-if="simple.state.errorMessage")
+						| {{simple.state.errorMessage}}
 				div.col-md-10.col-md-offset-1.scroll-container
 					div(ng-repeat="item in simple.state.searchResults").search-result-item
 						div.top-row

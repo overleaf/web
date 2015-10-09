@@ -21,6 +21,8 @@ define [
 		# scope namespace for the simple-mode interface
 		$scope.simple =
 			state:
+				errorMessage: null
+				successMessage: null
 				searchInput: ""
 				searching: false
 				searchResults: null
