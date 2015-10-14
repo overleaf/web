@@ -32,8 +32,40 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 									| Search
 							| &nbsp;
 	
+			// selected view
+			div(ng-if="simple.state.selected").row.package-details
+				div.col-md-12
+					div.row.top-row
+						div.col-md-12
+							span.package-name
+								a(href, ng-click="simple.selectPackage(item.name)")
+									| {{simple.state.selected.name}}
+							span.pull-right
+								button(
+									href,
+									ng-click="simple.install(simple.state.selected)"
+									ng-disabled="simple.state.install.currentRun.running"
+								).btn.btn-sm.btn-primary
+									span(ng-switch, on="")
+										span(ng-if="simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name")
+											| Installing
+										span(ng-if="!(simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name)")
+											| Install
+	
+					div.row.details
+						div.col-md-12
+	
+							div(ng-if="simple.state.selected.summary") {{simple.state.selected.summary}}
+							div(ng-if="simple.state.selected.url").small
+								a(href="{{simple.state.selected.url}}", target="_blank") {{simple.state.selected.url}}
+						
+					div.row.bottom-row
+						div.col-md-12
+							a(href, ng-click="simple.clearPackageSelection()")
+							.btn.btn-default.btn-sm.pull-right Back
+			
 			// search results panel
-			div(ng-if="simple.state.searchResults").row.package-search-results
+			div(ng-if="simple.state.searchResults && simple.state.selected == null").row.package-search-results
 	
 				// messages
 				div(ng-if="simple.state.errorMessage !== null || simple.state.successMessage !== null").messages
@@ -47,18 +79,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					div(ng-repeat="item in simple.state.searchResults").search-result-item
 						div.top-row
 							span.package-name
-								| {{item.name}}
-							span.pull-right
-								button(
-									href,
-									ng-click="simple.install(item)"
-									ng-disabled="simple.state.install.currentRun.running"
-								).btn.btn-sm.btn-primary
-									span(ng-switch, on="")
-										span(ng-if="simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name")
-											| Installing
-										span(ng-if="!(simple.state.install.currentRun.running && simple.state.install.currentRun.packageName == item.name)")
-											| Install
+								a(href, ng-click="simple.selectPackage(item)") {{item.name}}
 						div
 							div(ng-if="item.summary") {{item.summary}}
 							div(ng-if="item.url").small

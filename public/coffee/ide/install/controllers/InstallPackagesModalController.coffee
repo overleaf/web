@@ -12,6 +12,7 @@ define [
 			$scope.simple.state.searching = true
 			$http.post("/packages/search", post_data)
 				.success (data) ->
+					$scope.simple.clearPackageSelection()
 					$scope.simple.state.searching = false
 					$scope.simple.state.searchResults = data.results
 				.error () ->
@@ -80,6 +81,13 @@ define [
 		$scope.simple._resetMessages = () ->
 			$scope.simple.state.errorMessage = null
 			$scope.simple.state.successMessage = null
+
+		$scope.simple.selectPackage = (item) ->
+			console.log ">> selected #{item.name}"
+			$scope.simple.state.selected = item
+
+		$scope.simple.clearPackageSelection = () ->
+			$scope.simple.state.selected = null
 
 		$scope.simple.install = (item) ->
 			options = $scope.simple._buildCommandOptions(item)

@@ -26,6 +26,7 @@ define [
 				searchInput: ""
 				searching: false
 				searchResults: null
+				selected: null
 				install:
 					currentRun: {}
 
