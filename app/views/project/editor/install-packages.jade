@@ -78,14 +78,14 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 									span(ng-show="!simple.state.install.currentRun.running && !simple.state.install.currentRun.stopping") Install
 									span(ng-show="simple.state.install.currentRun.running && !simple.state.install.currentRun.stopping")
 										i.fa.fa-refresh.fa-spin.fa-fw
-										|  Installing...
+										|  Installing {{simple.state.install.currentRun.packageName}} ...
 									span(ng-show="simple.state.install.currentRun.stopping") 
 										i.fa.fa-refresh.fa-spin.fa-fw
 										|  Stopping...
 								| &nbsp;
 								a(
 									href,
-									ng-click="stop()",
+									ng-click="simple.stop()",
 									ng-show="simple.state.install.currentRun.running && !simple.state.install.currentRun.stopping"
 								).small
 									.i.fa.fa-fw.fa-stop

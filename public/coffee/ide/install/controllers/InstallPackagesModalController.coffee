@@ -88,6 +88,10 @@ define [
 		$scope.simple.clearPackageSelection = () ->
 			$scope.simple.state.selected = null
 
+		$scope.simple.stop = () ->
+			return if !$scope.simple.state.install.currentRun?
+			commandRunner.stop($scope.simple.state.install.currentRun)
+
 		$scope.simple.install = (item) ->
 			options = $scope.simple._buildCommandOptions(item)
 			$scope.simple._resetMessages()
