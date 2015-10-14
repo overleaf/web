@@ -111,7 +111,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							span Sorry, your script took too long to run and timed out.
 				
 						div.alert.alert-success.row-spaced(ng-show="simple.state.install.currentRun.exitCode == 0") Success! '{{ simple.state.install.currentRun.packageName }}' was installed.
-						div.alert.alert-danger.row-spaced(ng-show="simple.state.install.currentRun.exitCode") Failed to install '{{ installedPackage }}', sorry.
+						div.alert.alert-danger.row-spaced(ng-show="simple.state.install.currentRun.exitCode") Failed to install '{{ simple.state.install.currentRun.packageName }}', sorry.
 
 			
 			// search results panel
