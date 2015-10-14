@@ -414,6 +414,15 @@
 	}
 	.package-details {
 		padding: 18px;
+		.install-command-output {
+			height: 200px;
+			overflow: auto;
+			border: 1px solid @toolbar-border-color;
+			.alert {
+				margin-top: 6px;
+				margin-bottom: 8px;
+			}
+		}
 		.bottom-row {
 			margin-top: 16px;
 		}
@@ -431,15 +440,6 @@
 			margin-left: 2px;
 			margin-right: 12px;
 			margin-bottom: 0px;
-		}
-	}
-	.install-command-output {
-		max-height: 200px;
-		overflow: auto;
-		border: 1px solid @toolbar-border-color;
-		alert {
-			margin-top: 6px;
-			margin-bottom: 8px;
 		}
 	}
 	.package-search-results {
