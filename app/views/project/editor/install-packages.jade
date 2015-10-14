@@ -33,13 +33,13 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							| &nbsp;
 	
 			// selected view
-			div(ng-if="simple.state.selected").row.package-details
+			div(ng-if="simple.state.selected != null").row.package-details
 				div.col-md-12
+					// top row
 					div.row.top-row
 						div.col-md-12
 							span.package-name
-								a(href, ng-click="simple.selectPackage(item.name)")
-									| {{simple.state.selected.name}}
+								| {{simple.state.selected.name}}
 							span.pull-right
 								button(
 									href,
@@ -61,8 +61,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						
 					div.row.bottom-row
 						div.col-md-12
-							a(href, ng-click="simple.clearPackageSelection()")
-							.btn.btn-default.btn-sm.pull-right Back
+							a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm.pull-right Back
 			
 			// search results panel
 			div(ng-if="simple.state.searchResults && simple.state.selected == null").row.package-search-results

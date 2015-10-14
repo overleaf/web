@@ -176,7 +176,7 @@
 		bottom: @manual-input-height;
 		overflow: auto;
 	}
-	
+
 	.jupyter-uncompiled-bottom {
 		position: absolute;
 		bottom: @line-height-computed;
@@ -187,7 +187,7 @@
 			top: @line-height-computed / 2;
 		}
 	}
-	
+
 	.cell, .manual-input {
 		.input, .output {
 			position: relative;
@@ -195,7 +195,7 @@
 			font-size: 14px;
 			min-height: @line-height-computed;
 		}
-		
+
 		.execution-count {
 			position: absolute;
 			top: 1px;
@@ -205,13 +205,13 @@
 			color: @gray-light;
 			text-align: right;
 		}
-		
+
 		.cell-content {
 			margin-left: @execution-count-width + @line-height-computed / 2;
 			position: relative;
 		}
 	}
-	
+
 	.manual-input {
 		position: absolute;
 		bottom: 0;
@@ -237,7 +237,7 @@
 		margin: @line-height-computed / 2 0;
 		overflow: auto;
 	}
-	
+
 	.cell {
 		width: 100%;
 		margin: @line-height-computed / 2 0;
@@ -248,7 +248,7 @@
 				display: inline;
 			}
 		}
-		
+
 		.text-input, .text-output {
 			white-space: pre-wrap;
 		}
@@ -258,15 +258,15 @@
 			     color: inherit !important;
 			}
 		}
-		
+
 		pre {
 			margin: 0;
 		}
-		
+
 		.format-dropdown {
 			position: relative;
 		}
-		
+
 		.download-controls {
 			font-size: 16px;
 			display: none;
@@ -292,19 +292,19 @@
 				left: auto;
 			}
 		}
-		
+
 		.image, .file-modified, .file-modified-image-inner {
 			display: block;
 			border: 1px solid @gray-lighter;
 			background-color: white;
 			padding: 6px 12px;
 		}
-		
-		
+
+
 		.file-written {
 			width: 100%;
 		}
-		
+
 		.image {
 			padding-top: 18px;
 			max-width: 100%;
@@ -313,7 +313,7 @@
 				height: 100%;
 			}
 		}
-		
+
 		.iframe-wrapper {
 			position: relative;
 			width: 100%;
@@ -330,23 +330,23 @@
 				height: 100%;
 			}
 		}
-		
+
 		.file-modified {
 			position: relative;
 		}
-		
+
 		.file-modified-image {
 			.file-modified-image-inner {
 				display: inline-block;
 				min-width: 400px;
 				position: relative;
 			}
-			
+
 			img {
 				width: 100%;
 			}
 		}
-		
+
 		.display-data-inner {
 			display: inline-block;
 			position: relative;
@@ -356,7 +356,7 @@
 				width: 100%;
 			}
 		}
-		
+
 		.display-data, .file-modified, .file-modified-image {
 			margin: @line-height-computed / 2 0;
 			&:hover {
@@ -365,12 +365,12 @@
 				}
 			}
 		}
-		
+
 		hr {
 			margin-top: @line-height-computed / 2;
 			margin-bottom: @line-height-computed / 2;
 		}
-		
+
 		.input_request {
 			display: -webkit-box;
 			display: -moz-box;
@@ -420,7 +420,6 @@
 		}
 		.top-row {
 			margin-bottom: 8px;
-			border-bottom: 1px solid #ddd;
 			.package-name {
 				font-size: 1.3em;
 				font-weight: bold;

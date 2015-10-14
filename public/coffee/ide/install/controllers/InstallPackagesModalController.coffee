@@ -83,7 +83,6 @@ define [
 			$scope.simple.state.successMessage = null
 
 		$scope.simple.selectPackage = (item) ->
-			console.log ">> selected #{item.name}"
 			$scope.simple.state.selected = item
 
 		$scope.simple.clearPackageSelection = () ->
