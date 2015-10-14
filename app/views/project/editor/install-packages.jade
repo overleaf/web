@@ -61,7 +61,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						
 					div.row.bottom-row
 						div.col-md-12
-							a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm.pull-right Back
+							span.pull-left
+								a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm Back to Search Results
 			
 			// search results panel
 			div(ng-if="simple.state.searchResults && simple.state.selected == null").row.package-search-results
@@ -79,10 +80,6 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						div.top-row
 							span.package-name
 								a(href, ng-click="simple.selectPackage(item)") {{item.name}}
-						div
-							div(ng-if="item.summary") {{item.summary}}
-							div(ng-if="item.url").small
-								a(href="{{item.url}}", target="_blank") {{item.url}}
 
 
 	div.modal-body.install-packages-modal(ng-if="simpleMode == false")
