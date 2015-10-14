@@ -190,15 +190,18 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 			div.alert.alert-success.row-spaced(ng-show="output.currentRun.exitCode == 0") Success! '{{ installedPackage }}' was installed.
 			div.alert.alert-danger.row-spaced(ng-show="output.currentRun.exitCode") Failed to install '{{ installedPackage }}', sorry.
 	
-	.modal-footer
-		span.pull-left.small
-			a(href, ng-click="toggleMode()").mode-toggle
-				span Switch to 
-				span(ng-if="simpleMode == true") Advanced Mode
-				span(ng-if="simpleMode == false") Simple Mode
-		span.pull-left
-			| &nbsp;&nbsp;&nbsp;&nbsp;
-		spane.pull-left.small
-			| Trouble installing a package? 
-			a(href, ng-click="help()") Contact Us!
-		button.btn.btn-primary(ng-click="$close()") Done
+	div.modal-footer.install-packages-footer
+		div.row
+			div.col-md-10.left
+				span.pull-left.small
+					a(href, ng-click="toggleMode()").mode-toggle
+						span Switch to 
+						span(ng-if="simpleMode == true") Advanced Mode
+						span(ng-if="simpleMode == false") Simple Mode
+				span.pull-left
+					| &nbsp;&nbsp;&nbsp;&nbsp;
+				span.pull-left.small
+					| Trouble installing a package? 
+					a(href, ng-click="help()") Contact Us!
+			div.col-md-2
+				button.btn.btn-primary(ng-click="$close()") Done
