@@ -33,11 +33,11 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							| &nbsp;
 	
 			// messages
-			div(ng-if="simple.state.errorMessage !== null || simple.state.successMessage !== null").messages
-				div.alert.alert-success(ng-if="simple.state.successMessage")
-					| {{simple.state.successMessage}}
-				div.alert.alert-warning(ng-if="simple.state.errorMessage")
-					| {{simple.state.errorMessage}}
+			//- div(ng-if="simple.state.errorMessage !== null || simple.state.successMessage !== null").messages
+			//- 	div.alert.alert-success(ng-if="simple.state.successMessage")
+			//- 		| {{simple.state.successMessage}}
+			//- 	div.alert.alert-warning(ng-if="simple.state.errorMessage")
+			//- 		| {{simple.state.errorMessage}}
 	
 			// selected view
 			div(ng-if="simple.state.selected != null").row.package-details
@@ -70,6 +70,29 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						div.col-md-12
 							span.pull-left
 								a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm Back to Search Results
+								
+					div.row.command-output.install-command-output.row-spaced(scroll-glue, ng-show="simple.state.install.currentRun")
+						.alert.alert-info(ng-show="simple.state.install.currentRun.running && simple.state.install.currentRun.stillIniting && !simple.state.install.currentRun.inited")
+							p
+								i.fa.fa-spinner.fa-spin.fa-fw 
+								|  Initializing environment...
+							p.small (This can take a while the first time you run a script)
+	
+						span.output(ng-repeat="part in simple.state.install.currentRun.output | orderBy:'msg_id' track by $index ")
+							span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
+							span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
+				
+						.alert.alert-danger.row-spaced-small(ng-show="simple.state.install.currentRun.error")
+							strong #{translate("server_error")} 
+							span #{translate("somthing_went_wrong_compiling")}
+
+						.alert.alert-danger.row-spaced-small(ng-show="simple.state.install.currentRun.timedout")
+							strong #{translate("timedout")}. 
+							span Sorry, your script took too long to run and timed out.
+				
+						div.alert.alert-success.row-spaced(ng-show="simple.state.install.currentRun.exitCode == 0") Success! '{{ installedPackage }}' was installed.
+						div.alert.alert-danger.row-spaced(ng-show="simple.state.install.currentRun.exitCode") Failed to install '{{ installedPackage }}', sorry.
+
 			
 			// search results panel
 			div(ng-if="simple.state.searchResults && simple.state.selected == null").row.package-search-results
