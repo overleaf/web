@@ -130,6 +130,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 											| Installing ...
 										span(ng-if="simple.state.install.packageName != item.name")
 											| Install
+						div(ng-if="item.summary")
+							| {{item.summary}}
 
 
 
