@@ -18,20 +18,18 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 			.row.package-search-form
 				.col-md-12
 					form.form-inline.toolbar.toolbar-borderless.row-spaced
-						div.input-group
-							input.form-control.text-monospace#searchBox(
-								ng-model="simple.state.searchInput",
-								placeholder="Search {{engine}} packages...",
-								on-enter="simple.search()",
-								focus-on="open",
-								autocomplete="off"
-							)
-							span.input-group-btn
-								button(
-									ng-click="simple.search()"
-									ng-disabled="simple.state.searching"
-								).btn.btn-primary.search-button
-									| Search
+						input.form-control.text-monospace#searchBox(
+							ng-model="simple.state.searchInput",
+							placeholder="Search {{engine}} packages...",
+							on-enter="simple.search()",
+							focus-on="open",
+							autocomplete="off"
+						)
+						button(
+							ng-click="simple.search()"
+							ng-disabled="simple.state.searching"
+						).btn.btn-primary.search-button.pull-right
+							| Search
 	
 			// selected view
 			div(ng-if="simple.state.selected != null").row.package-details
