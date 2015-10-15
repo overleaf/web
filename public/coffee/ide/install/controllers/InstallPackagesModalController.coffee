@@ -89,8 +89,8 @@ define [
 			$scope.simple.state.selected = null
 
 		$scope.simple.stop = () ->
-			return if !$scope.simple.state.install.currentRun?
-			commandRunner.stop($scope.simple.state.install.currentRun)
+			return if !$scope.simple.state.install?
+			commandRunner.stop($scope.simple.state.install)
 
 		$scope.simple.install = (item) ->
 			options = $scope.simple._buildCommandOptions(item)
@@ -98,24 +98,19 @@ define [
 
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
-			$scope.simple.state.install.currentRun = currentRun
-			console.log currentRun
-			window._c = currentRun
+			$scope.simple.state.install = currentRun
 
-			completion_interval = null
+		$scope.simple.showSearchResults = () ->
+			$scope.simple.state.searchResults && $scope.simple.state.selected == null
 
-			# watch the exitCode
-			check_for_completion = () ->
-				exit_code = $scope.simple.state.install.currentRun?.exitCode
-				timed_out = $scope.simple.state.install.currentRun?.timedout
-				if typeof exit_code == 'number'
-					console.log ">> exit code #{exit_code}"
-					if exit_code == 0
-						$scope.simple.state.successMessage = "Installed #{item.name}"
-					if exit_code > 0 or timed_out == true
-						$scope.simple.state.errorMessage = "Failed to install #{item.name}"
-					$interval.cancel completion_interval
-			completion_interval = $interval(check_for_completion, 2000)
+		$scope.simple.showOutput = () ->
+			install = $scope.simple.state.install
+			install != null && install.packageName == $scope.simple.state.selected.name
+
+		$scope.simple.showStillIniting = () ->
+			install = $scope.simple.state.install
+			install.running && install.stillIniting && !install.inited
+
 
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->

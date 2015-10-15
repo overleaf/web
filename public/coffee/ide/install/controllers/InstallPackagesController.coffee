@@ -27,8 +27,7 @@ define [
 				searching: false
 				searchResults: null
 				selected: null
-				install:
-					currentRun: null
+				install: null
 
 		$scope.toggleMode = () ->
 			$scope.simpleMode = !$scope.simpleMode
