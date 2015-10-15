@@ -411,13 +411,27 @@
 				margin-top: -7px;
 			}
 		}
+		margin-bottom: 12px;
 	}
 	.package-details {
-		padding: 18px;
+		margin: 0px;
+		padding-top: 15px;
+		padding-bottom: 15px;
+		border: 1px solid @toolbar-border-color;
+		.separator {
+			padding-left: 15px;
+			padding-right: 15px;
+			hr {
+				margin-top: 15px;
+				margin-bottom: 3px;
+			}
+		}
 		.install-command-output {
 			height: 200px;
 			overflow: auto;
-			border: 1px solid @toolbar-border-color;
+			margin-top: 0px;
+			padding-left: 15px;
+			padding-right: 15px;
 			.alert {
 				margin-top: 6px;
 				margin-bottom: 8px;
@@ -427,7 +441,7 @@
 			margin-bottom: 10px;
 		}
 		.bottom-row {
-			margin-top: 16px;
+			margin-top: 15px;
 		}
 		.top-row {
 			margin-bottom: 0px;
@@ -450,8 +464,9 @@
 			max-height: 360px;
 			overflow: auto;
 			.search-result-item {
-				padding: 18px;
-				border-bottom: 1px solid #ddd;
+				padding: 15px;
+				border: 1px solid @toolbar-border-color;
+				margin-bottom: 12px;
 				.top-row {
 					margin-bottom: 8px;
 					.package-name {
