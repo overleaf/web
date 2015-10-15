@@ -92,6 +92,10 @@ define [
 			return if !$scope.simple.state.install?
 			commandRunner.stop($scope.simple.state.install)
 
+		$scope.simple.quickInstall = (item) ->
+			$scope.simple.selectPackage(item)
+			$scope.simple.install(item)
+
 		$scope.simple.install = (item) ->
 			options = $scope.simple._buildCommandOptions(item)
 			$scope.simple._resetMessages()

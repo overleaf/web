@@ -116,6 +116,21 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						div.top-row
 							span.package-name
 								a(href, ng-click="simple.selectPackage(item)") {{item.name}}
+	
+								// quick install
+								button(
+									ng-click="simple.quickInstall(item)"
+									ng-disabled="simple.state.install.running"
+								).btn.btn-primary.btn-sm.pull-right
+									span(ng-show="!simple.state.install.running")
+										| Install
+									span(ng-show="simple.state.install.running")
+										span(ng-if="simple.state.install.packageName == item.name")
+											i.fa.fa-refresh.fa-spin.fa-fw
+											| Installing ...
+										span(ng-if="simple.state.install.packageName != item.name")
+											| Install
+
 
 
 	// advanced mode
