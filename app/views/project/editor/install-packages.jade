@@ -50,13 +50,15 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							div(ng-if="simple.state.selected.summary")
 								| {{simple.state.selected.summary}}
 							div(ng-if="simple.state.selected.url").small
-								a(href="{{simple.state.selected.url}}", target="_blank") {{simple.state.selected.url}}
+								a(href="{{simple.state.selected.url}}", target="_blank")
+									| {{simple.state.selected.url}}
 						
 					// actions
 					div.row.bottom-row
 						div.col-md-12
 							span.pull-left
-								a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm Back to Search Results
+								a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm
+									| Back to Search Results
 								span &nbsp;
 								button(
 									ng-click="simple.install(simple.state.selected)"
