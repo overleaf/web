@@ -44,8 +44,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 								| {{simple.state.selected.name}}
 					div.row.back-link
 						div.col-md-12
-							span.pull-left.small.subdued
-								a(href, ng-click="simple.clearPackageSelection()")
+							span.pull-left
+								a(href, ng-click="simple.clearPackageSelection()").small.subdued
 									| Back to Search Results
 								span &nbsp;
 					
