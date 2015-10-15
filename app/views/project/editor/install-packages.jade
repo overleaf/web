@@ -93,17 +93,17 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							span(ng-if="part.output_type == 'stdout'").stdout {{ part.text }}
 							span(ng-if="part.output_type == 'stderr'").stderr {{ part.text }}
 				
-						.alert.alert-danger.row-spaced-small(ng-show="simple.state.install.error")
+						.alert.alert-danger.row-spaced-small(ng-if="simple.state.install.error")
 							strong #{translate("server_error")} 
 							span #{translate("somthing_went_wrong_compiling")}
 
-						.alert.alert-danger.row-spaced-small(ng-show="simple.state.install.timedout")
+						.alert.alert-danger.row-spaced-small(ng-if="simple.state.install.timedout")
 							strong #{translate("timedout")}. 
 							span Sorry, your script took too long to run and timed out.
 				
-						div.alert.alert-success.row-spaced(ng-show="simple.state.install.exitCode == 0")
+						div.alert.alert-success.row-spaced(ng-if="simple.state.install.exitCode == 0")
 							| Success! '{{ simple.state.install.packageName }}' was installed.
-						div.alert.alert-danger.row-spaced(ng-show="simple.state.install.exitCode")
+						div.alert.alert-danger.row-spaced(ng-if="simple.state.install.exitCode")
 							| Failed to install '{{ simple.state.install.packageName }}', sorry.
 
 			
