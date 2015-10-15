@@ -23,7 +23,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 								ng-model="simple.state.searchInput",
 								placeholder="Search {{engine}} packages...",
 								on-enter="simple.search()",
-								focus-on="open"
+								focus-on="open",
+								autocomplete="off"
 							)
 							span.input-group-btn
 								button(
@@ -47,7 +48,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					div.row.details
 						div.col-md-12
 	
-							div(ng-if="simple.state.selected.summary")
+							div(ng-if="simple.state.selected.summary").package-summary
 								| {{simple.state.selected.summary}}
 							div(ng-if="simple.state.selected.url").small
 								a(href="{{simple.state.selected.url}}", target="_blank")
