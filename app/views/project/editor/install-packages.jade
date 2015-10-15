@@ -42,7 +42,13 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 						div.col-md-12
 							span.package-name
 								| {{simple.state.selected.name}}
-							span.pull-right
+					div.row.back-link
+						div.col-md-12
+							span.pull-left.small.subdued
+								a(href, ng-click="simple.clearPackageSelection()")
+									| Back to Search Results
+								span &nbsp;
+					
 	
 					// package details
 					div.row.details
@@ -58,9 +64,6 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					div.row.bottom-row
 						div.col-md-12
 							span.pull-left
-								a(href, ng-click="simple.clearPackageSelection()").btn.btn-default.btn-sm
-									| Back to Search Results
-								span &nbsp;
 								button(
 									ng-click="simple.install(simple.state.selected)"
 									ng-disabled="simple.state.install.running"
