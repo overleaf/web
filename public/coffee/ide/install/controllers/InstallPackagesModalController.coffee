@@ -34,7 +34,10 @@ define [
 						compiler: "command"
 						command: [
 							"sudo", "pip", "install", "#{item.name}"
-						]
+						],
+						env: {
+							HOME: "/usr/local"
+						}
 					}
 				when 'cran'
 					options = {
