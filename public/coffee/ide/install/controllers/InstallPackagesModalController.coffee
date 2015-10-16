@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner, $interval) ->
+	App.controller "PackageSearchController", ($scope, $timeout, $http, commandRunner, $interval, event_tracking) ->
 
 		$scope.simple.search = () ->
 			post_data =
@@ -10,6 +10,10 @@ define [
 				query: $scope.simple.state.searchInput
 				_csrf: window.csrfToken
 			$scope.simple.state.searching = true
+			event_tracking.send("package-simple", "search", {
+				query: post_data.query,
+				language: post_data.language
+			})
 			$http.post("/packages/search", post_data)
 				.success (data) ->
 					$scope.simple.clearPackageSelection()
@@ -106,6 +110,21 @@ define [
 			currentRun = commandRunner.run options
 			currentRun.packageName = item.name
 			$scope.simple.state.install = currentRun
+
+			# watch for completion of install
+			check_for_completion = () ->
+				exit_code = $scope.simple.state.install?.exitCode
+				timed_out = $scope.simple.state.install?.timedout
+				event_meta =
+					name: item.name
+					language: item.language
+				if typeof exit_code == 'number'
+					if exit_code == 0
+						event_tracking.send('package-simple', 'installed', event_meta)
+					if exit_code > 0 or timed_out == true
+						event_tracking.send('package-simple', 'failed', event_meta)
+					$interval.cancel completion_interval
+			completion_interval = $interval(check_for_completion, 2000)
 
 		$scope.simple.showSearchResults = () ->
 			$scope.simple.state.searchResults && $scope.simple.state.selected == null
