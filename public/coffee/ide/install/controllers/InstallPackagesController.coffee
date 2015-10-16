@@ -15,8 +15,12 @@ define [
 
 		$scope.output = {}
 
+		# improved package management feature flag detection
+		$scope.simpleModeEnabled = () ->
+			true
+
 		# toggle for simple-mode vs advanced-mode (the old package interface)
-		$scope.simpleMode = true
+		$scope.simpleMode = $scope.simpleModeEnabled()
 
 		# scope namespace for the simple-mode interface
 		$scope.simple =
