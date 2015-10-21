@@ -20,6 +20,7 @@ module.exports = PackageIndexHandler =
 		request opts, (err, response, body) ->
 			return callback(err, null) if err?
 			if 200 <= response.statusCode < 300
+				# body presumed to be json object with fields {results::Array, searchParams::Object}
 				callback(null, body)
 			else
 				logger.log language: language, query: query, "Got non-ok response from package index search"
