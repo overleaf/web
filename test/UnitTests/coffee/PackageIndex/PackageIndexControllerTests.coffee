@@ -30,7 +30,7 @@ describe "PackageIndexController", ->
 		beforeEach ->
 			@PackageIndexHandler.search.callsArgWith(2, null, @search_result)
 
-		it "should send back some data", (done) ->
+		it "should send back the search result", (done) ->
 			@res.status = (code) =>
 				send: (data) =>
 					expect(code).to.equal 200
@@ -38,3 +38,15 @@ describe "PackageIndexController", ->
 					expect(data).to.deep.equal @search_result
 					done()
 			@controller.search @req, @res
+
+		describe "when the PackageIndexHandler produces an error", ->
+
+			beforeEach ->
+				@PackageIndexHandler.search.callsArgWith(2, new Error('search error'), null)
+
+			it "should produce a 500 response", (done) ->
+				@res.status = (code) =>
+					send: (data) =>
+						expect(code).to.equal 500
+						done()
+				@controller.search @req, @res
