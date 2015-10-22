@@ -236,4 +236,8 @@ module.exports = class Router
 			logger.error err: req.body.error, meta: req.body.meta, "client side error"
 			res.sendStatus(204)
 
+		webRouter.get  '/api/v1/project', AuthenticationController.requireLogin(allow_auth_token: true), ProjectController.getProjectList
+		webRouter.get  '/api/v1/project/:project_id', SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectApiController.getProjectDetails
+		webRouter.get  '/api/v1/project/:project_id/docs', AuthenticationController.requireLogin(allow_auth_token: true), SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectController.getProjectDocs
+
 		webRouter.get '*', ErrorController.notFound

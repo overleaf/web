@@ -17,6 +17,10 @@ SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
+UserGetter = require("../User/UserGetter")
+ProjectEditorHandler = require('./ProjectEditorHandler')
+ProjectGetter = require('./ProjectGetter')
+AuthorizationManager = require("../Security/AuthorizationManager")
 
 module.exports = ProjectController =
 
@@ -168,7 +172,6 @@ module.exports = ProjectController =
 					res.render 'project/list', viewModel
 					timer.done()
 
-
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
 		if !Settings.editorIsOpen
@@ -297,6 +300,36 @@ module.exports = ProjectController =
 				if project.owner_ref?
 					project.owner = users[project.owner_ref.toString()]
 			callback null, projects
+
+	getProjectList: (req, res, next)->
+		timer = new metrics.Timer("project-list")
+		user_id = req.user._id
+		console.log(req.user._id)
+		async.parallel {
+			projects: (cb)->
+				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+			}, (err, results)->
+				if err?
+					logger.err err:err, "error getting data for project list"
+					return next(err)
+				logger.log results:results, user_id:user_id, "rendering project list"
+				projectsList = []
+				for i in [0..2]
+					for p in results.projects[i]
+						projectsList.push p
+				res.json(projectsList)
+				timer.done()
+
+	getProjectDocs: (req, res, next)->
+		project_id = req.params.project_id
+		user_id = req.user._id
+		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
+			return next(error) if error?
+			return next(new Error("not found")) if !project?
+			ProjectGetter.populateProjectWithUsers project, (error, project) ->
+				return next(error) if error?
+				res.json(ProjectEditorHandler.buildProjectModelView(project))
+
 
 defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id
