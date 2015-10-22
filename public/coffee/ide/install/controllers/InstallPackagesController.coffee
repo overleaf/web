@@ -17,7 +17,7 @@ define [
 
 		# improved package management feature flag detection
 		$scope.simpleModeEnabled = () ->
-			$scope.user.featureSwitches.simplePackageManager == true
+			$scope.user.featureSwitches.simplePackageManager == true or window._ENABLE_SIMPLE_PACKAGES == true
 
 		# toggle for simple-mode vs advanced-mode (the old package interface)
 		$scope.simpleMode = $scope.simpleModeEnabled()
