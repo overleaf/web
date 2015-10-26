@@ -151,6 +151,8 @@ define [
 
 			event_tracking.send("package", "install", {
 				name: $scope.installedPackage
+				language: if $scope.selectedTab.python then "python" else "r"
+				installer: if $scope.selectedTab.python then $scope.inputs.pythonInstaller else $scope.inputs.rInstaller
 			})
 
 			# Don't clear the name on autostart so it's still clear what is going on.
