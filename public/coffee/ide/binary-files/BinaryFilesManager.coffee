@@ -10,3 +10,4 @@ define [
 		openFile: (file) ->
 			@$scope.ui.view = "file"
 			@$scope.openFile = file
+			@$scope.$broadcast 'binary-file:opened', file

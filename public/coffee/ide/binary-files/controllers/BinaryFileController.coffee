@@ -52,5 +52,10 @@ define [
 					$scope.state.message = 'No preview available.'
 					$scope.state.preview = null
 
+		# if this file is opened again, refresh the preview
+		$scope.$on 'binary-file:opened', (event, file) ->
+			if $scope.file_id == file.id
+				$scope.getPreview()
+
 		$scope.getPreview()
 	]
