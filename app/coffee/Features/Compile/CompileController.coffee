@@ -27,6 +27,8 @@ module.exports = CompileController =
 				options.command = req.body.command
 			if req.body?.package
 				options.package = req.body.package
+			if req.body?.source
+				options.source = req.body.source
 			if req.body?.env?
 				options.env = req.body.env
 			if req.body?.compiler == 'command' and req.body?.timeout?

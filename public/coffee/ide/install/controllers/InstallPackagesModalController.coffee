@@ -77,11 +77,29 @@ define [
 							}))"
 						]
 					}
+				when 'custom'
+					options = {
+						compiler: "command"
+						command: item.provider.command,
+						env: {
+							HOME: "/usr/local",
+							DEBIAN_FRONTEND: "noninteractive"
+						}
+					}
 				else
 					throw new Error("Unrecognized provider source: #{item.provider.source} for #{item.name}")
 
+			# # #
+			options = {
+				compiler: 'package-install'
+				source: item.provider.source
+				package: item.name
+			}
+
 			options.timeout = 400
 			options.parseErrors = false
+			console.log ">> "
+			console.log options
 
 			return options
 
