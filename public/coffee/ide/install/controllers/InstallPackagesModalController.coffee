@@ -24,82 +24,18 @@ define [
 					console.log ">> seach fail"
 
 		$scope.simple._buildCommandOptions = (item) ->
-			options = null
-			switch item.provider.source
-				when 'conda'
-					options = {
-						compiler: "command"
-						command: [
-							"sudo", "conda", "install", "--yes", "--quiet", item.name
-						]
-					}
-				when 'pip'
-					options = {
-						compiler: "command"
-						command: [
-							"sudo", "pip", "install", "#{item.name}"
-						],
-						env: {
-							HOME: "/usr/local"
-						}
-					}
-				when 'cran'
-					options = {
-						compiler: "command"
-						command: [
-							"sudo", "Rscript", "-e", "install.packages('#{item.name}');
-							suppressMessages(suppressWarnings(if(!require('#{item.name}')) {
-									stop('Could not load package', call.=FALSE)
-							}))"
-						]
-					}
-				when 'apt'
-					options = {
-						compiler: "apt-get-install"
-						package: "#{item.name}"
-						env: {
-							DEBIAN_FRONTEND: "noninteractive"
-						}
-					}
-				when 'bioconductor'
-					options = {
-						compiler: "command"
-						command: [
-							"sudo", "Rscript", "-e",
-							"if (!require(BiocInstaller,quietly=TRUE)) {
-								source('http://bioconductor.org/biocLite.R')
-							} else {
-								library(BiocInstaller);
-							};
-							biocLite('#{item.name}') ;
-							suppressMessages(suppressWarnings(if(!require('#{item.name}')) {
-								stop('Could not load package', call.=FALSE)
-							}))"
-						]
-					}
-				when 'custom'
-					options = {
-						compiler: "command"
-						command: item.provider.command,
-						env: {
-							HOME: "/usr/local",
-							DEBIAN_FRONTEND: "noninteractive"
-						}
-					}
-				else
-					throw new Error("Unrecognized provider source: #{item.provider.source} for #{item.name}")
-
-			# # #
 			options = {
 				compiler: 'package-install'
 				source: item.provider.source
 				package: item.name
+				env: {
+					HOME: "/usr/local",
+					DEBIAN_FRONTEND: "noninteractive"
+				}
 			}
 
-			options.timeout = 400
+			options.timeout = 1000
 			options.parseErrors = false
-			console.log ">> "
-			console.log options
 
 			return options
 

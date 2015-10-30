@@ -31,7 +31,7 @@ module.exports = CompileController =
 				options.source = req.body.source
 			if req.body?.env?
 				options.env = req.body.env
-			if req.body?.compiler == 'command' and req.body?.timeout?
+			if req.body?.compiler in ['command', 'package-install'] and req.body?.timeout?
 				options.timeout = req.body.timeout
 			logger.log {options, project_id}, "got compile request"
 			CompileManager.compile project_id, user_id, request_id, options, (error, status, outputFiles, output, limits) ->
