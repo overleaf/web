@@ -45,7 +45,8 @@ module.exports = class Router
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-		
+		webRouter.get "/payment_form", (req, res)->
+			res.render("subscriptions/form")
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 

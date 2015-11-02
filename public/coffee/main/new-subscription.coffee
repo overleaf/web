@@ -5,7 +5,7 @@ define [
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 	
-		$scope.currencyCode = MultiCurrencyPricing.currencyCode
+		$scope.currencyCode = MultiCurrencyPricing.currencyCode || "USD"
 		$scope.plans = MultiCurrencyPricing.plans
 
 		$scope.switchToStudent = ()->
@@ -41,9 +41,9 @@ define [
 
 		pricing = recurly.Pricing()
 		window.pricing = pricing
-
+		plan_code = window.plan_code || "student"
 		initialPricing = pricing
-			.plan(window.plan_code, { quantity: 1 })
+			.plan(plan_code, { quantity: 1 })
 			.address({country: $scope.data.country})
 			.tax({tax_code: 'digital', vat_number: ''})
 			.currency($scope.currencyCode)

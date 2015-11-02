@@ -27,6 +27,9 @@ define [
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
+	"main/new-subscription"
+	"main/plans"
+
 ], (
 	App
 	FileTreeManager
