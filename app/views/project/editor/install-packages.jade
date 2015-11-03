@@ -70,7 +70,8 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 											ng-switch="simple.state.install.exitCode == 0 && simple.state.selected.name == simple.state.install.packageName"
 											)
 											span(ng-switch-when="true")
-												| Installed
+												i.fa.fa-fw.fa-check
+												| &nbsp;Installed
 											span(ng-switch-default)
 												| Install
 									span(ng-show="simple.state.install.running && !simple.state.install.stopping")
