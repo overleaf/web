@@ -20,7 +20,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					form.form-inline.toolbar.toolbar-borderless.row-spaced
 						input.form-control.text-monospace#searchBox(
 							ng-model="simple.state.searchInput",
-							placeholder="Search {{engine}} packages...",
+							placeholder="Search {{simple.languageDisplayName(engine)}} packages...",
 							on-enter="simple.search()",
 							focus-on="open",
 							autocomplete="off"

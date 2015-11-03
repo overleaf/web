@@ -137,7 +137,8 @@ define [
 			install = $scope.simple.state.install
 			install.running && install.stillIniting && !install.inited
 
-
+		$scope.simple.languageDisplayName = (engine) ->
+			"" + engine.charAt(0).toUpperCase() + engine.slice(1)
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
 		$modalInstance.opened.then () ->
