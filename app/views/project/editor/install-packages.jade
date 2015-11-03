@@ -65,7 +65,14 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 									ng-click="simple.install(simple.state.selected)"
 									ng-disabled="simple.state.install.running"
 								).btn.btn-primary.btn-sm
-									span(ng-show="!simple.state.install.running && !simple.state.install.stopping") Install
+									span(ng-show="!simple.state.install.running && !simple.state.install.stopping")
+										span(
+											ng-switch="simple.state.install.exitCode == 0 && simple.state.selected.name == simple.state.install.packageName"
+											)
+											span(ng-switch-when="true")
+												| Installed
+											span(ng-switch-default)
+												| Install
 									span(ng-show="simple.state.install.running && !simple.state.install.stopping")
 										i.fa.fa-refresh.fa-spin.fa-fw
 										|  Installing {{simple.state.install.packageName}} ...
