@@ -56,7 +56,7 @@ define [
 				when 'apt'
 					options = {
 						compiler: "apt-get-install"
-						package: "#{item.name}"
+						package: "r-cran-#{item.name}"
 						env: {
 							DEBIAN_FRONTEND: "noninteractive"
 						}
