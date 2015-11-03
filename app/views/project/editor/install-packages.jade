@@ -115,6 +115,12 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 	
 				// scroll-able search results
 				div.col-md-12.scroll-container
+					// no-search-results message
+					div(ng-if="simple.state.searchResults != null && simple.state.searchResults.length == 0")
+						div.text-center
+							| No Packages Found
+	
+					// list of search results
 					div(ng-repeat="item in simple.state.searchResults").search-result-item
 						div.top-row
 							span.package-name
