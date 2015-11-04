@@ -117,13 +117,18 @@ describe "CompileManager", ->
 				compileProcesses: @processes = 57
 				compileCpuShares: @cpu_shares = 456
 			}
-			@Project.findById = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
+			@Project.findById = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123", imageName: "test" })
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { features: @features })
 			@CompileManager.getProjectCompileLimits @project_id, @callback
 			
 		it "should look up the owner of the project", ->
 			@Project.findById
-				.calledWith(@project_id, { owner_ref: 1 })
+				.calledWith(@project_id, sinon.match({ owner_ref: 1 }))
+				.should.equal true
+
+		it "should look up the project image", ->
+			@Project.findById
+				.calledWith(@project_id, sinon.match({ imageName: 1 }))
 				.should.equal true
 				
 		it "should look up the owner's features", ->
@@ -139,6 +144,7 @@ describe "CompileManager", ->
 					processes:    @processes
 					cpu_shares:   @cpu_shares
 					memory:       @memory
+					imageName:    "test"
 				})
 				.should.equal true
 				

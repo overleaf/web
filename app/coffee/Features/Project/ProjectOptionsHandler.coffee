@@ -17,6 +17,15 @@ module.exports =
 			if callback?
 				callback()
 
+	setImage: (project_id, image_name, callback = ()->) ->
+		logger.log project_id:project_id, image_name:image_name, "setting the base image name"
+		if not image_name.match(/^template\/[a-f0-9]{24}$/)
+			return callback()
+		conditions = {_id:project_id}
+		update = {imageName:image_name}
+		Project.update conditions, update, {}, (err)->
+			if callback?
+				callback()
 
 	setSpellCheckLanguage: (project_id, languageCode, callback = ()->)->
 		logger.log project_id:project_id, languageCode:languageCode, "setting the spell check language"

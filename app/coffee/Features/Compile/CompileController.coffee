@@ -98,6 +98,14 @@ module.exports = CompileController =
 			return next(error) if error?
 			res.send(200)
 
+	saveImage: (req, res, next) ->
+		project_id = req.params.Project_id
+		image_name = req.params.image_name
+		logger.log {project_id, image_name}, "saving image"
+		CompileManager.saveImage project_id, image_name, (error, data) ->
+			return next(error) if error?
+			res.status(200).send(data)
+
 	compileAndDownloadOutput: (req, res, next)->
 		project_id = req.params.project_id
 		logger.log {project_id}, "compiling and downloading project"

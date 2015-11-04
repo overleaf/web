@@ -157,6 +157,7 @@ module.exports = class Router
 		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
 		apiRouter.post '/internal/project/:Project_id/run', AuthenticationController.httpAuth, CompileController.compile
+		apiRouter.post '/internal/project/:Project_id/save/:image_name(\\S+)', AuthenticationController.httpAuth, CompileController.saveImage
 		
 		apiRouter.get  '/internal/project/:project_id/content', AuthenticationController.httpAuth, ProjectApiController.getProjectContent
 
