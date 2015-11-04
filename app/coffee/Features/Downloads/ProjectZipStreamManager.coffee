@@ -53,7 +53,20 @@ module.exports = ProjectZipStreamManager =
 					if error?
 						logger.error err: error, project_id: project_id, "error adding output files to zip stream"
 					archive.finalize()
-	
+
+	createZipStreamForProjectWithoutOutput: (project_id, callback = (error, stream) ->) ->
+		archive = archiver("zip")
+		# return stream immediately before we start adding things to it
+		archive.on "error", (err)->
+			logger.err err:err, project_id:project_id, "something went wrong building archive of project"
+		callback(null, archive)
+		@addAllDocsToArchive project_id, archive, (error) =>
+			if error?
+				logger.error err: error, project_id: project_id, "error adding docs to zip stream"
+			@addAllFilesToArchive project_id, archive, (error) =>
+				if error?
+					logger.error err: error, project_id: project_id, "error adding files to zip stream"
+				archive.finalize()
 
 	addAllDocsToArchive: (project_id, archive, callback = (error) ->) ->
 		ProjectEntityHandler.getAllDocs project_id, (error, docs) ->
