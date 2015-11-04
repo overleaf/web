@@ -60,7 +60,7 @@ define [
 			}
 
 		$scope.$on "installPackage", (e, packageName, language) ->
-			$scope.inputs.packageName = packageName
+			$scope.simple.state.searchInput = packageName
 			if language == "python"
 				$scope.selectedTab.python = true
 				$scope.selectedTab.R = false
