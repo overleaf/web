@@ -87,15 +87,21 @@ module.exports = ProjectZipStreamManager =
 			jobs = []
 			for path, file of files
 				do (path, file) ->
-					jobs.push (callback) ->
+					jobs.push (_callback) ->
+						cb = (args...) ->
+							_callback(args...)
+							callback = ->
 						FileStoreHandler.getFileStream  project_id, file._id, {}, (error, stream) ->
 							if error?
 								logger.err err:error, project_id:project_id, file_id:file._id, "something went wrong adding file to zip archive"
-								return callback(err)
+								return cb(err)
 							path = path.slice(1) if path[0] == "/"
+							stream.on 'error', (err) ->
+								logger.err {err}, "error in filestore stream"
+								cb(err)
 							archive.append stream, name: path
 							stream.on "end", () ->
-								callback()
+								cb()
 			async.parallelLimit jobs, 5, callback
 
 	addOutputFilesToArchive: (project_id, archive, _callback = (error) ->) ->
