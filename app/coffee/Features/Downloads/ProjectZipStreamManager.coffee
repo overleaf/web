@@ -85,10 +85,16 @@ module.exports = ProjectZipStreamManager =
 								callback()
 			async.parallelLimit jobs, 5, callback
 
-	addOutputFilesToArchive: (project_id, archive, callback = (error) ->) ->
+	addOutputFilesToArchive: (project_id, archive, _callback = (error) ->) ->
+		callback = (args...) ->
+			_callback(args...)
+			callback = ->
 		CompileController.getClsiStream project_id, {format: 'tar'}, (error, tarStream) ->
 			return callback(error) if error?
 			logger.log {project_id}, "streaming tar file from CLSI"
+			tarStream.on 'error', (err) ->
+				logger.log {err}, "error in tar stream from CLSI"
+				callback(err)
 			extract = tar.extract()
 			extract.on "entry", (header, stream, cb) ->
 				# header is the tar header
@@ -101,7 +107,7 @@ module.exports = ProjectZipStreamManager =
 				stream.on "end", () ->
 					cb() # ready for next entry
 			extract.on "error", (err) ->
-				logger.log {err}, "error unpacking tar file"
+				logger.err {err}, "error unpacking tar file"
 			extract.on "finish", () ->
 				logger.log {project_id}, "end of tar file"
 				callback()
