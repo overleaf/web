@@ -116,10 +116,12 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
 				doc = new Doc name: docName
-				Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
-					return callback(err) if err?
-					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
-						return callback(err) if err? 
+				# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
+				# which hasn't been created in docstore.
+				DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
+					return callback(err) if err? 
+					Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
+						return callback(err) if err?
 						tpdsUpdateSender.addDoc {
 							project_id:   project._id,
 							doc_id:		  doc._id	
@@ -138,7 +140,7 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFile: (project_or_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
-		Project.getProject project_or_id, "", (err, project) ->
+		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project) ->
 			logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)->

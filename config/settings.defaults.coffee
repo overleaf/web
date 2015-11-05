@@ -106,6 +106,8 @@ module.exports =
 			url: "http://localhost:3021"
 		packageindexer:
 			url: "http://localhost:3034"
+		contacts:
+			url: "http://localhost:3036"
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -222,7 +224,7 @@ module.exports =
 	#   publicDSN: ""
 	#
 	# src should be either a remote url like
-	#    //cdn.ravenjs.com/1.1.16/jquery,native/raven.min.js
+	#    //cdn.ravenjs.com/1.1.22/jquery,native/raven.min.js
 	# or a local file in the js/libs directory.
 	# The publicDSN is the token for the client-side getSentry service.
 
@@ -290,7 +292,7 @@ module.exports =
 		title: "ShareLaTeX Community Edition"
 		
 		left_footer: [{
-			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2014"
+			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2015"
 		}]
 
 		right_footer: [{
@@ -359,19 +361,24 @@ module.exports =
 		
 	]
 
+	sixpack:
+		domain:"http://45.79.157.156:5000"
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
 	# ----------
 
 
-	
-	# ldap:
+	# username = einstein
+	# password = password
+	# ldap :
 	# 	host: 'ldap://ldap.forumsys.com'
-	# 	dnObj: 'uid'
-	# 	dnSuffix: 'dc=example,dc=com'
+	# 	dn: 'uid=:userKey,dc=example,dc=com'
+	# 	baseSearch: 'dc=example,dc=com'
+	# 	filter: "(uid=:userKey)"
 	# 	failMessage: 'LDAP User Fail'
 	# 	fieldName: 'LDAP User'
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
+	# 	anonymous: false
 	
 	#templateLinks: [{
 	#	name : "CV projects",

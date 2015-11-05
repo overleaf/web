@@ -13,10 +13,12 @@ define [
 		"underscore"
 		"ngSanitize"
 		"ipCookie"
+		"mvdSixpack"
 		"ErrorCatcher"
 		"localStorage"
 		"luegg.directives" # Scroll glue
 		"ansiToHtml"
+		"ngTagsInput"
 	])
 	App.config( [
 		'$compileProvider', ($compileProvider) ->
@@ -24,5 +26,10 @@ define [
 			# returned by Jupyter kernel
 			$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|data):/);
 	])
+	App.config (sixpackProvider)->
+		sixpackProvider.setOptions({
+			debug: false
+			baseUrl: window.sharelatex.sixpackDomain
+		})
 
 	return App
