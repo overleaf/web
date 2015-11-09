@@ -9,7 +9,11 @@ define [
 	"libs/fineuploader"
 	"libs/angular-sanitize-1.2.17"
 	"libs/angular-cookie"
+	"libs/angular-cookies"
 	"libs/passfield"
 	"libs/angular-scroll-glue"
 	"libs/ansi2html"
+	"libs/sixpack"
+	"libs/angular-sixpack"
+	"libs/ng-tags-input-3.0.0"
 ], () ->

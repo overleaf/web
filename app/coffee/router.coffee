@@ -41,6 +41,7 @@ LinkController = require("./Features/Link/LinkController")
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 PreviewController = require('./Features/Previews/PreviewController')
 PackageIndexController = require('./Features/PackageIndex/PackageIndexController')
+ContactRouter = require("./Features/Contacts/ContactRouter")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -71,6 +72,7 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		AnalyticsRouter.apply(webRouter, apiRouter)
+		ContactRouter.apply(webRouter, apiRouter)
 		
 		Modules.applyRouter(webRouter, apiRouter)
 
@@ -157,6 +159,7 @@ module.exports = class Router
 		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
 		apiRouter.post '/internal/project/:Project_id/run', AuthenticationController.httpAuth, CompileController.compile
+		apiRouter.post '/internal/project/:Project_id/save/:image_name(\\S+)', AuthenticationController.httpAuth, CompileController.saveImage
 		
 		apiRouter.get  '/internal/project/:project_id/content', AuthenticationController.httpAuth, ProjectApiController.getProjectContent
 
@@ -198,6 +201,7 @@ module.exports = class Router
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
+		webRouter.get  '/admin/user', SecurityManager.requestIsAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
 		webRouter.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
 		webRouter.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
 		webRouter.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor

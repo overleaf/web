@@ -73,6 +73,21 @@ module.exports = ClsiManager =
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
 		request.del "#{compilerUrl}/project/#{project_id}/output/#{file}", callback
 
+	saveImage: (project_id, image_name, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup)
+		logger.log "requesting #{compilerUrl}/project/#{project_id}/save/#{image_name}"
+		request.post {
+			url: "#{compilerUrl}/project/#{project_id}/save/#{image_name}"
+			json: true
+		},  (error, response, data) ->
+			return callback(error) if error?
+			if 200 <= response.statusCode < 300
+				callback null, data
+			else
+				error = new Error("CLSI returned non-success code: #{response.statusCode}")
+				logger.error err: error, project_id: project_id, "CLSI returned failure code"
+				callback error, data
+
 	_getCompilerUrl: (compileGroup) ->
 		if compileGroup == "priority"
 			return Settings.apis.clsi_priority.url
@@ -107,7 +122,7 @@ module.exports = ClsiManager =
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r", "command", "apt-get-install", "package-install"]
 	_buildRequest: (project_id, request_id, options={}, callback = (error, request) ->) ->
-		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
+		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
 
@@ -141,6 +156,9 @@ module.exports = ClsiManager =
 				if compiler not in ClsiManager.VALID_COMPILERS
 					compiler = "pdflatex"
 
+				if project.imageName?.match(/^template\/[a-f0-9]{24}$/)
+					imageName = project.imageName
+
 				callback null, {
 					compile:
 						request_id: request_id
@@ -154,6 +172,7 @@ module.exports = ClsiManager =
 							memory:     options.memory
 							cpu_shares: options.cpu_shares
 							processes:  options.processes
+							imageName:  imageName
 						rootResourcePath: rootResourcePath
 						resources: resources
 				}

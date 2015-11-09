@@ -153,7 +153,7 @@ describe "ClsiManager", ->
 
 			it "should get the project with the required fields", ->
 				@Project.findById
-					.calledWith(@project_id, {compiler:1, rootDoc_id: 1})
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
 					.should.equal true
 
 			it "should get all the docs", ->
@@ -180,6 +180,7 @@ describe "ClsiManager", ->
 							memory:     @memory
 							processes:  @processes
 							cpu_shares: @cpu_shares
+							imageName: undefined
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"

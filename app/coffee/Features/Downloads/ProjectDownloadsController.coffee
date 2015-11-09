@@ -16,7 +16,7 @@ module.exports = ProjectDownloadsController =
 				return next(error) if error?
 				if !project?
 					return ErrorController.notFound(req, res)
-				ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->
+				handler = (error, stream) ->
 					return next(error) if error?
 					res.header(
 						"Content-Disposition",
@@ -24,6 +24,10 @@ module.exports = ProjectDownloadsController =
 					)
 					res.contentType('application/zip')
 					stream.pipe(res)
+				if req.query.skipOutputFiles
+					ProjectZipStreamManager.createZipStreamForProjectWithoutOutput project_id, handler
+				else
+					ProjectZipStreamManager.createZipStreamForProject project_id, handler
 
 	downloadMultipleProjects: (req, res, next) ->
 		project_ids = req.query.project_ids.split(",")

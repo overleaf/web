@@ -17,7 +17,8 @@ define [
 
 		# improved package management feature flag detection
 		$scope.simpleModeEnabled = () ->
-			$scope.user.featureSwitches.simplePackageManager == true or window._ENABLE_SIMPLE_PACKAGES == true
+			# $scope.user.featureSwitches.simplePackageManager == true or window._ENABLE_SIMPLE_PACKAGES == true
+			true
 
 		# toggle for simple-mode vs advanced-mode (the old package interface)
 		$scope.simpleMode = $scope.simpleModeEnabled()
@@ -59,7 +60,7 @@ define [
 			}
 
 		$scope.$on "installPackage", (e, packageName, language) ->
-			$scope.inputs.packageName = packageName
+			$scope.simple.state.searchInput = packageName
 			if language == "python"
 				$scope.selectedTab.python = true
 				$scope.selectedTab.R = false

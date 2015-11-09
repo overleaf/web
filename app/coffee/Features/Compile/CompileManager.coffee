@@ -65,8 +65,13 @@ module.exports = CompileManager =
 			return callback(error) if error?
 			ClsiManager.deleteOutputFile project_id, file, limits, callback
 
+	saveImage: (project_id, image_name, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.saveImage project_id, image_name, limits, callback
+
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
-		Project.findById project_id, {owner_ref: 1}, (error, project) ->
+		Project.findById project_id, {owner_ref: 1, imageName: 1}, (error, project) ->
 			return callback(error) if error?
 			UserGetter.getUser project.owner_ref, {"features":1}, (err, owner)->
 				return callback(error) if error?
@@ -76,6 +81,7 @@ module.exports = CompileManager =
 					processes: owner.features?.compileProcesses || Settings.defaultFeatures.compileProcesses
 					cpu_shares: owner.features?.compileCpuShares || Settings.defaultFeatures.compileCpuShares
 					memory: owner.features?.compileMemory || Settings.defaultFeatures.compileMemory
+					imageName: project.imageName
 				}
 			
 	getLogLines: (project_id, callback)->

@@ -53,7 +53,20 @@ module.exports = ProjectZipStreamManager =
 					if error?
 						logger.error err: error, project_id: project_id, "error adding output files to zip stream"
 					archive.finalize()
-	
+
+	createZipStreamForProjectWithoutOutput: (project_id, callback = (error, stream) ->) ->
+		archive = archiver("zip")
+		# return stream immediately before we start adding things to it
+		archive.on "error", (err)->
+			logger.err err:err, project_id:project_id, "something went wrong building archive of project"
+		callback(null, archive)
+		@addAllDocsToArchive project_id, archive, (error) =>
+			if error?
+				logger.error err: error, project_id: project_id, "error adding docs to zip stream"
+			@addAllFilesToArchive project_id, archive, (error) =>
+				if error?
+					logger.error err: error, project_id: project_id, "error adding files to zip stream"
+				archive.finalize()
 
 	addAllDocsToArchive: (project_id, archive, callback = (error) ->) ->
 		ProjectEntityHandler.getAllDocs project_id, (error, docs) ->
@@ -74,21 +87,33 @@ module.exports = ProjectZipStreamManager =
 			jobs = []
 			for path, file of files
 				do (path, file) ->
-					jobs.push (callback) ->
+					jobs.push (_callback) ->
+						cb = (args...) ->
+							_callback(args...)
+							callback = ->
 						FileStoreHandler.getFileStream  project_id, file._id, {}, (error, stream) ->
 							if error?
 								logger.err err:error, project_id:project_id, file_id:file._id, "something went wrong adding file to zip archive"
-								return callback(err)
+								return cb(err)
 							path = path.slice(1) if path[0] == "/"
+							stream.on 'error', (err) ->
+								logger.err {err}, "error in filestore stream"
+								cb(err)
 							archive.append stream, name: path
 							stream.on "end", () ->
-								callback()
+								cb()
 			async.parallelLimit jobs, 5, callback
 
-	addOutputFilesToArchive: (project_id, archive, callback = (error) ->) ->
+	addOutputFilesToArchive: (project_id, archive, _callback = (error) ->) ->
+		callback = (args...) ->
+			_callback(args...)
+			callback = ->
 		CompileController.getClsiStream project_id, {format: 'tar'}, (error, tarStream) ->
 			return callback(error) if error?
 			logger.log {project_id}, "streaming tar file from CLSI"
+			tarStream.on 'error', (err) ->
+				logger.log {err}, "error in tar stream from CLSI"
+				callback(err)
 			extract = tar.extract()
 			extract.on "entry", (header, stream, cb) ->
 				# header is the tar header
@@ -101,7 +126,7 @@ module.exports = ProjectZipStreamManager =
 				stream.on "end", () ->
 					cb() # ready for next entry
 			extract.on "error", (err) ->
-				logger.log {err}, "error unpacking tar file"
+				logger.err {err}, "error unpacking tar file"
 			extract.on "finish", () ->
 				logger.log {project_id}, "end of tar file"
 				callback()

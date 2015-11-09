@@ -20,7 +20,7 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 					form.form-inline.toolbar.toolbar-borderless.row-spaced
 						input.form-control.text-monospace#searchBox(
 							ng-model="simple.state.searchInput",
-							placeholder="Search {{engine}} packages...",
+							placeholder="Search {{simple.languageDisplayName(engine)}} packages...",
 							on-enter="simple.search()",
 							focus-on="open",
 							autocomplete="off"
@@ -65,19 +65,27 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 									ng-click="simple.install(simple.state.selected)"
 									ng-disabled="simple.state.install.running"
 								).btn.btn-primary.btn-sm
-									span(ng-show="!simple.state.install.running && !simple.state.install.stopping") Install
+									span(ng-show="!simple.state.install.running && !simple.state.install.stopping")
+										span(
+											ng-switch="simple.state.install.exitCode == 0 && simple.state.selected.name == simple.state.install.packageName"
+											)
+											span(ng-switch-when="true")
+												i.fa.fa-fw.fa-check
+												| &nbsp;Installed
+											span(ng-switch-default)
+												| Install
 									span(ng-show="simple.state.install.running && !simple.state.install.stopping")
 										i.fa.fa-refresh.fa-spin.fa-fw
 										|  Installing {{simple.state.install.packageName}} ...
 									span(ng-show="simple.state.install.stopping") 
 										i.fa.fa-refresh.fa-spin.fa-fw
 										|  Stopping...
-								| &nbsp;
+								| &nbsp;&nbsp;
 								a(
 									href,
 									ng-click="simple.stop()",
 									ng-show="simple.state.install.running && !simple.state.install.stopping"
-								).small
+								).small.stop-button
 									.i.fa.fa-fw.fa-stop
 									|  Stop
 								
@@ -115,6 +123,12 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 	
 				// scroll-able search results
 				div.col-md-12.scroll-container
+					// no-search-results message
+					div(ng-if="simple.state.searchResults != null && simple.state.searchResults.length == 0")
+						div.text-center
+							| No Packages Found
+	
+					// list of search results
 					div(ng-repeat="item in simple.state.searchResults").search-result-item
 						div.top-row
 							span.package-name

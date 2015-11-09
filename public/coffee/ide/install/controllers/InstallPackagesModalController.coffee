@@ -91,6 +91,11 @@ define [
 			install = $scope.simple.state.install
 			install.running && install.stillIniting && !install.inited
 
+		$scope.simple.languageDisplayName = (engine) ->
+			"" + engine.charAt(0).toUpperCase() + engine.slice(1)
+
+		if $scope.autoStart
+			$scope.simple.search()
 
 
 	App.controller "InstallPackagesModalController", ($scope, $modalInstance, $timeout, commandRunner, event_tracking) ->
@@ -198,9 +203,6 @@ define [
 			options.parseErrors = false
 
 			$scope.output.currentRun = commandRunner.run options
-
-		if $scope.autoStart
-			$scope.install(true)
 
 		$scope.stop = () ->
 			return if !$scope.output.currentRun?

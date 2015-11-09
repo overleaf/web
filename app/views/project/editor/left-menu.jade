@@ -25,7 +25,8 @@ aside#left-menu.full-size(
 				)
 					i.fa.fa-fw.fa-copy
 					| &nbsp;&nbsp; #{translate("copy_project")}
-			!= moduleIncludes("editorLeftMenu:actions", locals)
+
+			!= moduleIncludes("editorLeftMenu:actions", locals)	
 
 	if (moduleIncludesAvailable("editorLeftMenu:sync"))
 		div(ng-show="!anonymous")

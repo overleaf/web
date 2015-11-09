@@ -89,7 +89,9 @@ module.exports = SecurityManager =
 
 	requestIsOwner : (req, res, next)->
 		getRequestUserAndProject req, res, {}, (err, user, project)->
-			if userIsOwner user, project || user.isAdmin
+			if !user?
+				return res.redirect('/restricted')
+			else if userIsOwner user, project || user.isAdmin
 				next()
 			else
 				logger.log user_id: user?._id, email: user?.email, "user is not owner of project redirecting to restricted page"
@@ -169,6 +171,9 @@ module.exports = SecurityManager =
 
 getRequestUserAndProject = (req, res, options, callback)->
 	project_id = req.params.Project_id
+	if !project_id?
+		logger.log project_id:project_id, options:options, url:req?.url, "no project_id trying to getRequestUserAndProject"
+		return res.send 422
 	Project.findById project_id, 'name owner_ref readOnly_refs collaberator_refs publicAccesLevel archived', (err, project)=>
 		if err?
 			logger.err err:err, "error getting project for security check"
