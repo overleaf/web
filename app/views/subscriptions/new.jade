@@ -61,6 +61,7 @@ block content
 								.col-md-6.col-md-offset-3
 									.form-group
 										input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="Coupon Code")
+								i.fa.fa-fw.fa-spinner.fa-spin(ng-show="updating_coupon", style="vertical-align:bottom;")
 
 						.row
 							.col-md-12
@@ -187,11 +188,12 @@ block content
 
 
 				.col-md-5
-					if showStudentPlan == 'true'
+					p.text-center(ng-show="data.coupon.toLowerCase() != 'djedu'")
+						| Using DataJoy as a student or academic?
 						a.btn-primary.btn.plansPageStudentLink(
 							href,
-							ng-click="switchToStudent()"
-						) #{translate("half_price_student")} 
+							ng-click="applyCoupon('DJEDU')"
+						) Get a half price academic discount 
 
 					.card
 						.paymentPageFeatures

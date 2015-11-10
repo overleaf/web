@@ -95,9 +95,22 @@ block content
 												)
 													span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
-
-				.row.row-spaced(ng-cloak)
+				hr
+				.row.row-spaced.text-centered
+					.col-md-7
+						h3(style="margin-top: 0;") Student or Academic?
+						| Get 
+						strong 50% off 
+						| all of our plans as a student or member of a university.
+					.col-md-5.text-left
+						a.btn.btn-info(
+							ng-href="#{baseUrl}/user/subscription/new?planCode=datajoy{{ ui.view == 'annual' ? '-annual' : '' }}&currency={{currencyCode}}&cc=DJEDU", ng-click="signUpNowClicked('collaborator')"
+						) Sign up with academic discount
+				hr
+				.row.row-spaced-thin(ng-cloak)
 					p.text-centered Choose the plan that works for you with our 7-day free trial. Cancel at any time, and get a full 30-day refund if you're unhappy for any reason.
+
+						
 
 	.border-top
 		.content

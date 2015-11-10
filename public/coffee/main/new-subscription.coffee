@@ -51,6 +51,7 @@ define [
 			.done()
 
 		pricing.on "change", =>
+			$scope.updating_coupon = false
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
 			$scope.coupon = pricing.items.coupon
@@ -65,8 +66,13 @@ define [
 
 			$scope.$apply()
 
-		$scope.applyCoupon = ->
-			pricing.coupon($scope.data.coupon).done()
+		$scope.applyCoupon = (coupon) ->
+			if coupon?
+				$scope.data.coupon = coupon
+			$scope.updating_coupon = true
+			pricing.coupon($scope.data.coupon).done () ->
+				$scope.updating_coupon = false
+				$scope.$apply()
 
 		$scope.applyVatNumber = ->
 			pricing.tax({tax_code: 'digital', vat_number: $scope.data.vat_number}).done()
