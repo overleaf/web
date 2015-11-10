@@ -59,6 +59,7 @@ block content
 											h2 Basic
 										.circle #{translate("free")} 
 										ul.list-unstyled
+											li Only one collaborator
 											li Low CPU priority
 											li 256Mb Memory
 											li 1 minute script timeout
@@ -79,6 +80,8 @@ block content
 											div.exc-tax (Exc. tax)
 										ul.list-unstyled
 											li
+												strong Unlimited Collaborators
+											li
 												strong High CPU priority
 											li
 												strong 2GB Memory
@@ -92,8 +95,6 @@ block content
 												)
 													span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
-											li.row-spaced.small
-												a.js-intercom(href="#") Need more power? Get in touch.
 
 				.row.row-spaced(ng-cloak)
 					p.text-centered Choose the plan that works for you with our 7-day free trial. Cancel at any time, and get a full 30-day refund if you're unhappy for any reason.
