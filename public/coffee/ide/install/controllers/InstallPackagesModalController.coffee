@@ -34,7 +34,7 @@ define [
 				}
 			}
 
-			options.timeout = 1000
+			options.timeout = if item.provider.source == 'custom' then 60 * 30 else 60 * 10
 			options.parseErrors = false
 
 			return options
