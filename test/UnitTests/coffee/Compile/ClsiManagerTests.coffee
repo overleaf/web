@@ -175,6 +175,7 @@ describe "ClsiManager", ->
 							command: undefined
 							env: undefined
 							package: undefined
+							source: undefined
 							timeout : @timeout
 							memory:     @memory
 							processes:  @processes

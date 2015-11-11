@@ -10,7 +10,7 @@ UserGetter = require "../User/UserGetter"
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
-		res.setTimeout(5 * 60 * 1000)
+		res.setTimeout(30 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
 		request_id = req.body.request_id
@@ -27,9 +27,11 @@ module.exports = CompileController =
 				options.command = req.body.command
 			if req.body?.package
 				options.package = req.body.package
+			if req.body?.source
+				options.source = req.body.source
 			if req.body?.env?
 				options.env = req.body.env
-			if req.body?.compiler == 'command' and req.body?.timeout?
+			if req.body?.compiler in ['command', 'package-install'] and req.body?.timeout?
 				options.timeout = req.body.timeout
 			logger.log {options, project_id}, "got compile request"
 			CompileManager.compile project_id, user_id, request_id, options, (error, status, outputFiles, output, limits) ->

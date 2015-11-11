@@ -120,7 +120,7 @@ module.exports = ClsiManager =
 				build: file.build
 		return outputFiles
 
-	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r", "command", "apt-get-install"]
+	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex", "python", "r", "command", "apt-get-install", "package-install"]
 	_buildRequest: (project_id, request_id, options={}, callback = (error, request) ->) ->
 		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
 			return callback(error) if error?
@@ -166,6 +166,7 @@ module.exports = ClsiManager =
 							compiler:   compiler
 							command:    options.command
 							package:    options.package
+							source:    options.source
 							env:        options.env
 							timeout:    options.timeout
 							memory:     options.memory
