@@ -2,21 +2,35 @@ define [
 	"base"
 ], (App) ->
 	App.controller "BinaryFileController", ["$scope", ($scope) ->
+
 		$scope.extension = extension = (file) ->
 			return file.name.split(".").pop()?.toLowerCase()
+
 		$scope.isImage = (file) ->
 			return ['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(file)) > -1
+
 		$scope.isVectorWithPreview = (file) ->
 			# only binary files stored in mongo have previews, not output
 			# file on clsi
-			return ['pdf', 'eps'].indexOf(extension(file)) > -1
+			if $scope.isOutputFile(file)
+				return false
+			return (['pdf', 'eps'].indexOf(extension(file)) > -1)
+
 		$scope.isCsvWithPreview = (file) ->
 			return ['csv'].indexOf(extension(file)) > -1
+
 		$scope.isTextWithPreview = (file) ->
-			return (!$scope.isImage(file) && !$scope.isVectorWithPreview(file) && !$scope.isCsvWithPreview(file))
+			return (
+				!$scope.isImage(file) &&
+				!$scope.isVectorWithPreview(file) &&
+				!$scope.isCsvWithPreview(file)
+			)
 
 		$scope.isSmartPreview = (file) ->
 			return $scope.isCsvWithPreview(file) or $scope.isTextWithPreview(file)
+
+		$scope.isOutputFile = (file) ->
+			file.type == 'output'
 	]
 
 	App.controller "SmartPreviewController", ['$scope', '$http', '$timeout', ($scope, $http, $timeout) ->
