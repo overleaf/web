@@ -87,12 +87,46 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 					.entity
 						.entity-name(
 							ng-click="select()"
+							context-menu
+							data-target="context-menu-{{ entity.id }}"
+							context-menu-container="body"
+							context-menu-disabled="!permissions.write"
 						)
 							//- Just a spacer to align with folders
 							i.fa.fa-fw.toggle
 							i.fa.fa-fw(ng-class="'fa-' + iconTypeFromName(entity.name)")
 
 							span  {{ entity.name }}
+	
+							span.dropdown(
+								dropdown,
+								ng-show="entity.selected",
+								ng-if="permissions.write"
+							)
+								a.dropdown-toggle(href, dropdown-toggle)
+									i.fa.fa-chevron-down
+			
+								ul.dropdown-menu.dropdown-menu-right
+									li
+										a(
+											href
+											ng-click="openDeleteModal()"
+											right-click="openDeleteModal()"
+										) #{translate("delete")}
+
+							div.dropdown.context-menu(
+								id="context-menu-{{ entity.id }}",
+								ng-if="permissions.write"
+							)
+								ul.dropdown-menu
+									li
+										a(
+											href
+											ng-click="openDeleteModal()"
+											right-click="openDeleteModal()"
+										) #{translate("delete")}
+
+
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
