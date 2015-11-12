@@ -1,6 +1,6 @@
 .long-form-features {
 	h2 {
-		margin-top: @line-height-computed / 1.5;
+		margin-top: @line-height-computed / 4;
 	}
 	img {
 		border-radius: 3px;
@@ -9,5 +9,29 @@
 		width: 100%;    
 		height: auto;
 		margin: @line-height-computed / 2 0;
+	}
+	.row {
+		padding-top: @line-height-computed / 2;
+		padding-bottom: @line-height-computed / 2;
+	}
+}
+
+.feature-summary {
+	h3 {
+		margin-top: @line-height-computed;
+	}
+	a.card {
+		color: @gray-dark;
+		h3 {
+			margin-top: @line-height-computed / 2;
+			color: @brand-primary;
+		}
+		i { 
+			color: @brand-primary;
+		}
+		&:hover {
+			text-decoration: none;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+		}
 	}
 }
