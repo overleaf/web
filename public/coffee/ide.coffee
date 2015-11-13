@@ -46,7 +46,7 @@ define [
 	AnalyticsManager
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, $http) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, $http, $injector) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -98,8 +98,23 @@ define [
 		ide.scriptOutputManager = new ScriptOutputManager(ide, $scope)
 		ide.analyticsManager = new AnalyticsManager(ide, $scope)
 
+		_pingCompiler = () ->
+			try
+				commandRunner = $injector.get('commandRunner')
+				options =
+					compiler: 'command',
+					command: ['echo', 'warm-up']
+					timeout: 30
+					parseErrors: false
+				r = commandRunner.run options
+				console.log r
+			catch err
+				console.log ">> could not ping compiler backend"
+				console.log err
+
 		inited = false
 		$scope.$on "project:joined", () ->
+			setTimeout(_pingCompiler, 1000)
 			return if inited
 			inited = true
 			if $scope?.project?.deletedByExternalDataSource
