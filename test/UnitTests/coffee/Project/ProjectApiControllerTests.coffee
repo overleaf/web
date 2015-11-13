@@ -12,6 +12,7 @@ describe 'ProjectApiController', ->
 		@controller = SandboxedModule.require modulePath, requires:
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"./ProjectEntityHandler": @ProjectEntityHandler = {}
+			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 			"settings-sharelatex": @Settings =
 				apis:
 					filestore:
@@ -55,9 +56,15 @@ describe 'ProjectApiController', ->
 			@files = {
 				"/image.png": { _id: @file_id = "file-id-123" }
 			}
+			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArg(1)
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
 			@controller.getProjectContent @req, @res, @next
+			
+		it "should flush the project from the docupdater to mongo", ->
+			@DocumentUpdaterHandler.flushProjectToMongo
+				.calledWith(@project_id)
+				.should.equal true
 		
 		it "should return an array of resources", ->
 			@res.json
