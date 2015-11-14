@@ -15,9 +15,9 @@ is_html = (file) ->
 
 	ends_with('.html') or ends_with('.htm') or ends_with('.xhtml')
 
-module.exports =
+module.exports = FileStoreController =
 
-	getFile : (req, res)->
+	getFile: (req, res)->
 		project_id = req.params.Project_id
 		file_id = req.params.File_id
 		queryString = req.query
@@ -37,3 +37,12 @@ module.exports =
 					res.setHeader('Content-Type', 'text/plain')
 				res.setHeader("Content-Disposition", "attachment; filename=#{file.name}")
 				stream.pipe res
+
+	getFileByProjectAndPath: (req, res)->
+		project_id = req.params.project_id
+		path = req.params.path
+		ProjectLocator.findElementByPath project_id, path, (err, foundFolder) ->
+			if foundFolder?
+                            req.params.File_id = foundFolder._id
+                            req.params.Project_id = project_id
+                            FileStoreController.getFile(req, res)

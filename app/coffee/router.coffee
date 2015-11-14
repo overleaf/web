@@ -239,5 +239,13 @@ module.exports = class Router
 		publicApiRouter.get  '/api/v1/project', AuthenticationController.requireLogin(allow_auth_token: true), ProjectController.getProjectList
 		publicApiRouter.get  '/api/v1/project/:project_id', SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectApiController.getProjectDetails
 		publicApiRouter.get  '/api/v1/project/:project_id/docs', AuthenticationController.requireLogin(allow_auth_token: true), SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectController.getProjectDocs
+		publicApiRouter.get  /^\/api\/v1\/project\/([0-9a-f]+)\/file\/(.+)$/,
+			((req, res, next) ->
+				params =
+					"project_id": req.params[0]
+					"path":       req.params[1]
+				req.params = params
+				next()
+			), AuthenticationController.requireLogin(allow_auth_token: true), SecurityManager.requestCanAccessProject(allow_auth_token: true), FileStoreController.getFileByProjectAndPath
 
 		webRouter.get '*', ErrorController.notFound
