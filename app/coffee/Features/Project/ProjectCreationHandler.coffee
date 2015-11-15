@@ -30,7 +30,7 @@ module.exports =
 		self = @
 		@createBlankProject owner_id, projectName, (error, project)->
 			return callback(error) if error?
-			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
+			self._buildTemplate "mainbasic.tex", owner_id, projectName.replace('&', '\\&'), (error, docLines)->
 				return callback(error) if error?
 				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
 					return callback(error) if error?
