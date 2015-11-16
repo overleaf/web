@@ -23,6 +23,9 @@ define [
 			cell = jupyterRunner.findOrCreateCell(request_id, engine)
 			
 			jupyterRunner.stopIniting()
+			
+			if message.header.msg_type == "complete_reply"
+				jupyterRunner.COMPLETE_CALLBACKS[message.request_id]?(message.content)
 
 			if message.header.msg_type == "shutdown_reply"
 				cell.restarted = true
@@ -206,6 +209,48 @@ define [
 						@stopIniting()
 						@status.error = true
 						@status.running = false
+			
+			infoRequest: (code, engine) ->
+				request_id = Math.random().toString().slice(2)
+				url = "/project/#{ide.$scope.project_id}/request"
+				options = {
+					request_id: "#{engine}:#{request_id}"
+					msg_type: "object_info_request"
+					content: {
+						oname: code
+						detail_level: 0
+					}
+					engine: engine
+					_csrf: window.csrfToken
+				}
+				$http
+					.post(url, options)
+					.success (data) =>
+						console.log "completeRequest success", data
+					.error () =>
+						console.error "completeRequest error"
+			
+			COMPLETE_CALLBACKS: {}
+			completeRequest: (code, pos, engine, callback) ->
+				request_id = Math.random().toString().slice(2)
+				@COMPLETE_CALLBACKS["#{engine}:#{request_id}"] = callback
+				url = "/project/#{ide.$scope.project_id}/request"
+				options = {
+					request_id: "#{engine}:#{request_id}"
+					msg_type: "complete_request"
+					content: {
+						line: code
+						cursor_pos: pos
+					}
+					engine: engine
+					_csrf: window.csrfToken
+				}
+				$http
+					.post(url, options)
+					.success (data) =>
+						console.log "completeRequest success", data
+					.error () =>
+						console.error "completeRequest error"
 			
 			sendInput: (value, engine) ->
 				url = "/project/#{ide.$scope.project_id}/reply"

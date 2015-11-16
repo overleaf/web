@@ -5,6 +5,8 @@ define [
 		$scope.status = jupyterRunner.status
 		$scope.cells = jupyterRunner.CELL_LIST
 		ide.$scope.engine = 'python'
+		
+		window.jupyterRunner = jupyterRunner
 
 		$scope.determineDefaultEngine = () ->
 			# check all document extensions in the project,

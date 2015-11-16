@@ -64,32 +64,40 @@ define [], () ->
 				return false
 
 	class SuggestionManager
+		completionTimeout: null
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			doc = session.getValue()
-			parser = new Parser(doc)
-			commands = parser.parse()
-
-			completions = []
-			for command in commands
-				caption = "\\#{command[0]}"
-				snippet = caption
-				i = 1
-				_.times command[1], () ->
-					snippet += "[${#{i}}]"
-					caption += "[]"
-					i++
-				_.times command[2], () ->
-					snippet += "{${#{i}}}"
-					caption += "{}"
-					i++
-				unless caption == prefix
-					completions.push {
-						caption: caption
-						snippet: snippet
-						meta: "cmd"
-					}
-
-			callback null, completions
+			line = session.getLine(pos.row).slice(0, pos.column)
+			console.log "getCompletions", pos, prefix, line
+			if @completionTimeout?
+				clearTimeout(@completionTimeout)
+			@completionTimeout = setTimeout () =>
+				jupyterRunner.completeRequest line, pos.column, "python", (results) ->
+					completions = []
+					for match in results.matches or []
+						console.log "CONSIDERING", match
+						# Need to figure out how to properly complete
+						#    plt.show(np.s|)
+						# where | is the cursor.
+						# In this case, prefix is 's', line is 'plt.show(np.s'
+						# and the kernel returns 'np.sin', etc. Ace expects
+						# a completion of the 'prefix', so we need to return 'sin'.
+						# It's not clear how to determine that the 'np.' is what we need
+						# to strip.
+						if match.indexOf(line) == 0
+							completion = prefix + match.slice(line.length)
+							console.log "MATCHES START", completion
+							completions.push {
+								caption: completion
+								snippet: completion
+								meta: "cmd"
+							}
+						else
+							#
+					
+					@completionTimeout = null
+					console.log "completions", completions
+					callback null, completions
+			, 500
 
 		loadCommandsFromDoc: (doc) ->
 			parser = new Parser(doc)
