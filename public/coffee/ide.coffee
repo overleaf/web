@@ -106,15 +106,14 @@ define [
 					command: ['echo', 'warm-up']
 					timeout: 30
 					parseErrors: false
-				r = commandRunner.run options
-				console.log r
+				commandRunner.run options
 			catch err
-				console.log ">> could not ping compiler backend"
+				console.log ">> Error: could not ping compiler backend"
 				console.log err
 
 		inited = false
 		$scope.$on "project:joined", () ->
-			setTimeout(_pingCompiler, 1000)
+			setTimeout(_pingCompiler, 200)
 			return if inited
 			inited = true
 			if $scope?.project?.deletedByExternalDataSource
