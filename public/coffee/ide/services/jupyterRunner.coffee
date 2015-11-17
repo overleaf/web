@@ -7,7 +7,18 @@ define [
 		# Ordered list of preferred formats
 		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
-		
+
+		_is_help = (cell) ->
+			is_help_request = cell.input.length == 1 and cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+			is_help_response = cell.output.length == 1 and cell.output[0]?.content?.text?.match(/^Help on.*/)
+			is_help_request and is_help_response
+
+		_pretty_help = (cell) ->
+			input = cell.input[0]
+			output = cell.output[0]
+
+			"insert help here"
+
 		ide.socket.on "clsiOutput", (message) ->
 			if !message.content? and !message.header? and !message.header.msg_type?
 				console.warn "Malformed message: expected content, header and header.msg_type", message
@@ -142,6 +153,10 @@ define [
 
 			if message.header.msg_type == "system_status" and message.content.status == "killed_by_user"
 				cell.killed_by_user = true
+
+			if _is_help(cell)
+				cell._is_help = true
+				cell._help = _pretty_help(cell)
 
 			ide.$scope.$apply()
 		

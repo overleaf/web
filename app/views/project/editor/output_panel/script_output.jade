@@ -59,9 +59,14 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						.chunk(ng-repeat="input in cell.input")
 							span.text-input.text-monospace {{ input.content.code }}
 				div.output(ng-if="cell.output.length > 0")
+
 					.execution-count
 						| Out[{{cell.execution_count}}]:
 					.cell-content
+
+						div(ng-if="cell._is_help")
+							div(ng-bind-html="cell._help")
+
 						.chunk(ng-repeat="msg in cell.output")
 							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
 							span(ng-if="msg.header.msg_type == 'execute_result'")
