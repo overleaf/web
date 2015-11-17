@@ -85,7 +85,7 @@ module.exports = SubscriptionController =
 			return next(error) if error?
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
 				groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
-				if subscription?.customAccount or subscription.freeTrial?.expiresAt?
+				if subscription?.customAccount or subscription?.freeTrial?.expiresAt?
 					logger.log user: user, "redirecting to custom account"
 					res.redirect "/user/subscription/custom_account"
 				else if groupLicenceInviteUrl? and !hasSubOrIsGroupMember
