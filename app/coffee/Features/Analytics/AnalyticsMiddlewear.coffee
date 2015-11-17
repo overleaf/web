@@ -29,6 +29,7 @@ module.exports = AnalyticsMiddlewear =
 					institution: user.institution
 					use_case: user.use_case
 					plan_code: subscription?.planCode
+					free_trail_expires_at: subscription.freeTrial?.expiresAt 
 				}
 				next()
 				
