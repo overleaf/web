@@ -9,6 +9,8 @@ EmailHandler = require("../Email/EmailHandler")
 Events = require "../../infrastructure/Events"
 
 module.exports =
+	startFreeTrial: (user_id, planCode, expiresAt, callback) ->
+		SubscriptionUpdater.startFreeTrial user_id, planCode, expiresAt, callback
 
 	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
 		self = @

@@ -38,6 +38,7 @@ UserSchema = new Schema
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 							compileMemory: { type:Number,  default: Settings.defaultFeatures.compileMemory }
 							compileCpuShares: { type:Number,  default: Settings.defaultFeatures.compileCpuShares }
+							groups: { type:Boolean, default: Settings.defaultFeatures.groups }
 						}
 	featureSwitches	  : {
 		pdfng: { type: Boolean }

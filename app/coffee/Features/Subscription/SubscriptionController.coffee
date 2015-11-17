@@ -137,10 +137,21 @@ module.exports = SubscriptionController =
 							successURL : "#{Settings.siteUrl}/user/subscription/update"
 							user       :
 								id : user.id
-
-	createSubscription: (req, res, next)->
+	
+	startFreeTrial: (req, res, next) ->
+		{planCode,redir} = req.body
+		if planCode not in Settings.freeTrialPlanCodes
+			return res.sendStatus(400).end()
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return callback(error) if error?
+			expiresAt = new Date(Date.now() + Settings.freeTrialLength)
+			SubscriptionHandler.startFreeTrial user._id, planCode, expiresAt, (error) ->
+				return next(error) if error?
+				res.redirect redir or "/"
+	
+	createSubscription: (req, res, next)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			return next(error) if error?
 			recurly_token_id = req.body.recurly_token_id
 			subscriptionDetails = req.body.subscriptionDetails
 			logger.log recurly_token_id: recurly_token_id, user_id:user._id, subscriptionDetails:subscriptionDetails, "creating subscription"
