@@ -42,6 +42,7 @@ AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 PreviewController = require('./Features/Previews/PreviewController')
 PackageIndexController = require('./Features/PackageIndex/PackageIndexController')
 ContactRouter = require("./Features/Contacts/ContactRouter")
+SubscriptionMiddlewear = require("./Features/Subscription/SubscriptionMiddlewear")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -95,7 +96,7 @@ module.exports = class Router
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
 		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
-		webRouter.get  '/project', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, ProjectController.projectListPage
+		webRouter.get  '/project', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, SubscriptionMiddlewear.loadFreeTrialInfo, ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
 		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({

@@ -11,6 +11,27 @@ nav.navbar.navbar-default
 		.navbar-collapse.collapse(collapse="navCollapsed")
 
 			ul.nav.navbar-nav.navbar-right
+				-if(freeTrial && freeTrial.daysRemaining)
+					li.subdued
+						a(
+							href,
+							popover-template="'freeTrialPopoverTemplate'",
+							popover-placement="bottom",
+							popover-append-to-body="true"
+						)
+							if freeTrial.daysRemaining >= 0
+								span.text-success Trial expires in #{freeTrial.daysRemaining} days
+							else
+								span.text-danger Trial Expired!
+						script(type="text/ng-template", id="freeTrialPopoverTemplate")
+							.text-center
+								if freeTrial.daysRemaining >= 0
+									p Your free trial of the teaching license expires in #{freeTrial.daysRemaining} days.
+								else
+									p Your free trial of the teaching license has expired.
+								p
+									a.btn.btn-primary.js-intercom(href, intercom) Contact us to upgrade
+
 				if (session && session.user && session.user.isAdmin)
 					li.dropdown(class="subdued", dropdown)
 						a.dropdown-toggle(href, dropdown-toggle)

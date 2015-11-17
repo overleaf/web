@@ -24,6 +24,7 @@ define [
 	"directives/onEnter"
 	"directives/selectAll"
 	"directives/maxHeight"
+	"directives/intercom"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
