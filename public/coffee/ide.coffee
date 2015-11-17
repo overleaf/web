@@ -46,7 +46,7 @@ define [
 	AnalyticsManager
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, $http) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, $http, $injector) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -98,10 +98,26 @@ define [
 		ide.scriptOutputManager = new ScriptOutputManager(ide, $scope)
 		ide.analyticsManager = new AnalyticsManager(ide, $scope)
 
+		_pingCompiler = () ->
+			try
+				commandRunner = $injector.get('commandRunner')
+				options =
+					compiler: 'command',
+					command: ['echo', 'warm-up']
+					timeout: 30
+					parseErrors: false
+				commandRunner.run options
+			catch err
+				console.log ">> Error: could not ping compiler backend"
+				console.log err
+
 		inited = false
 		$scope.$on "project:joined", () ->
 			return if inited
 			inited = true
+			# FIXME: de-activate the _pingCompiler feature for now,
+			# until we're sure there are no concurrency issues.
+			# setTimeout(_pingCompiler, 200)
 			if $scope?.project?.deletedByExternalDataSource
 				ide.showGenericMessageModal("Project Renamed or Deleted", """
 					This project has either been renamed or deleted by an external data source such as Dropbox.
