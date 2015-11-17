@@ -31,10 +31,10 @@ define [
 			help.type = first_line.match(new RegExp("on (?:built-in | )(.*) #{help.subject} in"))[1]
 
 			if help.type in ['function', 'built-in function']
-				help.body = output_lines.slice(1)
+				help.body = ansiToSafeHtml(output_lines.slice(2).join('\n'))
 
 			console.log help
-			"insert help here"
+			return help
 
 		ide.socket.on "clsiOutput", (message) ->
 			if !message.content? and !message.header? and !message.header.msg_type?

@@ -65,7 +65,10 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					.cell-content
 
 						div(ng-if="cell._is_help")
-							div(ng-bind-html="cell._help")
+							div.pretty-help
+								h2 {{ cell._help.subject }}
+								div(ng-bind-html="cell._help.body")
+									
 
 						.chunk(ng-repeat="msg in cell.output")
 							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
