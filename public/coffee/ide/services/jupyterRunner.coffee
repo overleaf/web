@@ -28,7 +28,10 @@ define [
 			help = {}
 			help.subject = input.content.code.match(/^help\((.*)\)/)[1]
 			help.module = first_line.match(/in module (.*):$/)[1]
-			help.type = first_line.match(new RegExp("on (.*) #{help.subject} in"))[1]
+			help.type = first_line.match(new RegExp("on (?:built-in | )(.*) #{help.subject} in"))[1]
+
+			if help.type in ['function', 'built-in function']
+				help.body = output_lines.slice(1)
 
 			console.log help
 			"insert help here"
