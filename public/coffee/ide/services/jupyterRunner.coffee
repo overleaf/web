@@ -8,15 +8,29 @@ define [
 		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 
+		_handle_help = (cell) ->
+			if !cell._is_help and _is_help(cell)
+				cell._is_help = true
+				cell._help = _pretty_help(cell)
+
 		_is_help = (cell) ->
 			is_help_request = cell.input.length == 1 and cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
 			is_help_response = cell.output.length == 1 and cell.output[0]?.content?.text?.match(/^Help on.*/)
 			is_help_request and is_help_response
 
 		_pretty_help = (cell) ->
+			console.log cell
 			input = cell.input[0]
 			output = cell.output[0]
+			output_lines = output.content.text.split('\n')
+			first_line = output_lines[0]
 
+			help = {}
+			help.subject = input.content.code.match(/^help\((.*)\)/)[1]
+			help.module = first_line.match(/in module (.*):$/)[1]
+			help.type = first_line.match(new RegExp("on (.*) #{help.subject} in"))[1]
+
+			console.log help
 			"insert help here"
 
 		ide.socket.on "clsiOutput", (message) ->
@@ -30,9 +44,9 @@ define [
 			if !request_id? or !engine?
 				# The message isn't a jupyter message, likely from commandRunner instead.
 				return
-			
+
 			cell = jupyterRunner.findOrCreateCell(request_id, engine)
-			
+
 			jupyterRunner.stopIniting()
 
 			if message.header.msg_type == "shutdown_reply"
@@ -44,14 +58,14 @@ define [
 						cell.killed = true
 				else
 					cell.restart_intentional = true
-			
+
 			if message.header.msg_type == "execute_input"
 				cell.input.push message
-			
+
 			if message.header.msg_type in ["execute_input", "execute_reply", "execute_result"]
 				if message.content.execution_count?
 					cell.execution_count = message.content.execution_count
-					
+
 					# If the session has reset, but we didn't do it or haven't been told
 					# about it, then it's likely that the server crashed/reset.
 					# Do this before we create the cell, so we can see if the previous
@@ -61,14 +75,14 @@ define [
 						!jupyterRunner.hasJustRestarted(engine) # Ignore if the previous message was a shutdown request, also expected
 							# We've reset for some reason
 							cell.restarted = true
-			
+
 			if message.header.msg_type in ["error", "stream", "display_data", "execute_result", "input_request"]
 				if not cell.restart_intentional # suppress any errors from the restart
 					cell.output.push message
-			
+
 			if message.header.msg_type == "stream" and message.content.text?
 				message.content.text_escaped = ansiToSafeHtml(message.content.text)
-			
+
 			if message.header.msg_type == "error"
 				if message.content.traceback?
 					message.content.traceback_escaped = message.content.traceback.map ansiToSafeHtml
@@ -111,7 +125,7 @@ define [
 					if extension in ["png", "jpg", "jpeg", "svg", "gif"]
 						message.content.file_type = "image"
 					cell.output.push message
-			
+
 			if message.header.msg_type == "display_data" and message.content.data?
 				if message.content.data['text/html']?
 					message.content.data['text/html_escaped'] = $sce.trustAsHtml(message.content.data['text/html'])
@@ -119,12 +133,12 @@ define [
 					message.content.data['image/svg+xml'] = $sce.trustAsHtml(message.content.data['image/svg+xml'])
 				if message.content.data['application/pdf']?
 					message.content.data['application/pdf+url'] = $sce.trustAsResourceUrl("data:application/pdf;base64," + message.content.data['application/pdf'])
-				
+
 				for type in ['image/png', 'image/jpeg', 'application/pdf']
 					if message.content.data[type]?
 						message.content.data["#{type}+url"] =
 							$sce.trustAsResourceUrl("data:#{type};base64,#{message.content.data[type]}")
-					
+
 				preferred_format = localStorage("preferred_format")
 				if preferred_format? and preferred_format in FORMATS and message.content.data[preferred_format]?
 					message.content.format = preferred_format
@@ -134,32 +148,30 @@ define [
 						if message.content.data[format]?
 							message.content.format = format
 							break
-				
+
 				if message.content.format in IMAGE_FORMATS
 					message.content.image = true
 					message.content.available_formats = _.intersection(Object.keys(message.content.data), IMAGE_FORMATS)
-				
+
 			if message.header.msg_type == "status"
 				if message.content.execution_state == "busy"
 					jupyterRunner.status.running = true
 				else if message.content.execution_state == "idle"
 					jupyterRunner.status.running = false
-			
+
 			if message.header.msg_type == "system_status" and message.content.status == "exported"
 				cell.exported = true
-		
+
 			if message.header.msg_type == "system_status" and message.content.status == "timed_out"
 				cell.timed_out = true
 
 			if message.header.msg_type == "system_status" and message.content.status == "killed_by_user"
 				cell.killed_by_user = true
 
-			if _is_help(cell)
-				cell._is_help = true
-				cell._help = _pretty_help(cell)
+			_handle_help(cell)
 
 			ide.$scope.$apply()
-		
+
 		ansiToSafeHtml = (input) ->
 			return "" if !input?
 			input = input
@@ -173,26 +185,26 @@ define [
 				.replace(/\s+Traceback/," Traceback")
 				.replace(/\/home\/user\/project\/(\S+)/g, '$1')
 			return $sce.trustAsHtml(ansi2html.toHtml(input))
-		
+
 		jupyterRunner =
 			CELL_LIST: {}
 			CELLS: {}
-			
+
 			status: {
 				running: false,
 				stopping: false,
 				error: false,
 				initing: false
 			}
-			
+
 			current_request_id: null
-		
+
 			executeRequest: (code, engine) ->
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"
 				@status.running = true
 				@status.error = false
-				
+
 				@_initingTimeout = $timeout () =>
 					@status.initing = true
 				, 2000
@@ -221,7 +233,7 @@ define [
 						@stopIniting()
 						@status.error = true
 						@status.running = false
-			
+
 			sendInput: (value, engine) ->
 				url = "/project/#{ide.$scope.project_id}/reply"
 				options = {
@@ -242,7 +254,7 @@ define [
 					$timeout.cancel(@_initingTimeout)
 					delete @_initingTimeout
 				@status.initing = false
-			
+
 			findOrCreateCell: (request_id, engine) ->
 				if jupyterRunner.CELLS[request_id]?
 					return jupyterRunner.CELLS[request_id]
@@ -257,25 +269,25 @@ define [
 					jupyterRunner.CELL_LIST[engine] ||= []
 					jupyterRunner.CELL_LIST[engine].push cell
 					return cell
-			
+
 			cellCount: (engine) ->
 				return jupyterRunner.CELL_LIST[engine]?.length or 0
-			
+
 			clearCells: () ->
 				for request_id, cell of jupyterRunner.CELLS
 					if request_id != jupyterRunner.current_request_id
 						jupyterRunner.CELLS[request_id] = null
-				
+
 				for engine, cell_list of jupyterRunner.CELL_LIST
 					jupyterRunner.CELL_LIST[engine] = []
-			
+
 			hasJustRestarted: (engine) ->
 				cells = jupyterRunner.CELL_LIST[engine] or []
 				return false if cells.length < 2
 				last_cell = cells[cells.length - 1]
 				second_last_cell = cells[cells.length - 2]
 				return !!last_cell.restarted or !!second_last_cell.restarted
-			
+
 			stop: () ->
 				request_id = @current_request_id
 				return if !request_id?
@@ -284,7 +296,7 @@ define [
 					.post(url, {
 						_csrf: window.csrfToken
 					})
-			
+
 			shutdown: (engine) ->
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"
