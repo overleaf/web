@@ -52,7 +52,6 @@ define [
 			return help
 
 		_pretty_help = (cell) ->
-			console.log cell
 			input = cell.input[0]
 			output = cell.output[0]
 			output_lines = output.content.text.split('\n')
@@ -63,7 +62,9 @@ define [
 			help.module = first_line.match(/in module (.*):$/)[1]
 			help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
 
-			help.body = ansiToSafeHtml(output_lines.slice(2).join('\n'))
+			help.body = ansiToSafeHtml(
+				output_lines.slice(2).map((line) -> line.replace(/^ \|/, '  ')).join('\n')
+			)
 
 			console.log help
 			return help

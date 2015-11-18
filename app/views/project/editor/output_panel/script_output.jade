@@ -62,14 +62,15 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 
 					.execution-count
 						| Out[{{cell.execution_count}}]:
-					.cell-content
+	
+					// formatted help output
+					.cell-content(ng-if="cell._is_help")
+						div.chunk.pretty-help(style="white-space: pre")
+							div.help-subject {{ cell._help.subject }}
+							div.help-body(ng-bind-html="cell._help.body")
 
-						div(ng-if="cell._is_help")
-							div.pretty-help
-								h2 {{ cell._help.subject }}
-								div(ng-bind-html="cell._help.body")
-									
-
+					// normal output
+					.cell-content(ng-if="!cell._is_help")
 						.chunk(ng-repeat="msg in cell.output")
 							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
 							span(ng-if="msg.header.msg_type == 'execute_result'")
