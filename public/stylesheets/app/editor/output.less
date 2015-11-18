@@ -209,12 +209,16 @@
 		.cell-content {
 			margin-left: @execution-count-width + @line-height-computed / 2;
 			position: relative;
-			.pretty-help {
+
+			&.pretty-help {
+				.card {
+					border-top: 1px solid #efefef;
+				}
 				.help-subject {
 					font-weight: bold;
 				}
 				.help-body {
-
+					white-space: pre;
 				}
 			}
 		}

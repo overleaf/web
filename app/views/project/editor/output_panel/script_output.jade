@@ -64,10 +64,10 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						| Out[{{cell.execution_count}}]:
 	
 					// formatted help output
-					.cell-content(ng-if="cell._is_help")
-						div.chunk.pretty-help(style="white-space: pre")
-							div.help-subject {{ cell._help.subject }}
-							div.help-body(ng-bind-html="cell._help.body")
+					.cell-content.pretty-help
+						.text-output.text-monospace.card.card-thin(ng-if="cell._is_help")
+								div.help-subject {{ cell._help.subject }}
+								div.help-body(ng-bind-html="cell._help.body")
 
 					// normal output
 					.cell-content(ng-if="!cell._is_help")
