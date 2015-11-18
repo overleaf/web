@@ -13,10 +13,43 @@ define [
 				cell._is_help = true
 				cell._help = _pretty_help(cell)
 
+			if !cell._is_help and _is_introspection_help(cell)
+				cell._is_help = true
+				cell._help = _pretty_introspection_help(cell)
+
+		_is_introspection_help = (cell) ->
+			is_introspection_request = (
+				cell.input.length == 1 and
+				cell.input[0]?.content?.code?.trim().match(/^(.*)\?$/)
+			)
+			is_introspection_response = (
+				cell.output.length == 1 and
+				cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
+			)
+			is_introspection_request and is_introspection_response
+
 		_is_help = (cell) ->
-			is_help_request = cell.input.length == 1 and cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
-			is_help_response = cell.output.length == 1 and cell.output[0]?.content?.text?.match(/^Help on.*/)
+			is_help_request = (
+				cell.input.length == 1 and
+				cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+			)
+			is_help_response = (
+				cell.output.length == 1 and
+				cell.output[0]?.content?.text?.match(/^Help on.*/)
+			)
 			is_help_request and is_help_response
+
+		_pretty_introspection_help = (cell) ->
+			input = cell.input[0]
+			output = cell.output[0]
+
+			help = {}
+			help.subject = input.content.code.trim().match(/^(.*)\?$/)[1]
+			help.module = null
+			help.type = null
+			help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
+
+			return help
 
 		_pretty_help = (cell) ->
 			console.log cell
@@ -127,6 +160,12 @@ define [
 						extension = parts[parts.length - 1].toLowerCase()
 					if extension in ["png", "jpg", "jpeg", "svg", "gif"]
 						message.content.file_type = "image"
+					cell.output.push message
+
+			if message.header.msg_type in ["execute_reply"]
+				console.log ">> it's here"
+				console.log message
+				if _.some(message?.content?.payload, (x) -> x?.data?['text/plain'])
 					cell.output.push message
 
 			if message.header.msg_type == "display_data" and message.content.data?
