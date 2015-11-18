@@ -63,7 +63,9 @@ define [
 			help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
 
 			help.body = ansiToSafeHtml(
-				output_lines.slice(2).map((line) -> line.replace(/^ \|/, '  ')).join('\n')
+				output_lines.slice(2)
+					.map((line) -> line.replace(/^ \|/, '  ').replace(new RegExp("    ", 'g'), "  "))
+					.join('\n')
 			)
 
 			console.log help
