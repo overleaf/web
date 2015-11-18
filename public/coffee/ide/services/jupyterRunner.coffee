@@ -9,13 +9,13 @@ define [
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 
 		_handle_help = (cell) ->
-			if !cell._is_help and _is_help(cell)
-				cell._is_help = true
-				cell._help = _pretty_help(cell)
-
-			if !cell._is_help and _is_introspection_help(cell)
-				cell._is_help = true
-				cell._help = _pretty_introspection_help(cell)
+			if !cell._is_help
+				if _is_help(cell)
+					cell._is_help = true
+					cell._help = _pretty_help(cell)
+				if _is_introspection_help(cell)
+					cell._is_help = true
+					cell._help = _pretty_introspection_help(cell)
 
 		_is_introspection_help = (cell) ->
 			is_introspection_request = (
@@ -61,10 +61,9 @@ define [
 			help = {}
 			help.subject = input.content.code.match(/^help\((.*)\)/)[1]
 			help.module = first_line.match(/in module (.*):$/)[1]
-			help.type = first_line.match(new RegExp("on (?:built-in | )(.*) #{help.subject} in"))[1]
+			help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
 
-			if help.type in ['function', 'built-in function']
-				help.body = ansiToSafeHtml(output_lines.slice(2).join('\n'))
+			help.body = ansiToSafeHtml(output_lines.slice(2).join('\n'))
 
 			console.log help
 			return help
