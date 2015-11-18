@@ -59,8 +59,8 @@ define [
 
 			help = {}
 			help.subject = input.content.code.match(/^help\((.*)\)/)[1]
-			help.module = first_line.match(/in module (.*):$/)[1]
-			help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
+			# help.module = first_line.match(/in module (.*):$/)[1]
+			# help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
 
 			help.body = ansiToSafeHtml(
 				output_lines.slice(2)
@@ -68,7 +68,6 @@ define [
 					.join('\n')
 			)
 
-			console.log help
 			return help
 
 		ide.socket.on "clsiOutput", (message) ->
@@ -165,8 +164,6 @@ define [
 					cell.output.push message
 
 			if message.header.msg_type in ["execute_reply"]
-				console.log ">> it's here"
-				console.log message
 				if _.some(message?.content?.payload, (x) -> x?.data?['text/plain'])
 					cell.output.push message
 
