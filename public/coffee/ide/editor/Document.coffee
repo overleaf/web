@@ -124,12 +124,16 @@ define [
 			pendingOp = @getPendingOp()
 			if !inflightOp? and !pendingOp?
 				# there's nothing going on
+				console.log "SAVED: YES (nothing going on)"
 				saved = true
 			else if inflightOp == @oldInflightOp
+				console.log "SAVED: NO (stale inflight op)"
 				saved = false
 			else if pendingOp?
+				console.log "SAVED: NO (pending ops)"
 				saved = false
 			else
+				console.log "SAVED: YES (active inflight op)", inflightOp, @oldInflightOp
 				saved = true
 
 			@oldInflightOp = inflightOp

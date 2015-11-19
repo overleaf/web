@@ -135,13 +135,16 @@ define [
 			# If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
 			# gone unrecoverably wrong (the op will have been retried multiple times)
 			return if @_timeoutTimer?
+			console.log "STARTING TIMER"
 			@_timeoutTimer = setTimeout () =>
+				console.log "FATAL TIMEOUT"
 				@_clearFatalTimeoutTimer()
 				@trigger "op:timeout", update
 			, @FATAL_OP_TIMEOUT
 		
 		_clearFatalTimeoutTimer: () ->
 			return if !@_timeoutTimer?
+			console.log "CLEARING TIMER"
 			clearTimeout @_timeoutTimer
 			@_timeoutTimer = null
 
