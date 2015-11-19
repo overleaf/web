@@ -36,7 +36,7 @@ define [
 			if cell.engine == 'python'
 				is_help_request = (
 					cell.input.length == 1 and
-					cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+					cell.input[0]?.content?.code?.trim().match(/^help\((.*)\s*\)/)
 				)
 				is_help_response = (
 					cell.output.length == 1 and
@@ -45,7 +45,7 @@ define [
 			if cell.engine == 'r'
 				is_help_request = (
 					cell.input.length == 1 and
-					cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+					cell.input[0]?.content?.code?.trim().match(/^help\((.*)\s*\)/)
 				)
 				is_help_response = (
 					cell.output.length == 1 and

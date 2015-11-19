@@ -67,7 +67,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					.cell-content.pretty-help(ng-if="cell._help")
 						.text-output.text-monospace.card.card-thin
 								div.help-subject {{ cell._help.subject }}
-								div.help-body(ng-bind-html="cell._help.body")
+								div.help-body(ng-bind-html="cell._help.body", ng-class="{normalspace: cell.engine == 'r'}")
 
 					// normal output
 					.cell-content(ng-if="!cell._help")
