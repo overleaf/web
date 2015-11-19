@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
-	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce, localStorage) ->
+	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce, localStorage, $sanitize) ->
 		# Ordered list of preferred formats
 		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain", "text/html"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
@@ -76,7 +76,7 @@ define [
 
 			help = {}
 			help.subject = input.content.code.trim().match(/^help\((.*)\)/)[1]
-			help.body = output?.content?.data?['text/html']
+			help.body = $sanitize(output?.content?.data?['text/html'])
 
 			return help
 
@@ -87,7 +87,7 @@ define [
 
 			help = {}
 			help.subject = input.content.code.trim().match(/^\?(.*)/)[1]
-			help.body = output?.content?.data?['text/html']
+			help.body = $sanitize(output?.content?.data?['text/html'])
 
 			return help
 
