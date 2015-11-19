@@ -383,7 +383,9 @@ define [
 							help.subject = help_match[1]
 						if question_match
 							help.subject = question_match[1]
-						help.body = $sanitize(output?.content?.data?['text/html'])
+						content = $('<div />', html: output?.content?.data?['text/html'])
+						content.find('a').attr('target', '_blank')
+						help.body = $sanitize(content.html())
 						return help
 
 		return jupyterRunner
