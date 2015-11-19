@@ -5,14 +5,17 @@ define [
 	# from within other parts of the angular app.
 	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce, localStorage) ->
 		# Ordered list of preferred formats
-		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain"]
+		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain", "text/html"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 
 		_handle_help = (cell) ->
-			engine = ide.$scope.engine
+			console.log cell
 			if !cell._help
 				if _is_help(cell)
-					cell._help = _pretty_help(cell)
+					if cell.engine == 'python'
+						cell._help = _pretty_help(cell)
+					if cell.engine == 'r'
+						cell._help = _pretty_r_help(cell)
 				if _is_introspection_help(cell)
 					cell._help = _pretty_introspection_help(cell)
 
@@ -28,14 +31,28 @@ define [
 			is_introspection_request and is_introspection_response
 
 		_is_help = (cell) ->
-			is_help_request = (
-				cell.input.length == 1 and
-				cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
-			)
-			is_help_response = (
-				cell.output.length == 1 and
-				cell.output[0]?.content?.text?.match(/^Help on.*/)
-			)
+			is_help_request = false
+			is_help_response = false
+			if cell.engine == 'python'
+				is_help_request = (
+					cell.input.length == 1 and
+					cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+				)
+				is_help_response = (
+					cell.output.length == 1 and
+					cell.output[0]?.content?.text?.match(/^Help on.*/)
+				)
+			if cell.engine == 'r'
+				is_help_request = (
+					cell.input.length == 1 and
+					cell.input[0]?.content?.code?.match(/^help\((.*)\s*\)/)
+				)
+				is_help_response = (
+					cell.output.length == 1 and
+					cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
+				)
+				console.log ">> r #{is_help_request}, #{is_help_response}"
+
 			is_help_request and is_help_response
 
 		_pretty_introspection_help = (cell) ->
@@ -47,6 +64,17 @@ define [
 			help.module = null
 			help.type = null
 			help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
+
+			return help
+
+		_pretty_r_help = (cell) ->
+			console.log ">> pretty r"
+			input = cell.input[0]
+			output = cell.output[0]
+
+			help = {}
+			help.subject = input.content.code.trim().match(/^help\((.*)\)/)[1]
+			help.body = output?.content?.data?['text/html']
 
 			return help
 
