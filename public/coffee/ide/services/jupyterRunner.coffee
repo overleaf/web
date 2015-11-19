@@ -9,12 +9,11 @@ define [
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
 
 		_handle_help = (cell) ->
-			if !cell._is_help
+			engine = ide.$scope.engine
+			if !cell._help
 				if _is_help(cell)
-					cell._is_help = true
 					cell._help = _pretty_help(cell)
 				if _is_introspection_help(cell)
-					cell._is_help = true
 					cell._help = _pretty_introspection_help(cell)
 
 		_is_introspection_help = (cell) ->
