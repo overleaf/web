@@ -1,128 +1,13 @@
 define [
 	"base"
 ], (App) ->
+
 	# We create and provide this as service so that we can access the global ide
 	# from within other parts of the angular app.
 	App.factory "jupyterRunner", ($http, $timeout, ide, ansi2html, $sce, localStorage, $sanitize) ->
 		# Ordered list of preferred formats
 		FORMATS = ["text/html_escaped", "image/png", "image/svg+xml", "image/jpeg", "application/pdf", "text/plain", "text/html"]
 		IMAGE_FORMATS = ["image/png", "image/svg+xml", "image/jpeg", "application/pdf"]
-
-		_handle_help = (cell) ->
-			console.log cell
-			if !cell._help
-				if cell.engine == 'python'
-					if _is_help(cell)
-						cell._help = _pretty_help(cell)
-					if _is_introspection_help(cell)
-						cell._help = _pretty_introspection_help(cell)
-				if cell.engine == 'r'
-					if _is_help(cell)
-						cell._help = _pretty_r_help(cell)
-					if _is_r_introspection_help(cell)
-						cell._help = _pretty_r_introspection_help(cell)
-
-		_is_introspection_help = (cell) ->
-			is_introspection_request = (
-				cell.input.length == 1 and
-				cell.input[0]?.content?.code?.trim().match(/^(.*)\?$/)
-			)
-			is_introspection_response = (
-				cell.output.length == 1 and
-				cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
-			)
-			is_introspection_request and is_introspection_response
-
-		_is_r_introspection_help = (cell) ->
-			is_introspection_request = (
-				cell.input.length == 1 and
-				cell.input[0]?.content?.code?.trim().match(/^\?(.*)$/)
-			)
-			is_introspection_response = (
-				cell.output.length == 1 and
-					cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
-			)
-			is_introspection_request and is_introspection_response
-
-		_is_help = (cell) ->
-			is_help_request = false
-			is_help_response = false
-			if cell.engine == 'python'
-				is_help_request = (
-					cell.input.length == 1 and
-					cell.input[0]?.content?.code?.trim().match(/^help\((.*)\s*\)/)
-				)
-				is_help_response = (
-					cell.output.length == 1 and
-					cell.output[0]?.content?.text?.match(/^Help on.*/)
-				)
-			if cell.engine == 'r'
-				is_help_request = (
-					cell.input.length == 1 and
-					cell.input[0]?.content?.code?.trim().match(/^help\((.*)\s*\)/)
-				)
-				is_help_response = (
-					cell.output.length == 1 and
-					cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
-				)
-				console.log ">> r #{is_help_request}, #{is_help_response}"
-
-			is_help_request and is_help_response
-
-		_pretty_r_help = (cell) ->
-			# "help(some_var)"
-			input = cell.input[0]
-			output = cell.output[0]
-
-			help = {}
-			help.subject = input.content.code.trim().match(/^help\((.*)\)/)[1]
-			help.body = $sanitize(output?.content?.data?['text/html'])
-
-			return help
-
-		_pretty_r_introspection_help = (cell) ->
-			# "?some_var"
-			input = cell.input[0]
-			output = cell.output[0]
-
-			help = {}
-			help.subject = input.content.code.trim().match(/^\?(.*)/)[1]
-			help.body = $sanitize(output?.content?.data?['text/html'])
-
-			return help
-
-		_pretty_help = (cell) ->
-			# "help(some_var)"
-			input = cell.input[0]
-			output = cell.output[0]
-			output_lines = output.content.text.split('\n')
-			first_line = output_lines[0]
-
-			help = {}
-			help.subject = input.content.code.match(/^help\((.*)\)/)[1]
-			# help.module = first_line.match(/in module (.*):$/)[1]
-			# help.type = first_line.match(new RegExp("^Help on (.*) #{help.subject} in"))[1]
-
-			help.body = ansiToSafeHtml(
-				output_lines.slice(2)
-					.map((line) -> line.replace(/^ \|/, '  ').replace(new RegExp("    ", 'g'), "  "))
-					.join('\n')
-			)
-
-			return help
-
-		_pretty_introspection_help = (cell) ->
-			# "some_var?"
-			input = cell.input[0]
-			output = cell.output[0]
-
-			help = {}
-			help.subject = input.content.code.trim().match(/^(.*)\?$/)[1]
-			help.module = null
-			help.type = null
-			help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
-
-			return help
 
 		ide.socket.on "clsiOutput", (message) ->
 			if !message.content? and !message.header? and !message.header.msg_type?
@@ -263,7 +148,7 @@ define [
 			if message.header.msg_type == "system_status" and message.content.status == "killed_by_user"
 				cell.killed_by_user = true
 
-			_handle_help(cell)
+			HelpParser.handle_help(cell)
 
 			ide.$scope.$apply()
 
@@ -409,5 +294,87 @@ define [
 					.post(url, options)
 					.error () =>
 						@status.error = true
+
+		HelpParser =
+			_help_regex: /^help\((.*)\s*\)/
+			_question_regex: /^(.*)\?$/
+			_r_question_regex: /^\?(.*)/
+
+			handle_help: (cell) ->
+				if !cell._help
+					strategy = HelpParser.strategies[cell.engine]
+					if strategy.detect(cell)
+						cell._help = strategy.extract(cell)
+
+			strategies:
+				python:
+					detect: (cell) ->
+						is_help_request = (
+							cell.input.length == 1 and
+							cell.input[0]?.content?.code?.trim().match(HelpParser._help_regex)
+						)
+						is_help_response = (
+							cell.output.length == 1 and
+							cell.output[0]?.content?.text?.match(/^Help on.*/)
+						)
+						is_question_request = (
+							cell.input.length == 1 and
+							cell.input[0]?.content?.code?.trim().match(HelpParser._question_regex)
+						)
+						is_question_response = (
+							cell.output.length == 1 and
+							cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
+						)
+						(is_help_request and is_help_response) or (is_question_request and is_question_response)
+
+					extract: (cell) ->
+						input = cell.input[0]
+						output = cell.output[0]
+						help = {}
+						if input.content.code.trim().match(HelpParser._help_regex)
+							output_lines = output.content.text.split('\n')
+							help.subject = input.content.code.trim().match(HelpParser._help_regex)[1]
+							help.body = ansiToSafeHtml(
+								output_lines.slice(2)
+									.map((line) -> line.replace(/^ \|/, '  ').replace(new RegExp("    ", 'g'), "  "))
+									.join('\n')
+							)
+						else if input.content.code.match(HelpParser._question_regex)
+							help.subject = input.content.code.trim().match(HelpParser._question_regex)[1]
+							help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
+
+						return help
+				r:
+					detect: (cell) ->
+						is_help_request = (
+							cell.input.length == 1 and
+							cell.input[0]?.content?.code?.trim().match(HelpParser._help_regex)
+						)
+						is_help_response = (
+							cell.output.length == 1 and
+							cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
+						)
+						is_question_request = (
+							cell.input.length == 1 and
+							cell.input[0]?.content?.code?.trim().match(HelpParser._r_question_regex)
+						)
+						is_question_response = (
+							cell.output.length == 1 and
+								cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
+						)
+						(is_help_request and is_help_response) or (is_question_request and is_question_response)
+
+					extract: (cell) ->
+						input = cell.input[0]
+						output = cell.output[0]
+						help = {}
+						help_match = input.content.code.trim().match(HelpParser._help_regex)
+						question_match = input.content.code.trim().match(HelpParser._r_question_regex)
+						if help_match
+							help.subject = help_match[1]
+						if question_match
+							help.subject = question_match[1]
+						help.body = $sanitize(output?.content?.data?['text/html'])
+						return help
 
 		return jupyterRunner
