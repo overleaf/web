@@ -11,13 +11,16 @@ define [
 		_handle_help = (cell) ->
 			console.log cell
 			if !cell._help
-				if _is_help(cell)
-					if cell.engine == 'python'
+				if cell.engine == 'python'
+					if _is_help(cell)
 						cell._help = _pretty_help(cell)
-					if cell.engine == 'r'
+					if _is_introspection_help(cell)
+						cell._help = _pretty_introspection_help(cell)
+				if cell.engine == 'r'
+					if _is_help(cell)
 						cell._help = _pretty_r_help(cell)
-				if _is_introspection_help(cell)
-					cell._help = _pretty_introspection_help(cell)
+					if _is_r_introspection_help(cell)
+						cell._help = _pretty_r_introspection_help(cell)
 
 		_is_introspection_help = (cell) ->
 			is_introspection_request = (
@@ -27,6 +30,17 @@ define [
 			is_introspection_response = (
 				cell.output.length == 1 and
 				cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
+			)
+			is_introspection_request and is_introspection_response
+
+		_is_r_introspection_help = (cell) ->
+			is_introspection_request = (
+				cell.input.length == 1 and
+				cell.input[0]?.content?.code?.trim().match(/^\?(.*)$/)
+			)
+			is_introspection_response = (
+				cell.output.length == 1 and
+					cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
 			)
 			is_introspection_request and is_introspection_response
 
@@ -55,20 +69,8 @@ define [
 
 			is_help_request and is_help_response
 
-		_pretty_introspection_help = (cell) ->
-			input = cell.input[0]
-			output = cell.output[0]
-
-			help = {}
-			help.subject = input.content.code.trim().match(/^(.*)\?$/)[1]
-			help.module = null
-			help.type = null
-			help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
-
-			return help
-
 		_pretty_r_help = (cell) ->
-			console.log ">> pretty r"
+			# "help(some_var)"
 			input = cell.input[0]
 			output = cell.output[0]
 
@@ -78,7 +80,19 @@ define [
 
 			return help
 
+		_pretty_r_introspection_help = (cell) ->
+			# "?some_var"
+			input = cell.input[0]
+			output = cell.output[0]
+
+			help = {}
+			help.subject = input.content.code.trim().match(/^\?(.*)/)[1]
+			help.body = output?.content?.data?['text/html']
+
+			return help
+
 		_pretty_help = (cell) ->
+			# "help(some_var)"
 			input = cell.input[0]
 			output = cell.output[0]
 			output_lines = output.content.text.split('\n')
@@ -94,6 +108,19 @@ define [
 					.map((line) -> line.replace(/^ \|/, '  ').replace(new RegExp("    ", 'g'), "  "))
 					.join('\n')
 			)
+
+			return help
+
+		_pretty_introspection_help = (cell) ->
+			# "some_var?"
+			input = cell.input[0]
+			output = cell.output[0]
+
+			help = {}
+			help.subject = input.content.code.trim().match(/^(.*)\?$/)[1]
+			help.module = null
+			help.type = null
+			help.body = ansiToSafeHtml(cell.output[0]?.content?.payload?[0]?.data?['text/plain'])
 
 			return help
 
