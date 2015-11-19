@@ -59,9 +59,18 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						.chunk(ng-repeat="input in cell.input")
 							span.text-input.text-monospace {{ input.content.code }}
 				div.output(ng-if="cell.output.length > 0")
+
 					.execution-count
 						| Out[{{cell.execution_count}}]:
-					.cell-content
+	
+					// formatted help output
+					.cell-content.pretty-help(ng-if="cell._help")
+						.text-output.text-monospace.card.card-thin
+								div.help-subject {{ cell._help.subject }}
+								div.help-body(ng-bind-html="cell._help.body", ng-class="{normalspace: cell.engine == 'r'}")
+
+					// normal output
+					.cell-content(ng-if="!cell._help")
 						.chunk(ng-repeat="msg in cell.output")
 							span.text-output.text-monospace(ng-if="msg.header.msg_type == 'stream'", ng-bind-html="msg.content.text_escaped")
 							span(ng-if="msg.header.msg_type == 'execute_result'")

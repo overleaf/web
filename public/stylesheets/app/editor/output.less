@@ -209,6 +209,32 @@
 		.cell-content {
 			margin-left: @execution-count-width + @line-height-computed / 2;
 			position: relative;
+
+			&.pretty-help {
+				.card {
+					border-top: 1px solid #efefef;
+					padding-top: 10px;
+					padding-bottom: 10px;
+				}
+				.help-subject {
+					font-weight: bold;
+					border-bottom: 1px solid #efefef;
+					padding-bottom: 6px;
+				}
+				.help-body {
+					padding-top: 6px;
+					padding-bottom: 6px;
+					max-height: 280px;
+					overflow: auto;
+					white-space: pre;
+					&.normalspace {
+						white-space: normal !important;
+					}
+					td, th {
+						padding: 4px;
+					}
+				}
+			}
 		}
 	}
 
