@@ -309,23 +309,27 @@ define [
 			strategies:
 				python:
 					detect: (cell) ->
-						is_help_request = (
-							cell.input.length == 1 and
-							cell.input[0]?.content?.code?.trim().match(HelpParser._help_regex)
-						)
-						is_help_response = (
-							cell.output.length == 1 and
-							cell.output[0]?.content?.text?.match(/^Help on.*/)
-						)
-						is_question_request = (
-							cell.input.length == 1 and
-							cell.input[0]?.content?.code?.trim().match(HelpParser._question_regex)
-						)
-						is_question_response = (
-							cell.output.length == 1 and
-							cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
-						)
-						(is_help_request and is_help_response) or (is_question_request and is_question_response)
+						try
+							code = cell.input[0]?.content?.code
+							is_help_request = (
+								cell.input.length == 1 and
+								code?.trim().match(HelpParser._help_regex)
+							)
+							is_help_response = (
+								cell.output.length == 1 and
+								cell.output[0]?.content?.text?.match(/^Help on.*/)
+							)
+							is_question_request = (
+								cell.input.length == 1 and
+								code?.trim().match(HelpParser._question_regex)
+							)
+							is_question_response = (
+								cell.output.length == 1 and
+								cell.output[0]?.content?.payload?[0]?.data?['text/plain']?.match(/(.*)Docstring:(.*)/)
+							)
+							(is_help_request and is_help_response) or (is_question_request and is_question_response)
+						catch
+							false
 
 					extract: (cell) ->
 						input = cell.input[0]
@@ -346,23 +350,28 @@ define [
 						return help
 				r:
 					detect: (cell) ->
-						is_help_request = (
-							cell.input.length == 1 and
-							cell.input[0]?.content?.code?.trim().match(HelpParser._help_regex)
-						)
-						is_help_response = (
-							cell.output.length == 1 and
-							cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
-						)
-						is_question_request = (
-							cell.input.length == 1 and
-							cell.input[0]?.content?.code?.trim().match(HelpParser._r_question_regex)
-						)
-						is_question_response = (
-							cell.output.length == 1 and
-								cell.output[0]?.content?.data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
-						)
-						(is_help_request and is_help_response) or (is_question_request and is_question_response)
+						try
+							code = cell.input[0]?.content?.code
+							data = cell.output[0]?.content?.data
+							is_help_request = (
+								cell.input.length == 1 and
+								code?.trim().match(HelpParser._help_regex)
+							)
+							is_help_response = (
+								cell.output.length == 1 and
+								data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
+							)
+							is_question_request = (
+								cell.input.length == 1 and
+								code?.trim().match(HelpParser._r_question_regex)
+							)
+							is_question_response = (
+								cell.output.length == 1 and
+								data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
+							)
+							(is_help_request and is_help_response) or (is_question_request and is_question_response)
+						catch
+							false
 
 					extract: (cell) ->
 						input = cell.input[0]
