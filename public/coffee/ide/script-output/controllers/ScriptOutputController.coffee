@@ -6,6 +6,10 @@ define [
 		$scope.cells = jupyterRunner.CELL_LIST
 		ide.$scope.engine = 'python'
 
+		$scope.completion =
+			matches: null
+			currentSelection: null
+
 		$scope.determineDefaultEngine = () ->
 			# check all document extensions in the project,
 			# if .r files outnumber .py files, set the engine to 'r'
@@ -123,3 +127,7 @@ define [
 				console.log ">> tab hit"
 				$scope.doCompletion()
 				event.preventDefault()
+
+		$scope.$on 'completion:reply', (event, data) ->
+			console.log ">> got completion reply"
+			console.log data

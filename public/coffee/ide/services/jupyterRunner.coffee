@@ -14,10 +14,6 @@ define [
 				console.warn "Malformed message: expected content, header and header.msg_type", message
 				return
 
-			if message.header.msg_type == 'complete_reply'
-				console.log ">> complete reply"
-				console.log message
-
 			engine_and_request_id = message.request_id
 			return if !engine_and_request_id?
 			[engine,request_id] = engine_and_request_id?.split(":")
@@ -109,6 +105,9 @@ define [
 			if message.header.msg_type in ["execute_reply"]
 				if _.some(message?.content?.payload, (x) -> x?.data?['text/plain'])
 					cell.output.push message
+
+			if message.header.msg_type == 'complete_reply'
+				ide.$scope.$broadcast 'completion:reply', message.content
 
 			if message.header.msg_type == "display_data" and message.content.data?
 				if message.content.data['text/html']?
