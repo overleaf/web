@@ -88,6 +88,13 @@ define [
 			$scope._scrollOutput()
 			$scope.manualInput = ""
 
+		$scope.doCompletion = () ->
+			trackCommandRun()
+			code   = $scope.manualInput
+			engine = ide.$scope.engine
+			jupyterRunner.executeCompletionRequest code, engine
+			$scope._scrollOutput()
+
 		$scope._scrollOutput = () ->
 			try
 				container = document.querySelector('.jupyter-output-inner')
@@ -113,4 +120,6 @@ define [
 
 		$scope.preventTabFocus = (event) ->
 			if event.keyCode == 9  # TAB key
+				console.log ">> tab hit"
+				$scope.doCompletion()
 				event.preventDefault()

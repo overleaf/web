@@ -14,6 +14,10 @@ define [
 				console.warn "Malformed message: expected content, header and header.msg_type", message
 				return
 
+			if message.header.msg_type == 'complete_reply'
+				console.log ">> complete reply"
+				console.log message
+
 			engine_and_request_id = message.request_id
 			return if !engine_and_request_id?
 			[engine,request_id] = engine_and_request_id?.split(":")
@@ -178,6 +182,41 @@ define [
 			}
 
 			current_request_id: null
+
+			executeCompletionRequest: (code, engine) ->
+				console.log ">> doing completion for '#{code}'"
+				cursor_pos = code.length  # just presume it's the end of the code string
+				request_id = Math.random().toString().slice(2)
+				@current_request_id = "#{engine}:#{request_id}"
+				@status.running = true
+				@status.error = false
+
+				@_initingTimeout = $timeout () =>
+					@status.initing = true
+				, 2000
+
+				url = "/project/#{ide.$scope.project_id}/request"
+				options = {
+					request_id: "#{engine}:#{request_id}"
+					msg_type: "complete_request"
+					content: {
+						line: code,
+						block: code
+						text: code,
+						cursor_pos: cursor_pos,
+					}
+					engine: engine
+					_csrf: window.csrfToken
+				}
+				$http
+					.post(url, options)
+					.success (data) =>
+						@stopIniting()
+						@status.running = false
+					.error () =>
+						@stopIniting()
+						@status.error = true
+						@status.running = false
 
 			executeRequest: (code, engine) ->
 				request_id = Math.random().toString().slice(2)
