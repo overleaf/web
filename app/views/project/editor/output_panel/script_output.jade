@@ -227,6 +227,11 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| Sorry, something went wrong running your request. Please try again.
 			
 		div.manual-input.border-top
+			div(ng-if="completion.matches").completions
+				div(ng-repeat="match in completion.matches").match
+					span.label.label-default(ng-class="{'label-primary': $index == completion.currentSelection}")
+						| {{ match }}
+					| &nbsp;
 			div.input
 				.execution-count
 					| In[]:
@@ -236,7 +241,6 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 						command-line,
 						expand-to-content-height,
 						expand-to-content-height-max="200",
-						on-run="runManualInput()",
 						placeholder = "Command...",
 						ng-focus="ui.chatOpen || showInterCom(false)",
 						ng-blur="showInterCom(true)"

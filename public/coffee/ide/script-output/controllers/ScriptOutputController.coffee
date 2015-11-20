@@ -6,9 +6,12 @@ define [
 		$scope.cells = jupyterRunner.CELL_LIST
 		ide.$scope.engine = 'python'
 
-		$scope.completion =
-			matches: null
-			currentSelection: null
+		$scope.completion = {}
+
+		$scope.resetCompletion = () ->
+			$scope.completion.matches = null
+			$scope.completion.currentSelection = null
+		$scope.resetCompletion()
 
 		$scope.determineDefaultEngine = () ->
 			# check all document extensions in the project,
@@ -122,12 +125,45 @@ define [
 		$scope.clearCells = () ->
 			jupyterRunner.clearCells()
 
+		$scope.cycleCompletionSelection = (direction) ->
+			if !$scope.completion.matches
+				return
+			match_count = $scope.completion.matches.length
+			idx = $scope.completion.currentSelection
+			if direction == 'forward'
+				if idx == match_count - 1
+					idx = 0
+				else
+					idx += 1
+			if direction == 'backward'
+				if idx != 0
+					idx -= 1
+			console.log ">> #{idx} - #{match_count}"
+			$scope.completion.currentSelection = idx
+
 		$scope.preventTabFocus = (event) ->
+
+			if event.keyCode == 8 # Backspace key
+				if $scope.completion.matches
+					$scope.resetCompletion()
+					event.preventDefault()
+
 			if event.keyCode == 9  # TAB key
-				console.log ">> tab hit"
-				$scope.doCompletion()
 				event.preventDefault()
+				if !$scope.completion.matches
+					$scope.doCompletion()
+				else
+					$scope.cycleCompletionSelection 'forward'
+
+			if event.keyCode == 13 # Enter key
+				if $scope.completion.matches
+					event.preventDefault()
+					selected = $scope.completion.matches[$scope.completion.currentSelection]
+					$scope.manualInput = selected
+					$scope.resetCompletion()
+				else
+					$scope.runManualInput()
 
 		$scope.$on 'completion:reply', (event, data) ->
-			console.log ">> got completion reply"
-			console.log data
+			$scope.completion.matches = data.matches
+			$scope.completion.currentSelection = 0
