@@ -153,7 +153,7 @@ define [
 				if !$scope.completion.matches
 					$scope.doCompletion()
 				else
-					$scope.cycleCompletionSelection 'forward'
+					$scope.cycleCompletionSelection(if event.shiftKey then 'backward' else 'forward')
 
 			if event.keyCode == 13 # Enter key
 				if $scope.completion.matches
