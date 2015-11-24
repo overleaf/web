@@ -18,6 +18,7 @@ describe "FileStoreController", ->
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
 			"../Project/ProjectLocator": @ProjectLocator
 			"./FileStoreHandler": @FileStoreHandler
+			"../Project/ProjectEntityHandler":{}
 		@stream = {}
 		@project_id = "2k3j1lk3j21lk3j"
 		@file_id = "12321kklj1lk3jk12"
