@@ -285,6 +285,33 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.renameProject @req, @res
 
+	describe "getProjectList", ->
+		it "should send the list of projects of user", (done)->
+			@req.user = @user
+			projects = [{name:"one"}, {name:"two"}]
+			collaborations = [{name:"tree"}]
+
+			@ProjectModel.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects, collaborations)
+
+			@res.json = (json)=>
+				json.length.should.equal 3
+				done()
+
+			@ProjectController.getProjectList @req, @res
+
+		it "should propagate error if error", ->
+			next = sinon.spy()
+			@req.user = @user
+			projects = []
+			collabertions = []
+			error = sinon.stub()
+
+			@ProjectModel.findAllUsersProjects = sinon.stub().callsArgWith(2, error, projects, collabertions)
+
+			@ProjectController.getProjectList @req, @res, next
+
+			next.calledWith(error).should.equal true
+
 	describe "loadEditor", ->
 		beforeEach ->
 			@settings.editorIsOpen = true
