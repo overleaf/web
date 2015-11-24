@@ -10,7 +10,7 @@ describe "ProjectController", ->
 
 	beforeEach ->
 
-		@project_id = "123213jlkj9kdlsaj"
+		@project_id = "123213abcdef"
 
 		@settings = 
 			apis:
@@ -35,9 +35,14 @@ describe "ProjectController", ->
 			getAllTags: sinon.stub()
 		@NotificationsHandler =
 			getUserNotifications: sinon.stub()
+		@ProjectEditorHandler =
+			buildProjectModelView: sinon.stub()
 		@ProjectModel =
 			findAllUsersProjects: sinon.stub()
 			findPopulatedById: sinon.stub()
+		@ProjectGetter =
+			getProjectWithoutDocLines: sinon.stub()
+			populateProjectWithUsers: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
 		@SecurityManager =
@@ -73,6 +78,8 @@ describe "ProjectController", ->
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
+			"./ProjectGetter":@ProjectGetter
+			"./ProjectEditorHandler":@ProjectEditorHandler
 
 		@user = 
 			_id:"!£123213kjljkl"
@@ -291,7 +298,7 @@ describe "ProjectController", ->
 			projects = [{name:"one"}, {name:"two"}]
 			collaborations = [{name:"tree"}]
 
-			@ProjectModel.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects, collaborations)
+			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, projects, collaborations)
 
 			@res.json = (json)=>
 				json.length.should.equal 3
@@ -306,11 +313,67 @@ describe "ProjectController", ->
 			collabertions = []
 			error = sinon.stub()
 
-			@ProjectModel.findAllUsersProjects = sinon.stub().callsArgWith(2, error, projects, collabertions)
+			@ProjectModel.findAllUsersProjects.callsArgWith(2, error, projects, collabertions)
 
 			@ProjectController.getProjectList @req, @res, next
 
 			next.calledWith(error).should.equal true
+
+	describe "getProjectDocs", ->
+		it "should propagate error if error", ->
+			next = sinon.spy()
+			@req.user = @user
+
+			error = sinon.stub()
+
+			project  = sinon.spy()
+
+			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, error, project)
+
+			@ProjectController.getProjectDocs @req, @res, next
+
+			next.calledWith(error).should.equal true
+
+		it "should propagate error if project not found", ->
+			next = sinon.spy()
+			@req.user = @user
+
+			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, null, null)
+
+			@ProjectController.getProjectDocs @req, @res, next
+
+			next.calledWith(new Error("not found")).should.equal true
+
+		it "should propagate error when project exists and populate users with users fail", ->
+			next = sinon.spy()
+			@req.user = @user
+
+			project = sinon.stub()
+			error = sinon.stub()
+
+			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, null, project)
+			@ProjectGetter.populateProjectWithUsers.callsArgWith(1, error, project)
+
+			@ProjectController.getProjectDocs @req, @res, next
+
+			next.calledWith(error).should.equal true
+
+		it "should return json with project model view", (done)->
+			@req.user = @user
+
+			project = sinon.stub()
+
+			modelViewReturn = []
+
+			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, null, project)
+			@ProjectGetter.populateProjectWithUsers.callsArgWith(1, null, project)
+			@ProjectEditorHandler.buildProjectModelView.withArgs(project).returns(modelViewReturn)
+
+			@res.json = (json)=>
+				json.should.equal modelViewReturn
+				done()
+
+			@ProjectController.getProjectDocs @req, @res
 
 	describe "loadEditor", ->
 		beforeEach ->
