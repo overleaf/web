@@ -73,7 +73,9 @@ module.exports = ProjectEditorHandler =
 	buildFileModelView: (file) ->
 		_id  : file._id
 		name : file.name
+		mimetype: file.mimetype
 
 	buildDocModelView: (doc) ->
 		_id   : doc._id
 		name  : doc.name
+		mimetype: doc.mimetype
