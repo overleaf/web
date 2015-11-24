@@ -104,6 +104,21 @@ block content
 							if !externalAuthenticationSystemUsed()
 
 								p.small
+									a(
+										href,
+										ng-click="showAuthToken()",
+                                                                                ng-show="!authToken"
+									) #{translate("show_auth_token")}
+									span.auth-token-success(
+										ng-show="authToken"
+									) {{authToken}}
+
+								p.small
+									| #{translate("auth_token_info")} 
+
+								hr
+
+								p.small
 									| #{translate("newsletter_info_and_unsubscribe")} 
 									a(
 										href,

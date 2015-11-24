@@ -18,6 +18,19 @@ define [
 				.error () ->
 					$scope.unsubscribing = true
 
+		$scope.showAuthToken = () ->
+			$scope.authTokenFetching = true
+			$http({
+					method: "GET"
+					url: "/user/auth_token"
+				})
+				.success (res) ->
+					console.log(res)
+					$scope.authTokenFetching = false
+					$scope.authToken = res
+				.error () ->
+					$scope.authTokenFetching = true
+
 		$scope.deleteAccount = () ->
 			modalInstance = $modal.open(
 				templateUrl: "deleteAccountModalTemplate"
