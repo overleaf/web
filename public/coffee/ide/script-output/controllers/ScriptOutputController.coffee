@@ -36,10 +36,10 @@ define [
 
 		$scope.$on "editor:run-line", () ->
 			$scope.runSelection()
-		
+
 		$scope.$on "editor:run-all", () ->
 			$scope.runAll()
-		
+
 		run_count = 0
 		EVENT_COOL_DOWN = ONE_MINUTE = 60 * 1000
 		last_script_event = null
@@ -47,19 +47,19 @@ define [
 			run_count++
 			if run_count == 5
 				event_tracking.send("script", "multiple-run")
-			
+
 			now = new Date()
 			if !last_script_event? or now - last_script_event > EVENT_COOL_DOWN
 				event_tracking.send("script", "run")
 				last_script_event = now
-		
+
 		last_command_event = null
 		trackCommandRun = () ->
 			now = new Date()
 			if !last_command_event? or now - last_command_event > EVENT_COOL_DOWN
 				event_tracking.send("command", "run")
 				last_command_event = now
-		
+
 		$scope.runSelection = () ->
 			ide.$scope.$broadcast("editor:focus") # Don't steal focus from editor on click
 			ide.$scope.$broadcast("flush-changes")
@@ -99,7 +99,9 @@ define [
 			trackCommandRun()
 			code   = $scope.manualInput
 			engine = ide.$scope.engine
-			jupyterRunner.executeCompletionRequest code, engine
+			jupyterRunner.executeCompletionRequest code, code.length, engine, (data) ->
+				$scope.completion.matches = data.matches
+				$scope.completion.currentSelection = 0
 			$scope._scrollOutput()
 
 		$scope._scrollOutput = () ->
@@ -111,17 +113,17 @@ define [
 
 		$scope.stop = () ->
 			jupyterRunner.stop()
-		
+
 		$scope.restart = () ->
 			jupyterRunner.shutdown(ide.$scope.engine)
-		
+
 		$scope.installPackage = (packageName, language) ->
 			ide.$scope.$broadcast "installPackage", packageName, language
-		
+
 		$scope.showFormat = (message, format) ->
 			message.content.format = format
 			localStorage("preferred_format", format)
-		
+
 		$scope.clearCells = () ->
 			jupyterRunner.clearCells()
 
@@ -162,7 +164,3 @@ define [
 					$scope.resetCompletion()
 				else
 					$scope.runManualInput()
-
-		$scope.$on 'completion:reply', (event, data) ->
-			$scope.completion.matches = data.matches
-			$scope.completion.currentSelection = 0

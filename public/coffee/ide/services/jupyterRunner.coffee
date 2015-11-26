@@ -107,7 +107,7 @@ define [
 					cell.output.push message
 
 			if message.header.msg_type == 'complete_reply'
-				ide.$scope.$broadcast 'completion:reply', message.content
+				jupyterRunner.COMPLETION_CALLBACKS[message.request_id]?(message.content)
 
 			if message.header.msg_type == "display_data" and message.content.data?
 				if message.content.data['text/html']?
@@ -172,6 +172,7 @@ define [
 		jupyterRunner =
 			CELL_LIST: {}
 			CELLS: {}
+			COMPLETION_CALLBACKS: {}
 
 			status: {
 				running: false,
@@ -182,13 +183,14 @@ define [
 
 			current_request_id: null
 
-			executeCompletionRequest: (code, engine) ->
+			executeCompletionRequest: (code, pos, engine, callback) ->
 				console.log ">> doing completion for '#{code}'"
-				cursor_pos = code.length  # just presume it's the end of the code string
+				cursor_pos = pos  # just presume it's the end of the code string
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"
 				@status.running = true
 				@status.error = false
+				jupyterRunner.COMPLETION_CALLBACKS[@current_request_id] = callback
 
 				@_initingTimeout = $timeout () =>
 					@status.initing = true
