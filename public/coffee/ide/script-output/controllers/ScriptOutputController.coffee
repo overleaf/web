@@ -6,6 +6,8 @@ define [
 		$scope.cells = jupyterRunner.CELL_LIST
 		ide.$scope.engine = 'python'
 
+		window._JUPYTER_RUNNER = jupyterRunner
+
 		$scope.completion = {}
 
 		$scope.resetCompletion = () ->
