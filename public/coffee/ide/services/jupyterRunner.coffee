@@ -188,13 +188,7 @@ define [
 				cursor_pos = pos  # just presume it's the end of the code string
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"
-				@status.running = true
-				@status.error = false
 				jupyterRunner.COMPLETION_CALLBACKS[@current_request_id] = callback
-
-				@_initingTimeout = $timeout () =>
-					@status.initing = true
-				, 2000
 
 				url = "/project/#{ide.$scope.project_id}/request"
 				options = {
@@ -212,12 +206,9 @@ define [
 				$http
 					.post(url, options)
 					.success (data) =>
-						@stopIniting()
-						@status.running = false
+						null
 					.error () =>
-						@stopIniting()
-						@status.error = true
-						@status.running = false
+						null
 
 			executeRequest: (code, engine) ->
 				request_id = Math.random().toString().slice(2)
