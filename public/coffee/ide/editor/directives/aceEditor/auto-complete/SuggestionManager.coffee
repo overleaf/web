@@ -93,7 +93,17 @@ define [], () ->
 								meta: "cmd"
 							}
 						else
-							#
+							# try to catch the case above: plt.show(np.s|)
+							if match.indexOf('.') >= 0
+								completion = match.slice(match.indexOf('.') + 1)
+							else
+								completion = match
+							console.log "MATCHES LATER", completion
+							completions.push {
+								caption: completion
+								snippet: completion
+								meta: "cmd"
+							}
 
 					@completionTimeout = null
 					console.log "completions", completions
