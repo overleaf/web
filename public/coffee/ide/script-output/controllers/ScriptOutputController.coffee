@@ -138,7 +138,6 @@ define [
 			if direction == 'backward'
 				if idx != 0
 					idx -= 1
-			console.log ">> #{idx} - #{match_count}"
 			$scope.completion.currentSelection = idx
 
 		$scope.preventTabFocus = (event) ->
