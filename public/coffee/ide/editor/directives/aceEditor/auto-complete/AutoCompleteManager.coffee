@@ -22,6 +22,13 @@ define [
 				else
 					@disable()
 
+			onChange = (change) =>
+				@onChange(change)
+
+			@editor.on "changeSession", (e) =>
+				e.oldSession.off "change", onChange
+				e.session.on "change", onChange
+
 		enable: () ->
 			console.log "ENABLE auto complete"
 			@editor.setOptions({
@@ -48,8 +55,15 @@ define [
 					range = new Range(end.row, 0, end.row, end.column)
 					lineUpToCursor = @editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
+					console.log ">> onChange: #{lineUpToCursor} - #{commandFragment}"
 
 					if commandFragment? and commandFragment.length > 2
+						setTimeout () =>
+							@editor.execCommand("startAutocomplete")
+						, 0
+
+					# fire autocomplete if line ends in `some_identifier.`
+					if lineUpToCursor.match(/(\w+)\.$/)
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0

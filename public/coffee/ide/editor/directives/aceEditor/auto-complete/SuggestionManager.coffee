@@ -86,7 +86,7 @@ define [], () ->
 						# to strip.
 						if match.indexOf(line) == 0
 							completion = prefix + match.slice(line.length)
-							console.log "MATCHES START", completion
+							# console.log "MATCHES START", completion
 							completions.push {
 								caption: completion
 								snippet: completion
@@ -98,7 +98,7 @@ define [], () ->
 								completion = match.slice(match.indexOf('.') + 1)
 							else
 								completion = match
-							console.log "MATCHES LATER", completion
+							# console.log "MATCHES LATER", completion
 							completions.push {
 								caption: completion
 								snippet: completion
