@@ -67,7 +67,7 @@ define [], () ->
 		completionTimeout: null
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			line = session.getLine(pos.row).slice(0, pos.column)
-			console.log "getCompletions", pos, prefix, line
+			# console.log "getCompletions", pos, prefix, line
 			if @completionTimeout?
 				clearTimeout(@completionTimeout)
 			@completionTimeout = setTimeout () =>
@@ -75,7 +75,7 @@ define [], () ->
 				window._JUPYTER_RUNNER.executeCompletionRequest line, pos.column, engine, (results) ->
 					completions = []
 					for match in results.matches or []
-						console.log "CONSIDERING", match
+						# console.log "CONSIDERING", match
 						# Need to figure out how to properly complete
 						#    plt.show(np.s|)
 						# where | is the cursor.

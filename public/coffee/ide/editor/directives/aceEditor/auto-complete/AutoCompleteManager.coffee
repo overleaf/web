@@ -44,7 +44,7 @@ define [
 					current_line = editor.getSession().getLine(pos.row)
 					line_to_cursor = current_line.slice(0, pos.column)
 					line_beyond_cursor = current_line.slice(pos.column)
-					if line_to_cursor.match(/^(.+)(\w+|\.)$/) and line_beyond_cursor == ''
+					if line_to_cursor.match(/(\w|\.)$/) and line_beyond_cursor == ''
 						setTimeout () =>
 							editor.execCommand("startAutocomplete")
 						, 0
@@ -70,7 +70,7 @@ define [
 					range = new Range(end.row, 0, end.row, end.column)
 					lineUpToCursor = @editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
-					console.log ">> onChange: #{lineUpToCursor} - #{commandFragment}"
+					# console.log ">> onChange: #{lineUpToCursor} - #{commandFragment}"
 
 					if commandFragment? and commandFragment.length > 2
 						setTimeout () =>
@@ -82,3 +82,4 @@ define [
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
+					window._e = @editor
