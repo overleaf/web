@@ -45,23 +45,6 @@ define [
 				enableSnippets: false
 			})
 
-		_patched: false
-		monkeyPatch: (editor) ->
-			if @_patched
-				return
-			lang = ace.require('ace/lib/lang')
-			editor.completer.changeTimer = lang.delayedCall(
-				() ->
-					editor.completer.updateCompletions()
-			)
-			@_patched = true
-
-		triggerAutocomplete: (editor) ->
-			setTimeout () =>
-				editor.execCommand("startAutocomplete")
-				@monkeyPatch(editor)
-			, 0
-
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
@@ -75,8 +58,12 @@ define [
 					console.log ">> onChange: #{lineUpToCursor} - #{commandFragment}"
 
 					if commandFragment? and commandFragment.length > 2
-						@triggerAutocomplete(editor)
+						setTimeout () =>
+							@editor.execCommand("startAutocomplete")
+						, 0
 
 					# fire autocomplete if line ends in `some_identifier.`
 					if lineUpToCursor.match(/(\w+)\.$/)
-						@triggerAutocomplete(editor)
+						setTimeout () =>
+							@editor.execCommand("startAutocomplete")
+						, 0
