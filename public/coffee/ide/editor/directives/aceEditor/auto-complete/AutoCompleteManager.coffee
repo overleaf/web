@@ -36,6 +36,21 @@ define [
 				enableSnippets: true,
 				enableLiveAutocompletion: true
 			})
+			@editor.commands.addCommand {
+				name: 'tabComplete'
+				bindKey: 'TAB'
+				exec: (editor) =>
+					pos = editor.getCursorPosition()
+					current_line = editor.getSession().getLine(pos.row)
+					line_to_cursor = current_line.slice(0, pos.column)
+					line_beyond_cursor = current_line.slice(pos.column)
+					if line_to_cursor.match(/^(.+)(\w+|\.)$/) and line_beyond_cursor == ''
+						setTimeout () =>
+							editor.execCommand("startAutocomplete")
+						, 0
+					else
+						editor.indent()
+			}
 
 			@editor.completers = [@suggestionManager]
 
