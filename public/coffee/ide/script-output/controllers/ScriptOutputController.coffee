@@ -27,6 +27,15 @@ define [
 				ide.$scope.engine = 'r'
 		$scope.determineDefaultEngine()
 
+		$scope._noOutput = true
+		$scope.noOutput = () ->
+			if $scope._noOutput == false
+				return false
+			some_output = _.some($scope.cells[ide.$scope.engine], (cell) -> cell.execution_count or cell.restarted)
+			if some_output
+				$scope._noOutput = false
+			return $scope._noOutput
+
 		ide.$scope.$watch "editor.ace_mode", () ->
 			ace_mode = ide.$scope.editor.ace_mode
 			# If the selected file mode is either R or Python set the engine type.

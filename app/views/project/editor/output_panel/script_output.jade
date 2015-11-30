@@ -36,11 +36,11 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 
 	div.jupyter-output.main-script-output
 		.jupyter-output-inner(scroll-glue)
-			.jupyter-uncompiled(ng-show="!cells[engine] && !status.running")
+			.jupyter-uncompiled(ng-show="noOutput() && !status.running")
 				| &nbsp;
 				i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Click here to run your script...
-			.jupyter-uncompiled.jupyter-uncompiled-bottom(ng-show="!cells[engine] && !status.running")
+			.jupyter-uncompiled.jupyter-uncompiled-bottom(ng-show="noOutput() && !status.running")
 				| &nbsp;
 				i.fa.fa-level-down.fa-flip-horizontal.fa-2x
 				| &nbsp;&nbsp;Or run a command directly!
