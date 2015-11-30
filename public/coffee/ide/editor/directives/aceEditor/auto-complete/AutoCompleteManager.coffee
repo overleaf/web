@@ -30,7 +30,21 @@ define [
 				e.session.on "change", onChange
 
 		enable: () ->
+
+			# HACK: modified ace Autocomplete completer, with a less-bad changeTimer
+			#   necessary to ensure autocomplete works consistently, even if many characters
+			#   are typed within the timeout window.
+			ac = ace.require('ace/autocomplete')
+			lang = ace.require('ace/lib/lang')
+			patched_completer = new ac.Autocomplete()
+			patched_completer.changeTimer = lang.delayedCall(
+				(() -> this.updateCompletions()).bind(patched_completer) # NOTE: not passing `true` to updateCompletions
+			)
+			@editor.completer = patched_completer
+			# /HACK
+
 			console.log "ENABLE auto complete"
+
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
 				enableSnippets: true,

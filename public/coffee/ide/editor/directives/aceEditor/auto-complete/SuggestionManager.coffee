@@ -68,14 +68,13 @@ define [], () ->
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			line = session.getLine(pos.row).slice(0, pos.column)
 			# console.log "getCompletions", pos, prefix, line
-			if @completionTimeout?
+			if @completionTimeout
 				clearTimeout(@completionTimeout)
 			@completionTimeout = setTimeout () =>
 				engine = window?._ide?.$scope?.engine || 'python'
 				window._JUPYTER_RUNNER.executeCompletionRequest line, pos.column, engine, (results) ->
 					completions = []
 					for match in results.matches or []
-						# console.log "CONSIDERING", match
 						# Need to figure out how to properly complete
 						#    plt.show(np.s|)
 						# where | is the cursor.
@@ -86,7 +85,6 @@ define [], () ->
 						# to strip.
 						if match.indexOf(line) == 0
 							completion = prefix + match.slice(line.length)
-							# console.log "MATCHES START", completion
 							completions.push {
 								caption: completion
 								snippet: completion
@@ -98,7 +96,6 @@ define [], () ->
 								completion = match.slice(match.indexOf('.') + 1)
 							else
 								completion = match
-							# console.log "MATCHES LATER", completion
 							completions.push {
 								caption: completion
 								snippet: completion
@@ -106,7 +103,7 @@ define [], () ->
 							}
 
 					@completionTimeout = null
-					console.log "completions", completions
+					clearTimeout(@completionTimeout)
 					callback null, completions
 			, 500
 
