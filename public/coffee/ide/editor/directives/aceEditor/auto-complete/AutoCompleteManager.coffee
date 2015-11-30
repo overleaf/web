@@ -65,8 +65,7 @@ define [
 					else
 						editor.indent()
 			}
-
-			@editor.completers = [@suggestionManager]
+			@editor.completers.push @suggestionManager
 
 		disable: () ->
 			@editor.setOptions({
