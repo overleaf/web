@@ -89,6 +89,7 @@ define [], () ->
 								caption: completion
 								snippet: completion
 								meta: "cmd"
+								score: 100000
 							}
 						else
 							# try to catch the case above: plt.show(np.s|)
@@ -99,7 +100,8 @@ define [], () ->
 							completions.push {
 								caption: completion
 								snippet: completion
-								meta: "cmd"
+								meta: "cmd",
+								score: 100000
 							}
 
 					@completionTimeout = null
