@@ -184,7 +184,6 @@ define [
 			current_request_id: null
 
 			executeCompletionRequest: (code, pos, engine, callback) ->
-				console.log ">> doing completion for '#{code}'"
 				cursor_pos = pos  # just presume it's the end of the code string
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"
