@@ -115,9 +115,7 @@ define [
 		$scope.$on "project:joined", () ->
 			return if inited
 			inited = true
-			# FIXME: de-activate the _pingCompiler feature for now,
-			# until we're sure there are no concurrency issues.
-			# setTimeout(_pingCompiler, 200)
+			setTimeout(_pingCompiler, 200)
 			if $scope?.project?.deletedByExternalDataSource
 				ide.showGenericMessageModal("Project Renamed or Deleted", """
 					This project has either been renamed or deleted by an external data source such as Dropbox.
