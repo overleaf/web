@@ -190,15 +190,17 @@ define [
 				jupyterRunner.COMPLETION_CALLBACKS[@current_request_id] = callback
 
 				url = "/project/#{ide.$scope.project_id}/request"
+				content = {cursor_pos: cursor_pos}
+				if engine == 'r'
+					content.code = code
+				else
+					content.line = code
+					content.block = code
+					content.text = code
 				options = {
 					request_id: "#{engine}:#{request_id}"
 					msg_type: "complete_request"
-					content: {
-						line: code,
-						block: code
-						text: code,
-						cursor_pos: cursor_pos,
-					}
+					content: content
 					engine: engine
 					_csrf: window.csrfToken
 				}
