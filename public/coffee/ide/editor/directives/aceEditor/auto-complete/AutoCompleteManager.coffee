@@ -63,9 +63,9 @@ define [
 				enableSnippets: false
 			})
 
-		_spinnerAttached: false
+		_spinner: null
 		_attachSpinner: () ->
-			if @_spinnerAttached
+			if @_spinner
 				return
 			autocomplete = $('.ace_autocomplete')
 			if autocomplete.length == 1
@@ -91,7 +91,7 @@ define [
 				window._spinner = spinner
 				$(ac).append(spinner)
 
-				@_spinnerAttached = true
+				@_spinner = spinner
 
 
 		onChange: (change) ->
