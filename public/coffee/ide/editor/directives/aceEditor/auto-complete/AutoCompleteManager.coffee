@@ -51,6 +51,7 @@ define [
 						, 0
 					else
 						editor.indent()
+					setTimeout(@_attachSpinner, 1)
 			}
 			@editor.completers.push @suggestionManager
 
@@ -72,9 +73,6 @@ define [
 				window._xx = ac
 				ac.style.position = 'relative'
 				ac.style.overflow = 'visible'
-				t = parseInt(ac.style.top)
-				h = parseInt(ac.style.height)
-				l = parseInt(ac.style.left)
 				spinner = $('.ace_spinner')[0]
 				if !spinner
 					inner = document.createElement('div')
@@ -88,9 +86,6 @@ define [
 					spinner.appendChild(inner)
 
 				spinner.style.position = 'absolute'
-				# spinner.style.color = 'red'
-				# spinner.style.top = t + h  + 'px'
-				# spinner.style.left = l + 4 + 'px'
 				spinner.style.bottom = '-20px'
 				spinner.style.left = '4px'
 				window._spinner = spinner
