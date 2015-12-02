@@ -54,11 +54,50 @@ define [
 			}
 			@editor.completers.push @suggestionManager
 
+			window._e = @editor
+
 		disable: () ->
 			@editor.setOptions({
 				enableBasicAutocompletion: false,
 				enableSnippets: false
 			})
+
+		_spinnerAttached: false
+		_attachSpinner: () ->
+			if @_spinnerAttached
+				return
+			autocomplete = $('.ace_autocomplete')
+			if autocomplete.length == 1
+				ac = autocomplete[0]
+				window._xx = ac
+				ac.style.position = 'relative'
+				ac.style.overflow = 'visible'
+				t = parseInt(ac.style.top)
+				h = parseInt(ac.style.height)
+				l = parseInt(ac.style.left)
+				spinner = $('.ace_spinner')[0]
+				if !spinner
+					inner = document.createElement('div')
+					inner.classList.add('loading')
+					for i in [1..3]
+						dot = document.createElement('span')
+						dot.textContent = '.'
+						inner.appendChild(dot)
+					spinner = document.createElement('div')
+					spinner.classList.add('ace_spinner')
+					spinner.appendChild(inner)
+
+				spinner.style.position = 'absolute'
+				# spinner.style.color = 'red'
+				# spinner.style.top = t + h  + 'px'
+				# spinner.style.left = l + 4 + 'px'
+				spinner.style.bottom = '-20px'
+				spinner.style.left = '4px'
+				window._spinner = spinner
+				$(ac).append(spinner)
+
+				@_spinnerAttached = true
+
 
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
@@ -82,4 +121,4 @@ define [
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
-					window._e = @editor
+			setTimeout(@_attachSpinner, 1)
