@@ -107,6 +107,7 @@ define [
 					cell.output.push message
 
 			if message.header.msg_type == 'complete_reply'
+				ide.$scope.$broadcast 'completion_request:end'
 				jupyterRunner.COMPLETION_CALLBACKS[message.request_id]?(message.content)
 
 			if message.header.msg_type == "display_data" and message.content.data?
@@ -184,6 +185,7 @@ define [
 			current_request_id: null
 
 			executeCompletionRequest: (code, pos, engine, callback) ->
+				ide.$scope.$broadcast 'completion_request:start'
 				cursor_pos = pos  # just presume it's the end of the code string
 				request_id = Math.random().toString().slice(2)
 				@current_request_id = "#{engine}:#{request_id}"

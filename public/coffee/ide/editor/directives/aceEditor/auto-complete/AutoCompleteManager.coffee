@@ -64,7 +64,7 @@ define [
 			})
 
 		_spinner: null
-		_attachSpinner: () ->
+		_attachSpinner: (scope) ->
 			if @_spinner
 				return
 			autocomplete = $('.ace_autocomplete')
@@ -77,6 +77,7 @@ define [
 				if !spinner
 					inner = document.createElement('div')
 					inner.classList.add('loading')
+					inner.style.visibility = 'visible'
 					for i in [1..3]
 						dot = document.createElement('span')
 						dot.textContent = '.'
@@ -90,6 +91,17 @@ define [
 				spinner.style.left = '4px'
 				window._spinner = spinner
 				$(ac).append(spinner)
+
+				spinner._request_count = 0
+				scope.$on 'completion_request:start', () ->
+					spinner._request_count++
+					if spinner._request_count > 0
+						inner.style.visibility = 'visible'
+
+				scope.$on 'completion_request:end', () ->
+					spinner._request_count--
+					if spinner._request_count <= 0
+						inner.style.visibility = 'hidden'
 
 				@_spinner = spinner
 
@@ -116,4 +128,4 @@ define [
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
-			setTimeout(@_attachSpinner, 1)
+			setTimeout(@_attachSpinner(@$scope), 1)
