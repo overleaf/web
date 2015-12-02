@@ -51,7 +51,9 @@ define [
 						, 0
 					else
 						editor.indent()
-					setTimeout(@_attachSpinner, 1)
+					setTimeout =>
+						@_attachSpinner(@$scope)
+					, 1
 			}
 			@editor.completers.push @suggestionManager
 
@@ -128,4 +130,6 @@ define [
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
-			setTimeout(@_attachSpinner(@$scope), 1)
+			setTimeout =>
+				@_attachSpinner(@$scope)
+			, 1
