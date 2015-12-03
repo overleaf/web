@@ -275,6 +275,8 @@ define [
 
 			_displayErrors: (run) ->
 				$scope = ide.$scope
+				if !$scope.pdf  # FIXME: pdf can be undefined, this is dead code
+					return
 				$scope.pdf.logEntryAnnotations = {}
 
 				addError = (error, message = error.message, type = "error") ->
