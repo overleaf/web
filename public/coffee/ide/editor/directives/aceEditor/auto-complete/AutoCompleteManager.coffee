@@ -69,7 +69,7 @@ define [
 		_attachSpinner: (scope) ->
 			# early return if we've already got a spinner from a
 			# previous run
-			if @_spinner
+			if scope._autocomplete_spinner
 				return
 
 			# get the autocomplete popup, if it exists in the page
@@ -114,7 +114,7 @@ define [
 						if spinner._request_count <= 0
 							inner.style.visibility = 'hidden'
 
-				@_spinner = spinner
+				scope._autocomplete_spinner = spinner
 
 
 		onChange: (change) ->
