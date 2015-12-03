@@ -12,6 +12,7 @@ define [
 		else
 			return null
 
+	# remove comments from multiline text
 	stripUnwantedText =  (text) ->
 		text.replace(new RegExp('#(.*)$', 'm'), '')
 
@@ -44,11 +45,9 @@ define [
 			return wordScores
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			console.log ">> here"
 			window._s = session
 			wordScore = @wordDistance(session, pos, prefix)
 			wordList = Object.keys(wordScore)
-			console.log wordList
 			callback(null, wordList.map((word) ->
 					{
 							caption: word,
@@ -101,7 +100,16 @@ define [
 						@_attachSpinner(@$scope)
 					, 1
 			}
-			@editor.completers = [@editor.completers[0], new CustomLocalCompleter(), @suggestionManager]
+			# find the completer responsible for the 'local' suggestions and replace it with ours
+			local_index = null
+			for completer, i in @editor.completers
+				if completer.getCompletions.toString().indexOf('wordDistance(') >= 0
+					local_index = i
+					break
+			if local_index
+				@editor.completers.splice(local_index, 1, new CustomLocalCompleter())
+
+			@editor.completers.push @suggestionManager
 
 			window._e = @editor
 
