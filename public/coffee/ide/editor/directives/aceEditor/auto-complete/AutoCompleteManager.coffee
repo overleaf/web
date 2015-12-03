@@ -75,7 +75,7 @@ define [
 				window._xx = ac
 				ac.style.position = 'relative'
 				ac.style.overflow = 'visible'
-				spinner = $('.ace_spinner')[0]
+				spinner = $('.dj_ace_autocomplete_spinner')[0]
 				if !spinner
 					inner = document.createElement('div')
 					inner.classList.add('loading')
@@ -85,7 +85,7 @@ define [
 						dot.textContent = '.'
 						inner.appendChild(dot)
 					spinner = document.createElement('div')
-					spinner.classList.add('ace_spinner')
+					spinner.classList.add('dj_ace_autocomplete_spinner')
 					spinner.appendChild(inner)
 
 				spinner.style.position = 'absolute'
