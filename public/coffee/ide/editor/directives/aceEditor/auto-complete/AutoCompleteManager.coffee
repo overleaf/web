@@ -65,7 +65,6 @@ define [
 				enableSnippets: false
 			})
 
-		_spinner: null
 		_attachSpinner: (scope) ->
 			# early return if we've already got a spinner from a
 			# previous run
