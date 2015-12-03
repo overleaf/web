@@ -117,6 +117,20 @@ define [
 
 			@editor.completers.push @suggestionManager
 
+			# Force the editor.completer into existence,
+			# then override it's change handler with our own
+			setTimeout (editor) ->
+				console.log ">> patching"
+				Autocomplete = ace.require('ace/autocomplete').Autocomplete
+				if !editor.completer
+					editor.completer = new Autocomplete()
+				lang = ace.require('ace/lib/lang')
+				editor.completer.changeTimer = lang.delayedCall (() ->
+					console.log ">> here is change"
+					this.updateCompletions(true)
+				).bind(editor.completer)
+			, 0, @editor
+
 			window._e = @editor
 
 		disable: () ->
