@@ -12,10 +12,9 @@ define [
 		else
 			return null
 
-	# remove comments from multiline text
+	# remove comments and content between quote marksfrom multiline text
 	stripUnwantedText =  (text) ->
-		result = text.replace(/#(.*)$/m, ' ')
-		result = text.replace(/('|").*\1/mg, ' ')
+		result = text.replace(/#(.*)$/m, ' ').replace(/('|").*\1/mg, ' ')
 		return result
 
 	# this is mostly a replica of ace/autocomplete/text_completer,
