@@ -14,7 +14,9 @@ define [
 
 	# remove comments from multiline text
 	stripUnwantedText =  (text) ->
-		text.replace(new RegExp('#(.*)$', 'm'), '')
+		result = text.replace(/#(.*)$/m, ' ')
+		result = text.replace(/('|").*\1/mg, ' ')
+		return result
 
 	# this is mostly a replica of ace/autocomplete/text_completer,
 	# except it ignores text within comments as best it can
