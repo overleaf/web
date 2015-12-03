@@ -75,13 +75,14 @@ define [
 			# get the autocomplete popup, if it exists in the page
 			autocomplete = $('.ace_autocomplete')
 			if autocomplete.length == 1
-				ac = autocomplete[0]
-				ac.style.position = 'relative'
-				ac.style.overflow = 'visible'  # required to make the spinner visible
-
 				# try to find the spinner (it may already exist)
 				spinner = $('.dj_ace_autocomplete_spinner')[0]
 				if !spinner
+					# patch styles on the autocomplete popup
+					ac = autocomplete[0]
+					ac.style.position = 'relative'
+					ac.style.overflow = 'visible'  # required to make the spinner visible
+
 					# create the spinner elements
 					inner = document.createElement('div')
 					inner.classList.add('loading')
