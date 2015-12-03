@@ -12,6 +12,52 @@ define [
 		else
 			return null
 
+	stripUnwantedText =  (text) ->
+		text.replace(new RegExp('#(.*)$', 'm'), '')
+
+	# this is mostly a replica of ace/autocomplete/text_completer,
+	# except it ignores text within comments as best it can
+	class CustomLocalCompleter
+		splitRegex: /[^a-zA-Z_0-9\$\-\u00C0-\u1FFF\u2C00-\uD7FF\w]+/
+		getWordIndex: (doc, pos) ->
+			textBefore = doc.getTextRange(Range.fromPoints({row: 0, column:0}, pos))
+			textBefore = stripUnwantedText(textBefore)
+			return textBefore.split(@splitRegex).length - 1
+
+		wordDistance: (doc, pos) ->
+			prefixPos = @getWordIndex(doc, pos)
+			words = stripUnwantedText(doc.getValue()).split(@splitRegex)
+			wordScores = Object.create(null)
+
+			currentWord = words[prefixPos]
+
+			words.forEach((word, idx) ->
+				if (!word || word == currentWord)
+					return
+				distance = Math.abs(prefixPos - idx)
+				score = words.length - distance
+				if (wordScores[word])
+					wordScores[word] = Math.max(score, wordScores[word])
+				else
+					wordScores[word] = score;
+			)
+			return wordScores
+
+		getCompletions: (editor, session, pos, prefix, callback) ->
+			console.log ">> here"
+			window._s = session
+			wordScore = @wordDistance(session, pos, prefix)
+			wordList = Object.keys(wordScore)
+			console.log wordList
+			callback(null, wordList.map((word) ->
+					{
+							caption: word,
+							value: word,
+							score: wordScore[word],
+							meta: "local"
+					}
+			))
+
 	class AutoCompleteManager
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
@@ -55,7 +101,7 @@ define [
 						@_attachSpinner(@$scope)
 					, 1
 			}
-			@editor.completers.push @suggestionManager
+			@editor.completers = [@editor.completers[0], new CustomLocalCompleter(), @suggestionManager]
 
 			window._e = @editor
 
