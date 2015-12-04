@@ -81,8 +81,6 @@ define [
 				e.session.on "change", onChange
 
 		enable: () ->
-			console.log "ENABLE auto complete"
-
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
 				enableSnippets: true,
@@ -131,7 +129,6 @@ define [
 					line_to_cursor = current_line.slice(0, pos.column)
 
 					# bail if we are in a comment
-					console.log line_to_cursor
 					return if line_to_cursor.indexOf('#') >= 0
 
 					# bail if we have unbalanced quotes in this line
@@ -217,7 +214,6 @@ define [
 					range = new Range(end.row, 0, end.row, end.column)
 					lineUpToCursor = @editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
-					# console.log ">> onChange: #{lineUpToCursor} - #{commandFragment}"
 
 					if commandFragment? and commandFragment.length > 2
 						setTimeout () =>
