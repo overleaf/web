@@ -1,9 +1,10 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
+	"ide/editor/directives/aceEditor/auto-complete/CustomTextCompleter"
 	"ide/editor/directives/aceEditor/auto-complete/Snippets"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, Snippets) ->
+], (SuggestionManager, CustomTextCompleter, Snippets) ->
 	Range = ace.require("ace/range").Range
 
 	getLastCommandFragment = (lineUpToCursor) ->
@@ -11,57 +12,6 @@ define [
 			return m[1]
 		else
 			return null
-
-	stripUnwantedText =  (original_text) ->
-		_.reduce(
-			[
-				/#(.*)$/m         # remove comments
-				/('|").*\1/mg      # remove string contents
-			]
-			(text, re) -> text.replace(re, ' ')
-			original_text
-		)
-
-	# this is mostly a replica of ace/autocomplete/text_completer,
-	# except it ignores text within comments as best it can
-	class CustomLocalCompleter
-		splitRegex: /[^a-zA-Z_0-9\$\-\u00C0-\u1FFF\u2C00-\uD7FF\w]+/
-		getWordIndex: (doc, pos) ->
-			textBefore = doc.getTextRange(Range.fromPoints({row: 0, column:0}, pos))
-			textBefore = stripUnwantedText(textBefore)
-			return textBefore.split(@splitRegex).length - 1
-
-		wordDistance: (doc, pos) ->
-			prefixPos = @getWordIndex(doc, pos)
-			words = stripUnwantedText(doc.getValue()).split(@splitRegex)
-			wordScores = Object.create(null)
-
-			currentWord = words[prefixPos]
-
-			words.forEach((word, idx) ->
-				if (!word || word == currentWord)
-					return
-				distance = Math.abs(prefixPos - idx)
-				score = words.length - distance
-				if (wordScores[word])
-					wordScores[word] = Math.max(score, wordScores[word])
-				else
-					wordScores[word] = score;
-			)
-			return wordScores
-
-		getCompletions: (editor, session, pos, prefix, callback) ->
-			window._s = session
-			wordScore = @wordDistance(session, pos, prefix)
-			wordList = Object.keys(wordScore)
-			callback(null, wordList.map((word) ->
-					{
-							caption: word,
-							value: word,
-							score: wordScore[word],
-							meta: "local"
-					}
-			))
 
 	class AutoCompleteManager
 		constructor: (@$scope, @editor) ->
@@ -104,15 +54,8 @@ define [
 						@_attachSpinner(@$scope)
 					, 1
 			}
-			# find the completer responsible for the 'local' suggestions and replace it with ours
-			local_index = null
-			for completer, i in @editor.completers
-				if completer.getCompletions.toString().indexOf('wordDistance(') >= 0
-					local_index = i
-					break
-			if local_index
-				@editor.completers.splice(local_index, 1, new CustomLocalCompleter())
 
+			CustomTextCompleter.init(@editor)
 			@editor.completers.push @suggestionManager
 
 			# Force the editor.completer into existence,
