@@ -118,17 +118,33 @@ define [
 			@editor.completers.push @suggestionManager
 
 			# Force the editor.completer into existence,
-			# then override it's change handler with our own
+			# then override it's showPopup handler with our own
 			setTimeout (editor) ->
-				console.log ">> patching"
 				Autocomplete = ace.require('ace/autocomplete').Autocomplete
 				if !editor.completer
 					editor.completer = new Autocomplete()
-				lang = ace.require('ace/lib/lang')
-				editor.completer.changeTimer = lang.delayedCall (() ->
-					console.log ">> here is change"
-					this.updateCompletions(true)
-				).bind(editor.completer)
+
+				_showPopup = editor.completer.showPopup.bind(editor.completer)
+				editor.completer.showPopup = (editor) ->
+					pos = editor.getCursorPosition()
+					current_line = editor.getSession().getLine(pos.row)
+					line_to_cursor = current_line.slice(0, pos.column)
+
+					# bail if we are in a comment
+					console.log line_to_cursor
+					return if line_to_cursor.indexOf('#') >= 0
+
+					# bail if we have unbalanced quotes in this line
+					single_quote_count = line_to_cursor.match(/'/g)?.length || 0
+					double_quote_count = line_to_cursor.match(/"/g)?.length || 0
+					return if (
+						single_quote_count > 0 and single_quote_count % 2 == 1 or
+						double_quote_count > 0 and double_quote_count % 2 == 1
+					)
+
+					# or just continue to the original popup method
+					_showPopup(editor)
+
 			, 0, @editor
 
 			window._e = @editor
