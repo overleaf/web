@@ -128,6 +128,6 @@ define [
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
-			setTimeout =>
-				KernelCompletionSpinner.tryAttach(@$scope)
-			, 1
+				setTimeout =>
+					KernelCompletionSpinner.tryAttach(@$scope)
+				, 1
