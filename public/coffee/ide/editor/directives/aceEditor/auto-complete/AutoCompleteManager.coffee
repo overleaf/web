@@ -8,12 +8,6 @@ define [
 ], (SuggestionManager, CustomTextCompleter, KernelCompletionSpinner, Snippets) ->
 	Range = ace.require("ace/range").Range
 
-	getLastCommandFragment = (lineUpToCursor) ->
-		if m = lineUpToCursor.match(/(\\[^\\ ]+)$/)
-			return m[1]
-		else
-			return null
-
 	# Here we force the editor.completer into existence, which usually doesn't get instantiated
 	# until it's first used.
 	# We then monkey-patch it's showPopup handler with our own, so we can interupt the popup if
@@ -115,16 +109,9 @@ define [
 				if change.action == "insert"
 					range = new Range(end.row, 0, end.row, end.column)
 					lineUpToCursor = @editor.getSession().getTextRange(range)
-					commandFragment = getLastCommandFragment(lineUpToCursor)
-
-					if commandFragment? and commandFragment.length > 2
-						setTimeout () =>
-							@editor.execCommand("startAutocomplete")
-						, 0
 
 					# fire autocomplete if line ends in a dot like: `some_identifier.`
 					if lineUpToCursor.match(/(\w+)\.$/)
-						console.log ">> here"
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
