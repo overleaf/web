@@ -7,7 +7,7 @@ define [
 	stripUnwantedText =  (original_text) ->
 		_.reduce(
 			[
-				/#(.*)$/m         # remove comments
+				/#(.*)$/m          # remove comments
 				/('|").*\1/mg      # remove string contents
 			]
 			(text, re) -> text.replace(re, ' ')
@@ -34,6 +34,8 @@ define [
 
 		constructor: (@editor) ->
 
+		# these methods are much the same as in ace/autocomplete/text_completer,
+		# except for the calls to stripUnwantedText()
 		getWordIndex: (doc, pos) ->
 			textBefore = doc.getTextRange(Range.fromPoints({row: 0, column:0}, pos))
 			textBefore = stripUnwantedText(textBefore)
