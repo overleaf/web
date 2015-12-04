@@ -86,6 +86,7 @@ define [
 					, 1
 			}
 
+			# set up our completers
 			CustomTextCompleter.init(@editor)
 			@editor.completers.push @suggestionManager
 
