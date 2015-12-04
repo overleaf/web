@@ -14,6 +14,39 @@ define [
 		else
 			return null
 
+	# Here we force the editor.completer into existence, which usually doesn't get instantiated
+	# until it's first used.
+	# We then monkey-patch it's showPopup handler with our own, so we can interupt the popup if
+	# we know it should not be shown, such as if the cursor is in a comment, or inside a string
+	monkeyPatchAutocomplete = (editor) ->
+		Autocomplete = ace.require('ace/autocomplete').Autocomplete
+		if !editor.completer
+			editor.completer = new Autocomplete()
+
+		# keep a reference to the old showPopup, and substitute it
+		# with a wrapper function
+		_showPopup = editor.completer.showPopup.bind(editor.completer)
+		editor.completer.showPopup = (editor) ->
+			pos = editor.getCursorPosition()
+			current_line = editor.getSession().getLine(pos.row)
+			line_to_cursor = current_line.slice(0, pos.column)
+
+			# bail if we are in a comment
+			return if line_to_cursor.indexOf('#') >= 0
+
+			# bail if we have unbalanced quotes in this line
+			single_quote_count = line_to_cursor.match(/'/g)?.length || 0
+			double_quote_count = line_to_cursor.match(/"/g)?.length || 0
+			return if (
+				single_quote_count > 0 and single_quote_count % 2 == 1 or
+				double_quote_count > 0 and double_quote_count % 2 == 1
+			)
+
+			# If we have no objections, just continue to the original popup method
+			_showPopup(editor)
+
+		return editor.completer
+
 	class AutoCompleteManager
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
@@ -37,6 +70,9 @@ define [
 				enableSnippets: true,
 				enableLiveAutocompletion: true
 			})
+
+			# add our own tab handler, so we can trigger autocomplete
+			# if we want
 			@editor.commands.addCommand {
 				name: 'tabComplete'
 				bindKey: 'TAB'
@@ -59,36 +95,10 @@ define [
 			CustomTextCompleter.init(@editor)
 			@editor.completers.push @suggestionManager
 
-			# Force the editor.completer into existence,
-			# then override it's showPopup handler with our own
+			# on the next tick, monkey-patch the autocompleter
 			setTimeout (editor) ->
-				Autocomplete = ace.require('ace/autocomplete').Autocomplete
-				if !editor.completer
-					editor.completer = new Autocomplete()
-
-				_showPopup = editor.completer.showPopup.bind(editor.completer)
-				editor.completer.showPopup = (editor) ->
-					pos = editor.getCursorPosition()
-					current_line = editor.getSession().getLine(pos.row)
-					line_to_cursor = current_line.slice(0, pos.column)
-
-					# bail if we are in a comment
-					return if line_to_cursor.indexOf('#') >= 0
-
-					# bail if we have unbalanced quotes in this line
-					single_quote_count = line_to_cursor.match(/'/g)?.length || 0
-					double_quote_count = line_to_cursor.match(/"/g)?.length || 0
-					return if (
-						single_quote_count > 0 and single_quote_count % 2 == 1 or
-						double_quote_count > 0 and double_quote_count % 2 == 1
-					)
-
-					# or just continue to the original popup method
-					_showPopup(editor)
-
+				monkeyPatchAutocomplete(editor)
 			, 0, @editor
-
-			window._e = @editor
 
 		disable: () ->
 			@editor.setOptions({
@@ -112,8 +122,9 @@ define [
 							@editor.execCommand("startAutocomplete")
 						, 0
 
-					# fire autocomplete if line ends in `some_identifier.`
+					# fire autocomplete if line ends in a dot like: `some_identifier.`
 					if lineUpToCursor.match(/(\w+)\.$/)
+						console.log ">> here"
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
