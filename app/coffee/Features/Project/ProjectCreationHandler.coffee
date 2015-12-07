@@ -2,7 +2,7 @@ logger = require('logger-sharelatex')
 async = require("async")
 metrics = require('../../infrastructure/Metrics')
 Settings = require('settings-sharelatex')
-ObjectId = require('mongoose').Types.ObjectId	
+ObjectId = require('mongoose').Types.ObjectId
 Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
 ProjectEntityHandler = require('./ProjectEntityHandler')
@@ -28,9 +28,13 @@ module.exports =
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @
+		cleanProjectName = (name) ->
+			name = name.replace(n, o) for n, o in '&': '\\&', '$': '\\$', '%': '\\%', '^': '\\^{}', '_': '\\_', '<': '\\textless', '>': '\\textgreater'
+			return name
+
 		@createBlankProject owner_id, projectName, (error, project)->
 			return callback(error) if error?
-			self._buildTemplate "mainbasic.tex", owner_id, projectName.replace('&', '\\&'), (error, docLines)->
+			self._buildTemplate "mainbasic.tex", owner_id, cleanProjectName(projectName), (error, docLines)->
 				return callback(error) if error?
 				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
 					return callback(error) if error?
@@ -74,6 +78,3 @@ module.exports =
 					month: monthNames[new Date().getUTCMonth()]
 				output = _.template(template.toString(), data)
 				callback null, output.split("\n")
-
-
-
