@@ -98,7 +98,8 @@ define [
 		disable: () ->
 			@editor.setOptions({
 				enableBasicAutocompletion: false,
-				enableSnippets: false
+				enableSnippets: false,
+				enableLiveAutocompletion: false
 			})
 
 		onChange: (change) ->
