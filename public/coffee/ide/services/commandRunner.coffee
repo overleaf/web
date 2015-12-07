@@ -19,7 +19,6 @@ define [
 				ide.$scope.$apply()
 			else if msg_type == "command_exited"
 				run.exitCode = message.content.exitCode
-				commandRunner._displayErrors(run)
 			else
 				output = commandRunner._parseOutputMessage(message)
 				if output?
@@ -272,39 +271,5 @@ define [
 					return ''
 				output.text = stderr
 				return parsedErrors
-
-			_displayErrors: (run) ->
-				$scope = ide.$scope
-				if !$scope.pdf  # FIXME: pdf can be undefined, this is dead code
-					return
-				$scope.pdf.logEntryAnnotations = {}
-
-				addError = (error, message = error.message, type = "error") ->
-					return unless error.file?
-					entity = ide.fileTreeManager.findEntityByPath(error.file)
-					if entity?
-						$scope.pdf.logEntryAnnotations[entity.id] ||= []
-						$scope.pdf.logEntryAnnotations[entity.id].push {
-							row: error.line-1
-							type: type
-							text: message
-						}
-
-				formatStackTrace = (error, depth) ->
-					formatLine = (frame, i, j) ->
-						if i == j then "*" + frame.message else frame.message
-					error.message + "\n" + (formatLine(s, i, depth) for s, i in error.stack).join("\n")
-
-				for output in run.output when output.parsedErrors?
-					for error in output.parsedErrors
-						if error.stack?
-							for frame, i in error.stack
-								status = if frame.type? then frame.type else "warning"
-								addError frame, formatStackTrace(error, i), status
-						else
-							addError error
-
-				$scope.$evalAsync()
-
 
 		return commandRunner
