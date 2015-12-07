@@ -115,7 +115,9 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 							div.alert.alert-success.row-spaced(ng-if="simple.state.install.exitCode == 0")
 								| Success! '{{ simple.state.install.packageName }}' was installed.
 							div.alert.alert-danger.row-spaced(ng-if="simple.state.install.exitCode")
-								| Failed to install '{{ simple.state.install.packageName }}', sorry.
+								| Failed to install '{{ simple.state.install.packageName }}', sorry. 
+								a(href="/learn/Installing_{{ engine == 'python' ? 'Python' : 'R' }}_Packages", target="_blank")
+									| Learn more about installing packages
 
 			
 			// search results panel
