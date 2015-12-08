@@ -210,6 +210,12 @@
 			margin-left: @execution-count-width + @line-height-computed / 2;
 			position: relative;
 
+			.ace-manual-input-wrapper {
+				.ace_hidden-cursors {
+					opacity: 0;
+				}
+			}
+
 			&.pretty-help {
 				.card {
 					border-top: 1px solid #efefef;

@@ -70,6 +70,9 @@ define [
 				if attrs.maxLines
 					editor.setOption('maxLines', parseInt(attrs.maxLines))
 
+				if attrs.highlightActiveLine == 'false'
+					editor.setOption('highlightActiveLine', false)
+
 				if scope.autocompleteDelegate
 					setTimeout (scope) ->
 						our_editor = _.filter(window.editors, (e) -> e._djName == scope.name)
