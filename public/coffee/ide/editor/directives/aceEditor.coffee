@@ -73,6 +73,22 @@ define [
 				if attrs.highlightActiveLine == 'false'
 					editor.setOption('highlightActiveLine', false)
 
+				if attrs.placeholder
+					_updatePlaceholder = () ->
+						shouldShow = editor.getValue().length == 0
+						existingMessage = editor.renderer.emptyMessageNode
+						if (!shouldShow and existingMessage)
+							editor.renderer.scroller.removeChild(existingMessage)
+							editor.renderer.emptyMessageNode = null
+						else if (shouldShow and !existingMessage)
+							newMessage = editor.renderer.emptyMessageNode = document.createElement("div")
+							newMessage.textContent = attrs.placeholder
+							newMessage.className = 'ace_invisible ace_emptyMessage'
+							newMessage.style.padding = "0 8px"
+							editor.renderer.scroller.appendChild(newMessage)
+					editor.on('input', _updatePlaceholder)
+					setTimeout(_updatePlaceholder, 0)
+
 				if scope.autocompleteDelegate
 					setTimeout (scope) ->
 						our_editor = _.filter(window.editors, (e) -> e._djName == scope.name)

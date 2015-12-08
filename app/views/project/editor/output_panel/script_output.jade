@@ -241,7 +241,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							ace-editor="manual_editor",
 							theme="github",
 							keybindings="settings.mode",
-							font-size="settings.fontSize",
+							font-size="14",
 							auto-complete="settings.autoComplete",
 							line-wrap="settings.lineWrap",
 							highlights="onlineUserCursorHighlights[manual_editor.open_doc_id]"
@@ -259,6 +259,7 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							max-lines="1"
 							highlight-active-line="false"
 							ng-keydown="handleKeyUp($event)"
+							placeholder="Command..."
 						)
 
 				
