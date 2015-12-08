@@ -54,6 +54,8 @@ define [
 			onChange = (change) =>
 				@onChange(change)
 
+			@editor.on 'change', onChange
+
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
@@ -82,9 +84,9 @@ define [
 					else
 						editor.indent()
 					# HACK: only do the spinner thing for the main editor
-					if editor._djName == 'editor'
+					if editor._djName == 'editor' or true
 						setTimeout =>
-							KernelCompletionSpinner.tryAttach(@$scope)
+							KernelCompletionSpinner.tryAttach(@$scope, editor)
 						, 1
 			}
 
@@ -120,5 +122,5 @@ define [
 							@editor.execCommand("startAutocomplete")
 						, 0
 				setTimeout =>
-					KernelCompletionSpinner.tryAttach(@$scope)
+					KernelCompletionSpinner.tryAttach(@$scope, @editor)
 				, 1
