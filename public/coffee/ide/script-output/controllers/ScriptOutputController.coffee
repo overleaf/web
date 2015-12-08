@@ -178,7 +178,6 @@ define [
 		$scope.handleKeyUp = (event) ->
 
 			if event.keyCode == 13  # Enter
-				console.log ">> enter"
 				event.preventDefault()
 				manual_editor = _.filter(window.editors, (e) -> e._djName == 'manual_editor')[0]
 				if manual_editor
