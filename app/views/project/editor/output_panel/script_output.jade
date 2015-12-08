@@ -227,43 +227,49 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				| Sorry, something went wrong running your request. Please try again.
 			
 		div.manual-input.border-top
-			div(ng-if="completion.matches").completions
-				div(ng-repeat="match in completion.matches").match
-					span.label.label-default(ng-class="{'label-primary': $index == completion.currentSelection}")
-						| {{ match }}
-					| &nbsp;
-			div.manual-input-editor(
-				ace-editor="manual_editor"
-				keybindings="settings.mode",
-				font-size="settings.fontSize",
-				auto-complete="settings.autoComplete",
-				line-wrap="settings.lineWrap",
-				highlights="onlineUserCursorHighlights[manual_editor.open_doc_id]"
-				show-print-margin="false",
-				sharejs-doc="manual_editor.sharejs_doc",
-				last-updated="manual_editor.last_updated",
-				cursor-position="manual_editor.cursorPosition",
-				goto-line="manual_editor.gotoLine",
-				resize-on="layout:main:resize,layout:pdf:resize",
-				annotations="pdf.logEntryAnnotations[manual_editor.open_doc_id]",
-				read-only="!permissions.write",
-				ace-mode="editor.ace_mode",
-				wrap-lines="editor.editor_mode == 'latex'",
-				selection="manual_editor.selection"
-				autocomplete-delegate="editor"
-			)
+			//- div(ng-if="completion.matches").completions
+			//- 	div(ng-repeat="match in completion.matches").match
+			//- 		span.label.label-default(ng-class="{'label-primary': $index == completion.currentSelection}")
+			//- 			| {{ match }}
+			//- 		| &nbsp;
 			div.input
 				.execution-count
 					| In[]:
 				.cell-content
-					textarea(
-						ng-model="manualInput",
-						command-line,
-						expand-to-content-height,
-						expand-to-content-height-max="200",
-						on-run="runManualInput()",
-						placeholder = "Command...",
-						ng-focus="ui.chatOpen || showInterCom(false)",
-						ng-blur="showInterCom(true)"
-						ng-keydown="preventTabFocus($event)"
-					)
+					.ace-manual-input-wrapper
+						div.manual-input-editor(
+							ace-editor="manual_editor",
+							theme="github",
+							keybindings="settings.mode",
+							font-size="settings.fontSize",
+							auto-complete="settings.autoComplete",
+							line-wrap="settings.lineWrap",
+							highlights="onlineUserCursorHighlights[manual_editor.open_doc_id]"
+							show-print-margin="false",
+							sharejs-doc="null",
+							last-updated="manual_editor.last_updated",
+							cursor-position="manual_editor.cursorPosition",
+							resize-on="layout:main:resize,layout:pdf:resize",
+							read-only="false",
+							ace-mode="editor.ace_mode",
+							wrap-lines="false",
+							selection="manual_editor.selection"
+							autocomplete-delegate="editor"
+							hide-line-numbers="true"
+							max-lines="1"
+						)
+
+				
+				
+				
+					//- textarea(
+					//- 	ng-model="manualInput",
+					//- 	command-line,
+					//- 	expand-to-content-height,
+					//- 	expand-to-content-height-max="200",
+					//- 	on-run="runManualInput()",
+					//- 	placeholder = "Command...",
+					//- 	ng-focus="ui.chatOpen || showInterCom(false)",
+					//- 	ng-blur="showInterCom(true)"
+					//- 	ng-keydown="preventTabFocus($event)"
+					//- )

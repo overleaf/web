@@ -56,17 +56,24 @@ define [
 				scope.name = attrs.aceEditor
 				scope.autocompleteDelegate = attrs.autocompleteDelegate
 
-				editor.name = scope.name
+				editor._djName = scope.name
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 
+				if attrs.hideLineNumbers == 'true'
+					editor.setOption('showLineNumbers', false)
+					editor.setOption('showGutter', false)
+
+				if attrs.maxLines
+					editor.setOption('maxLines', parseInt(attrs.maxLines))
+
 				if scope.autocompleteDelegate
 					setTimeout (scope) ->
-						our_editor = _.filter(window.editors, (e) -> e.name == scope.name)
-						delegate = _.filter(window.editors, (e) -> e.name == scope.autocompleteDelegate)[0]
+						our_editor = _.filter(window.editors, (e) -> e._djName == scope.name)
+						delegate = _.filter(window.editors, (e) -> e._djName == scope.autocompleteDelegate)[0]
 						if our_editor and delegate
 							our_editor.completer = delegate.completer
 					, 500, scope
