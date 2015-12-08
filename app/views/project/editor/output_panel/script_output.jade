@@ -232,6 +232,26 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					span.label.label-default(ng-class="{'label-primary': $index == completion.currentSelection}")
 						| {{ match }}
 					| &nbsp;
+			div.manual-input-editor(
+				ace-editor="manual_editor"
+				keybindings="settings.mode",
+				font-size="settings.fontSize",
+				auto-complete="settings.autoComplete",
+				line-wrap="settings.lineWrap",
+				highlights="onlineUserCursorHighlights[manual_editor.open_doc_id]"
+				show-print-margin="false",
+				sharejs-doc="manual_editor.sharejs_doc",
+				last-updated="manual_editor.last_updated",
+				cursor-position="manual_editor.cursorPosition",
+				goto-line="manual_editor.gotoLine",
+				resize-on="layout:main:resize,layout:pdf:resize",
+				annotations="pdf.logEntryAnnotations[manual_editor.open_doc_id]",
+				read-only="!permissions.write",
+				ace-mode="editor.ace_mode",
+				wrap-lines="editor.editor_mode == 'latex'",
+				selection="manual_editor.selection"
+				autocomplete-delegate="editor"
+			)
 			div.input
 				.execution-count
 					| In[]:

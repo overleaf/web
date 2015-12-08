@@ -8,7 +8,7 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 ], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
-	
+
 	# Ace loads its script itself, so we need to hook in to be able to clear
 	# the cache.
 	if !ace.config._moduleUrl?
@@ -54,11 +54,22 @@ define [
 				window.editors.push editor
 
 				scope.name = attrs.aceEditor
+				scope.autocompleteDelegate = attrs.autocompleteDelegate
+
+				editor.name = scope.name
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+
+				if scope.autocompleteDelegate
+					setTimeout (scope) ->
+						our_editor = _.filter(window.editors, (e) -> e.name == scope.name)
+						delegate = _.filter(window.editors, (e) -> e.name == scope.autocompleteDelegate)[0]
+						if our_editor and delegate
+							our_editor.completer = delegate.completer
+					, 500, scope
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -135,24 +146,24 @@ define [
 						session = editor.getSession()
 						session.setUseWrapMode(scope.wrapLines)
 						session.setMode("ace/mode/#{scope.aceMode}")
-						
+
 				scope.$watch "aceMode", (mode) ->
 					if mode?
 						session = editor.getSession()
 						session.setMode("ace/mode/#{mode}")
-						
+
 				scope.$watch "wrapLines", (wrap) ->
 					if wrap?
 						session = editor.getSession()
 						session.setUseWrapMode(wrap)
-						
+
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()
 					session.setAnnotations annotations
 
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
-			
+
 				scope.$watch "lineWrap", (lineWrap) =>
 					if lineWrap?
 						editor.getSession().setUseWrapMode(lineWrap)
@@ -167,7 +178,7 @@ define [
 					session.setUseWrapMode(scope.wrapLines)
 					session.setMode("ace/mode/#{scope.aceMode}")
 					session.setAnnotations scope.annotations
-				
+
 				updatingSelection = false
 				updateSelection = () ->
 					range = editor.selection.getRange()
@@ -176,7 +187,7 @@ define [
 						scope.selection = {
 							lines: lines
 						}
-					
+
 				onSelectionChange = () ->
 					# the changeSelection event is emitted multiple times
 					# per change, so make sure we only run our update code once.
@@ -186,7 +197,7 @@ define [
 							updateSelection()
 							updatingSelection = false
 						, 0
-								
+
 				editor.on "changeSelection", onSelectionChange
 
 				updateCount = 0
@@ -195,14 +206,14 @@ define [
 					updateCount++
 					if updateCount == 100
 						event_tracking.send 'document', 'significantly-edit'
-						
+
 					# Send 'document-edit' events at a max rate of one per minute
 					ONE_MINUTE = 60 * 1000
 					now = new Date()
 					if !last_sent_event? or now - last_sent_event > ONE_MINUTE
 						event_tracking.send 'document', 'edit'
 						last_sent_event = now
-						
+
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
@@ -210,7 +221,7 @@ define [
 					editor.setSession(new EditSession(lines))
 					resetSession()
 					session = editor.getSession()
-					
+
 					if scope.lineWrap
 						editor.getSession().setUseWrapMode(true)
 
@@ -224,7 +235,7 @@ define [
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
-					
+
 					updateSelection()
 
 					editor.focus()
