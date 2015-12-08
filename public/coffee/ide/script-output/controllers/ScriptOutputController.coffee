@@ -175,6 +175,17 @@ define [
 		# 		else
 		# 			$scope.runManualInput()
 
-		$scope.preventTabFocus = (event) ->
-			if event.keyCode == 9
+		$scope.handleKeyUp = (event) ->
+
+			if event.keyCode == 13  # Enter
+				console.log ">> enter"
+				event.preventDefault()
+				manual_editor = _.filter(window.editors, (e) -> e._djName == 'manual_editor')[0]
+				if manual_editor
+					text = manual_editor.getValue()
+					$scope.manualInput = text
+					$scope.runManualInput()
+					manual_editor.setValue('')
+
+			if event.keyCode == 9  # TAB
 				event.preventDefault()
