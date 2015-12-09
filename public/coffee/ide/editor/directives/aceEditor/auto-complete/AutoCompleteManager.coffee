@@ -54,11 +54,14 @@ define [
 			onChange = (change) =>
 				@onChange(change)
 
-			@editor.on 'change', onChange
-
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
+
+			# HACK: the manual-input editor will never change session,
+			# so explcitely add it's on-change handler
+			if @editor._dj_name == 'manual_editor'
+				@editor.on 'change', onChange
 
 		enable: () ->
 			@editor.setOptions({
