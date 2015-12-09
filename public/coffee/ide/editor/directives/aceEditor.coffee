@@ -92,15 +92,6 @@ define [
 					editor.on('input', _updatePlaceholder)
 					setTimeout(_updatePlaceholder, 0)
 
-				# delegate autocomplete for this editor to another named editor
-				if scope.autocompleteDelegate
-					setTimeout (scope) ->
-						our_editor = _.filter(window.editors, (e) -> e._dj_name == scope.name)
-						delegate = _.filter(window.editors, (e) -> e._dj_name == scope.autocompleteDelegate)[0]
-						if our_editor and delegate
-							our_editor.completer = delegate.completer
-					, 500, scope
-
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
 					name: "save",
