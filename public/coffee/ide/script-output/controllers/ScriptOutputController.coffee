@@ -103,18 +103,6 @@ define [
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
 
-		# HACK
-		$scope.manuaInput = ""
-		$scope.runManualInput = () ->
-			code = $scope.manualInput
-			trackCommandRun()
-			engine = ide.$scope.engine
-			jupyterRunner.executeRequest code, engine
-			$scope._scrollOutput()
-			$scope.manualInput = ""
-		# /HACK
-
-
 		$scope.doCompletion = () ->
 			trackCommandRun()
 			code   = $scope.manualInput
@@ -196,7 +184,3 @@ define [
 
 			if event.keyCode == 9  # TAB
 				event.preventDefault()
-
-		# HACK
-		$scope.preventTabFocus = $scope.handleKeyUp
-		# /HACK
