@@ -254,9 +254,8 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							ace-mode="editor.ace_mode",
 							wrap-lines="false",
 							selection="manual_editor.selection"
-							hide-line-numbers="true"
-							max-lines="1"
-							highlight-active-line="false"
-							ng-keydown="handleKeyUp($event)"
-							placeholder="Command..."
+							command-line="true"
+							command-line-get-value="getManualEditorValue"
+							command-line-set-value="setManualEditorValue"
+							command-line-on-run="onRun"
 						)

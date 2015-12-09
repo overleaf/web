@@ -17,6 +17,64 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
+	ENTER = 13
+	UP    = 38
+	DOWN  = 40
+	TAB   = 9
+	END   = -1
+
+	class CommandLine
+
+		@init: (editor, rootElement, getValue, setValue, onRun) ->
+			commandLine = new CommandLine(editor, rootElement, getValue, setValue, onRun)
+			editor._dj_commandLine = commandLine
+
+		constructor: (@editor, @rootElement, @getValueFn, @setValueFn, @onRunFn) ->
+			@history = []
+			@cursor = END
+			@pendingCommand = ""
+
+			rootElement.bind "keydown", (event) =>
+				@handleKeyDown(event)
+
+		handleKeyDown: (event) ->
+			console.log ">> keydown"
+			if event.which == ENTER and not event.shiftKey
+				event.preventDefault()
+				@runCommand()
+			else if event.which == UP
+				event.preventDefault()
+				if @cursor == END and @history.length > 0
+					@savePendingCommand()
+					@moveToHistoryEntry(@history.length - 1)
+				else if @cursor > 0
+					@moveToHistoryEntry(@cursor - 1)
+			else if event.which == DOWN
+				event.preventDefault()
+				if @cursor != END and @cursor < history.length - 1
+					@moveToHistoryEntry(@cursor + 1)
+				else if @cursor == @history.length - 1
+					@moveToHistoryEntry(END)
+
+		savePendingCommand: () ->
+			console.log ">> save command"
+			@pendingCommand = @getValueFn()
+
+		moveToHistoryEntry: (index) ->
+			console.log ">> move to hist entry"
+			@cursor = index
+			if index == END
+				@setValueFn(@pendingCommand)
+			else
+				@setValueFn(@history[index])
+
+		runCommand: () ->
+			console.log ">> run command"
+			@history.push @getValueFn()
+			@cursor = END
+			@onRunFn()
+
+
 	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage) ->
 		monkeyPatchSearch($rootScope, $compile)
 
@@ -63,20 +121,20 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 
-				if attrs.hideLineNumbers == 'true'
+				if attrs.commandLine == 'true'
+					console.log ">> it's command line #{scope.name}"
 					editor.setOption('showLineNumbers', false)
 					editor.setOption('showGutter', false)
-
-				if attrs.maxLines
-					editor.setOption('maxLines', parseInt(attrs.maxLines))
-
-				if attrs.highlightActiveLine == 'false'
+					editor.setOption('maxLines', 1)
 					editor.setOption('highlightActiveLine', false)
 
-				# set up a placeholder text
-				# watch for changes to the editor, if the text is empty,
-				# add a div with the placeholder text, otherwise remove it
-				if attrs.placeholder
+					getValueFn = scope.$parent[attrs.commandLineGetValue]
+					setValueFn = scope.$parent[attrs.commandLineSetValue]
+					onRunFn = scope.$parent[attrs.commandLineOnRun]
+
+					# set up a placeholder text
+					# watch for changes to the editor, if the text is empty,
+					# add a div with the placeholder text, otherwise remove it
 					_updatePlaceholder = () ->
 						shouldShow = editor.getValue().length == 0
 						existingMessage = editor.renderer.emptyMessageNode
@@ -85,12 +143,15 @@ define [
 							editor.renderer.emptyMessageNode = null
 						else if (shouldShow and !existingMessage)
 							newMessage = editor.renderer.emptyMessageNode = document.createElement("div")
-							newMessage.textContent = attrs.placeholder
+							newMessage.textContent = 'Command...'
 							newMessage.className = 'ace_invisible ace_emptyMessage'
 							newMessage.style.padding = "0 8px"
 							editor.renderer.scroller.appendChild(newMessage)
 					editor.on('input', _updatePlaceholder)
 					setTimeout(_updatePlaceholder, 0)
+
+					CommandLine.init(editor, element, getValueFn, setValueFn, onRunFn)
+
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand

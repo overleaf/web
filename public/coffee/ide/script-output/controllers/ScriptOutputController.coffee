@@ -184,3 +184,22 @@ define [
 
 			if event.keyCode == 9  # TAB
 				event.preventDefault()
+
+		$scope.getManualEditor = () ->
+			_.filter(window.editors, (e) -> e._dj_name == 'manual_editor')[0]
+
+		$scope.getManualEditorValue = () ->
+			manual_editor = $scope.getManualEditor()
+			if manual_editor
+				manual_editor.getValue()
+
+		$scope.setManualEditorValue = (text) ->
+			manual_editor = $scope.getManualEditor()
+			if manual_editor
+				manual_editor.setValue(text)
+
+		$scope.onRun = () ->
+			code = $scope.getManualEditorValue()
+			if code
+				$scope.runManualInput(code)
+				$scope.setManualEditorValue('')
