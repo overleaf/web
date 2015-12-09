@@ -236,27 +236,42 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 				.execution-count
 					| In[]:
 				.cell-content
-					.ace-manual-input-wrapper
-						div#manual_editor.manual-input-editor(
-							ace-editor="manual_editor",
-							theme=" 'textmate' ",
-							keybindings="settings.mode",
-							font-size="14",
-							auto-complete="settings.autoComplete",
-							line-wrap="false",
-							highlights="null"
-							show-print-margin="false",
-							sharejs-doc="null",
-							last-updated="manual_editor.last_updated",
-							cursor-position="manual_editor.cursorPosition",
-							resize-on="layout:main:resize,layout:pdf:resize",
-							read-only="false",
-							ace-mode="editor.ace_mode",
-							wrap-lines="false",
-							selection="manual_editor.selection"
-							hide-line-numbers="true"
-							max-lines="1"
-							highlight-active-line="false"
-							ng-keydown="handleKeyUp($event)"
-							placeholder="Command..."
-						)
+
+					// HACK
+
+					//- .ace-manual-input-wrapper
+					//- 	div#manual_editor.manual-input-editor(
+					//- 		ace-editor="manual_editor",
+					//- 		theme=" 'textmate' ",
+					//- 		keybindings="settings.mode",
+					//- 		font-size="14",
+					//- 		auto-complete="settings.autoComplete",
+					//- 		line-wrap="false",
+					//- 		highlights="null"
+					//- 		show-print-margin="false",
+					//- 		sharejs-doc="null",
+					//- 		last-updated="manual_editor.last_updated",
+					//- 		cursor-position="manual_editor.cursorPosition",
+					//- 		resize-on="layout:main:resize,layout:pdf:resize",
+					//- 		read-only="false",
+					//- 		ace-mode="editor.ace_mode",
+					//- 		wrap-lines="false",
+					//- 		selection="manual_editor.selection"
+					//- 		hide-line-numbers="true"
+					//- 		max-lines="1"
+					//- 		highlight-active-line="false"
+					//- 		ng-keydown="handleKeyUp($event)"
+					//- 		placeholder="Command..."
+					//- 	)
+
+					textarea(
+						ng-model="manualInput",
+						command-line,
+						expand-to-content-height,
+						expand-to-content-height-max="200",
+						on-run="runManualInput()",
+						placeholder = "Command...",
+						ng-focus="ui.chatOpen || showInterCom(false)",
+						ng-blur="showInterCom(true)"
+						ng-keydown="preventTabFocus($event)"
+					)
