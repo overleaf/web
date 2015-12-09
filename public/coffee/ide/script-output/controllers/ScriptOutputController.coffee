@@ -97,14 +97,11 @@ define [
 				throw new Error("not implemented yet")
 			$scope._scrollOutput()
 
-		$scope.manualInput = ""
-		$scope.runManualInput = () ->
+		$scope.runManualInput = (code) ->
 			trackCommandRun()
-			code   = $scope.manualInput
 			engine = ide.$scope.engine
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
-			$scope.manualInput = ""
 
 		$scope.doCompletion = () ->
 			trackCommandRun()
@@ -179,11 +176,10 @@ define [
 
 			if event.keyCode == 13  # Enter
 				event.preventDefault()
-				manual_editor = _.filter(window.editors, (e) -> e._djName == 'manual_editor')[0]
+				manual_editor = _.filter(window.editors, (e) -> e._dj_name == 'manual_editor')[0]
 				if manual_editor
-					text = manual_editor.getValue()
-					$scope.manualInput = text
-					$scope.runManualInput()
+					code = manual_editor.getValue()
+					$scope.runManualInput(code)
 					manual_editor.setValue('')
 
 			if event.keyCode == 9  # TAB

@@ -43,7 +43,7 @@ define [], () ->
 
 			# early return if we've already got a spinner from a
 			# previous run
-			if $scope._autocomplete_spinners[editor._djName]
+			if $scope._autocomplete_spinners[editor._dj_name]
 				return
 
 			# get the autocomplete popup for this editor, if it exists in the page
@@ -76,4 +76,4 @@ define [], () ->
 						spinner_element.style.visibility = 'hidden'
 
 				spinner.spinner_element = spinner_element
-				$scope._autocomplete_spinners[editor._djName] = spinner
+				$scope._autocomplete_spinners[editor._dj_name] = spinner

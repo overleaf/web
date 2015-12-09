@@ -83,11 +83,9 @@ define [
 						, 0
 					else
 						editor.indent()
-					# HACK: only do the spinner thing for the main editor
-					if editor._djName == 'editor' or true
-						setTimeout =>
-							KernelCompletionSpinner.tryAttach(@$scope, editor)
-						, 1
+					setTimeout =>
+						KernelCompletionSpinner.tryAttach(@$scope, editor)
+					, 1
 			}
 
 			# set up our completers

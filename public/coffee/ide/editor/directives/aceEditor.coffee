@@ -56,7 +56,7 @@ define [
 				scope.name = attrs.aceEditor
 				scope.autocompleteDelegate = attrs.autocompleteDelegate
 
-				editor._djName = scope.name
+				editor._dj_name = scope.name
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
@@ -73,6 +73,9 @@ define [
 				if attrs.highlightActiveLine == 'false'
 					editor.setOption('highlightActiveLine', false)
 
+				# set up a placeholder text
+				# watch for changes to the editor, if the text is empty,
+				# add a div with the placeholder text, otherwise remove it
 				if attrs.placeholder
 					_updatePlaceholder = () ->
 						shouldShow = editor.getValue().length == 0
@@ -89,10 +92,11 @@ define [
 					editor.on('input', _updatePlaceholder)
 					setTimeout(_updatePlaceholder, 0)
 
+				# delegate autocomplete for this editor to another named editor
 				if scope.autocompleteDelegate
 					setTimeout (scope) ->
-						our_editor = _.filter(window.editors, (e) -> e._djName == scope.name)
-						delegate = _.filter(window.editors, (e) -> e._djName == scope.autocompleteDelegate)[0]
+						our_editor = _.filter(window.editors, (e) -> e._dj_name == scope.name)
+						delegate = _.filter(window.editors, (e) -> e._dj_name == scope.autocompleteDelegate)[0]
 						if our_editor and delegate
 							our_editor.completer = delegate.completer
 					, 500, scope
