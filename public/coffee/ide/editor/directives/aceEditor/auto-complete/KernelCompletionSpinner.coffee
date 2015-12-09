@@ -5,7 +5,7 @@ define [], () ->
 	# a '.ace_autocomple' element, and if found builds the the spinner dom elements and
 	# inserts them into the page.
 	# All state is kept in singleton instance of this class, and that instance is cached
-	# on the $scope object. Further calls to tryAttach will have no effect.
+	# on the $scope object. Further calls to tryAttach for that editor will have no effect.
 	class KernelCompletionSpinner
 
 		constructor: (@$scope, @editor) ->
@@ -33,16 +33,17 @@ define [], () ->
 
 			return spinner_element
 
-		# static method: attempt to find the ace_autocomplete element and attach our
+		# static method: attempt to find the ace_autocomplete element
+		# for the given editor and attach our
 		# spinner graphic to it, keeping it's state in an instance of
-		# this class, caching that single instance in $scope._autocomplet_spinner
+		# this class, caching that single instance in $scope._autocomplete_spinners
 		@tryAttach: ($scope, editor) ->
 			# init an object to keep references to spinners for each editor
-			$scope._spinners ||= {}
+			$scope._autocomplete_spinners ||= {}
 
 			# early return if we've already got a spinner from a
 			# previous run
-			if $scope._spinners[editor._djName]
+			if $scope._autocomplete_spinners[editor._djName]
 				return
 
 			# get the autocomplete popup for this editor, if it exists in the page
@@ -53,8 +54,10 @@ define [], () ->
 				# the spinner graphic
 				spinner = new KernelCompletionSpinner($scope, editor)
 
-				# patch styles on the autocomplete popup
-				autocomplete.style.overflow = 'visible'  # required to make the spinner visible
+				# patch styles on the autocomplete popup.
+				# required to make the spinner visible beyond the edge of
+				# the popup
+				autocomplete.style.overflow = 'visible'
 
 				# append spinner element (graphic) to the autocomplete popup
 				spinner_element = KernelCompletionSpinner.buildSpinnerElement()
@@ -73,4 +76,4 @@ define [], () ->
 						spinner_element.style.visibility = 'hidden'
 
 				spinner.spinner_element = spinner_element
-				$scope._spinners[editor._djName] = spinner
+				$scope._autocomplete_spinners[editor._djName] = spinner
