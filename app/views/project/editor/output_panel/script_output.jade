@@ -239,12 +239,12 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 					.ace-manual-input-wrapper
 						div#manual_editor.manual-input-editor(
 							ace-editor="manual_editor",
-							theme="github",
+							theme=" 'textmate' ",
 							keybindings="settings.mode",
 							font-size="14",
 							auto-complete="settings.autoComplete",
-							line-wrap="settings.lineWrap",
-							highlights="onlineUserCursorHighlights[manual_editor.open_doc_id]"
+							line-wrap="false",
+							highlights="null"
 							show-print-margin="false",
 							sharejs-doc="null",
 							last-updated="manual_editor.last_updated",
@@ -260,18 +260,3 @@ div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 							ng-keydown="handleKeyUp($event)"
 							placeholder="Command..."
 						)
-
-				
-				
-				
-					//- textarea(
-					//- 	ng-model="manualInput",
-					//- 	command-line,
-					//- 	expand-to-content-height,
-					//- 	expand-to-content-height-max="200",
-					//- 	on-run="runManualInput()",
-					//- 	placeholder = "Command...",
-					//- 	ng-focus="ui.chatOpen || showInterCom(false)",
-					//- 	ng-blur="showInterCom(true)"
-					//- 	ng-keydown="preventTabFocus($event)"
-					//- )
