@@ -23,16 +23,41 @@ define [
 	TAB   = 9
 	END   = -1
 
-	class CommandLine
+	class CommandLineEditor
 
 		@init: (editor, rootElement, getValue, setValue, onRun) ->
-			commandLine = new CommandLine(editor, rootElement, getValue, setValue, onRun)
+			commandLine = new CommandLineEditor(editor, rootElement, getValue, setValue, onRun)
 			editor._dj_commandLine = commandLine
 
 		constructor: (@editor, @rootElement, @getValueFn, @setValueFn, @onRunFn) ->
 			@history = []
 			@cursor = END
 			@pendingCommand = ""
+
+			editor.setOption('showLineNumbers', false)
+			editor.setOption('showGutter', false)
+			editor.setOption('maxLines', 20)
+			editor.setOption('highlightActiveLine', false)
+			editor.on 'change', () ->
+				editor.resize()
+
+			# set up a placeholder text
+			# watch for changes to the editor, if the text is empty,
+			# add a div with the placeholder text, otherwise remove it
+			_updatePlaceholder = () ->
+				shouldShow = editor.getValue().length == 0
+				existingMessage = editor.renderer.emptyMessageNode
+				if (!shouldShow and existingMessage)
+					editor.renderer.scroller.removeChild(existingMessage)
+					editor.renderer.emptyMessageNode = null
+				else if (shouldShow and !existingMessage)
+					newMessage = editor.renderer.emptyMessageNode = document.createElement("div")
+					newMessage.textContent = 'Command...'
+					newMessage.className = 'ace_invisible ace_emptyMessage'
+					newMessage.style.padding = "0 8px"
+					editor.renderer.scroller.appendChild(newMessage)
+			editor.on('input', _updatePlaceholder)
+			setTimeout(_updatePlaceholder, 0)
 
 			# patch the up/down navigation in the editor
 			# to do history instead
@@ -135,36 +160,10 @@ define [
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 
 				if attrs.commandLine == 'true'
-					editor.setOption('showLineNumbers', false)
-					editor.setOption('showGutter', false)
-					editor.setOption('maxLines', 20)
-					editor.setOption('highlightActiveLine', false)
-					editor.on 'change', () ->
-						editor.resize()
-
 					getValueFn = scope.$parent[attrs.commandLineGetValue]
 					setValueFn = scope.$parent[attrs.commandLineSetValue]
 					onRunFn = scope.$parent[attrs.commandLineOnRun]
-					CommandLine.init(editor, element, getValueFn, setValueFn, onRunFn)
-
-					# set up a placeholder text
-					# watch for changes to the editor, if the text is empty,
-					# add a div with the placeholder text, otherwise remove it
-					_updatePlaceholder = () ->
-						shouldShow = editor.getValue().length == 0
-						existingMessage = editor.renderer.emptyMessageNode
-						if (!shouldShow and existingMessage)
-							editor.renderer.scroller.removeChild(existingMessage)
-							editor.renderer.emptyMessageNode = null
-						else if (shouldShow and !existingMessage)
-							newMessage = editor.renderer.emptyMessageNode = document.createElement("div")
-							newMessage.textContent = 'Command...'
-							newMessage.className = 'ace_invisible ace_emptyMessage'
-							newMessage.style.padding = "0 8px"
-							editor.renderer.scroller.appendChild(newMessage)
-					editor.on('input', _updatePlaceholder)
-					setTimeout(_updatePlaceholder, 0)
-
+					CommandLineEditor.init(editor, element, getValueFn, setValueFn, onRunFn)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
