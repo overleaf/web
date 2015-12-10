@@ -73,6 +73,7 @@ define [
 				@setValueFn(@pendingCommand)
 			else
 				@setValueFn(@history[index])
+			@editor.clearSelection()
 
 		runCommand: () ->
 			@history.push @getValueFn()
