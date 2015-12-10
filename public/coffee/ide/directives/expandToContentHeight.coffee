@@ -16,7 +16,6 @@ define [
 					# element.height(initialHeight)
 
 					aceHeight = parseInt($(element).find('.ace_content')[0].style.height)
-					console.log ">> target height: #{aceHeight}"
 					if attrs.expandToContentHeightMax
 						maxHeight = parseInt(attrs.expandToAceContentHeightMax, 10)
 						if aceHeight > maxHeight
