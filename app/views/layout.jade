@@ -83,6 +83,13 @@ html(itemscope, itemtype='http://schema.org/Product')
 						email: "#{intercom_user.email}",
 						use_case: "#{intercom_user.use_case}"
 					})
+			if (justRegistered())
+				script(type="text/javascript").
+					heap.track("register");
+			if (justLoggedIn())
+				script(type="text/javascript").
+					heap.track("login");
+					
 
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
