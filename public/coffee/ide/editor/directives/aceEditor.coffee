@@ -59,6 +59,13 @@ define [
 			rootElement.bind "keydown", (event) =>
 				@handleKeyDown(event)
 
+			# give the wrapper a glow on focus
+			editorWrapper = rootElement.find('.ace-editor-wrapper')
+			editor.on 'focus', () ->
+				editorWrapper.addClass('highlight-glow')
+			editor.on 'blur', () ->
+				editorWrapper.removeClass('highlight-glow')
+
 		handleKeyDown: (event) ->
 			if event.which == ENTER and not event.shiftKey
 				event.preventDefault()
@@ -138,6 +145,7 @@ define [
 					getValueFn = scope.$parent[attrs.commandLineGetValue]
 					setValueFn = scope.$parent[attrs.commandLineSetValue]
 					onRunFn = scope.$parent[attrs.commandLineOnRun]
+					CommandLine.init(editor, element, getValueFn, setValueFn, onRunFn)
 
 					# set up a placeholder text
 					# watch for changes to the editor, if the text is empty,
@@ -156,8 +164,6 @@ define [
 							editor.renderer.scroller.appendChild(newMessage)
 					editor.on('input', _updatePlaceholder)
 					setTimeout(_updatePlaceholder, 0)
-
-					CommandLine.init(editor, element, getValueFn, setValueFn, onRunFn)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog

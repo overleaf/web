@@ -20,7 +20,7 @@ define [
 						maxHeight = parseInt(attrs.expandToAceContentHeightMax, 10)
 						if aceHeight > maxHeight
 							aceHeight = maxHeight
-					element.height(aceHeight - 38)
+					element.height(aceHeight - 34)
 
 				element.bind "keyup", adjustHeightToContent
 				element.bind "paste", () ->
