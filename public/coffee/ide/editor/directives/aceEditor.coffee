@@ -34,34 +34,40 @@ define [
 			@cursor = END
 			@pendingCommand = ""
 
-			rootElement.bind "keydown", (event) =>
-				@handleKeyDown(event)
+			# patch the up/down navigation in the editor
+			# to do history instead
+			_navigateDown = editor.navigateDown.bind(editor)
+			_navigateUp = editor.navigateUp.bind(editor)
 
-		handleKeyDown: (event) ->
-			console.log ">> keydown"
-			if event.which == ENTER and not event.shiftKey
-				event.preventDefault()
-				@runCommand()
-			else if event.which == UP
-				event.preventDefault()
+			editor.navigateUp = (times) =>
 				if @cursor == END and @history.length > 0
 					@savePendingCommand()
 					@moveToHistoryEntry(@history.length - 1)
 				else if @cursor > 0
 					@moveToHistoryEntry(@cursor - 1)
-			else if event.which == DOWN
-				event.preventDefault()
-				if @cursor != END and @cursor < history.length - 1
+				else
+					_navigateUp(times)
+
+			editor.navigateDown = (times) =>
+				if @cursor != END and @cursor < @history.length - 1
 					@moveToHistoryEntry(@cursor + 1)
 				else if @cursor == @history.length - 1
 					@moveToHistoryEntry(END)
+				else
+					_navigateDown(times)
+
+			rootElement.bind "keydown", (event) =>
+				@handleKeyDown(event)
+
+		handleKeyDown: (event) ->
+			if event.which == ENTER and not event.shiftKey
+				event.preventDefault()
+				@runCommand()
 
 		savePendingCommand: () ->
-			console.log ">> save command"
 			@pendingCommand = @getValueFn()
 
 		moveToHistoryEntry: (index) ->
-			console.log ">> move to hist entry"
 			@cursor = index
 			if index == END
 				@setValueFn(@pendingCommand)
@@ -69,7 +75,6 @@ define [
 				@setValueFn(@history[index])
 
 		runCommand: () ->
-			console.log ">> run command"
 			@history.push @getValueFn()
 			@cursor = END
 			@onRunFn()
