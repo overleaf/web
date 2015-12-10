@@ -128,7 +128,6 @@ define [
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 
 				if attrs.commandLine == 'true'
-					console.log ">> it's command line #{scope.name}"
 					editor.setOption('showLineNumbers', false)
 					editor.setOption('showGutter', false)
 					editor.setOption('maxLines', 20)
