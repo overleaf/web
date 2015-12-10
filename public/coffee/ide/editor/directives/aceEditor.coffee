@@ -125,8 +125,10 @@ define [
 					console.log ">> it's command line #{scope.name}"
 					editor.setOption('showLineNumbers', false)
 					editor.setOption('showGutter', false)
-					editor.setOption('maxLines', 1)
+					editor.setOption('maxLines', 20)
 					editor.setOption('highlightActiveLine', false)
+					editor.on 'change', () ->
+						editor.resize()
 
 					getValueFn = scope.$parent[attrs.commandLineGetValue]
 					setValueFn = scope.$parent[attrs.commandLineSetValue]
