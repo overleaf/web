@@ -150,28 +150,6 @@ define [
 					idx -= 1
 			$scope.completion.currentSelection = idx
 
-		# $scope.preventTabFocus = (event) ->
-		# 	if event.keyCode == 8 # Backspace key
-		# 		if $scope.completion.matches
-		# 			$scope.resetCompletion()
-		# 			event.preventDefault()
-
-		# 	if event.keyCode == 9  # TAB key
-		# 		event.preventDefault()
-		# 		if !$scope.completion.matches
-		# 			$scope.doCompletion()
-		# 		else
-		# 			$scope.cycleCompletionSelection(if event.shiftKey then 'backward' else 'forward')
-
-		# 	if event.keyCode == 13 # Enter key
-		# 		if $scope.completion.matches
-		# 			event.preventDefault()
-		# 			selected = $scope.completion.matches[$scope.completion.currentSelection]
-		# 			$scope.manualInput = selected
-		# 			$scope.resetCompletion()
-		# 		else
-		# 			$scope.runManualInput()
-
 		$scope.handleKeyUp = (event) ->
 
 			if event.keyCode == 13  # Enter
