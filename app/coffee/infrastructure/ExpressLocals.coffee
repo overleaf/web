@@ -122,6 +122,18 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
+		if req.session.user?
+			# We have to make these methods so that we only clear the temporary
+			# session flag when it is actually called when rendering a page,
+			# so that we can pass through redirects without clearing them.
+			res.locals.justRegistered = () ->
+				result = !!req.session.justRegistered
+				delete req.session.justRegistered
+				return result
+			res.locals.justLoggedIn = () ->
+				result = !!req.session.justLoggedIn
+				delete req.session.justLoggedIn
+				return result
 		res.locals.gaToken       = Settings.analytics?.ga?.token
 		res.locals.tenderUrl     = Settings.tenderUrl
 		res.locals.sentrySrc     = Settings.sentry?.src

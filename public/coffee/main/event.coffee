@@ -5,6 +5,7 @@ define [
 		ga('send', 'event', category, action)
 		event_name = "#{action}-#{category}"
 		Intercom?("trackEvent", event_name, attributes)
+		heap?.track(event_name, attributes)
 		$.ajax {
 			url: "/event/#{event_name}",
 			method: "POST",
