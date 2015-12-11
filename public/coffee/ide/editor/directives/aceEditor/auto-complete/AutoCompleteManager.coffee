@@ -2,10 +2,9 @@ define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
 	"ide/editor/directives/aceEditor/auto-complete/CustomTextCompleter"
 	"ide/editor/directives/aceEditor/auto-complete/KernelCompletionSpinner"
-	"ide/editor/directives/aceEditor/auto-complete/Snippets"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, CustomTextCompleter, KernelCompletionSpinner, Snippets) ->
+], (SuggestionManager, CustomTextCompleter, KernelCompletionSpinner) ->
 	Range = ace.require("ace/range").Range
 
 	# Here we force the editor.completer into existence, which usually doesn't get instantiated
