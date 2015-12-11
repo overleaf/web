@@ -31,7 +31,10 @@
 				'bmi_SafeAddOnload',
 				'EBCallBackMessageReceived',
 				// See http://toolbar.conduit.com/Developer/HtmlAndGadget/Methods/JSInjection.aspx
-				'conduitPage'
+				'conduitPage',
+				'/NS_ERROR_NOT_CONNECTED/i',
+				"/Cannot read property 'row' of undefined/i",
+				'TypeError: start is undefined'
 			],
 			ignoreUrls: [
 				// Facebook flakiness
@@ -54,7 +57,7 @@
 			],
 			shouldSendCallback: function(data) {
 				// only send a fraction of errors
-				var sampleRate = 1.00;
+				var sampleRate = 0.01;
 				return (Math.random() <= sampleRate);
 			},
 			dataCallback: function(data) {

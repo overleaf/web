@@ -108,6 +108,8 @@ module.exports =
 			url: "http://localhost:3034"
 		contacts:
 			url: "http://localhost:3036"
+		sixpack:
+			url: ""
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -119,8 +121,8 @@ module.exports =
 	siteUrl : siteUrl = 'http://localhost:3000'
 
 	# cookie domain
-	# use full domain for cookies to only be accesabble from that domain,
-	# replace subdomain with dot to have them accessable on all subdomains
+	# use full domain for cookies to only be accessible from that domain,
+	# replace subdomain with dot to have them accessible on all subdomains
 	# cookieDomain: ".sharelatex.dev"
 	cookieName:"sharelatex.sid"
 
@@ -365,13 +367,17 @@ module.exports =
 	]
 
 	sixpack:
-		domain:"http://45.79.157.156:5000"
+		domain:""
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
 	# ----------
 
 
-	# username = einstein
-	# password = password
+	
+	# LDAP
+	# ----------
+	# Settings below use a working LDAP test server kindly provided by forumsys.com
+	# When testing with forumsys.com use username = einstein and password = password
+	
 	# ldap :
 	# 	host: 'ldap://ldap.forumsys.com'
 	# 	dn: 'uid=:userKey,dc=example,dc=com'
@@ -382,6 +388,8 @@ module.exports =
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
+	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
+	#	adminPW: 'password'
 	
 	#templateLinks: [{
 	#	name : "CV projects",

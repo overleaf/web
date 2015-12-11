@@ -92,6 +92,9 @@ module.exports = (app, webRouter, apiRouter)->
 			if req.query.redir?
 				return "?#{querystring.stringify({redir:req.query.redir})}"
 			return ""
+
+		res.locals.getLoggedInUserId = ->
+			return req.session.user?._id
 		next()
 
 	webRouter.use (req, res, next) ->
@@ -176,4 +179,5 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.moduleIncludes = Modules.moduleIncludes
 		res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable
 		next()
+
 

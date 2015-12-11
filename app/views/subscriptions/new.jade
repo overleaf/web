@@ -41,7 +41,9 @@ block content
 							hr.thin
 							.row
 								.col-md-12.text-center
-									div(ng-if="trialLength") !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+									div(ng-if="trialLength") 
+										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+										span(ng-if="discountMonths && discountRate") &nbsp; -  {{discountMonths}} #{translate("month")}s {{discountRate}}% Off
 									div(ng-if="price && coupon.duration != 'temporal'")
 										strong {{price.currency.symbol}}{{price.next.total}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
@@ -53,7 +55,8 @@ block content
 										strong {{price.currency.symbol}}{{basePriceWithTax}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
-
+									div(ng-if="normalPrice")
+										span.small Normally {{price.currency.symbol}}{{normalPrice}}
 									a.small.subdued.pull-right(href, ng-hide="showCouponField || data.coupon", ng-click="showCouponField = true") Enter a Coupon Code
 
 							.row(ng-if="showCouponField || data.coupon")
@@ -140,26 +143,26 @@ block content
 									.row
 										.col-md-6
 											.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
+												input.form-control(type='text', value='', maxlength='255', , onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
 										.col-md-6
 											.form-group(ng-class="validation.errorFields.last_name ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
 									hr
 									.row
 										.col-md-12
 											.form-group(ng-class="validation.errorFields.address1 ? 'has-error' : ''")
 												label #{translate("billing_address")}
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
 											.form-group(ng-class="validation.errorFields.address2 ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
 											.form-group(ng-class="validation.errorFields.state ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.state", placeholder="#{translate('state')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.state", placeholder="#{translate('state')}")
 									.row
 										.col-md-7
 											.form-group(ng-class="validation.errorFields.city ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
 										.col-md-5(ng-class="validation.errorFields.postal_code ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
+												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
 									.row
 										.col-md-7
 											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
@@ -173,19 +176,20 @@ block content
 									.row
 										.col-xs-7
 											.form-group
-												button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
+												button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
 									
 										.col-xs-3.pricingBreakdown
-											div Subtotal
-											div Tax
+											div(ng-if="price.next.subtotal != price.next.total") Subtotal
+											div(ng-if="price.next.tax!='0.00'") Tax
 											div
 												strong Total
 										.col-xs-2
-											div.pull-right {{price.currency.symbol}}{{price.next.subtotal}}
-											div.pull-right {{price.currency.symbol}}{{price.next.tax}}
+											div(ng-if="price.next.subtotal != price.next.total").pull-right {{price.currency.symbol}}{{price.next.subtotal}}
+											div(ng-if="price.next.tax!='0.00'").pull-right {{price.currency.symbol}}{{price.next.tax}}
 											div.pull-right
 												strong {{price.currency.symbol}}{{price.next.total}}
 
+				span(sixpack-switch="payment-left-menu-bottom")
 
 				.col-md-5
 					p.text-center(ng-show="data.coupon.toLowerCase() != 'djedu'")
@@ -235,7 +239,6 @@ block content
 									p
 										| #{translate("work_offline_and_sync_with_dropbox")}.
 								
-							hr
 							
 							p.small.text-center We're confident that you'll love DataJoy, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
 

@@ -8,7 +8,6 @@ metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserUpdater = require("./UserUpdater")
-SubscriptionDomainHandler = require("../Subscription/SubscriptionDomainHandler")
 EmailHandler = require("../Email/EmailHandler")
 OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
 settings = require "settings-sharelatex"
@@ -105,7 +104,7 @@ module.exports =
 			OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
 				return next(err) if err?
 				
-				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
+				setNewPasswordUrl = "#{settings.siteUrl}/user/activate?token=#{token}&user_id=#{user._id}"
 
 				EmailHandler.sendEmail "registered", {
 					to: user.email

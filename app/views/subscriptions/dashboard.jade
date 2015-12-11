@@ -6,7 +6,7 @@ block scripts
 		window.recomendedCurrency = '#{recomendedCurrency}'
 		window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
 		window.taxRate = #{taxRate}
-
+		window.subscription = !{JSON.stringify(subscription)}
 
 
 
@@ -36,11 +36,11 @@ mixin printPlans(plans)
 		mixin printPlan(plan)
 
 block content
-	.content.content-alt
-		.container
+	.content.content-alt(ng-cloak)
+		.container(ng-controller="UserSubscriptionController")
 			.row
 				.col-md-8.col-md-offset-2
-					.card
+					.card(ng-if="view == 'overview'")
 						.page-header
 							h1 #{translate("your_subscription")}
 						-if (groups.length != 0)
@@ -56,12 +56,10 @@ block content
 										a(href, ng-click="changePlan = true") !{translate("change_plan")}.
 									p Your next invoice date is <strong>!{subscription.nextPaymentDueAt}</strong>
 									p.pull-right
-
-									p: form(action="/user/subscription/cancel",method="post")
-										input(type="hidden", name="_csrf", value=csrfToken)
+									p
 										a(href="/user/subscription/billing-details/edit").btn.btn-info #{translate("update_your_billing_details")}
 										| &nbsp;
-										input(type="submit", value="Cancel your subscription").btn.btn-primary#cancelSubscription
+										a(href, ng-click="switchToCancelationView()").btn.btn-primary !{translate("cancel_your_subscription")}
 								when "canceled"
 									p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + subscription.name + "</strong>"})}
 									p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
@@ -76,7 +74,7 @@ block content
 										p !{translate("problem_with_subscription_contact_us")}
 
 							-if(subscription.groupPlan)
-								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
+								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
 
 								
 
@@ -107,6 +105,43 @@ block content
 							
 
 
+					.card(ng-if="view == 'cancelation'")		
+						.page-header
+							h1 #{translate("Cancel Subscription")}
+
+						span(ng-if="sixpackOpt == 'downgrade-options'")
+
+							div(ng-show="showExtendFreeTrial", style="text-align: center")
+								p !{translate("have_more_days_to_try", {days:14})}
+								button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it")}
+								p
+									| &nbsp;
+								p
+									a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
+
+
+							div(ng-show="showDowngradeToStudent", style="text-align: center")
+								span(ng-controller="ChangePlanFormController")
+									p
+										!{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+									button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please")}
+									p
+										| &nbsp;
+									p
+										a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
+
+							div(ng-show="showBasicCancel")
+								p #{translate("sure_you_want_to_cancel")}
+								a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+								| &nbsp;
+								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
+
+						span(ng-if="sixpackOpt == 'basic'")
+							p #{translate("sure_you_want_to_cancel")}
+							a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+							| &nbsp;
+							a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
+
 	script(type="text/javascript").
 		$('#cancelSubscription').on("click", function() {
 			ga('send', 'event', 'subscription-funnel', 'cancelation')
@@ -115,7 +150,7 @@ block content
 
 	script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 		.modal-header
-			h3 Change plan?
+			h3 #{translate("change_plan")}
 		.modal-body
 			p !{translate("sure_you_want_to_change_plan", {planName:"<strong>{{plan.name}}</strong>"})}
 		.modal-footer

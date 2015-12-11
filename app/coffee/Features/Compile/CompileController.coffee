@@ -7,6 +7,7 @@ request = require "request"
 Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
+RateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -75,8 +76,25 @@ module.exports = CompileController =
 			res.send 204
 
 	downloadPdf: (req, res, next = (error) ->)->
+	
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id
+		isPdfjsPartialDownload = req.query?.pdfng
+
+
+
+		rateLimit = (callback)->
+			if isPdfjsPartialDownload
+				callback null, true
+	
+			else
+				rateLimitOpts =
+					endpointName: "full-pdf-download"
+					throttle: 1000
+					subjectName : req.ip
+					timeInterval : 60 * 60
+				RateLimiter.addCount rateLimitOpts, callback
+
 		Project.findById project_id, {name: 1}, (err, project)->
 			res.contentType("application/pdf")
 			if !!req.query.popupDownload
@@ -85,7 +103,16 @@ module.exports = CompileController =
 			else
 				logger.log project_id: project_id, "download pdf to embed in browser"
 				res.header('Content-Disposition', "filename=#{project.getSafeProjectName()}.pdf")
-			CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/output.pdf", req, res, next)
+
+			rateLimit (err, canContinue)->
+				if err?
+					logger.err err:err, "error checking rate limit for pdf download"
+					return res.send 500
+				else if !canContinue
+					logger.log project_id:project_id, ip:req.ip, "rate limit hit downloading pdf"
+					res.send 500
+				else
+					CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/output.pdf", req, res, next)
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
