@@ -92,7 +92,10 @@ define [
 
 			# set up our completers
 			CustomTextCompleter.init(@editor)
-			@editor.completers.push @suggestionManager
+			existing_suggestion_manager = _.filter(@editor.completers, (c) -> c instanceof SuggestionManager)[0]
+			if !existing_suggestion_manager
+				console.log ">> setting suggestion manager"
+				@editor.completers.push @suggestionManager
 
 			# on the next tick, monkey-patch the autocompleter
 			setTimeout (editor) ->

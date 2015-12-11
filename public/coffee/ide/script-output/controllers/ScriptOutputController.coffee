@@ -103,15 +103,6 @@ define [
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
 
-		$scope.doCompletion = () ->
-			trackCommandRun()
-			code   = $scope.manualInput
-			engine = ide.$scope.engine
-			jupyterRunner.executeCompletionRequest code, code.length, engine, (data) ->
-				$scope.completion.matches = data.matches
-				$scope.completion.currentSelection = 0
-			$scope._scrollOutput()
-
 		$scope._scrollOutput = () ->
 			try
 				container = document.querySelector('.jupyter-output-inner')
