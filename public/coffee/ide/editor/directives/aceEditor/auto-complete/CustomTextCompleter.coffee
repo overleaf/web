@@ -10,6 +10,7 @@ define [
 				/#(.*)$/m                  # remove comments
 				/('|").*\1/mg              # remove string contents
 				/^\s*(?:-|_|=){4}.*\s*$/mg # remove markdown-alike lines
+				/\b(\d+)\b/mg              # remove numeric literals
 			]
 			(text, re) -> text.replace(re, ' ')
 			original_text
