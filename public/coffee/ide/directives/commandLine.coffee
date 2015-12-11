@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.directive 'commandLine', () ->
+	App.directive 'notcommandLine', () ->
 		return {
 			scope: {
 				ngModel: "="
@@ -9,20 +9,20 @@ define [
 			},
 			link: (scope, element, attrs) ->
 				window.history = history = []
-				
+
 				ENTER = 13
 				UP = 38
 				DOWN = 40
-				
+
 				END = -1
 				cursor = END
-				
+
 				# If we scroll up into the history with a command not yet run,
 				# save it so we can come back to it.
 				pendingCommand = ""
 				savePendingCommand = () ->
 					pendingCommand = scope.ngModel
-				
+
 				setValue = (val) ->
 					scope.$apply () ->
 						scope.ngModel = val
@@ -33,12 +33,12 @@ define [
 						setValue(pendingCommand)
 					else
 						setValue(history[index])
-				
+
 				runCommand = () ->
 					history.push scope.ngModel
 					cursor = END
 					scope.onRun()
-				
+
 				element.bind "keydown", (event) ->
 					if event.which == ENTER and not event.shiftKey
 						event.preventDefault()

@@ -109,6 +109,7 @@ define [
 			if message.header.msg_type == 'complete_reply'
 				ide.$scope.$broadcast 'completion_request:end'
 				jupyterRunner.COMPLETION_CALLBACKS[message.request_id]?(message.content)
+				delete jupyterRunner.COMPLETION_CALLBACKS[message.request_id]
 
 			if message.header.msg_type == "display_data" and message.content.data?
 				if message.content.data['text/html']?
@@ -139,7 +140,9 @@ define [
 
 			if message.header.msg_type == "status"
 				if message.content.execution_state == "busy"
-					jupyterRunner.status.running = true
+					# completion requests don't count as 'running'
+					if !jupyterRunner.COMPLETION_CALLBACKS[message.request_id]
+						jupyterRunner.status.running = true
 				else if message.content.execution_state == "idle"
 					jupyterRunner.status.running = false
 

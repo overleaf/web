@@ -2,10 +2,9 @@ define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
 	"ide/editor/directives/aceEditor/auto-complete/CustomTextCompleter"
 	"ide/editor/directives/aceEditor/auto-complete/KernelCompletionSpinner"
-	"ide/editor/directives/aceEditor/auto-complete/Snippets"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, CustomTextCompleter, KernelCompletionSpinner, Snippets) ->
+], (SuggestionManager, CustomTextCompleter, KernelCompletionSpinner) ->
 	Range = ace.require("ace/range").Range
 
 	# Here we force the editor.completer into existence, which usually doesn't get instantiated
@@ -58,11 +57,16 @@ define [
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
 
+			# HACK: the manual-input editor will never change session,
+			# so explcitely add it's on-change handler
+			if @editor._dj_name == 'manual_editor'
+				@editor.on 'change', onChange
+
 		enable: () ->
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
 				enableSnippets: true,
-				enableLiveAutocompletion: true
+				enableLiveAutocompletion: false
 			})
 
 			# add our own tab handler, so we can trigger autocomplete
@@ -82,7 +86,7 @@ define [
 					else
 						editor.indent()
 					setTimeout =>
-						KernelCompletionSpinner.tryAttach(@$scope)
+						KernelCompletionSpinner.tryAttach(@$scope, editor)
 					, 1
 			}
 
@@ -118,5 +122,5 @@ define [
 							@editor.execCommand("startAutocomplete")
 						, 0
 				setTimeout =>
-					KernelCompletionSpinner.tryAttach(@$scope)
+					KernelCompletionSpinner.tryAttach(@$scope, @editor)
 				, 1

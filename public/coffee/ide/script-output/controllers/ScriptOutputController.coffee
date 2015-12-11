@@ -97,14 +97,11 @@ define [
 				throw new Error("not implemented yet")
 			$scope._scrollOutput()
 
-		$scope.manualInput = ""
-		$scope.runManualInput = () ->
+		$scope.runManualInput = (code) ->
 			trackCommandRun()
-			code   = $scope.manualInput
 			engine = ide.$scope.engine
 			jupyterRunner.executeRequest code, engine
 			$scope._scrollOutput()
-			$scope.manualInput = ""
 
 		$scope.doCompletion = () ->
 			trackCommandRun()
@@ -153,28 +150,34 @@ define [
 					idx -= 1
 			$scope.completion.currentSelection = idx
 
-		# $scope.preventTabFocus = (event) ->
-		# 	if event.keyCode == 8 # Backspace key
-		# 		if $scope.completion.matches
-		# 			$scope.resetCompletion()
-		# 			event.preventDefault()
+		$scope.handleKeyUp = (event) ->
 
-		# 	if event.keyCode == 9  # TAB key
-		# 		event.preventDefault()
-		# 		if !$scope.completion.matches
-		# 			$scope.doCompletion()
-		# 		else
-		# 			$scope.cycleCompletionSelection(if event.shiftKey then 'backward' else 'forward')
-
-		# 	if event.keyCode == 13 # Enter key
-		# 		if $scope.completion.matches
-		# 			event.preventDefault()
-		# 			selected = $scope.completion.matches[$scope.completion.currentSelection]
-		# 			$scope.manualInput = selected
-		# 			$scope.resetCompletion()
-		# 		else
-		# 			$scope.runManualInput()
-
-		$scope.preventTabFocus = (event) ->
-			if event.keyCode == 9
+			if event.keyCode == 13  # Enter
 				event.preventDefault()
+				manual_editor = _.filter(window.editors, (e) -> e._dj_name == 'manual_editor')[0]
+				if manual_editor
+					code = manual_editor.getValue()
+					$scope.runManualInput(code)
+					manual_editor.setValue('')
+
+			if event.keyCode == 9  # TAB
+				event.preventDefault()
+
+		$scope.getManualEditor = () ->
+			_.filter(window.editors, (e) -> e._dj_name == 'manual_editor')[0]
+
+		$scope.getManualEditorValue = () ->
+			manual_editor = $scope.getManualEditor()
+			if manual_editor
+				manual_editor.getValue()
+
+		$scope.setManualEditorValue = (text) ->
+			manual_editor = $scope.getManualEditor()
+			if manual_editor
+				manual_editor.setValue(text)
+
+		$scope.onRun = () ->
+			code = $scope.getManualEditorValue()
+			if code
+				$scope.runManualInput(code)
+				$scope.setManualEditorValue('')

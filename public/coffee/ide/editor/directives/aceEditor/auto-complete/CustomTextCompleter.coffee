@@ -7,12 +7,15 @@ define [
 	stripUnwantedText =  (original_text) ->
 		_.reduce(
 			[
-				/#(.*)$/m          # remove comments
-				/('|").*\1/mg      # remove string contents
+				/#(.*)$/m                  # remove comments
+				/('|").*\1/mg              # remove string contents
+				/^\s*(?:-|_|=){4}.*\s*$/mg # remove markdown-alike lines
+				/\b(\d+)\b/mg              # remove numeric literals
 			]
 			(text, re) -> text.replace(re, ' ')
 			original_text
 		)
+
 	splitRegex = /[^a-zA-Z_0-9\$\-\u00C0-\u1FFF\u2C00-\uD7FF\w]+/
 
 	# this is mostly a replica of ace/autocomplete/text_completer,
