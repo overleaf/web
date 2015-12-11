@@ -66,7 +66,7 @@ define [
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
 				enableSnippets: true,
-				enableLiveAutocompletion: true
+				enableLiveAutocompletion: false
 			})
 
 			# add our own tab handler, so we can trigger autocomplete
