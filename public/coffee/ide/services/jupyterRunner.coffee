@@ -336,6 +336,7 @@ define [
 			_help_regex: /^help\((.*)\s*\)/
 			_question_regex: /^(.*)\?$/
 			_r_question_regex: /^\?(.*)/
+			_r_double_question_regex: /^\?\?(.*)/
 
 			handle_help: (cell) ->
 				if !cell._help
@@ -406,7 +407,18 @@ define [
 								cell.output.length == 1 and
 								data?['text/html']?.match(/(.*)page for(.*)R Documentation(.*)/)
 							)
-							(is_help_request and is_help_response) or (is_question_request and is_question_response)
+							is_double_question_request = (
+								cell.input.length == 1 and
+								code?.trim().match(HelpParser._r_double_question_regex)
+							)
+							is_double_question_response = (
+								cell.output.length == 1 and
+								cell.output[0]?.content?.payload?[0]?.data['text/plain'].match(/^R Information\n+Help files/)
+							)
+							is_help = is_help_request and is_help_response
+							is_question = is_question_request and is_question_response
+							is_double_question = is_double_question_request and is_double_question_response
+							return is_help or is_question or is_double_question
 						catch
 							false
 
@@ -416,13 +428,19 @@ define [
 						help = {}
 						help_match = input.content.code.trim().match(HelpParser._help_regex)
 						question_match = input.content.code.trim().match(HelpParser._r_question_regex)
+						double_question_match = input.content.code.trim().match(HelpParser._r_double_question_regex)
 						if help_match
 							help.subject = help_match[1]
 						if question_match
 							help.subject = question_match[1]
-						content = $('<div />', html: output?.content?.data?['text/html'])
-						content.find('a').attr('target', '_blank')
-						help.body = $sanitize(content.html())
+						if double_question_match
+							helpjsubject = double_question_match[1]
+						if double_question_match
+							help.body = ansiToSafeHtml(output?.content?.payload?[0]?.data?['text/plain'])
+						else
+							content = $('<div />', html: output?.content?.data?['text/html'])
+							content.find('a').attr('target', '_blank')
+							help.body = $sanitize(content.html())
 						return help
 
 		return jupyterRunner
