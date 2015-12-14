@@ -1,4 +1,5 @@
 _ = require("underscore")
+mime = require('mime')
 
 module.exports = ProjectEditorHandler =
 	buildProjectModelView: (project, options) ->
@@ -71,11 +72,11 @@ module.exports = ProjectEditorHandler =
 		docs       : @buildDocModelView doc for doc in folder.docs
 
 	buildFileModelView: (file) ->
-		_id  : file._id
-		name : file.name
-		mimetype: file.mimetype
+		_id      : file._id
+		name     : file.name
+		mimetype : mime.lookup(name)
 
 	buildDocModelView: (doc) ->
-		_id   : doc._id
-		name  : doc.name
-		mimetype: doc.mimetype
+		_id      : doc._id
+		name     : doc.name
+		mimetype : "application/x-tex"

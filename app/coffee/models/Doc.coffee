@@ -5,9 +5,7 @@ Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
 DocSchema = new Schema
-	name          :     {type:String, default:'new doc'},
-        mimetype	:	{type:String, default:'application/x-tex'}
-
+	name          :     {type:String, default:'new doc'}
 
 mongoose.model 'Doc', DocSchema
 exports.Doc = mongoose.model 'Doc'
