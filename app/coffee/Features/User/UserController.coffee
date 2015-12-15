@@ -40,6 +40,8 @@ module.exports =
 				user.role = req.body.role.trim()
 			if req.body.institution?
 				user.institution = req.body.institution.trim()
+			if req.body.class_size?
+				user.class_size = req.body.class_size.trim()
 			if req.body.use_case?
 				user.use_case = req.body.use_case
 			if req.body.mode?

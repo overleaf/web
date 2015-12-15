@@ -62,3 +62,6 @@ module.exports =
 	
 	useCasePage: (req, res, next) ->
 		res.render 'user/use_case', title: "Register Step 2 of 2"
+	
+	startFreeTrial: (req, res, next) ->
+		res.render 'user/start_free_trial', title: "Welcome to DataJoy"
