@@ -139,14 +139,12 @@ module.exports = SubscriptionController =
 							user       :
 								id : user.id
 	
-	startFreeTrial: (req, res, next) ->
-		{planCode,redir} = req.body
-		if planCode not in Settings.freeTrialPlanCodes
-			return res.sendStatus(400).end()
+	startFreeTeacherTrial: (req, res, next) ->
+		{redir} = req.body
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return callback(error) if error?
 			expiresAt = new Date(Date.now() + Settings.freeTrialLength)
-			SubscriptionHandler.startFreeTrial user._id, planCode, expiresAt, (error) ->
+			SubscriptionHandler.startFreeTrial user._id, "teacher", expiresAt, true, (error) ->
 				return next(error) if error?
 				res.redirect redir or "/"
 	

@@ -71,6 +71,7 @@ describe "SubscriptionController sanboxed", ->
 			"logger-sharelatex": log:->
 			"settings-sharelatex": @settings
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
+			"../../infrastructure/Sixpack": {}
 
 
 		@res = new MockResponse()
