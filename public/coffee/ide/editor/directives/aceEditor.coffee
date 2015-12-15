@@ -68,7 +68,7 @@ define [
 					getValueFn = scope.$parent[attrs.commandLineGetValue]
 					setValueFn = scope.$parent[attrs.commandLineSetValue]
 					onRunFn = scope.$parent[attrs.commandLineOnRun]
-					CommandLineEditor.init(editor, element, getValueFn, setValueFn, onRunFn)
+					CommandLineEditor.init(scope, editor, element, getValueFn, setValueFn, onRunFn)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand

@@ -8,11 +8,11 @@ define [], () ->
 
 	class CommandLineEditor
 
-		@init: (editor, rootElement, getValue, setValue, onRun) ->
-			commandLine = new CommandLineEditor(editor, rootElement, getValue, setValue, onRun)
+		@init: (scope, editor, rootElement, getValue, setValue, onRun) ->
+			commandLine = new CommandLineEditor(scope, editor, rootElement, getValue, setValue, onRun)
 			editor._dj_commandLine = commandLine
 
-		constructor: (@editor, @rootElement, @getValueFn, @setValueFn, @onRunFn) ->
+		constructor: (@scope, @editor, @rootElement, @getValueFn, @setValueFn, @onRunFn) ->
 			@history = []
 			@cursor = END
 			@pendingCommand = ""
@@ -68,10 +68,13 @@ define [], () ->
 				@handleKeyDown(event)
 
 			# give the wrapper a glow on focus
+			# and show/hide the intercom button
 			editorWrapper = rootElement.find('.ace-editor-wrapper')
-			editor.on 'focus', () ->
+			editor.on 'focus', () =>
+				@scope.$parent.showInterCom(false)
 				editorWrapper.addClass('highlight-glow')
-			editor.on 'blur', () ->
+			editor.on 'blur', () =>
+				@scope.$parent.showInterCom(true)
 				editorWrapper.removeClass('highlight-glow')
 
 		handleKeyDown: (event) ->
