@@ -156,6 +156,7 @@ module.exports = AuthenticationController =
 			isAdmin: user.isAdmin
 			email: user.email
 			referal_id: user.referal_id
+			use_case: user.use_case
 		# Regenerate the session to get a new sessionID (cookie value) to
 		# protect against session fixation attacks
 		oldSession = req.session
