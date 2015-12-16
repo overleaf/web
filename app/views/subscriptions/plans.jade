@@ -10,28 +10,12 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-							h1(ng-cloak) #{translate("start_x_day_trial", {len:'{{trial_len}}'})}
+							h1(ng-cloak) Choose your plan
 				.row
-					.col-md-8.col-md-offset-2
-						p.text-centered
+					.col-md-10
+						p
 							| DataJoy is world's easiest platform for your data analysis in Python and R.
-							| Access your code &amp; data from anywhere in the world, and share your
-							| work with your collaborators without them needing to install anything extra.
-
-				.row(ng-cloak)
-					.col-md-6.col-md-offset-3
-						ul.nav.nav-pills
-							li(ng-class="{'active': ui.view == 'monthly'}")
-								a(
-									href,
-									ng-click="switchToMonthly()"
-								) #{translate("monthly")}
-							li(ng-class="{'active': ui.view == 'annual'}")
-								a(
-									href
-									ng-click="switchToAnnual()"
-								) #{translate("annual")}
-
+							| Pick the plan that best suits your needs below.
 					.col-md-2.text-right
 						.dropdown.currency-dropdown(dropdown)
 							a.btn.btn-default.dropdown-toggle#currenyDropdown(
@@ -50,51 +34,80 @@ block content
 									) {{currency}} ({{value['symbol']}})
 
 				.row(ng-cloak)
-					.col-md-10.col-md-offset-1
+					.col-md-12
 						.row
-							.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
-								.col-md-6
-									.card
-										.card-header
-											h2 Basic
-										.circle #{translate("free")} 
-										ul.list-unstyled
-											li Only one collaborator
-											li Low CPU priority
-											li 256Mb Memory
-											li 1 minute script timeout
-											li
-												br
-												a.btn.btn-info(href="/register") #{translate("sign_up_now")}
+							.text-centered
 								.col-md-6
 									.card
 										.card-header
 											h2 Researcher
-										.circle
-											span(ng-if="ui.view == 'monthly'")
-												| {{plans[currencyCode]['datajoy']['monthly']}}
-												span.small /mo
-											span(ng-if="ui.view == 'annual'")
-												| {{plans[currencyCode]['datajoy']['annual']}}
-												span.small /yr
-											div.exc-tax (Exc. tax)
 										ul.list-unstyled
 											li
-												strong Unlimited Collaborators
+												strong
+													| Ideal for individuals and small teams to work
+													| from anywhere and collaborate together.
+										
+										.row
+											.col-md-10.col-md-offset-1
+												ul.list-unstyled.text-left
+													li Complete Python and R environment
+													li Unlimited Collaborators
+													li Full version history
+													li #{translate("sync_to_dropbox")}
+													li #{translate("sync_to_github")}
+										
+										ul.list-unstyled.row-spaced
 											li
-												strong High CPU priority
-											li
-												strong 2GB Memory
-											li #{translate("sync_to_dropbox")}
-											li #{translate("sync_to_github")}
-											li Full version history
-											li
-												br
+												| Only 
+												strong(ng-if="ui.view == 'monthly'")
+													| {{plans[currencyCode]['datajoy']['monthly']}}
+													span.small /mo
+												strong(ng-if="ui.view == 'annual'")
+													| {{plans[currencyCode]['datajoy']['annual']}}
+													span.small /yr
+												| 
+												span.small.subdued (Exc. tax)
+											li.row-spaced-small
 												a.btn.btn-info(
 													ng-href="#{baseUrl}/user/subscription/new?planCode=datajoy{{ ui.view == 'annual' ? '-annual' : '' }}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 												)
-													span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+													span(ng-show="ui.view != 'annual'") Start your 7 day free trial
 													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+											li.row-spaced-small(ng-show="ui.view == 'annual'").small
+												| View 
+												a(
+													href,
+													ng-click="switchToMonthly()"
+												) #{translate("monthly")} 
+												|  pricing
+											li.row-spaced-small(ng-show="ui.view == 'monthly'").small
+												| View 
+												a(
+													href
+													ng-click="switchToAnnual()"
+												) #{translate("annual")}
+												|  pricing
+								.col-md-6
+									.card
+										.card-header
+											h2 Teaching
+										ul.list-unstyled
+											li
+												strong
+													| Get DataJoy for your whole class with a low
+													| cost teaching license
+										.row
+											.col-md-10.col-md-offset-1
+												ul.list-unstyled.text-left
+													li Zero-installation Python and R
+													li No more tech-trouble shooting
+													li Students can access work from anywhere
+													li Handout examples and assignments
+													li Teaching and debug interactively
+										ul.list-unstyled.row-spaced
+											li
+												a.btn.btn-info.js-intercom(href="#") Get in Touch
+
 				hr
 				.row.row-spaced.text-centered
 					.col-md-7
@@ -109,37 +122,6 @@ block content
 				hr
 				.row.row-spaced-thin(ng-cloak)
 					p.text-centered Choose the plan that works for you with our 7-day free trial. Cancel at any time, and get a full 30-day refund if you're unhappy for any reason.
-
-						
-
-	.border-top
-		.content
-			.container
-				.row
-					.col-md-3
-						h3 GROUPS
-					.col-md-7
-						p
-							strong Large Group?
-						p Get DataJoy accounts for your whole organisation.
-					.col-md-2
-						p.row-spaced-small
-							a.btn.btn-info.js-intercom(href="#") Get in Touch
-
-	.pattern-container.border-top
-		.content
-			.container
-				.row
-					.col-md-3
-						h3 EDUCATION
-					.col-md-7
-						p
-							strong Teaching with Python or R?
-						p
-							| Get DataJoy accounts for you and your students.
-					.col-md-2
-						p.row-spaced-small
-							a.btn.btn-info.js-intercom(href="#") Get in Touch
 
 	.border-top
 		.content
