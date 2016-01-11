@@ -1,5 +1,6 @@
 SubscriptionLocator = require "./SubscriptionLocator"
 LimitationsManager = require "./LimitationsManager"
+UserGetter = require "../User/UserGetter"
 logger = require "logger-sharelatex"
 
 module.exports = SubscriptionMiddlewear =
@@ -23,8 +24,10 @@ module.exports = SubscriptionMiddlewear =
 			if hasPaidSubscription or subscription?
 				return next()
 			else
-				use_case = req.session.user.use_case 
-				if use_case == "teacher"
-					res.redirect "/teacher/free_trial"
-				else
-					res.redirect "/user/subscription/new?planCode=datajoy"
+				UserGetter.getUser req.session.user._id, { use_case: 1 }, (error, user) ->
+					return next(error) if error?
+					use_case = user?.use_case 
+					if use_case == "teacher"
+						res.redirect "/teacher/free_trial"
+					else
+						res.redirect "/user/subscription/new?planCode=datajoy"
