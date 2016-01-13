@@ -18,7 +18,7 @@ module.exports = SubscriptionMiddlewear =
 			next()
 	
 	requireSubscription: (req, res, next) ->
-		LimitationsManager.userHasSubscription req.session.user, (error, hasPaidSubscription, subscription) ->
+		LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, (error, hasPaidSubscription, subscription) ->
 			return next(error) if error?
 			logger.log {hasPaidSubscription, subscription}, "got subscription status"
 			if hasPaidSubscription or subscription?
