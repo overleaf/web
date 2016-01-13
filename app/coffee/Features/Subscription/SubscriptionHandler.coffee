@@ -9,8 +9,8 @@ EmailHandler = require("../Email/EmailHandler")
 Events = require "../../infrastructure/Events"
 
 module.exports =
-	startFreeTrial: (user_id, planCode, expiresAt, callback) ->
-		SubscriptionUpdater.startFreeTrial user_id, planCode, expiresAt, callback
+	startFreeTrial: (user_id, planCode, expiresAt, groupPlan, callback) ->
+		SubscriptionUpdater.startFreeTrial user_id, planCode, expiresAt, groupPlan, callback
 
 	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
 		self = @
@@ -76,5 +76,5 @@ module.exports =
 					return callback("no user found")
 				SubscriptionUpdater.syncSubscription recurlySubscription, user?._id, callback
 
-
-
+	extendTrial: (subscription, daysToExend, callback)->
+		RecurlyWrapper.extendTrial subscription.recurlySubscription_id, daysToExend, callback

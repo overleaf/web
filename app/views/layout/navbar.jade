@@ -43,27 +43,28 @@ nav.navbar.navbar-default
 
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
-						if item.dropdown
-							li.dropdown(class=item.class, dropdown)
-								a.dropdown-toggle(href, dropdown-toggle)
-									| !{translate(item.text)}
-									b.caret
-								ul.dropdown-menu
-									each child in item.dropdown
-										if child.divider
-											li.divider
-										else
-											li
-												if child.url
-													a(href=child.url, class=child.class) !{translate(child.text)}
-												else
-													| !{translate(child.text)}
-						else
-							li(class=item.class)
-								if item.url
-									a(href=item.url, class=item.class) !{translate(item.text)}
-								else
-									| !{translate(item.text)}
+						if (!item.use_case || (session && session.user && item.use_case == use_case))
+							if item.dropdown
+								li.dropdown(class=item.class, dropdown)
+									a.dropdown-toggle(href, dropdown-toggle)
+										| !{translate(item.text)}
+										b.caret
+									ul.dropdown-menu
+										each child in item.dropdown
+											if child.divider
+												li.divider
+											else
+												li
+													if child.url
+														a(href=child.url, class=child.class) !{translate(child.text)}
+													else
+														| !{translate(child.text)}
+							else
+								li(class=item.class)
+									if item.url
+										a(href=item.url, class=item.class) !{translate(item.text)}
+									else
+										| !{translate(item.text)}
 				
 				
 				

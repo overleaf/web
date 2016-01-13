@@ -9,6 +9,7 @@ Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
+require("../../infrastructure/Sixpack")
 
 module.exports = SubscriptionController =
 
@@ -138,14 +139,12 @@ module.exports = SubscriptionController =
 							user       :
 								id : user.id
 	
-	startFreeTrial: (req, res, next) ->
-		{planCode,redir} = req.body
-		if planCode not in Settings.freeTrialPlanCodes
-			return res.sendStatus(400).end()
+	startFreeTeacherTrial: (req, res, next) ->
+		{redir} = req.body
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return callback(error) if error?
 			expiresAt = new Date(Date.now() + Settings.freeTrialLength)
-			SubscriptionHandler.startFreeTrial user._id, planCode, expiresAt, (error) ->
+			SubscriptionHandler.startFreeTrial user._id, "teacher", expiresAt, true, (error) ->
 				return next(error) if error?
 				res.redirect redir or "/"
 	
@@ -236,6 +235,14 @@ module.exports = SubscriptionController =
 				else
 					res.sendStatus 200
 
+	extendTrial: (req, res)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				SubscriptionHandler.extendTrial subscription, 14, (err)->
+					if err?
+						res.send 500
+					else
+						res.send 200
 
 	recurlyNotificationParser: (req, res, next) ->
 		xml = ""

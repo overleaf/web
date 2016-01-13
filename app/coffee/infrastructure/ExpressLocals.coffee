@@ -5,6 +5,7 @@ Settings = require('settings-sharelatex')
 SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatters')
 querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
+UserGetter = require "../Features/User/UserGetter"
 _ = require("underscore")
 Modules = require "./Modules"
 
@@ -92,6 +93,9 @@ module.exports = (app, webRouter, apiRouter)->
 			if req.query.redir?
 				return "?#{querystring.stringify({redir:req.query.redir})}"
 			return ""
+
+		res.locals.getLoggedInUserId = ->
+			return req.session.user?._id
 		next()
 
 	webRouter.use (req, res, next) ->
@@ -176,4 +180,15 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.moduleIncludes = Modules.moduleIncludes
 		res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable
 		next()
+	
+	webRouter.use (req, res, next) ->
+		if req.session.user? and !req.session.use_case?
+			UserGetter.getUser req.session.user._id, {use_case: 1}, (error, user) ->
+				return next(error) if error?
+				req.session.use_case = res.locals.use_case = (user.use_case or "")
+				next()
+		else
+			res.locals.use_case = req.session.use_case
+			next()
+				 
 

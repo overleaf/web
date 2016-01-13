@@ -14,6 +14,8 @@ define [
 				allowedExtensions: "="
 				onCompleteCallback: "="
 				onUploadCallback: "="
+				onValidateBatch: "="
+				onErrorCallback: "="
 				params: "="
 			}
 			link: (scope, element, attrs) ->
@@ -30,17 +32,20 @@ define [
 					uploadButton: scope.uploadButtonText or "Upload"
 				dragAreaText = scope.dragAreaText or "drag here"
 				hintText = scope.hintText or ""
-
+				maxConnections = scope.maxConnections or 1
 				onComplete = scope.onCompleteCallback or () ->
 				onUpload   = scope.onUploadCallback or () ->
+				onError   = scope.onErrorCallback or () ->
+				onValidateBatch = scope.onValidateBatch or () ->
 				params     = scope.params or {}
 				params._csrf = window.csrfToken
 
-				new qq.FineUploader
+				q = new qq.FineUploader
 					element: element[0]
 					multiple: multiple
 					disabledCancelForFormUploads: true
 					validation: validation
+					maxConnections: maxConnections
 					request:
 						endpoint: endpoint
 						forceMultipart: true
@@ -49,6 +54,8 @@ define [
 					callbacks:
 						onComplete: onComplete
 						onUpload:   onUpload
+						onValidateBatch: onValidateBatch
+						onError: onError
 					text: text
 					template: """
 						<div class="qq-uploader">
@@ -63,4 +70,5 @@ define [
 							<ul class="qq-upload-list"></ul>
 						</div>
 					"""
+				return q
 		}

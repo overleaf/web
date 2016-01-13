@@ -12,21 +12,20 @@ ReferalAllocator = require("../Referal/ReferalAllocator")
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports =
-	startFreeTrial: (adminUser_id, planCode, expiresAt, callback) ->
+	startFreeTrial: (adminUser_id, planCode, expiresAt, groupPlan, callback) ->
 		self = @
-		logger.log {adminUser_id, planCode, expiresAt}, "starting free trial"
+		logger.log {adminUser_id, planCode, groupPlan, expiresAt}, "starting free trial"
 		SubscriptionLocator.getUsersSubscription adminUser_id, (error, subscription)->
 			return callback(error) if error?
 			if subscription?
-				# HACK: If the user already has a paid subscription we don't overwrite it, we just
-				# update the freeTrial part of it to be a teaching plan.
-				logger.log {adminUser_id, planCode, expiresAt}, "subscription already exists, updating to free trial anyway"
-				self._startFreeTrial subscription, planCode, expiresAt, callback
+				# HACK: If the user already has a paid subscription this will overwrite the planCode
+				logger.log {adminUser_id, planCode, expiresAt, groupPlan}, "subscription already exists, updating to free trial anyway"
+				self._startFreeTrial subscription, planCode, expiresAt, groupPlan, callback
 			else
-				logger.log {adminUser_id, planCode, expiresAt}, "subscription already exists, updating to free trial anyway"
+				logger.log {adminUser_id, planCode, expiresAt, groupPlan}, "subscription already exists, updating to free trial anyway"
 				self._createNewSubscription adminUser_id, (error, subscription)->
 					return callback(error) if error?
-					self._startFreeTrial subscription, planCode, expiresAt, callback
+					self._startFreeTrial subscription, planCode, expiresAt, groupPlan, callback
 
 	syncSubscription: (recurlySubscription, adminUser_id, callback) ->
 		self = @
@@ -57,10 +56,12 @@ module.exports =
 		Subscription.update searchOps, removeOperation, ->
 			UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, callback
 
-	_startFreeTrial: (subscription, planCode, expiresAt, callback) ->
+	_startFreeTrial: (subscription, planCode, expiresAt, groupPlan, callback) ->
 		subscription.freeTrial.expiresAt = expiresAt
 		subscription.freeTrial.planCode = planCode
 		subscription.freeTrial.allowed = false
+		subscription.planCode = planCode
+		subscription.groupPlan = !!groupPlan
 		subscription.save (error) ->
 			return callback(error) if error?
 			UserFeaturesUpdater.updateFeatures subscription.admin_id, planCode, callback

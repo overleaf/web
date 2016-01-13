@@ -110,14 +110,34 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "event_tracking",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, event_tracking) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "event_tracking", "$window",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, event_tracking, $window) ->
 			$scope.parent_folder_id = parent_folder?.id
+			$scope.tooManyFiles = false
+			$scope.rateLimitHit = false
+			$scope.secondsToRedirect = 10
+			$scope.notLoggedIn = false
+
+
+			needToLogBackIn = ->
+				$scope.notLoggedIn = true
+				decreseTimeout = ->
+					$timeout (() ->
+						if $scope.secondsToRedirect == 0
+							$window.location.href = "/login?redir=/project/#{ide.project_id}"
+						else
+							decreseTimeout()
+							$scope.secondsToRedirect = $scope.secondsToRedirect - 1
+					), 1000
+
+				decreseTimeout()
+
 
 			uploadCount = 0
 			$scope.onUpload = () ->
 				uploadCount++
 
+			$scope.max_files = 40
 			$scope.onComplete = (error, name, response) ->
 				event_tracking.send "file", "upload", {name}
 				$timeout (() ->
@@ -125,6 +145,23 @@ define [
 					if uploadCount == 0 and response? and response.success
 						$modalInstance.close("done")
 				), 250
+
+			$scope.onValidateBatch = (files)->
+				if files.length > $scope.max_files
+					$timeout (() ->
+						$scope.tooManyFiles = true
+					), 1
+					return false
+				else
+					return true
+
+			$scope.onError = (id, name, reason)->
+				console.log(id, name, reason)
+				if reason.indexOf("429") != -1
+					$scope.rateLimitHit = true
+				else if reason.indexOf("403") != -1
+					needToLogBackIn()
+
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

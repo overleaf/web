@@ -10,16 +10,19 @@
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",,
 				ng-click="openCreateProjectModal('python')"
 			) Python Project
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",,
 				ng-click="openCreateProjectModal('r')"
 			) R Project
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",
 				ng-click="openUploadProjectModal()"
 			) #{translate("upload_project")}
 		!= moduleIncludes("newProjectMenu", locals)
@@ -28,7 +31,7 @@
 			li.dropdown-header #{translate("templates")}
 			each item in templates
 				li
-					a.menu-indent(href=item.url) #{translate(item.name)}
+					a.menu-indent(href=item.url, sixpack-convert="first_sign_up") #{translate(item.name)}
 
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
@@ -69,7 +72,7 @@
 			i.fa.fa-arrow-up.fa-2x
 		div
 			strong #{translate("create_your_first_project")}
-
+			
 - if (showUserDetailsArea)
 	.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
 		div(ng-controller="UserProfileController")
@@ -85,12 +88,4 @@
 					ng-click="openUserProfileModal()"
 				) #{translate("complete")}
 
--if (settings.enableSubscriptions && !hasSubscription)
-	.row-spaced(ng-if="projects.length > 0", ng-cloak).text-centered
-		hr
-		p.small #{translate("on_free_sl")}
-		p
-			a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
-		p.small
-			| #{translate("or_unlock_features_bonus")} 
-			a(href="/user/bonus") #{translate("sharing_sl")} .
+

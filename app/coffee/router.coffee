@@ -85,7 +85,10 @@ module.exports = class Router
 		
 		# Inject intercom details to set email address in heap before sending the 'register' event
 		webRouter.get '/user/usage', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, UserPagesController.useCasePage
-
+		webRouter.get '/teacher/free_trial', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, UserPagesController.startFreeTrial
+		
+		webRouter.get '/user/activate', UserPagesController.activateAccountPage
+		
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
@@ -97,7 +100,7 @@ module.exports = class Router
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
 		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
-		webRouter.get  '/project', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, SubscriptionMiddlewear.loadFreeTrialInfo, ProjectController.projectListPage
+		webRouter.get  '/project', AuthenticationController.requireLogin(), SubscriptionMiddlewear.requireSubscription, AnalyticsMiddlewear.injectIntercomDetails, SubscriptionMiddlewear.loadFreeTrialInfo, ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
 		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({

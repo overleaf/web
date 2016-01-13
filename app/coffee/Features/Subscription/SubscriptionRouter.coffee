@@ -40,8 +40,9 @@ module.exports =
 		webRouter.post '/user/subscription/cancel',     AuthenticationController.requireLogin(), SubscriptionController.cancelSubscription
 		webRouter.post '/user/subscription/reactivate', AuthenticationController.requireLogin(), SubscriptionController.reactivateSubscription
 
+		webRouter.put '/user/subscription/extend', AuthenticationController.requireLogin(), SubscriptionController.extendTrial
 
 		webRouter.get "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.renderUpgradeToAnnualPlanPage
 		webRouter.post "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.processUpgradeToAnnualPlan
 
-		webRouter.post "/user/subscription/free_trial", AuthenticationController.requireLogin(), SubscriptionController.startFreeTrial
+		webRouter.post "/user/subscription/free_trial", AuthenticationController.requireLogin(), SubscriptionController.startFreeTeacherTrial

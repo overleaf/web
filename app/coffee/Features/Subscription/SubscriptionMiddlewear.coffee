@@ -1,4 +1,7 @@
 SubscriptionLocator = require "./SubscriptionLocator"
+LimitationsManager = require "./LimitationsManager"
+UserGetter = require "../User/UserGetter"
+logger = require "logger-sharelatex"
 
 module.exports = SubscriptionMiddlewear =
 	loadFreeTrialInfo: (req, res, next) ->
@@ -13,4 +16,18 @@ module.exports = SubscriptionMiddlewear =
 				DAY = 24 * 60 * 60 * 1000
 				res.locals.freeTrial.daysRemaining = Math.floor((expiresAt - new Date()) / DAY) + 1
 			next()
-		
+	
+	requireSubscription: (req, res, next) ->
+		LimitationsManager.userHasSubscription req.session.user, (error, hasPaidSubscription, subscription) ->
+			return next(error) if error?
+			logger.log {hasPaidSubscription, subscription}, "got subscription status"
+			if hasPaidSubscription or subscription?
+				return next()
+			else
+				UserGetter.getUser req.session.user._id, { use_case: 1 }, (error, user) ->
+					return next(error) if error?
+					use_case = user?.use_case 
+					if use_case == "teacher"
+						res.redirect "/teacher/free_trial"
+					else
+						res.redirect "/user/subscription/new?planCode=datajoy"
