@@ -35,7 +35,7 @@ module.exports =
 			@userIsMemberOfGroupSubscription user, (err, isMember)=>
 				return callback(err) if err?
 				logger.log user_id:user._id, isMember:isMember, hasSubscription:hasSubscription, "checking if user has subscription or is group member"
-				callback err, isMember or hasSubscription, subscription
+				callback err, isMember or hasSubscription or subscription?, subscription
 
 	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"

@@ -1,38 +1,44 @@
-.dropdown(dropdown)
+if hasSubscription
+	.dropdown(dropdown)
+		a.btn.btn-primary.dropdown-toggle(
+			href="#",
+			data-toggle="dropdown",
+			dropdown-toggle
+		)
+			| #{translate("new_project")}
+
+		ul.dropdown-menu(role="menu")
+			li
+				a(
+					href,
+					sixpack-convert="first_sign_up",,
+					ng-click="openCreateProjectModal('python')"
+				) Python Project
+			li
+				a(
+					href,
+					sixpack-convert="first_sign_up",,
+					ng-click="openCreateProjectModal('r')"
+				) R Project
+			li
+				a(
+					href,
+					sixpack-convert="first_sign_up",
+					ng-click="openUploadProjectModal()"
+				) #{translate("upload_project")}
+			!= moduleIncludes("newProjectMenu", locals)
+			if (templates)
+				li.divider
+				li.dropdown-header #{translate("templates")}
+				each item in templates
+					li
+						a.menu-indent(href=item.url, sixpack-convert="first_sign_up") #{translate(item.name)}
+else
 	a.btn.btn-primary.dropdown-toggle(
-		href="#",
-		data-toggle="dropdown",
-		dropdown-toggle
+		href="/user/subscription/new"
 	)
 		| #{translate("new_project")}
-
-	ul.dropdown-menu(role="menu")
-		li
-			a(
-				href,
-				sixpack-convert="first_sign_up",,
-				ng-click="openCreateProjectModal('python')"
-			) Python Project
-		li
-			a(
-				href,
-				sixpack-convert="first_sign_up",,
-				ng-click="openCreateProjectModal('r')"
-			) R Project
-		li
-			a(
-				href,
-				sixpack-convert="first_sign_up",
-				ng-click="openUploadProjectModal()"
-			) #{translate("upload_project")}
-		!= moduleIncludes("newProjectMenu", locals)
-		if (templates)
-			li.divider
-			li.dropdown-header #{translate("templates")}
-			each item in templates
-				li
-					a.menu-indent(href=item.url, sixpack-convert="first_sign_up") #{translate(item.name)}
-
+	
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
 		ng-controller="TagListController"
