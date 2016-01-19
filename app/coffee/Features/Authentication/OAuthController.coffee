@@ -40,7 +40,7 @@ OAuthController =
 		return OAuth(credentials)
 
 	redirect_url: ->
-		return 'http://localhost:3000/oauth/callback'
+		return Settings.apis.web.url + '/oauth/callback'
 
 	callback: (req, res) ->
 		code = req.query.code
