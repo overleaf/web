@@ -40,6 +40,9 @@ AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlew
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
+
+OAuthController = require('./Features/Authentication/OAuthController')
+
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
@@ -48,25 +51,37 @@ module.exports = class Router
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
-		webRouter.post '/login', AuthenticationController.passportLogin
+		if !Settings.oauth.is_enabled
+			webRouter.post '/login', AuthenticationController.passportLogin
+			
+			webRouter.get  '/register', UserPagesController.registerPage
+			AuthenticationController.addEndpointToLoginWhitelist '/register'
+
+		else
+			webRouter.get '/oauth/login', OAuthController.login
+			webRouter.post '/login',      OAuthController.login
+			AuthenticationController.addEndpointToLoginWhitelist '/oauth/login'
+
+			webRouter.get '/oauth/callback', OAuthController.callback
+			AuthenticationController.addEndpointToLoginWhitelist '/oauth/callback'
 
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
 		# Left as a placeholder for implementing a public register page
-		webRouter.get  '/register', UserPagesController.registerPage
-		AuthenticationController.addEndpointToLoginWhitelist '/register'
 
 
 		EditorRouter.apply(webRouter, apiRouter)
 		CollaboratorsRouter.apply(webRouter, apiRouter)
 		SubscriptionRouter.apply(webRouter, apiRouter)
 		UploadsRouter.apply(webRouter, apiRouter)
-		PasswordResetRouter.apply(webRouter, apiRouter)
+
+		if !Settings.oauth.is_enabled
+			PasswordResetRouter.apply(webRouter, apiRouter)
+
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
@@ -86,7 +101,9 @@ module.exports = class Router
 
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
-		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
+
+		if !Settings.oauth.is_enabled
+			webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		webRouter.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser

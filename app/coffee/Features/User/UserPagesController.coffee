@@ -48,10 +48,14 @@ module.exports =
 					token: req.query.token
 
 	loginPage : (req, res)->
-		res.render 'user/login',
-			title: 'login',
-			redir: req.query.redir,
-			email: req.query.email
+		if !Settings.oauth.is_enabled
+			res.render 'user/login',
+				title: 'login',
+				redir: req.query.redir,
+				email: req.query.email
+		else
+			res.render 'user/login_oauth',
+				redir: '/oauth/login'
 
 	settingsPage : (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
