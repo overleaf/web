@@ -419,7 +419,7 @@ module.exports = settings =
 	#	url: "/templates/all"
 	#}]
 	oauth:
-		is_enabled: true
+		is_enabled: false
 		client_id: 'sharelatex'
 		client_secret: 'sekret'
 		base_url: 'http://localhost:8080/'

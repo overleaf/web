@@ -10,8 +10,9 @@ describe "UserPagesController", ->
 
 	beforeEach ->
 
-		@settings = {}
-		@user =
+		@settings = { oauth: { is_enabled: false } }
+		@user = 
+
 			_id: @user_id = "kwjewkl"
 			features:{}
 			email: "joe@example.com"
