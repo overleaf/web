@@ -158,6 +158,10 @@ define [
 						row: endRow
 						column: endColumn
 				}
+				
+				if startRow != endRow
+					console.error "Highlight manager doesn't yet support multi row highlights", entry
+					continue
 
 				if entry.i? or entry.d?
 					if entry.meta.user?
@@ -169,14 +173,20 @@ define [
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
 						highlights.push {
+							type: "highlight"
 							label: "Added by #{name} on #{date}"
-							highlight: range
+							row: startRow
+							column: startColumn
+							length: endColumn - startColumn
 							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 					else if entry.d?
 						highlights.push {
+							type: "strikethrough"
 							label: "Deleted by #{name} on #{date}"
-							strikeThrough: range
+							row: startRow
+							column: startColumn
+							length: endColumn - startColumn
 							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 

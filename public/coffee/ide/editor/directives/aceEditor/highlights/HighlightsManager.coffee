@@ -1,54 +1,64 @@
 define [
 	"ace/ace"
-], () ->
+	"ide/editor/directives/aceEditor/spell-check/AnnotationManager"
+], (_, AnnotationManager) ->
 	Range = ace.require("ace/range").Range
 
 	class HighlightsManager
 		constructor: (@$scope, @editor, @element) ->
-			@markerIds = []
-			@labels = []
-
-			@$scope.annotationLabel = {
-				show: false
-				right:  "auto"
-				left:   "auto"
-				top:    "auto"
-				bottom: "auto"
-				backgroundColor: "black"
-				text: ""
-			}
-
-			@$scope.updateLabels = {
-				updatesAbove: 0
-				updatesBelow: 0
-			}
-
-			@$scope.$watch "highlights", (value) =>
-				@redrawAnnotations()
-
-			@$scope.$watch "theme", (value) =>
-				@redrawAnnotations()
-
-			@editor.on "mousemove", (e) =>
-				position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-				e.position = position
-				@showAnnotationLabels(position)
-
-			onChangeScrollTop = () =>
-				@updateShowMoreLabels()
-
-			@editor.getSession().on "changeScrollTop", onChangeScrollTop
-
-			@$scope.$watch "text", () =>
-				if @$scope.navigateHighlights
-					setTimeout () =>
-						@scrollToFirstHighlight()
-					, 0
-
-			@editor.on "changeSession", (e) =>
-				e.oldSession?.off "changeScrollTop", onChangeScrollTop
-				e.session.on "changeScrollTop", onChangeScrollTop
-				@redrawAnnotations()
+			@annotationManager = new AnnotationManager(@editor)
+			
+			@$scope.$watch "highlights", (highlights) =>
+				return if !highlights?
+				@annotationManager.removeAllAnnotations()
+				for highlight in highlights
+					@annotationManager.addAnnotation(highlight)
+			
+			
+			# @markerIds = []
+			# @labels = []
+			# 
+			# @$scope.annotationLabel = {
+			# 	show: false
+			# 	right:  "auto"
+			# 	left:   "auto"
+			# 	top:    "auto"
+			# 	bottom: "auto"
+			# 	backgroundColor: "black"
+			# 	text: ""
+			# }
+			# 
+			# @$scope.updateLabels = {
+			# 	updatesAbove: 0
+			# 	updatesBelow: 0
+			# }
+			# 
+			# @$scope.$watch "highlights", (value) =>
+			# 	@redrawAnnotations()
+			# 
+			# @$scope.$watch "theme", (value) =>
+			# 	@redrawAnnotations()
+			# 
+			# @editor.on "mousemove", (e) =>
+			# 	position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
+			# 	e.position = position
+			# 	@showAnnotationLabels(position)
+			# 
+			# onChangeScrollTop = () =>
+			# 	@updateShowMoreLabels()
+			# 
+			# @editor.getSession().on "changeScrollTop", onChangeScrollTop
+			# 
+			# @$scope.$watch "text", () =>
+			# 	if @$scope.navigateHighlights
+			# 		setTimeout () =>
+			# 			@scrollToFirstHighlight()
+			# 		, 0
+			# 
+			# @editor.on "changeSession", (e) =>
+			# 	e.oldSession?.off "changeScrollTop", onChangeScrollTop
+			# 	e.session.on "changeScrollTop", onChangeScrollTop
+			# 	@redrawAnnotations()
 
 			@$scope.gotoHighlightBelow = () =>
 				return if !@firstHiddenHighlightAfter?

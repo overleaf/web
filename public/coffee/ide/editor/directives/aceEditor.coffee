@@ -263,20 +263,6 @@ define [
 							</li>
 						</ul>
 					</div>
-					<div
-						class="annotation-label"
-						ng-show="annotationLabel.show"
-						ng-style="{
-							position: 'absolute',
-							left:     annotationLabel.left,
-							right:    annotationLabel.right,
-							bottom:   annotationLabel.bottom,
-							top:      annotationLabel.top,
-							'background-color': annotationLabel.backgroundColor
-						}"
-					>
-						{{ annotationLabel.text }}
-					</div>
 
 					<a
 						href
