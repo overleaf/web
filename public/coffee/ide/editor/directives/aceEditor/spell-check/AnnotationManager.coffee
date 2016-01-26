@@ -17,6 +17,12 @@ define [
 				position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
 				e.position = position
 				@showAnnotationLabels(position)
+			
+			@editor.renderer.on "themeChange", (e) =>
+				console.log "THEME CHANGE"
+				setTimeout () =>
+					@redrawMarkers()
+				, 0
 
 		addAnnotation: (annotation) ->
 			@_addMarker(annotation)
@@ -24,17 +30,15 @@ define [
 			@annotations.rows[annotation.row].push annotation
 
 		removeAnnotation: (annotation) ->
-			for markerId in annotation.markerIds or []
-				@editor.getSession().removeMarker(markerId)
-			for h, i in @annotations.rows[annotation.row]
-				if h == annotation
+			@_clearMarker(annotation)
+			for a, i in @annotations.rows[annotation.row]
+				if a == annotation
 					@annotations.rows[annotation.row].splice(i, 1)
 		
 		removeAllAnnotations: () ->
 			for row in @annotations.rows or []
 				for annotation in row or []
-					for markerId in annotation.markerIds or []
-						@editor.getSession().removeMarker(markerId)
+					@_clearMarker(annotation)
 			@annotations.rows = []
 		
 		removeWord: (word) ->
@@ -51,6 +55,12 @@ define [
 			annotation.row = position.row
 			annotation.column = position.column
 			@addAnnotation annotation
+		
+		redrawMarkers: () ->
+			for row in @annotations.rows
+				for annotation in (row || [])
+					@_clearMarker(annotation)
+					@_addMarker(annotation)
 
 		clearRows: (from, to) ->
 			from ||= 0
@@ -177,6 +187,10 @@ define [
 			else
 				console.error "Unknown annotation type: #{annotation.type}"
 		
+		_clearMarker: (annotation) ->
+			for markerId in annotation.markerIds or []
+				@editor.getSession().removeMarker(annotation.markerId)
+		
 		_drawSpellingUnderline: (annotation) ->
 			annotation.markerIds = [
 				@editor.getSession().addMarker @_annotationRange(annotation), "spelling-annotation", null, true
@@ -244,14 +258,12 @@ define [
 				}
 
 		_isDarkTheme: () ->
-			return false
-			# TODO: get this working again
-			# rgb = @editor.find(".ace_editor").css("background-color");
-			# [m, r, g, b] = rgb.match(/rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)/)
-			# r = parseInt(r, 10)
-			# g = parseInt(g, 10)
-			# b = parseInt(b, 10)
-			# return r + g + b < 3 * 128
+			rgb = $(@editor.renderer.container).css("background-color");
+			[m, r, g, b] = rgb.match(/rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)/)
+			r = parseInt(r, 10)
+			g = parseInt(g, 10)
+			b = parseInt(b, 10)
+			return r + g + b < 3 * 128
 			
 		showAnnotationLabels: (position) ->
 			annotation = null
