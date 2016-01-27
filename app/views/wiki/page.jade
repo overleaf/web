@@ -1,5 +1,9 @@
 extends ../layout
 
+block vars
+	if (!session || !session.user)
+		- var suppressIntercom = true
+	
 block scripts
 	script.
 		if (typeof(ga) != "undefined") {

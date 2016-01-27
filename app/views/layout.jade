@@ -55,7 +55,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			script(type='text/javascript').
 				window.ga = function() { console.log("Sending to GA", arguments) };
 
-		if (settings.analytics.intercom)
+		if (settings.analytics.intercom && !suppressIntercom)
 			if (intercom_user)
 				script(type='text/javascript').
 					window.intercomSettings = !{JSON.stringify(intercom_user)}
