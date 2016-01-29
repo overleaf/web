@@ -193,18 +193,18 @@ script(type='text/ng-template', id='installPackagesModalTemplate')
 				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'biocLite'")
 					| (Packages will be installed from Bioconductor. 
 					| Install from 
-					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") Binary
 					| , 
-					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") CRAN
 					|  or 
 					a(href, ng-click="inputs.rInstaller = 'git'") GitHub
 					|  instead.)
 				span.small.row-spaced-small(ng-show="selectedTab.R && inputs.rInstaller == 'git'")
 					| (Packages will be installed from GitHub. 
 					| Install from 
-					a(href, ng-click="inputs.rInstaller = 'apt-get'") CRAN
+					a(href, ng-click="inputs.rInstaller = 'apt-get'") Binary
 					| , 
-					a(href, ng-click="inputs.rInstaller = 'install.packages'") source
+					a(href, ng-click="inputs.rInstaller = 'install.packages'") CRAN
 					|  or 
 					a(href, ng-click="inputs.rInstaller = 'biocLite'") Bioconductor
 					|  instead.)
