@@ -92,7 +92,7 @@ module.exports = SubscriptionController =
 				else if groupLicenceInviteUrl? and !hasSubOrIsGroupMember
 					logger.log user:user, "redirecting to group subscription invite page"		
 					res.redirect groupLicenceInviteUrl
-				else if !hasSubOrIsGroupMember
+				else if !hasSubOrIsGroupMember or !subscription.recurlySubscription_id?
 					logger.log user: user, "redirecting to plans"
 					res.redirect "/user/subscription/plans"
 				else
