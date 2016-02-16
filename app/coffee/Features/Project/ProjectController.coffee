@@ -170,6 +170,23 @@ module.exports = ProjectController =
 					res.render 'project/list', viewModel
 					timer.done()
 
+	checkIfOwnerFreeTrialHasExpired: (req, res, next) ->
+		project_id = req.params.Project_id
+		Project.findOne { _id: project_id }, {owner_ref: 1, name: 1}, (error, project) ->
+			return next(error) if error?
+			return next() if !project?
+			owner_id = project.owner_ref
+			user_is_owner = (owner_id?.toString() == req.session.user._id.toString())
+			logger.log {project_id, owner_id, user_is_owner}, "checking if project owner's trial has expired"
+			SubscriptionLocator.getUsersSubscription owner_id, (error, subscription) ->
+				return next(error) if error?
+				return next() if !subscription?
+				now = new Date()
+				if subscription.freeTrial.expiresAt? and subscription.freeTrial.expiresAt < now
+					logger.log {project_id, owner_id, user_is_owner, subscription}, "trial is expired"
+					res.render "subscriptions/trial_expired", {user_is_owner, project: project}
+				else
+					next()
 
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")

@@ -1,0 +1,30 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card.text-center
+						.page-header
+							h1 Free Trial Expired
+						if user_is_owner
+							p
+								| Your free trial of DataJoy has now expired.
+								br
+								| Please upgrade to continue to work with this project.
+							p
+								a.btn.btn-success(
+									href="/user/subscription/plans"
+								) Upgrade Now
+						else
+							p
+								| The owner of this project is at the end of their DataJoy free trial.
+								br
+								| Please contact them if you would like to continue working on this project in DataJoy.
+						hr
+						p
+							a.btn.btn-primary(href="project/blah/download/zip")
+								i.fa.fa-fw.fa-download
+								| &nbsp;
+								| Download "#{project.name}"

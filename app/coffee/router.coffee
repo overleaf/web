@@ -110,7 +110,7 @@ module.exports = class Router
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
-		}), SecurityManager.requestCanAccessProject, AnalyticsMiddlewear.injectIntercomDetails, ProjectController.loadEditor
+		}), SecurityManager.requestCanAccessProject, ProjectController.checkIfOwnerFreeTrialHasExpired, AnalyticsMiddlewear.injectIntercomDetails, ProjectController.loadEditor
 		webRouter.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
 
