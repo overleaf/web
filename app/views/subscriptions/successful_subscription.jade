@@ -13,23 +13,14 @@ block content
 						//- 	p #{translate("if_you_dont_want_to_be_charged")}
 						//- 		a(href="/user/subscription") #{translate("click_here_to_cancel")}.
 
-						p
-							- if (subscription.groupPlan == true)
-								a.btn.btn-success.btn-large(href="/subscription/group") #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:subscription.name})}
 							p #{translate("need_anything_contact_us_at")} 
-								a(href='mailto:support@sharelatex.com') support@sharelatex.com
+								a(href='mailto:support@sharelatex.com') team@getdatajoy.com
 								| . #{translate("goes_straight_to_our_inboxes")}.
 							p #{translate("regards")},
 								br
 								| Henry and James
-							.portraits
-								span.img-circle
-									img(src="/img/about/henry_oswald.jpg") 
-								| &nbsp;
-								span.img-circle
-									img(src="/img/about/james_allen.jpg") 
 						p
 							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}
 

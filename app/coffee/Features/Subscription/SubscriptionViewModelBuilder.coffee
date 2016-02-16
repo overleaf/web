@@ -56,10 +56,10 @@ module.exports =
 			plan.groupPlan and plan.annual
 
 		result.individualMonthlyPlans = _.filter plans, (plan)->
-			!plan.groupPlan and !plan.annual and plan.planCode != "personal" and plan.planCode.indexOf("student") == -1
+			!plan.groupPlan and !plan.annual and plan.planCode != "personal" and plan.planCode.indexOf("teacher") == -1
 
 		result.individualAnnualPlans = _.filter plans, (plan)->
-			!plan.groupPlan and plan.annual and plan.planCode.indexOf("student") == -1
+			!plan.groupPlan and plan.annual and plan.planCode.indexOf("teacher") == -1
 
 		return result
 
