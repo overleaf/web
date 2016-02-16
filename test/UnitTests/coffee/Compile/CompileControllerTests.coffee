@@ -43,6 +43,12 @@ describe "CompileController", ->
 		@res = new MockResponse()
 
 	describe "compile", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+			@req.session = {}
+			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
+			@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
 
 		describe "when not an auto compile", ->
 			beforeEach ->
@@ -80,8 +86,6 @@ describe "CompileController", ->
 
 		describe "when an auto compile", ->
 			beforeEach ->
-				@req.params =
-					Project_id: @project_id
 				@req.query =
 					auto_compile: "true"
 				@req.body =

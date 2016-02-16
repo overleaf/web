@@ -111,6 +111,7 @@ describe "ClsiManager", ->
 				_id: @project_id
 				compiler: @compiler = "latex"
 				rootDoc_id: "mock-doc-id-1"
+				imageName: @image = "mock-image-name"
 
 			@docs = {
 				"/main.tex": @doc_1 = {
@@ -181,6 +182,7 @@ describe "ClsiManager", ->
 							processes:  @processes
 							cpu_shares: @cpu_shares
 							imageName: undefined
+
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"

@@ -76,7 +76,7 @@ define [
 
 
 	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack) ->
-		freeTrialEndDate = new Date(subscription.trial_ends_at)
+		freeTrialEndDate = new Date(subscription?.trial_ends_at)
 
 		sevenDaysTime = new Date()
 		sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)
@@ -123,15 +123,16 @@ define [
 			$scope.inflight = true
 			$http.post("/user/subscription/cancel", body)
 				.success ->
-					sixpack.convert 'cancelation-view', ->
-						location.reload()
+					sixpack.convert 'cancelation-options-view', ->
+						sixpack.convert 'upgrade-success-message', ->
+							location.reload()
 				.error ->
 					console.log "something went wrong changing plan"
 
 
 
 		$scope.switchToCancelationView = ->
-			sixpack.participate 'cancelation-view', ['basic', 'downgrade-options'], (view, rawResponse)->
+			sixpack.participate 'cancelation-options-view', ['basic', 'downgrade-options'], (view, rawResponse)->
 				$scope.view = "cancelation"
 				$scope.sixpackOpt = view
 

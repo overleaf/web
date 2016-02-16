@@ -26,6 +26,8 @@ module.exports = ProjectEditorHandler =
 				dropbox:false
 				compileTimeout: 60
 				compileGroup:"standard"
+				templates: false
+				references: false
 
 			if project.owner_ref.features?
 				if project.owner_ref.features.collaborators?
@@ -40,6 +42,10 @@ module.exports = ProjectEditorHandler =
 					result.features.compileGroup = project.owner_ref.features.compileGroup	
 				if project.owner_ref.features.compileMemory?
 					result.features.compileMemory = project.owner_ref.features.compileMemory
+				if project.owner_ref.features.templates?
+					result.features.templates = project.owner_ref.features.templates
+				if project.owner_ref.features.references?
+					result.features.references = project.owner_ref.features.references
 
 					
 			result.owner = @buildUserModelView project.owner_ref, "owner"

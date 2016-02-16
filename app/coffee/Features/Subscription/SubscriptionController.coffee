@@ -9,7 +9,6 @@ Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
-require("../../infrastructure/Sixpack")
 
 module.exports = SubscriptionController =
 
@@ -105,7 +104,7 @@ module.exports = SubscriptionController =
 							recomendedCurrency: subscription?.currency
 							taxRate:subscription?.taxRate
 							plans: plans
-							subscription: subscription
+							subscription: subscription || {}
 							groups: groups
 							subscriptionTabActive: true
 

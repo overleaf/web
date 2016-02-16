@@ -16,6 +16,7 @@ define [
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
 	"main/free-trial"
+	"main/universties-site"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
@@ -26,6 +27,7 @@ define [
 	"directives/selectAll"
 	"directives/maxHeight"
 	"directives/intercom"
+	"services/queued-http"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
