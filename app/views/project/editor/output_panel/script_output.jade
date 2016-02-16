@@ -1,31 +1,34 @@
 div.full-size.script-output-pane(ng-controller="ScriptOutputController")
 	.toolbar.toolbar-tall
-		span(ng-show="!status.running && !status.stopping")
-			a.btn.btn-info(
-				href,
-				ng-click="runSelection()"
-			)
-				i.fa.fa-fw.fa-play
-				| &nbsp; 
-				span(ng-show="editor.selection.lines.length == 1") Run Line
-				span(ng-show="editor.selection.lines.length > 1") Run Selection
-		span(ng-show="!status.running && !status.stopping")
-			a.btn.btn-default(
-				href,
-				ng-click="runAll()"
-			)
-				| Run Script
-		span(ng-show="status.running && !status.stopping")
-			a.btn.btn-info(disabled=true)
-				i.fa.fa-fw.fa-refresh.fa-spin
-				| &nbsp; Running
-			a(
-				href,
-				ng-click="stop()"
-			).small
-				.i.fa.fa-fw.fa-stop
-				|  Stop
-		span.pull-right.small-controls
+		a.btn.btn-info(
+			href,
+			ng-click="runSelection()"
+			ng-show="!status.running && !status.stopping"
+		)
+			i.fa.fa-fw.fa-play
+			| &nbsp; 
+			span(ng-show="editor.selection.lines.length == 1") Run Line
+			span(ng-show="editor.selection.lines.length > 1") Run Selection
+		a.btn.btn-default(
+			href,
+			ng-click="runAll()"
+			ng-show="!status.running && !status.stopping"
+		)
+			| Run Script
+		a.btn.btn-info(
+			ng-show="status.running && !status.stopping"
+			disabled=true
+		)
+			i.fa.fa-fw.fa-refresh.fa-spin
+			| &nbsp; Running
+		a(
+			href,
+			ng-show="status.running && !status.stopping"
+			ng-click="stop()"
+		).small
+			.i.fa.fa-fw.fa-stop
+			|  Stop
+		span.toolbar-right
 			a(href, ng-click="clearCells()", ng-if="cells[engine].length > 0", tooltip-html="'Clear<br/>Output'", tooltip-placement="bottom")
 				i.fa.fa-fw.fa-times
 			a(href, ng-click="restart()", tooltip-html="'Restart<br/>Session'", tooltip-placement="bottom")
