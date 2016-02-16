@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	App.controller "FileTreeEntityController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.select = (e) ->
-			if e? and e.ctrlKey or e.metaKey
+			if e? and (e.ctrlKey or e.metaKey)
 				e.stopPropagation()
 				initialMultiSelectCount = ide.fileTreeManager.multiSelectedCount()
 				ide.fileTreeManager.toggleMultiSelectEntity($scope.entity) == 0
