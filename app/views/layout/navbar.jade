@@ -11,7 +11,7 @@ nav.navbar.navbar-default
 		.navbar-collapse.collapse(collapse="navCollapsed")
 
 			ul.nav.navbar-nav.navbar-right
-				-if(freeTrial && freeTrial.daysRemaining)
+				-if(freeTrial && typeof(freeTrial.daysRemaining) != "undefined")
 					li.subdued
 						a(
 							href,

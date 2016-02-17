@@ -15,7 +15,7 @@ module.exports = SubscriptionMiddlewear =
 			expiresAt = subscription.freeTrial.expiresAt
 			if expiresAt?
 				DAY = 24 * 60 * 60 * 1000
-				res.locals.freeTrial.daysRemaining = Math.floor((expiresAt - new Date()) / DAY) + 1
+				res.locals.freeTrial.daysRemaining = Math.round((expiresAt - new Date()) / DAY)
 			next()
 
 	requireSubscription: (req, res, next) ->
