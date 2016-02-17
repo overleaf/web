@@ -46,12 +46,4 @@ module.exports = SubscriptionMiddlewear =
 			return callback null, (sharedProjects.length > 0 or readOnlyProjects.length > 0)
 		
 	_redirectToSignUp: (user, res) ->
-		UserGetter.getUser user._id, { use_case: 1 }, (error, user) ->
-			return next(error) if error?
-			use_case = user?.use_case 
-			if use_case == "teacher"
-				res.redirect "/teacher/free_trial"
-			else
-				res.redirect "/user/subscription/new?planCode=datajoy"
-					
-					
+		res.redirect "/user/free_trial"

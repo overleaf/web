@@ -5,48 +5,62 @@ block content
 		.container
 			.row
 				.col-md-6.col-md-offset-3
-					.card(ng-controller="FreeTrialController")
-						.page-header
-							h2 Welcome to DataJoy!
-						p
-							| Please tell us a little bit about yourself then
-							| start a 30-day free trial to try
-							| out DataJoy with your students.
-						form(ng-submit="submit()")
-							.form-group
-								label(for="first_name") #{translate("first_name")}
-								input.form-control(
-									type='text',
-									name='first_name',
-									ng-model="userInfoForm.first_name",
-									placeholder="First Name",
-									autofocus
-								)
+					if use_case == "teacher"
+						.card(ng-controller="FreeTrialController")
+							.page-header
+								h2 Welcome to DataJoy!
+							p
+								| Please tell us a little bit about yourself then
+								| start a 30-day free trial to try
+								| out DataJoy with your students.
+							form(ng-submit="submit()")
+								.form-group
+									label(for="first_name") #{translate("first_name")}
+									input.form-control(
+										type='text',
+										name='first_name',
+										ng-model="userInfoForm.first_name",
+										placeholder="First Name",
+										autofocus
+									)
 
-							.form-group.user_details_auto_complete
-								label(for="institution") University / #{translate("institution")}
-								input.form-control(
-									type="text",
-									name="institution",
-									ng-model="userInfoForm.institution",
-									placeholder="University / Institution"
-								)
+								.form-group.user_details_auto_complete
+									label(for="institution") University / #{translate("institution")}
+									input.form-control(
+										type="text",
+										name="institution",
+										ng-model="userInfoForm.institution",
+										placeholder="University / Institution"
+									)
 
-							.form-group.user_details_auto_complete
-								label(for="institution") Class Size (approximately)
-								input.form-control(
-									type="text",
-									name="class_size",
-									ng-model="userInfoForm.class_size",
-									placeholder="Class Size"
-								)
-							
-							.row-spaced.text-center
-								button.btn.btn-primary.btn-lg(
-									type="submit",
-									ng-disabled="status.inflight",
-									ng-cloak
-								)
-									span(ng-show="!status.inflight") Start Free Trial
-									span(ng-show="status.inflight") Submitting...
-
+								.form-group.user_details_auto_complete
+									label(for="institution") Class Size (approximately)
+									input.form-control(
+										type="text",
+										name="class_size",
+										ng-model="userInfoForm.class_size",
+										placeholder="Class Size"
+									)
+								
+								.row-spaced.text-center
+									button.btn.btn-primary.btn-lg(
+										type="submit",
+										ng-disabled="status.inflight",
+										ng-cloak
+									)
+										span(ng-show="!status.inflight") Start Free Trial
+										span(ng-show="status.inflight") Submitting...
+					else
+						.card
+							.page-header
+								h2 Welcome to DataJoy!
+							p
+								| You can try our online collaborative Python and R environment for free for 14 days.
+								| After that you can pick a plan that suits your needs.
+							p.text-center.row-spaced
+								form(action="/user/subscription/free_trial", method="POST").text-center
+									input(name='_csrf', type='hidden', value=csrfToken)
+									input(name='planCode', type='hidden', value="datajoy")
+									button.btn.btn-lg.btn-primary(type='submit') Start Free Trial
+							p.text-center.row-spaced
+								| Please get in touch if you have any questions!

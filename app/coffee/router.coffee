@@ -87,7 +87,7 @@ module.exports = class Router
 		
 		# Inject intercom details to set email address in heap before sending the 'register' event
 		webRouter.get '/user/usage', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, UserPagesController.useCasePage
-		webRouter.get '/teacher/free_trial', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, UserPagesController.startFreeTrial
+		webRouter.get '/user/free_trial', AuthenticationController.requireLogin(), AnalyticsMiddlewear.injectIntercomDetails, UserPagesController.startFreeTrial
 		
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
 

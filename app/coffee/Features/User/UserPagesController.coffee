@@ -64,4 +64,9 @@ module.exports =
 		res.render 'user/use_case', title: "Register Step 2 of 2"
 	
 	startFreeTrial: (req, res, next) ->
-		res.render 'user/start_free_trial', title: "Welcome to DataJoy"
+		UserGetter.getUser req.session.user._id, {use_case: 1}, (error, user) ->
+			return next(error) if error?
+			res.render 'user/start_free_trial', {
+				title: "Welcome to DataJoy"
+				use_case: user.use_case
+			}

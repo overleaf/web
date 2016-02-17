@@ -26,11 +26,14 @@ nav.navbar.navbar-default
 						script(type="text/ng-template", id="freeTrialPopoverTemplate")
 							.text-center
 								if freeTrial.daysRemaining >= 0
-									p Your free trial of the teaching license expires in #{freeTrial.daysRemaining} days.
+									p Your free trial expires in #{freeTrial.daysRemaining} days.
 								else
-									p Your free trial of the teaching license has expired.
+									p Your free trial has expired.
 								p
-									a.btn.btn-primary.js-intercom(href, intercom) Contact us to upgrade
+									if freeTrial.planCode == "teacher"
+										a.btn.btn-primary.js-intercom(href, intercom) Contact us to upgrade
+									else
+										a.btn.btn-primary(href="/user/subscription/plans") Upgrade Now
 
 				if (session && session.user && session.user.isAdmin)
 					li.dropdown(class="subdued", dropdown)

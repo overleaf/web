@@ -138,14 +138,19 @@ module.exports = SubscriptionController =
 							user       :
 								id : user.id
 	
-	startFreeTeacherTrial: (req, res, next) ->
-		{redir} = req.body
-		SecurityManager.getCurrentUser req, (error, user) ->
-			return callback(error) if error?
-			expiresAt = new Date(Date.now() + Settings.freeTrialLength)
-			SubscriptionHandler.startFreeTrial user._id, "teacher", expiresAt, true, (error) ->
-				return next(error) if error?
-				res.redirect redir or "/"
+	startFreeTrial: (req, res, next) ->
+		{redir, planCode} = req.body
+		length = Settings.freeTrialLength[planCode]
+		if !length?
+			res.status(400)
+			res.send("Invalid planCode")
+		else
+			SecurityManager.getCurrentUser req, (error, user) ->
+				return callback(error) if error?
+				expiresAt = new Date(Date.now() + length)
+				SubscriptionHandler.startFreeTrial user._id, planCode, expiresAt, true, (error) ->
+					return next(error) if error?
+					res.redirect redir or "/"
 	
 	createSubscription: (req, res, next)->
 		SecurityManager.getCurrentUser req, (error, user) ->
