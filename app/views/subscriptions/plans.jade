@@ -71,8 +71,8 @@ block content
 												a.btn.btn-info(
 													ng-href="#{baseUrl}/user/subscription/new?planCode=datajoy{{ ui.view == 'annual' ? '-annual' : '' }}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 												)
-													span(ng-show="ui.view != 'annual'") Start your 7 day free trial
-													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+													span(ng-show="ui.view != 'annual'") Sign Up Now
+													span(ng-show="ui.view == 'annual'") Sign Up Now
 											li.row-spaced-small(ng-show="ui.view == 'annual'").small
 												| View 
 												a(
@@ -121,8 +121,7 @@ block content
 						) Sign up with academic discount
 				hr
 				.row.row-spaced-thin(ng-cloak)
-					p.text-centered Choose the plan that works for you with our 7-day free trial. Cancel at any time, and get a full 30-day refund if you're unhappy for any reason.
-
+					p.text-centered There's no lock-in and you can cancel at any time. We'll give you a full refund if you're unhappy for any reason, within 30 days.
 	.border-top
 		.content
 			.container
