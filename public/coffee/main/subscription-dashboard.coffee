@@ -125,7 +125,8 @@ define [
 				.success ->
 					sixpack.convert 'cancelation-options-view', ->
 						sixpack.convert 'upgrade-success-message', ->
-							location.reload()
+							$scope.view = 'feedback'
+							$scope.$apply()
 				.error ->
 					console.log "something went wrong changing plan"
 
