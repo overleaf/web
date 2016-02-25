@@ -176,7 +176,7 @@ module.exports = ProjectController =
 			return next(error) if error?
 			return next() if !project?
 			owner_id = project.owner_ref
-			user_is_owner = (owner_id?.toString() == req.session.user._id.toString())
+			user_is_owner = (req.session.user?._id? and owner_id?.toString() == req.session.user._id.toString())
 			logger.log {project_id, owner_id, user_is_owner}, "checking if project owner's trial has expired"
 			SubscriptionLocator.getUsersSubscription owner_id, (error, subscription) ->
 				return next(error) if error?
