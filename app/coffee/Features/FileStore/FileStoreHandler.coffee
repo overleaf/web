@@ -23,10 +23,10 @@ module.exports = FileStoreHandler =
 		# FIXME: potential double callbacks
 		writeStream.on "end", callback
 		readStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of putFileStream"
+			logger.err err:err, project_id:project_id, file_id:file_id, "something went wrong on the read stream of putFileStream"
 			callback err
 		writeStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of putFileStream"
+			logger.err err:err, project_id:project_id, file_id:file_id, "something went wrong on the write stream of putFileStream"
 			callback err
 		readStream.pipe writeStream
 
