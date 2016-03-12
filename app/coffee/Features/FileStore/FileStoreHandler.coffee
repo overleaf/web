@@ -9,9 +9,16 @@ fiveMinsInMs = oneMinInMs * 5
 module.exports = FileStoreHandler =
 
 	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
-		logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
-		readStream = fs.createReadStream(fsPath)
-		FileStoreHandler.putFileStream project_id, file_id, readStream, callback
+		fs.lstat fsPath, (err, stat)->
+			if err?
+				logger.err err:err, "error with path symlink check"
+				return callback(err)
+			if stat.isSymbolicLink()
+				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "error uploading file from disk, file path is symlink"
+				return callback('file is from symlink')
+			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
+			readStream = fs.createReadStream(fsPath)
+			FileStoreHandler.putFileStream project_id, file_id, readStream, callback
 
 	putFileStream: (project_id, file_id, readStream, callback)->
 		logger.log project_id:project_id, file_id:file_id, "putting stream"
