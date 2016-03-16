@@ -67,5 +67,6 @@ module.exports = FileStoreController =
 								res.setHeader('Content-Type', 'text/plain')
 							res.setHeader("Content-Disposition", "attachment; filename=#{file.name}")
 							stream.pipe res
-			logger.err err:err, project_id: project_id, path: path, queryString:queryString, "error finding file by project and path"
-			return res.sendStatus 500
+			else
+				logger.err err:err, project_id: project_id, path: path, queryString:queryString, "error finding file by project and path"
+				return res.sendStatus 500
