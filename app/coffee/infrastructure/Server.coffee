@@ -46,6 +46,7 @@ app = express()
 
 webRouter = express.Router()
 apiRouter = express.Router()
+publicApiRouter = express.Router()
 
 if Settings.behindProxy
 	app.enable('trust proxy')
@@ -90,7 +91,7 @@ webRouter.use (req, res, next) ->
 	next()
 
 webRouter.use ReferalConnect.use
-expressLocals(app, webRouter, apiRouter)
+expressLocals(app, webRouter, apiRouter, publicApiRouter)
 
 if app.get('env') == 'production'
 	logger.info "Production Enviroment"
@@ -129,12 +130,14 @@ app.get "/heapdump", (req, res)->
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-# process api routes first, if nothing matched fall though and use
+# first of all, public api, then
+# process api routes, if nothing matched fall though and use
 # web middlewear + routes
+app.use(publicApiRouter)
 app.use(apiRouter)
 app.use(webRouter)
 
-router = new Router(webRouter, apiRouter)
+router = new Router(webRouter, apiRouter, publicApiRouter)
 
 module.exports =
 	app: app

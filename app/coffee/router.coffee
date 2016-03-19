@@ -44,7 +44,7 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 
 module.exports = class Router
-	constructor: (webRouter, apiRouter)->
+	constructor: (webRouter, apiRouter, publicApiRouter)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
@@ -69,8 +69,8 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
-
-		Modules.applyRouter(webRouter, apiRouter)
+		
+		Modules.applyRouter(webRouter, apiRouter, publicApiRouter)
 
 
 		if Settings.enableSubscriptions
@@ -235,5 +235,17 @@ module.exports = class Router
 		webRouter.post '/error/client', (req, res, next) ->
 			logger.error err: req.body.error, meta: req.body.meta, "client side error"
 			res.sendStatus(204)
+
+		publicApiRouter.get  '/api/v1/project', AuthenticationController.requireLogin(allow_auth_token: true), ProjectController.getProjectList
+		publicApiRouter.get  '/api/v1/project/:project_id', SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectApiController.getProjectDetails
+		publicApiRouter.get  '/api/v1/project/:project_id/docs', AuthenticationController.requireLogin(allow_auth_token: true), SecurityManager.requestCanAccessProject(allow_auth_token: true), ProjectController.getProjectDocs
+		publicApiRouter.get  /^\/api\/v1\/project\/([0-9a-f]+)\/file\/(.+)$/,
+			((req, res, next) ->
+				params =
+					"project_id": req.params[0]
+					"path":       req.params[1]
+				req.params = params
+				next()
+			), AuthenticationController.requireLogin(allow_auth_token: true), SecurityManager.requestCanAccessProject(allow_auth_token: true), FileStoreController.getFileByProjectAndPath
 
 		webRouter.get '*', ErrorController.notFound

@@ -15,9 +15,9 @@ module.exports = Modules =
 				@modules.push loadedModule
 		Modules.attachHooks()
 
-	applyRouter: (webRouter, apiRouter) ->
+	applyRouter: (webRouter, apiRouter, publicApiRouter) ->
 		for module in @modules
-			module.router?.apply(webRouter, apiRouter)
+			module.router?.apply(webRouter, apiRouter, publicApiRouter)
 			
 	viewIncludes: {}
 	loadViewIncludes: (app) ->

@@ -103,6 +103,8 @@ module.exports = AuthenticationController =
 			return AuthenticationController.httpAuth(req, res, next)
 		else if req.session.user?
 			return next()
+		else if (req.url) && (req.url.indexOf '/api/v1/' != -1) && req.query?.auth_token?
+		        return next()
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
 			return res.redirect "/login"
