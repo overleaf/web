@@ -1,0 +1,36 @@
+@font-face {
+	font-family: 'PT Serif';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('PT Serif'),
+		local('PTSerif-Regular'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/0Om6Iw1e323HjeZHy8W4rfesZW2xOQ-xsNqO47m55DA.eot */
+		url('../font/PT_Serif_400.eot?#iefix') format('embedded-opentype'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/sDRi4fY9bOiJUbgq53yZCfesZW2xOQ-xsNqO47m55DA.woff */
+		url('../font/PT_Serif_400.woff') format('woff'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/I-OtoJZa3TeyH6D9oli3ifesZW2xOQ-xsNqO47m55DA.woff2 */
+		url('../font/PT_Serif_400.woff2') format('woff2'),
+		/* from https://fonts.gstatic.com/l/font?kit=zSUbs06MuKAdU7m-SV4ok_esZW2xOQ-xsNqO47m55DA&skey=e37119e9cd703ddf&v=v8#PTSerif */
+		url('../font/PT_Serif_400.svg#PTSerif') format('svg'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/EgBlzoNBIHxNPCMwXaAhYPesZW2xOQ-xsNqO47m55DA.ttf */
+		url('../font/PT_Serif_400.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'PT Serif';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('PT Serif Bold'),
+		local('PTSerif-Bold'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/QABk9IxT-LFTJ_dQzv7xpGfQcKutQXcIrRfyR5jdjY8.eot */
+		url('../font/PT_Serif_700.eot?#iefix') format('embedded-opentype'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/QABk9IxT-LFTJ_dQzv7xpIbN6UDyHWBl620a-IRfuBk.woff */
+		url('../font/PT_Serif_700.woff') format('woff'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/QABk9IxT-LFTJ_dQzv7xpI4P5ICox8Kq3LLUNMylGO4.woff2 */
+		url('../font/PT_Serif_700.woff2') format('woff2'),
+		/* from https://fonts.gstatic.com/l/font?kit=QABk9IxT-LFTJ_dQzv7xpHNsigHlcrQGNV8nkUSFQfc&skey=f3f4fc2f289c7d5b&v=v8#PTSerif */
+		url('../font/PT_Serif_700.svg#PTSerif') format('svg'),
+		/* from https://fonts.gstatic.com/s/ptserif/v8/QABk9IxT-LFTJ_dQzv7xpJ0EAVxt0G0biEntp43Qt6E.ttf */
+		url('../font/PT_Serif_700.ttf') format('truetype');
+}
