@@ -2,7 +2,7 @@ Subscription = require('../../models/Subscription').Subscription
 logger = require("logger-sharelatex")
 ObjectId = require('mongoose').Types.ObjectId
 
-module.exports =
+module.exports = SubscriptionLocator =
 
 	getUsersSubscription: (user_or_id, callback)->
 		if user_or_id? and user_or_id._id?
@@ -23,3 +23,14 @@ module.exports =
 
 	getSubscriptionByMemberIdAndId: (user_id, subscription_id, callback)->
 		Subscription.findOne member_ids: user_id, _id:subscription_id, callback
+		
+	getFreeTrialInfo: (user_id, callback = (error, freeTrialInfo) ->) ->
+		# Returns users free trial info, but not if they are in a group, since
+		# then their own free trial should not apply.
+		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+			return callback(error) if error?
+			return callback() if !subscription?
+			SubscriptionLocator.getMemberSubscriptions user_id, (error, groupSubscriptions) ->
+				return callback(error) if error?
+				return callback() if groupSubscriptions.length > 0 # Don't worry about free trial if in group
+				return callback null, subscription.freeTrial

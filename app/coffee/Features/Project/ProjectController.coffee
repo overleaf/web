@@ -178,12 +178,12 @@ module.exports = ProjectController =
 			owner_id = project.owner_ref
 			user_is_owner = (req.session.user?._id? and owner_id?.toString() == req.session.user._id.toString())
 			logger.log {project_id, owner_id, user_is_owner}, "checking if project owner's trial has expired"
-			SubscriptionLocator.getUsersSubscription owner_id, (error, subscription) ->
+			SubscriptionLocator.getFreeTrialInfo owner_id, (error, freeTrial) ->
 				return next(error) if error?
-				return next() if !subscription?
+				return next() if !freeTrial?
 				now = new Date()
-				if subscription.freeTrial.expiresAt? and subscription.freeTrial.expiresAt < now
-					logger.log {project_id, owner_id, user_is_owner, subscription}, "trial is expired"
+				if freeTrial.expiresAt? and freeTrial.expiresAt < now
+					logger.log {project_id, owner_id, user_is_owner, freeTrial}, "trial is expired"
 					res.render "subscriptions/trial_expired", {user_is_owner, project: project}
 				else
 					next()

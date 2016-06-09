@@ -8,11 +8,11 @@ module.exports = SubscriptionMiddlewear =
 	loadFreeTrialInfo: (req, res, next) ->
 		user_id = req.session.user?._id
 		return next() if !user_id?
-		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
+		SubscriptionLocator.getFreeTrialInfo user_id, (error, freeTrial) ->
 			return next(error) if error?
-			return next() if !subscription?
-			res.locals.freeTrial = subscription.freeTrial
-			expiresAt = subscription.freeTrial.expiresAt
+			return next() if !freeTrial?
+			res.locals.freeTrial = freeTrial
+			expiresAt = freeTrial.expiresAt
 			if expiresAt?
 				DAY = 24 * 60 * 60 * 1000
 				res.locals.freeTrial.daysRemaining = Math.floor((expiresAt - new Date()) / DAY)
