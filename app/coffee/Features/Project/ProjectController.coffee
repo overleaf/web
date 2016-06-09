@@ -17,7 +17,6 @@ SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
-ReferencesSearchHandler = require("../ReferencesSearch/ReferencesSearchHandler")
 
 
 module.exports = ProjectController =
@@ -241,9 +240,6 @@ module.exports = ProjectController =
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
-
-				# HACK: don't do it for now
-				# ReferencesSearchHandler.indexProjectReferences project, ->  # don't need to wait on this
 
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',

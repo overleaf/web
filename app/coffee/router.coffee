@@ -44,7 +44,6 @@ PreviewController = require('./Features/Previews/PreviewController')
 PackageIndexController = require('./Features/PackageIndex/PackageIndexController')
 ContactRouter = require("./Features/Contacts/ContactRouter")
 SubscriptionMiddlewear = require("./Features/Subscription/SubscriptionMiddlewear")
-ReferencesSearchController = require('./Features/ReferencesSearch/ReferencesSearchController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -212,9 +211,6 @@ module.exports = class Router
 		webRouter.get "/project/:Project_id/file/:file_id/preview", SecurityManager.requestCanAccessProject, PreviewController.getPreview
 
 		webRouter.post "/packages/search", PackageIndexController.search
-
-		webRouter.post "/project/:Project_id/references/index", SecurityManager.requestCanAccessProject, ReferencesSearchController.index
-		webRouter.post "/project/:Project_id/references/indexAll", SecurityManager.requestCanAccessProject, ReferencesSearchController.indexAll
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
