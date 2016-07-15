@@ -88,4 +88,10 @@ define -> [
 		humanReadableHint: """
 			You have used a font command which is only available in math mode. To use this command, you must be in maths mode (E.g. $ \u2026 $ or \\begin{math} \u2026 \\end{math}). If you want to use it outside of math mode, use the text version instead: \\textrm, \\textit, etc.
 		"""
+	,
+		regexToMatch: /LaTeX Error: Can be used only in preamble/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_Can_be_used_only_in_preamble"
+		humanReadableHint: """
+			You have used a command in the main body of your document which should be used in the preamble. Make sure that \\documentclass[\u2026]{\u2026} and all \\usepackage{\u2026} commands are written before \\begin{document}.
+		"""
 ]
