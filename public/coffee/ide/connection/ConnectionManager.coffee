@@ -62,6 +62,8 @@ define [], () ->
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
 
+				sl_console.log "[socket.io connect] Connected"
+
 				setTimeout(() =>
 					@joinProject()
 				, 100)
