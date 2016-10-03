@@ -247,7 +247,7 @@ define [
 						ng-class="{open: spellingMenu.open}"
 					>
 						<ul class="dropdown-menu">
-							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
+							<li ng-repeat="suggestion in spellingMenu.highlight.data.suggestions | limitTo:8">
 								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
 							</li>
 							<li class="divider"></li>

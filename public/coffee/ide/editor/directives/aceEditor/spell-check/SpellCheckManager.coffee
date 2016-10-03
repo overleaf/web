@@ -95,7 +95,7 @@ define [
 		replaceWord: (highlight, text) ->
 			@editor.getSession().replace(new Range(
 				highlight.row, highlight.column,
-				highlight.row, highlight.column + highlight.word.length
+				highlight.row, highlight.column + highlight.length
 			), text)
 
 		learnWord: (highlight) ->
