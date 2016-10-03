@@ -36,7 +36,6 @@ define [
 
 			@$scope.gotoHighlightBelow = () =>
 				return if !@firstHiddenHighlightAfterRow?
-				console.log "Goto highlight below", @firstHiddenHighlightAfterRow
 				@editor.scrollToLine(@firstHiddenHighlightAfterRow, true, false)
 
 			@$scope.gotoHighlightAbove = () =>
@@ -66,6 +65,5 @@ define [
 		
 		scrollToFirstHighlight: () ->
 			for marker in @$scope.diff.markers or []
-				console.log "scrollToFirstHighlight", marker.row
 				@editor.scrollToLine(marker.row, true, false)
 				break
