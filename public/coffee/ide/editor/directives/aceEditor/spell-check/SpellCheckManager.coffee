@@ -62,7 +62,7 @@ define [
 
 		openContextMenu: (e) ->
 			position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-			highlight = @annotationManager.findHighlightWithinRange
+			highlight = @annotationManager.findAnnotationWithinRange
 				start: position
 				end:   position
 
@@ -107,7 +107,7 @@ define [
 
 		getHighlightedWordAtCursor: () ->
 			cursor = @editor.getCursorPosition()
-			highlight = @annotationManager.findHighlightWithinRange
+			highlight = @annotationManager.findAnnotationWithinRange
 				start: cursor
 				end: cursor
 			return highlight
@@ -164,8 +164,10 @@ define [
 					# word is correct
 				else
 					highlights.push
+						type: "spelling"
 						column: positions[i].column
 						row: positions[i].row
+						length: word.length
 						word: word
 						suggestions: cached
 			words = newWords

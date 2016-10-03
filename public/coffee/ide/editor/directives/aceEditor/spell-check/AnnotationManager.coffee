@@ -19,7 +19,6 @@ define [
 				@showAnnotationLabels(position)
 			
 			@editor.renderer.on "themeChange", (e) =>
-				console.log "THEME CHANGE"
 				setTimeout () =>
 					@redrawMarkers()
 				, 0
@@ -30,6 +29,7 @@ define [
 			@annotations.rows[annotation.row].push annotation
 
 		removeAnnotation: (annotation) ->
+			sl_console.log "[removeAnnotation]", annotation
 			@_clearMarker(annotation)
 			for a, i in @annotations.rows[annotation.row]
 				if a == annotation
@@ -63,6 +63,7 @@ define [
 					@_addMarker(annotation)
 
 		clearRows: (from, to) ->
+			sl_console.log "[clearRows]", from, to
 			from ||= 0
 			to ||= @annotations.rows.length - 1
 			for row in @annotations.rows.slice(from, to + 1)
@@ -159,7 +160,7 @@ define [
 			annotation.column >= end.column
 			
 		_addMarker: (annotation) ->
-			console.log "Adding marker for annotation", annotation
+			sl_console.log "[_addMarker]", annotation
 			if annotation.type == "spelling"
 				@_drawSpellingUnderline(annotation)
 			else if annotation.type == "highlight"
@@ -189,7 +190,7 @@ define [
 		
 		_clearMarker: (annotation) ->
 			for markerId in annotation.markerIds or []
-				@editor.getSession().removeMarker(annotation.markerId)
+				@editor.getSession().removeMarker(markerId)
 		
 		_drawSpellingUnderline: (annotation) ->
 			annotation.markerIds = [
