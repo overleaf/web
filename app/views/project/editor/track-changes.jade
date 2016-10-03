@@ -132,13 +132,11 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 						href,
 						ng-click="openRestoreDiffModal()"
 					) #{translate("restore_to_before_these_changes")}
-			.diff-editor.hide-ace-cursor(
+			.diff-editor(
 				ace-editor="track-changes",
 				theme="settings.theme",
 				font-size="settings.fontSize",
-				text="trackChanges.diff.text",
-				highlights="trackChanges.diff.highlights",
-				read-only="true",
+				diff="trackChanges.diff.data",
 				resize-on="layout:main:resize",
 				navigate-highlights="true"
 			)

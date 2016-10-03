@@ -37,8 +37,7 @@ define [
 				sharejsDoc: "="
 				spellCheck: "="
 				spellCheckLanguage: "="
-				highlights: "="
-				text: "="
+				diff: "="
 				readOnly: "="
 				annotations: "="
 				navigateHighlights: "=",
@@ -174,12 +173,6 @@ define [
 
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
-
-				scope.$watch "text", (text) ->
-					if text?
-						editor.setValue(text, -1)
-						session = editor.getSession()
-						session.setUseWrapMode(true)
 
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()

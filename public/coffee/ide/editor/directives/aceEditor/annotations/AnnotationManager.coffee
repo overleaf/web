@@ -11,7 +11,15 @@ define [
 			@$labelEl = $("<div class='annotation-label'></div>")
 			@$ace.append(@$labelEl)
 			@labelVisible = false
-			
+
+			onChange = (e) =>
+				@applyChange(e)
+
+			@editor.on "changeSession", (e) =>
+				e.oldSession?.getDocument().off "change", onChange
+				e.session.getDocument().on "change", onChange
+			@editor.getSession().getDocument().on "change", onChange
+
 			# TODO: Only enable if needed? Mouse moves are common and expensive
 			@editor.on "mousemove", (e) =>
 				position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)

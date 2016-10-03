@@ -56,7 +56,6 @@ define [
 
 		runCheckOnChange: (e) ->
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
-				@annotationManager.applyChange(e)
 				@markLinesAsUpdated(e)
 				@runSpellCheckSoon()
 

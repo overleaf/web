@@ -7,11 +7,14 @@ define [
 	class HighlightsManager
 		constructor: (@$scope, @editor, @element) ->
 			@annotationManager = new AnnotationManager(@editor)
-			
-			@$scope.$watch "highlights", (highlights) =>
-				return if !highlights?
+
+			@$scope.$watch "diff", (diff) =>
+				return if !diff? or !diff.text?
+				@editor.setValue(diff.text, -1)
+				session = @editor.getSession()
+				session.setUseWrapMode(true)
 				@annotationManager.removeAllAnnotations()
-				for highlight in highlights
+				for highlight in diff.highlights
 					@annotationManager.addAnnotation(highlight)
 
 			@$scope.gotoHighlightBelow = () =>
