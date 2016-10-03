@@ -6703,6 +6703,7 @@ var SearchHighlight = function(regExp, clazz, type) {
     };
 
     this.update = function(html, markerLayer, session, config) {
+        console.log("UPDATING SEARCH HIGHLIGHT");
         if (!this.regExp)
             return;
         var start = config.firstRow, end = config.lastRow;

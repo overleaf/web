@@ -41,11 +41,11 @@ define [
 					@_clearMarker(annotation)
 			@annotations.rows = []
 		
-		removeWord: (word) ->
+		removeAnnotationsMatching: (callback = (annotation) ->) ->
 			toRemove = []
 			for row in @annotations.rows
 				for annotation in (row || [])
-					if annotation.word == word
+					if callback(annotation)
 						toRemove.push(annotation)
 			for annotation in toRemove
 				@removeAnnotation annotation
@@ -148,7 +148,7 @@ define [
 		_doesAnnotationOverlapRange: (annotation, start, end) ->
 			annotationIsAllBeforeRange =
 				annotation.row < start.row or
-				(annotation.row == start.row and annotation.column + annotation.word.length <= start.column)
+				(annotation.row == start.row and annotation.column + annotation.length <= start.column)
 			annotationIsAllAfterRange =
 				annotation.row > end.row or
 				(annotation.row == end.row and annotation.column >= end.column)
@@ -165,25 +165,9 @@ define [
 				@_drawSpellingUnderline(annotation)
 			else if annotation.type == "highlight"
 				colorScheme = @_getColorScheme(annotation.hue)
-				# @labels.push {
-				# 	text: annotation.label
-				# 	range: new Range(
-				# 		annotation.annotation.start.row, annotation.annotation.start.column,
-				# 		annotation.annotation.end.row,   annotation.annotation.end.column
-				# 	)
-				# 	colorScheme: colorScheme
-				# }
 				@_drawHighlight(annotation, colorScheme)
 			else if annotation.type == "strikethrough"
 				colorScheme = @_getColorScheme(annotation.hue)
-				# @labels.push {
-				# 	text: annotation.label
-				# 	range: new Range(
-				# 		annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-				# 		annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
-				# 	)
-				# 	colorScheme: colorScheme
-				# }
 				@_drawStrikeThrough(annotation, colorScheme)
 			else
 				console.error "Unknown annotation type: #{annotation.type}"

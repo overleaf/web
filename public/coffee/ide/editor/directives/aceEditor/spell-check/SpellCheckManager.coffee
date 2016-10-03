@@ -1,5 +1,5 @@
 define [
-	"ide/editor/directives/aceEditor/spell-check/AnnotationManager"
+	"ide/editor/directives/aceEditor/annotations/AnnotationManager"
 	"ace/ace"
 ], (AnnotationManager) ->
 	Range = ace.require("ace/range").Range
@@ -76,7 +76,7 @@ define [
 				@editor.getSession().getSelection().setSelectionRange(
 					new Range(
 						highlight.row, highlight.column
-						highlight.row, highlight.column + highlight.word.length
+						highlight.row, highlight.column + highlight.length
 					)
 				)
 
@@ -100,10 +100,12 @@ define [
 			), text)
 
 		learnWord: (highlight) ->
-			@apiRequest "/learn", word: highlight.word
-			@annotationManager.removeWord highlight.word
+			word = highlight.data.word
+			@apiRequest "/learn", word: word
+			@annotationManager.removeAnnotationsMatching (annotation) ->
+				return annotation.data.word == word
 			language = @$scope.spellCheckLanguage
-			@cache?.put("#{language}:#{highlight.word}", true)
+			@cache?.put("#{language}:#{word}", true)
 
 		getHighlightedWordAtCursor: () ->
 			cursor = @editor.getCursorPosition()
@@ -168,8 +170,9 @@ define [
 						column: positions[i].column
 						row: positions[i].row
 						length: word.length
-						word: word
-						suggestions: cached
+						data:
+							word: word
+							suggestions: cached
 			words = newWords
 			positions = newPositions
 
@@ -198,8 +201,9 @@ define [
 							column: position.column
 							row: position.row
 							length: word.length
-							word: word
-							suggestions: misspelling.suggestions
+							data:
+								word: word
+								suggestions: misspelling.suggestions
 						key = "#{language}:#{word}"
 						if not seen[key]
 							@cache.put key, misspelling.suggestions
