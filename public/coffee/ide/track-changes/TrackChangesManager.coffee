@@ -109,8 +109,8 @@ define [
 					.get(url)
 					.success (data) =>
 						diff.loading = false
-						{text, highlights} = @_parseDiff(data)
-						diff.data = {text, highlights}
+						{text, markers} = @_parseDiff(data)
+						diff.data = {text, markers}
 					.error () ->
 						diff.loading = false
 						diff.error = true
@@ -131,7 +131,7 @@ define [
 		_parseDiff: (diff) ->
 			row    = 0
 			column = 0
-			highlights = []
+			markers = []
 			text   = ""
 			for entry, i in diff.diff or []
 				content = entry.u or entry.i or entry.d
@@ -164,25 +164,25 @@ define [
 					else if entry.d?
 						type = "strikethrough"
 						label = "Deleted by #{name} on #{date}"
-					for highlight in @_createHighlight(startRow, startColumn, lines, type, label, hue)
-						highlights.push highlight
+					for marker in @_createHighlight(startRow, startColumn, lines, type, label, hue)
+						markers.push marker
 					
-			return {text, highlights}
+			return {text, markers}
 
 		_createHighlight: (startRow, startColumn, lines, type, label, hue) ->
-			highlights = []
+			markers = []
 			for line, i in lines
 				row = startRow + i
 				if i == 0 # First line starts at an offset
 					column = startColumn
 				else
 					column = 0
-				highlights.push {
+				markers.push {
 					type, label, hue,
 					row, column,
 					length: line.length
 				}
-			return highlights
+			return markers
 
 		_loadUpdates: (updates = []) ->
 			previousUpdate = @$scope.trackChanges.updates[@$scope.trackChanges.updates.length - 1]

@@ -260,21 +260,21 @@ define [
 					<a
 						href
 						class="highlights-before-label btn btn-info btn-xs"
-						ng-show="updateLabels.highlightsBefore > 0"
+						ng-show="updateLabels.updatesBefore > 0"
 						ng-click="gotoHighlightAbove()"
 					>
 						<i class="fa fa-fw fa-arrow-up"></i>
-						{{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
+						{{ updateLabels.updatesBefore }} more update{{ updateLabels.updatesBefore > 1 && "" || "s" }} above
 					</a>
 
 					<a
 						href
 						class="highlights-after-label btn btn-info btn-xs"
-						ng-show="updateLabels.highlightsAfter > 0"
+						ng-show="updateLabels.updatesAfter > 0"
 						ng-click="gotoHighlightBelow()"
 					>
 						<i class="fa fa-fw fa-arrow-down"></i>
-						{{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
+						{{ updateLabels.updatesAfter }} more update{{ updateLabels.updatesAfter > 1 && "" || "s" }} below
 
 					</a>
 				</div>

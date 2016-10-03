@@ -137,8 +137,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 				theme="settings.theme",
 				font-size="settings.fontSize",
 				diff="trackChanges.diff.data",
-				resize-on="layout:main:resize",
-				navigate-highlights="true"
+				resize-on="layout:main:resize"
 			)
 		.diff-deleted.text-centered(
 			ng-show="trackChanges.diff.deleted && !trackChanges.diff.restoreDeletedSuccess"
