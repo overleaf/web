@@ -6,8 +6,9 @@ define [
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/diff/DiffManager"
-	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, DiffManager, CursorPositionManager) ->
+	"ide/editor/directives/aceEditor/cursor-position/MyCursorPositionManager"
+	"ide/editor/directives/aceEditor/cursor-position/OtherCursorPositionManager"
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, DiffManager, MyCursorPositionManager, OtherCursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 
 	# set the path for ace workers if using a CDN (from editor.jade)
@@ -40,8 +41,8 @@ define [
 				diff: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "=",
 				onCtrlEnter: "="
+				otherCursorMarkers: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -66,7 +67,7 @@ define [
 					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
 				undoManager           = new UndoManager(scope, editor, element)
 				diffManager           = new DiffManager(scope, editor, element)
-				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+				myCursorPositionManager = new MyCursorPositionManager(scope, editor, element, localStorage)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -182,6 +183,12 @@ define [
 					editor.setReadOnly !!value
 
 				editor.setOption("scrollPastEnd", true)
+
+				# Put this after the sharejsDoc watcher, so that the cursor
+				# watcher triggers after the sharejsDoc watcher. If not, 
+				# updating the doc will trigger a change event which destroys
+				# the cursor markers.
+				otherCursorPositionManager = new OtherCursorPositionManager(scope, editor, element)
 
 				resetSession = () ->
 					session = editor.getSession()

@@ -177,6 +177,9 @@ define [
 			else if marker.type == "strikethrough"
 				colorScheme = @_getColorScheme(marker.hue)
 				@_drawStrikeThrough(marker, colorScheme)
+			else if marker.type == "cursor"
+				colorScheme = @_getColorScheme(marker.hue)
+				@_drawCursor(marker, colorScheme)
 			else
 				console.error "Unknown marker type: #{marker.type}"
 		
@@ -189,6 +192,25 @@ define [
 				@editor.getSession().addMarker @_markerRange(marker), "spelling-marker", null, true
 			]
 		
+		_drawCursor: (marker, colorScheme) ->
+			console.log "DRAWING CURSOR", marker, colorScheme
+			marker.markerIds = [
+				@editor.getSession().addMarker new Range(
+					marker.row, marker.column,
+					marker.row, marker.column + 1
+				), "annotation remote-cursor", (html, range, left, top, config) ->
+					div = """
+						<div
+							class='remote-cursor custom ace_start'
+							style='height: #{config.lineHeight}px; top:#{top}px; left:#{left}px; border-color: #{colorScheme.cursor};'
+						>
+							<div class="nubbin" style="bottom: #{config.lineHeight}px; background-color: #{colorScheme.cursor};"></div>
+						</div>
+					"""
+					html.push div
+				, true
+			]
+
 		_drawHighlight: (marker, colorScheme) ->
 			marker.markerIds = [
 				@_addMarkerWithCustomStyle(
