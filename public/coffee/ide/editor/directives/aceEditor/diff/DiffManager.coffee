@@ -1,21 +1,21 @@
 define [
 	"ace/ace"
-	"ide/editor/directives/aceEditor/annotations/AnnotationManager"
-], (_, AnnotationManager) ->
+	"ide/editor/directives/aceEditor/markers/MarkerManager"
+], (_, MarkerManager) ->
 	Range = ace.require("ace/range").Range
 
-	class HighlightsManager
+	class DiffManager
 		constructor: (@$scope, @editor, @element) ->
-			@annotationManager = new AnnotationManager(@editor)
+			@markerManager = new MarkerManager(@editor)
 
 			@$scope.$watch "diff", (diff) =>
 				return if !diff? or !diff.text?
 				@editor.setValue(diff.text, -1)
 				session = @editor.getSession()
 				session.setUseWrapMode(true)
-				@annotationManager.removeAllAnnotations()
+				@markerManager.removeAllMarkers()
 				for highlight in diff.highlights
-					@annotationManager.addAnnotation(highlight)
+					@markerManager.addMarker(highlight)
 
 			@$scope.gotoHighlightBelow = () =>
 				return if !@firstHiddenHighlightAfter?
@@ -25,48 +25,48 @@ define [
 				return if !@lastHiddenHighlightBefore?
 				@editor.scrollToLine(@lastHiddenHighlightBefore.start.row, true, false)
 		# 
-		# redrawAnnotations: () ->
+		# redrawMarkers: () ->
 		# 	@_clearMarkers()
 		# 	@_clearLabels()
 		# 
-		# 	for annotation in @$scope.highlights or []
-		# 		do (annotation) =>
-		# 			colorScheme = @_getColorScheme(annotation.hue)
-		# 			if annotation.cursor?
+		# 	for marker in @$scope.highlights or []
+		# 		do (marker) =>
+		# 			colorScheme = @_getColorScheme(marker.hue)
+		# 			if marker.cursor?
 		# 				@labels.push {
-		# 					text: annotation.label
+		# 					text: marker.label
 		# 					range: new Range(
-		# 						annotation.cursor.row, annotation.cursor.column,
-		# 						annotation.cursor.row, annotation.cursor.column + 1
+		# 						marker.cursor.row, marker.cursor.column,
+		# 						marker.cursor.row, marker.cursor.column + 1
 		# 					)
 		# 					colorScheme: colorScheme
 		# 					snapToStartOfRange: true
 		# 				}
-		# 				@_drawCursor(annotation, colorScheme)
-		# 			else if annotation.highlight?
+		# 				@_drawCursor(marker, colorScheme)
+		# 			else if marker.highlight?
 		# 				@labels.push {
-		# 					text: annotation.label
+		# 					text: marker.label
 		# 					range: new Range(
-		# 						annotation.highlight.start.row, annotation.highlight.start.column,
-		# 						annotation.highlight.end.row,   annotation.highlight.end.column
+		# 						marker.highlight.start.row, marker.highlight.start.column,
+		# 						marker.highlight.end.row,   marker.highlight.end.column
 		# 					)
 		# 					colorScheme: colorScheme
 		# 				}
-		# 				@_drawHighlight(annotation, colorScheme)
-		# 			else if annotation.strikeThrough?
+		# 				@_drawHighlight(marker, colorScheme)
+		# 			else if marker.strikeThrough?
 		# 				@labels.push {
-		# 					text: annotation.label
+		# 					text: marker.label
 		# 					range: new Range(
-		# 						annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-		# 						annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
+		# 						marker.strikeThrough.start.row, marker.strikeThrough.start.column,
+		# 						marker.strikeThrough.end.row,   marker.strikeThrough.end.column
 		# 					)
 		# 					colorScheme: colorScheme
 		# 				}
-		# 				@_drawStrikeThrough(annotation, colorScheme)
+		# 				@_drawStrikeThrough(marker, colorScheme)
 		# 
 		# 	@updateShowMoreLabels()
 		# 
-		# showAnnotationLabels: (position) ->
+		# showMarkerLabels: (position) ->
 		# 	labelToShow = null
 		# 	for label in @labels or []
 		# 		if label.range.contains(position.row, position.column)
@@ -75,13 +75,13 @@ define [
 		# 	if !labelToShow?
 		# 		# this is the most common path, triggered on mousemove, so
 		# 		# for performance only apply setting when it changes
-		# 		if @$scope?.annotationLabel?.show != false
+		# 		if @$scope?.markerLabel?.show != false
 		# 			@$scope.$apply () =>
-		# 				@$scope.annotationLabel.show = false
+		# 				@$scope.markerLabel.show = false
 		# 	else
 		# 		$ace = $(@editor.renderer.container).find(".ace_scroller")
 		# 		# Move the label into the Ace content area so that offsets and positions are easy to calculate.
-		# 		$ace.append(@element.find(".annotation-label"))
+		# 		$ace.append(@element.find(".marker-label"))
 		# 
 		# 		if labelToShow.snapToStartOfRange
 		# 			coords = @editor.renderer.textToScreenCoordinates(labelToShow.range.start.row, labelToShow.range.start.column)
@@ -102,10 +102,10 @@ define [
 		# 
 		# 		# Apply this first that the label has the correct width when calculating below
 		# 		@$scope.$apply () =>
-		# 			@$scope.annotationLabel.text = labelToShow.text
-		# 			@$scope.annotationLabel.show = true
+		# 			@$scope.markerLabel.text = labelToShow.text
+		# 			@$scope.markerLabel.show = true
 		# 
-		# 		$label = @element.find(".annotation-label")
+		# 		$label = @element.find(".marker-label")
 		# 
 		# 		if coords.pageX + $label.outerWidth() < $ace.width()
 		# 			left  = coords.pageX
@@ -115,7 +115,7 @@ define [
 		# 			left = "auto"
 		# 
 		# 		@$scope.$apply () =>
-		# 			@$scope.annotationLabel = {
+		# 			@$scope.markerLabel = {
 		# 				show:   true
 		# 				left:   left
 		# 				right:  right
@@ -134,8 +134,8 @@ define [
 		# 		highlightsAfter = 0
 		# 		@lastHiddenHighlightBefore = null
 		# 		@firstHiddenHighlightAfter = null
-		# 		for annotation in @$scope.highlights or []
-		# 			range = annotation.highlight or annotation.strikeThrough
+		# 		for marker in @$scope.highlights or []
+		# 			range = marker.highlight or marker.strikeThrough
 		# 			continue if !range?
 		# 			if range.start.row < firstRow
 		# 				highlightsBefore += 1
@@ -152,8 +152,8 @@ define [
 		# 	, 100
 		# 
 		# scrollToFirstHighlight: () ->
-		# 	for annotation in @$scope.highlights or []
-		# 		range = annotation.highlight or annotation.strikeThrough
+		# 	for marker in @$scope.highlights or []
+		# 		range = marker.highlight or marker.strikeThrough
 		# 		continue if !range?
 		# 		@editor.scrollToLine(range.start.row, true, false)
 		# 		break
@@ -166,11 +166,11 @@ define [
 		# _clearLabels: () ->
 		# 	@labels = []
 		# 
-		# _drawCursor: (annotation, colorScheme) ->
+		# _drawCursor: (marker, colorScheme) ->
 		# 	@markerIds.push @editor.getSession().addMarker new Range(
-		# 		annotation.cursor.row, annotation.cursor.column,
-		# 		annotation.cursor.row, annotation.cursor.column + 1
-		# 	), "annotation remote-cursor", (html, range, left, top, config) ->
+		# 		marker.cursor.row, marker.cursor.column,
+		# 		marker.cursor.row, marker.cursor.column + 1
+		# 	), "marker remote-cursor", (html, range, left, top, config) ->
 		# 		div = """
 		# 			<div
 		# 				class='remote-cursor custom ace_start'
@@ -182,34 +182,34 @@ define [
 		# 		html.push div
 		# 	, true
 		# 
-		# _drawHighlight: (annotation, colorScheme) ->
+		# _drawHighlight: (marker, colorScheme) ->
 		# 	@_addMarkerWithCustomStyle(
 		# 		new Range(
-		# 			annotation.highlight.start.row, annotation.highlight.start.column,
-		# 			annotation.highlight.end.row,   annotation.highlight.end.column
+		# 			marker.highlight.start.row, marker.highlight.start.column,
+		# 			marker.highlight.end.row,   marker.highlight.end.column
 		# 		),
-		# 		"annotation highlight",
+		# 		"marker highlight",
 		# 		false,
 		# 		"background-color: #{colorScheme.highlightBackgroundColor}"
 		# 	)
 		# 
-		# _drawStrikeThrough: (annotation, colorScheme) ->
+		# _drawStrikeThrough: (marker, colorScheme) ->
 		# 	lineHeight = @editor.renderer.lineHeight
 		# 	@_addMarkerWithCustomStyle(
 		# 		new Range(
-		# 			annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-		# 			annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
+		# 			marker.strikeThrough.start.row, marker.strikeThrough.start.column,
+		# 			marker.strikeThrough.end.row,   marker.strikeThrough.end.column
 		# 		),
-		# 		"annotation strike-through-background",
+		# 		"marker strike-through-background",
 		# 		false,
 		# 		"background-color: #{colorScheme.strikeThroughBackgroundColor}"
 		# 	)
 		# 	@_addMarkerWithCustomStyle(
 		# 		new Range(
-		# 			annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-		# 			annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
+		# 			marker.strikeThrough.start.row, marker.strikeThrough.start.column,
+		# 			marker.strikeThrough.end.row,   marker.strikeThrough.end.column
 		# 		),
-		# 		"annotation strike-through-foreground",
+		# 		"marker strike-through-foreground",
 		# 		true,
 		# 		"""
 		# 			height: #{Math.round(lineHeight/2) + 2}px;

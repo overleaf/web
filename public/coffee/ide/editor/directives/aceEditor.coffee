@@ -5,9 +5,9 @@ define [
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
-	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
+	"ide/editor/directives/aceEditor/diff/DiffManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, DiffManager, CursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 
 	# set the path for ace workers if using a CDN (from editor.jade)
@@ -65,7 +65,7 @@ define [
 					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
 					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
 				undoManager           = new UndoManager(scope, editor, element)
-				highlightsManager     = new HighlightsManager(scope, editor, element)
+				diffManager           = new DiffManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog

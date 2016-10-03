@@ -1,7 +1,7 @@
 define [
-	"ide/editor/directives/aceEditor/annotations/AnnotationManager"
+	"ide/editor/directives/aceEditor/markers/MarkerManager"
 	"ace/ace"
-], (AnnotationManager) ->
+], (MarkerManager) ->
 	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
@@ -9,7 +9,7 @@ define [
 			$(document.body).append @element.find(".spell-check-menu")
 			
 			@updatedLines = []
-			@annotationManager = new AnnotationManager(@editor)
+			@markerManager = new MarkerManager(@editor)
 
 			@$scope.$watch "spellCheckLanguage", (language, oldLanguage) =>
 				if language != oldLanguage and oldLanguage?
@@ -50,7 +50,7 @@ define [
 				@learnWord(highlight)
 
 		runFullCheck: () ->
-			@annotationManager.clearRows()
+			@markerManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()
 
@@ -61,7 +61,7 @@ define [
 
 		openContextMenu: (e) ->
 			position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-			highlight = @annotationManager.findAnnotationWithinRange
+			highlight = @markerManager.findMarkerWithinRange
 				start: position
 				end:   position
 
@@ -101,14 +101,14 @@ define [
 		learnWord: (highlight) ->
 			word = highlight.data.word
 			@apiRequest "/learn", word: word
-			@annotationManager.removeAnnotationsMatching (annotation) ->
-				return annotation.data.word == word
+			@markerManager.removeMarkersMatching (marker) ->
+				return marker.data.word == word
 			language = @$scope.spellCheckLanguage
 			@cache?.put("#{language}:#{word}", true)
 
 		getHighlightedWordAtCursor: () ->
 			cursor = @editor.getCursorPosition()
-			highlight = @annotationManager.findAnnotationWithinRange
+			highlight = @markerManager.findMarkerWithinRange
 				start: cursor
 				end: cursor
 			return highlight
@@ -178,11 +178,11 @@ define [
 			displayResult = (highlights) =>
 				if linesToProcess?
 					for shouldProcess, row in linesToProcess
-						@annotationManager.clearRows(row, row) if shouldProcess
+						@markerManager.clearRows(row, row) if shouldProcess
 				else
-					@annotationManager.clearRows()
+					@markerManager.clearRows()
 				for highlight in highlights
-					@annotationManager.addAnnotation highlight
+					@markerManager.addMarker highlight
 
 			if not words.length
 				displayResult highlights
