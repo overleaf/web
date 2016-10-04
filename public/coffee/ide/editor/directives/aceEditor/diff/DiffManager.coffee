@@ -6,7 +6,7 @@ define [
 
 	class DiffManager
 		constructor: (@$scope, @editor, @element) ->
-			@markerManager = new MarkerManager(@editor)
+			@markerManager = new MarkerManager(@editor, enableLabels: true)
 
 			@$scope.$watch "diff", (diff) =>
 				return if !diff? or !diff.text?

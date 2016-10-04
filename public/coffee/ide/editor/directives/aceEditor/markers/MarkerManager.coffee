@@ -4,7 +4,7 @@ define [
 	Range = ace.require("ace/range").Range
 
 	class MarkerManager
-		constructor: (@editor) ->
+		constructor: (@editor, opts = {enableLabels: false}) ->
 			@markers = rows: []
 			
 			@$ace = $(@editor.renderer.container).find(".ace_scroller")
@@ -20,11 +20,11 @@ define [
 				e.session.getDocument().on "change", onChange
 			@editor.getSession().getDocument().on "change", onChange
 
-			# TODO: Only enable if needed? Mouse moves are common and expensive
-			@editor.on "mousemove", (e) =>
-				position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-				e.position = position
-				@showMarkerLabels(position)
+			if opts.enableLabels
+				@editor.on "mousemove", (e) =>
+					position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
+					e.position = position
+					@showMarkerLabels(position)
 			
 			@editor.renderer.on "themeChange", (e) =>
 				setTimeout () =>

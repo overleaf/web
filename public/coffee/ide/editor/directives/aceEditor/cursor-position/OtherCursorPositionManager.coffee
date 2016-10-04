@@ -3,7 +3,7 @@ define [
 ], (MarkerManager) ->
 	class OtherCursorPositionManager
 		constructor: (@$scope, @editor, @element) ->
-			@markerManager = new MarkerManager(@editor)
+			@markerManager = new MarkerManager(@editor, enableLabels: true)
 
 			@$scope.$watch "otherCursorMarkers", (markers) =>
 				return if !markers?
