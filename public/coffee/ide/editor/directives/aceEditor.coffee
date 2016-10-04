@@ -5,9 +5,10 @@ define [
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
-	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
-	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+	"ide/editor/directives/aceEditor/diff/DiffManager"
+	"ide/editor/directives/aceEditor/cursor-position/MyCursorPositionManager"
+	"ide/editor/directives/aceEditor/cursor-position/OtherCursorPositionManager"
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, DiffManager, MyCursorPositionManager, OtherCursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 
 	# set the path for ace workers if using a CDN (from editor.jade)
@@ -37,12 +38,11 @@ define [
 				sharejsDoc: "="
 				spellCheck: "="
 				spellCheckLanguage: "="
-				highlights: "="
-				text: "="
+				diff: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "=",
 				onCtrlEnter: "="
+				otherCursorMarkers: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -66,8 +66,8 @@ define [
 					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
 					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
 				undoManager           = new UndoManager(scope, editor, element)
-				highlightsManager     = new HighlightsManager(scope, editor, element)
-				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+				diffManager           = new DiffManager(scope, editor, element)
+				myCursorPositionManager = new MyCursorPositionManager(scope, editor, element, localStorage)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -175,12 +175,6 @@ define [
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
 
-				scope.$watch "text", (text) ->
-					if text?
-						editor.setValue(text, -1)
-						session = editor.getSession()
-						session.setUseWrapMode(true)
-
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()
 					session.setAnnotations annotations
@@ -189,6 +183,12 @@ define [
 					editor.setReadOnly !!value
 
 				editor.setOption("scrollPastEnd", true)
+
+				# Put this after the sharejsDoc watcher, so that the cursor
+				# watcher triggers after the sharejsDoc watcher. If not, 
+				# updating the doc will trigger a change event which destroys
+				# the cursor markers.
+				otherCursorPositionManager = new OtherCursorPositionManager(scope, editor, element)
 
 				resetSession = () ->
 					session = editor.getSession()
@@ -254,7 +254,7 @@ define [
 						ng-class="{open: spellingMenu.open}"
 					>
 						<ul class="dropdown-menu">
-							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
+							<li ng-repeat="suggestion in spellingMenu.highlight.data.suggestions | limitTo:8">
 								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
 							</li>
 							<li class="divider"></li>
@@ -263,39 +263,25 @@ define [
 							</li>
 						</ul>
 					</div>
-					<div
-						class="annotation-label"
-						ng-show="annotationLabel.show"
-						ng-style="{
-							position: 'absolute',
-							left:     annotationLabel.left,
-							right:    annotationLabel.right,
-							bottom:   annotationLabel.bottom,
-							top:      annotationLabel.top,
-							'background-color': annotationLabel.backgroundColor
-						}"
-					>
-						{{ annotationLabel.text }}
-					</div>
 
 					<a
 						href
 						class="highlights-before-label btn btn-info btn-xs"
-						ng-show="updateLabels.highlightsBefore > 0"
+						ng-show="updateLabels.updatesBefore > 0"
 						ng-click="gotoHighlightAbove()"
 					>
 						<i class="fa fa-fw fa-arrow-up"></i>
-						{{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
+						{{ updateLabels.updatesBefore }} more update{{ updateLabels.updatesBefore > 1 && "" || "s" }} above
 					</a>
 
 					<a
 						href
 						class="highlights-after-label btn btn-info btn-xs"
-						ng-show="updateLabels.highlightsAfter > 0"
+						ng-show="updateLabels.updatesAfter > 0"
 						ng-click="gotoHighlightBelow()"
 					>
 						<i class="fa fa-fw fa-arrow-down"></i>
-						{{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
+						{{ updateLabels.updatesAfter }} more update{{ updateLabels.updatesAfter > 1 && "" || "s" }} below
 
 					</a>
 				</div>

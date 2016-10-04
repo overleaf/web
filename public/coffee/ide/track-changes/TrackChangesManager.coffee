@@ -109,9 +109,8 @@ define [
 					.get(url)
 					.success (data) =>
 						diff.loading = false
-						{text, highlights} = @_parseDiff(data)
-						diff.text = text
-						diff.highlights = highlights
+						{text, markers} = @_parseDiff(data)
+						diff.data = {text, markers}
 					.error () ->
 						diff.loading = false
 						diff.error = true
@@ -132,7 +131,7 @@ define [
 		_parseDiff: (diff) ->
 			row    = 0
 			column = 0
-			highlights = []
+			markers = []
 			text   = ""
 			for entry, i in diff.diff or []
 				content = entry.u or entry.i or entry.d
@@ -150,15 +149,6 @@ define [
 				row    = endRow
 				column = endColumn
 
-				range = {
-					start:
-						row: startRow
-						column: startColumn
-					end:
-						row: endRow
-						column: endColumn
-				}
-
 				if entry.i? or entry.d?
 					if entry.meta.user?
 						name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
@@ -167,20 +157,32 @@ define [
 					if entry.meta.user?.id == @$scope.user.id
 						name = "you"
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
+					hue = @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 					if entry.i?
-						highlights.push {
-							label: "Added by #{name} on #{date}"
-							highlight: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
-						}
+						type = "highlight"
+						label = "Added by #{name} on #{date}"
 					else if entry.d?
-						highlights.push {
-							label: "Deleted by #{name} on #{date}"
-							strikeThrough: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
-						}
+						type = "strikethrough"
+						label = "Deleted by #{name} on #{date}"
+					for marker in @_createHighlight(startRow, startColumn, lines, type, label, hue)
+						markers.push marker
+					
+			return {text, markers}
 
-			return {text, highlights}
+		_createHighlight: (startRow, startColumn, lines, type, label, hue) ->
+			markers = []
+			for line, i in lines
+				row = startRow + i
+				if i == 0 # First line starts at an offset
+					column = startColumn
+				else
+					column = 0
+				markers.push {
+					type, label, hue,
+					row, column,
+					length: line.length
+				}
+			return markers
 
 		_loadUpdates: (updates = []) ->
 			previousUpdate = @$scope.trackChanges.updates[@$scope.trackChanges.updates.length - 1]

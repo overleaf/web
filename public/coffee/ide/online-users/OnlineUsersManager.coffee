@@ -8,7 +8,7 @@ define [
 
 		constructor: (@ide, @$scope) ->
 			@$scope.onlineUsers = {}
-			@$scope.onlineUserCursorHighlights = {}
+			@$scope.onlineUserCursorMarkers = {}
 			@$scope.onlineUsersArray = []
 
 			@$scope.$on "cursor:editor:update", (event, position) =>
@@ -64,16 +64,16 @@ define [
 
 				@$scope.onlineUsersArray.push user
 
-			@$scope.onlineUserCursorHighlights = {}
+			@$scope.onlineUserCursorMarkers = {}
 			for client_id, client of @$scope.onlineUsers
 				doc_id = client.doc_id
 				continue if !doc_id? or !client.row? or !client.column?
-				@$scope.onlineUserCursorHighlights[doc_id] ||= []
-				@$scope.onlineUserCursorHighlights[doc_id].push {
+				@$scope.onlineUserCursorMarkers[doc_id] ||= []
+				@$scope.onlineUserCursorMarkers[doc_id].push {
+					type: "cursor"
 					label: client.name
-					cursor:
-						row: client.row
-						column: client.column
+					row: client.row
+					column: client.column
 					hue: @getHueForUserId(client.user_id)
 				}
 

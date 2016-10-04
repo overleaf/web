@@ -1,7 +1,7 @@
 define [
-	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
+	"ide/editor/directives/aceEditor/markers/MarkerManager"
 	"ace/ace"
-], (HighlightedWordManager) ->
+], (MarkerManager) ->
 	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
@@ -9,7 +9,7 @@ define [
 			$(document.body).append @element.find(".spell-check-menu")
 			
 			@updatedLines = []
-			@highlightedWordManager = new HighlightedWordManager(@editor)
+			@markerManager = new MarkerManager(@editor)
 
 			@$scope.$watch "spellCheckLanguage", (language, oldLanguage) =>
 				if language != oldLanguage and oldLanguage?
@@ -50,19 +50,18 @@ define [
 				@learnWord(highlight)
 
 		runFullCheck: () ->
-			@highlightedWordManager.clearRows()
+			@markerManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()
 
 		runCheckOnChange: (e) ->
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
-				@highlightedWordManager.applyChange(e)
 				@markLinesAsUpdated(e)
 				@runSpellCheckSoon()
 
 		openContextMenu: (e) ->
 			position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-			highlight = @highlightedWordManager.findHighlightWithinRange
+			highlight = @markerManager.findMarkerWithinRange
 				start: position
 				end:   position
 
@@ -76,7 +75,7 @@ define [
 				@editor.getSession().getSelection().setSelectionRange(
 					new Range(
 						highlight.row, highlight.column
-						highlight.row, highlight.column + highlight.word.length
+						highlight.row, highlight.column + highlight.length
 					)
 				)
 
@@ -96,18 +95,20 @@ define [
 		replaceWord: (highlight, text) ->
 			@editor.getSession().replace(new Range(
 				highlight.row, highlight.column,
-				highlight.row, highlight.column + highlight.word.length
+				highlight.row, highlight.column + highlight.length
 			), text)
 
 		learnWord: (highlight) ->
-			@apiRequest "/learn", word: highlight.word
-			@highlightedWordManager.removeWord highlight.word
+			word = highlight.data.word
+			@apiRequest "/learn", word: word
+			@markerManager.removeMarkersMatching (marker) ->
+				return marker.data.word == word
 			language = @$scope.spellCheckLanguage
-			@cache?.put("#{language}:#{highlight.word}", true)
+			@cache?.put("#{language}:#{word}", true)
 
 		getHighlightedWordAtCursor: () ->
 			cursor = @editor.getCursorPosition()
-			highlight = @highlightedWordManager.findHighlightWithinRange
+			highlight = @markerManager.findMarkerWithinRange
 				start: cursor
 				end: cursor
 			return highlight
@@ -164,21 +165,24 @@ define [
 					# word is correct
 				else
 					highlights.push
+						type: "spelling"
 						column: positions[i].column
 						row: positions[i].row
-						word: word
-						suggestions: cached
+						length: word.length
+						data:
+							word: word
+							suggestions: cached
 			words = newWords
 			positions = newPositions
 
 			displayResult = (highlights) =>
 				if linesToProcess?
 					for shouldProcess, row in linesToProcess
-						@highlightedWordManager.clearRows(row, row) if shouldProcess
+						@markerManager.clearRows(row, row) if shouldProcess
 				else
-					@highlightedWordManager.clearRows()
+					@markerManager.clearRows()
 				for highlight in highlights
-					@highlightedWordManager.addHighlight highlight
+					@markerManager.addMarker highlight
 
 			if not words.length
 				displayResult highlights
@@ -192,10 +196,13 @@ define [
 						position = positions[misspelling.index]
 						mispelled[misspelling.index] = true
 						highlights.push
+							type: "spelling"
 							column: position.column
 							row: position.row
-							word: word
-							suggestions: misspelling.suggestions
+							length: word.length
+							data:
+								word: word
+								suggestions: misspelling.suggestions
 						key = "#{language}:#{word}"
 						if not seen[key]
 							@cache.put key, misspelling.suggestions
