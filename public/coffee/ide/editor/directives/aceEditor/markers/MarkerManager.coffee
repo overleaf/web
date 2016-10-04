@@ -193,7 +193,6 @@ define [
 			]
 		
 		_drawCursor: (marker, colorScheme) ->
-			console.log "DRAWING CURSOR", marker, colorScheme
 			marker.markerIds = [
 				@editor.getSession().addMarker new Range(
 					marker.row, marker.column,
