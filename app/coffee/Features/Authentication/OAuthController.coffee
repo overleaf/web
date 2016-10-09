@@ -64,10 +64,10 @@ OAuthController =
 	login_user: (req, res, user) ->
 		LoginRateLimiter.recordSuccessfulLogin user.email
 		AuthenticationController._recordSuccessfulLogin user._id
-		AuthenticationController.establishUserSession req, user, (error) ->
+		req.login user, (error) ->
 			if error?
 				return error 
-			req.session.justLoggedIn = true
+#			req.session.justLoggedIn = true
 		logger.log email: user.email, user_id: user._id.toString(), "successful log in"
 		res.redirect Url.parse("/project").path
 
