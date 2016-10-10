@@ -220,6 +220,11 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+					
+					# Updating the document can wipe out the cursors if they are added first
+					# so redraw them
+					otherCursorPositionManager.refreshMarkers()
+
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
