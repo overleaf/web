@@ -11,7 +11,6 @@ define [
 				@refreshMarkers()
 		
 		refreshMarkers: () ->
-			console.log "Updating other cursors", @markers
 			@markerManager.removeAllMarkers()
 			for marker in @markers
 				@markerManager.addMarker(marker)
