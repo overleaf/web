@@ -13,7 +13,8 @@ define [
 			@labelVisible = false
 
 			onChange = (e) =>
-				@applyChange(e)
+				if !@editor.initing
+					@applyChange(e)
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession?.getDocument().off "change", onChange

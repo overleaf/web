@@ -217,7 +217,9 @@ define [
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
 
+					editor.initing = true
 					sharejs_doc.attachToAce(editor)
+					editor.initing = false
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
