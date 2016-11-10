@@ -420,5 +420,12 @@ module.exports = settings =
 	#	name : "all projects",
 	#	url: "/templates/all"
 	#}]
+	oauth:
+		is_enabled: false
+		client_id: 'sharelatex'
+		client_secret: 'sekret'
+		base_url: 'http://localhost:8080/'
+		scope: 'openid'
+
 
 
