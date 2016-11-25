@@ -1,6 +1,4 @@
-define [
-	"utils/EventEmitter"
-], (EventEmitter) ->
+load = (EventEmitter) ->
 	class ChangesTracker extends EventEmitter
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
 		# track changes in Word. We store these as a set of ShareJs style ranges:
@@ -453,3 +451,9 @@ define [
 				else # Only update to the current change if we haven't removed it.
 					previous_change = change
 			return { moved_changes, remove_changes }
+
+if define?
+	define ["utils/EventEmitter"], load
+else
+	EventEmitter = require("events").EventEmitter
+	module.exports = load(EventEmitter)
