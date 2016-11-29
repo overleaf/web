@@ -3,9 +3,16 @@ logger = require "logger-sharelatex"
 AuthenticationController = require '../Authentication/AuthenticationController'
 
 module.exports = ErrorController =
+
+	_shouldObscureExistenceOfResource: (req) ->
+		!!req.url.match(new RegExp('^/project/.*$'))
+
 	notFound: (req, res)->
+		template = 'general/404'
+		if ErrorController._shouldObscureExistenceOfResource(req)
+			template = 'general/404_or_restricted'
 		res.status(404)
-		res.render 'general/404',
+		res.render template,
 			title: "page_not_found"
 
 	serverError: (req, res)->

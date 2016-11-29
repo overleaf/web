@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2.text-center
+					.page-header
+						h2 #{translate("cant_find_page_or_restricted")}
+					p
+						a(href="/")
+							i.fa.fa-arrow-circle-o-left
+							|  #{translate("take_me_home")}

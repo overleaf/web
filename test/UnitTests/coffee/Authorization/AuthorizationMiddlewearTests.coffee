@@ -112,6 +112,88 @@ describe "AuthorizationMiddlewear", ->
 							error.should.be.instanceof Errors.NotFoundError
 							done()
 
+	describe 'ensureUserCanOpenProject', ->
+
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+			@next = sinon.stub()
+			@AuthorizationManager.canUserReadProject = sinon.stub()
+
+		describe "with missing project_id", ->
+			beforeEach ->
+				@req.params = {}
+
+			it "should return an error to next", ->
+				@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, @next
+				@next.calledWith(new Error()).should.equal true
+
+		describe "with logged in user", ->
+			beforeEach ->
+				@AuthenticationController.getLoggedInUserId.returns(@user_id)
+
+			describe "when user has permission", ->
+				beforeEach ->
+					@next = sinon.stub()
+					@AuthorizationManager.canUserReadProject
+						.withArgs(@user_id, @project_id)
+						.yields(null, true)
+
+				it "should return next", ->
+					@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, @next
+					@next.called.should.equal true
+
+			describe "when user doesn't have permission", ->
+				beforeEach ->
+					@next = sinon.stub()
+					@AuthorizationManager.canUserReadProject
+						.withArgs(@user_id, @project_id)
+						.yields(null, false)
+
+				it "should return next with a NotFoundError", ->
+					@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, @next
+					@next.called.should.equal true
+					@next.callCount.should.equal 1
+					@next.lastCall.args[0].should.be.instanceof Errors.NotFoundError
+
+		describe "with anonymous user", ->
+			describe "when user has permission", ->
+				beforeEach ->
+					@next = sinon.stub()
+					@AuthenticationController.getLoggedInUserId.returns(null)
+					@AuthorizationManager.canUserReadProject
+						.withArgs(null, @project_id)
+						.yields(null, true)
+
+				it "should return next", ->
+					@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, @next
+					@next.called.should.equal true
+
+			describe "when user doesn't have permission", ->
+				beforeEach ->
+					@next = sinon.stub()
+					@AuthenticationController.getLoggedInUserId.returns(null)
+					@AuthorizationManager.canUserReadProject
+						.withArgs(null, @project_id)
+						.yields(null, false)
+
+				it "should return next with a NotFoundError", ->
+					@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, @next
+					@next.called.should.equal true
+					@next.callCount.should.equal 1
+					@next.lastCall.args[0].should.be.instanceof Errors.NotFoundError
+
+		describe "with malformed project id", ->
+			beforeEach ->
+				@req.params =
+					project_id: "blah"
+				@ObjectId.isValid = sinon.stub().returns false
+
+			it "should return a not found error", (done) ->
+				@AuthorizationMiddlewear.ensureUserCanOpenProject @req, @res, (error) ->
+					error.should.be.instanceof Errors.NotFoundError
+					done()
+
 	describe "ensureUserIsSiteAdmin", ->
 		beforeEach ->
 			@AuthorizationManager.isUserSiteAdmin = sinon.stub()

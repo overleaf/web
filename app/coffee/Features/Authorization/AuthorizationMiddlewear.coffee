@@ -22,6 +22,18 @@ module.exports = AuthorizationMiddlewear =
 				else
 					next()
 
+	ensureUserCanOpenProject: (req, res, next) ->
+		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
+			return next(error) if error?
+			AuthorizationManager.canUserReadProject user_id, project_id, (error, canRead) ->
+				return next(error) if error?
+				if canRead
+					logger.log {user_id, project_id}, "allowing user read access (open) to project"
+					next()
+				else
+					logger.log {user_id, project_id}, "denying user read access (open) to project"
+					return next(new Errors.NotFoundError('deny access'))
+
 	ensureUserCanReadProject: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
