@@ -70,3 +70,9 @@ Gemfile.lock
 app/views/external
 
 /modules/
+
+
+# Typescript stuff
+/.tscache/
+tscommand-*.txt
+.baseDir.ts

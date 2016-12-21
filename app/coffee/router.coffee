@@ -40,6 +40,7 @@ AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlew
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
+TrialRouter = require './Features/Trial/TrialRouter'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -72,6 +73,7 @@ module.exports = class Router
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
 		AnalyticsRouter.apply(webRouter, apiRouter)
+		TrialRouter.apply(webRouter, apiRouter)
 
 		Modules.applyRouter(webRouter, apiRouter)
 

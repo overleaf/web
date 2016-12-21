@@ -18,6 +18,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
+	grunt.loadNpmTasks 'grunt-ts'
 	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	# grunt.loadNpmTasks 'grunt-sprity'
 
@@ -71,6 +72,9 @@ module.exports = (grunt) ->
 		# 		src: ['./public/img/flags/24/*.png']
 		# 		dest: './public/img/sprite'
 
+		ts:
+			app_dir:
+				tsconfig: true
 
 		coffee:
 			app_dir: 
@@ -364,7 +368,7 @@ module.exports = (grunt) ->
 		content = content.replace(/, "__MAIN_CLIENTSIDE_INCLUDES__"/g, moduleMainClientSideIncludes.map((i) -> ", \"#{i}\"").join(""))
 		fs.writeFileSync "public/js/main.js", content
 	
-	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
+	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'ts:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
 	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "exec:cssmin",]

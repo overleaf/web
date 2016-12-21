@@ -2,6 +2,7 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 AuthenticationController = require '../Authentication/AuthenticationController'
 
+
 module.exports = ErrorController =
 	notFound: (req, res)->
 		res.status(404)
