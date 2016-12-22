@@ -74,7 +74,9 @@ module.exports = (grunt) ->
 
 		ts:
 			app_dir:
-				tsconfig: true
+				tsconfig: 'tsconfig.app_dir.json'
+			client:
+				tsconfig: 'tsconfig.client.json'
 
 		coffee:
 			app_dir: 

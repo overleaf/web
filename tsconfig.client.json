@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+		"rootDir": "public/ts",
+		"outDir": "public/js",
+    "module": "AMD",
+		"paths": {
+      "*": ["*"]
+		},
+		"moduleResolution": "Classic",
+		"noResolve": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+		"strictNullChecks": true
+  },
+	"exclude": [
+    "node_modules/",
+		"app/"
+	]
+}
