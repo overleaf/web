@@ -101,12 +101,11 @@ expect_admin_access = (user, project_id, callback) ->
 		expect(response.statusCode).to.be.oneOf [200, 204]
 	, callback)
 
-expect_no_read_access = (user, project_id, options, callback) ->
+expect_no_read_access = (user, project_id, callback) ->
 	async.series [
 		(cb) ->
 			try_read_access(user, project_id, (response, body) ->
-				expect(response.statusCode).to.equal 302
-				expect(response.headers.location).to.match new RegExp(options.redirect_to)
+				expect(response.statusCode).to.equal 404
 			, cb)
 		(cb) ->
 			try_content_access(user, project_id, (response, body) ->
@@ -170,7 +169,7 @@ describe "Authorization", ->
 			expect_admin_access @owner, @project_id, done
 			
 		it "should not allow another user read access to the project", (done) ->
-			expect_no_read_access @other1, @project_id, redirect_to: "/restricted", done
+			expect_no_read_access @other1, @project_id, done
 			
 		it "should not allow another user write access to its content", (done) ->
 			expect_no_content_write_access @other1, @project_id, done
@@ -182,7 +181,7 @@ describe "Authorization", ->
 			expect_no_admin_access @other1, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow anonymous user read access to it", (done) ->
-			expect_no_read_access @anon, @project_id, redirect_to: "/restricted", done
+			expect_no_read_access @anon, @project_id, done
 			
 		it "should not allow anonymous user write access to its content", (done) ->
 			expect_no_content_write_access @anon, @project_id, done

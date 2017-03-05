@@ -108,7 +108,7 @@ module.exports = class Router
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
-		}), AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.loadEditor
+		}), AuthorizationMiddlewear.ensureUserCanOpenProject, ProjectController.loadEditor
 		webRouter.get  '/Project/:Project_id/file/:File_id', AuthorizationMiddlewear.ensureUserCanReadProject, FileStoreController.getFile
 		webRouter.post '/project/:Project_id/settings', AuthorizationMiddlewear.ensureUserCanWriteProjectSettings, ProjectController.updateProjectSettings
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
@@ -182,7 +182,7 @@ module.exports = class Router
 		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.acceptChange
 		webRouter.post "/project/:project_id/track_changes", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.toggleTrackChanges
 
-		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
+		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanOpenProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
