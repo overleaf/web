@@ -19,9 +19,14 @@ div.full-size(
 			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
 			'rp-size-expanded': ui.reviewPanelOpen,\
 			'rp-layout-left': reviewPanel.layoutToLeft,\
-			'rp-loading-threads': reviewPanel.loadingThreads\
+			'rp-loading-threads': reviewPanel.loadingThreads,\
+			'show-knitr-warning': (editor.open_doc_extension == 'rtex')\
 		}"
 	)
+		.knitr-warning.alert-warning
+			| KnitR support will be removed from ShareLaTeX on 1st June 2017. 
+			a(href) Read More.
+	
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh

@@ -9,6 +9,7 @@ define [
 				sharejs_doc: null
 				open_doc_id: null
 				open_doc_name: null
+				open_doc_extension: null
 				opening: true
 				trackChanges: false
 				wantTrackChanges: false
@@ -81,6 +82,7 @@ define [
 
 			@$scope.editor.open_doc_id = doc.id
 			@$scope.editor.open_doc_name = doc.name
+			@$scope.editor.open_doc_extension = doc.name.split(".").pop()?.toLowerCase()
 
 			@ide.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)

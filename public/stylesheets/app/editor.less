@@ -52,6 +52,28 @@
 	.full-size;
 }
 
+.knitr-warning {
+	display: none;
+	.show-knitr-warning & {
+		display: block;
+	}
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 30px;
+	padding: 3px;
+	font-size: 14px;
+	text-align: center;
+	border-bottom: 1px solid @gray-lighter;
+}
+
+.show-knitr-warning {
+	#editor, #review-panel, .loading-panel {
+		top: 30px;
+	}
+}
+
 .loading-screen {
 	h3 {
 		padding-top: 136px;
