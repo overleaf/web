@@ -221,6 +221,8 @@ module.exports = ProjectController =
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
 			showTrackChangesOnboarding: (cb) ->
+				if Settings.hideTrackChangesOnboarding
+					return cb(null, false)
 				cb = underscore.once(cb)
 				if !user_id?
 					return cb()
