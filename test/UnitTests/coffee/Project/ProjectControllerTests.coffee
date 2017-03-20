@@ -389,3 +389,11 @@ describe "ProjectController", ->
 				opts.showTrackChangesOnboarding.should.equal false
 				done()
 			@ProjectController.loadEditor @req, @res
+
+		it "should set showTrackChangesOnboarding = false if settings say to hide onboarding", (done) ->
+			@settings.hideTrackChangesOnboarding = true
+			@AnalyticsManager.getLastOccurance.yields(null, null)
+			@res.render = (pageName, opts)=>
+				opts.showTrackChangesOnboarding.should.equal false
+				done()
+			@ProjectController.loadEditor @req, @res
