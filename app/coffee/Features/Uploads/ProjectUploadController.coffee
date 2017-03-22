@@ -7,7 +7,9 @@ ProjectUploadManager    = require "./ProjectUploadManager"
 AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports = ProjectUploadController =
+
 	uploadProject: (req, res, next) ->
+		return res.sendStatus(500)
 		timer = new metrics.Timer("project-upload")
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		{originalname, path} = req.files.qqfile
@@ -27,6 +29,7 @@ module.exports = ProjectUploadController =
 				res.send success: true, project_id: project._id
 
 	uploadFile: (req, res, next) ->
+		return res.sendStatus(500)
 		timer = new metrics.Timer("file-upload")
 		name = req.files.qqfile?.originalname
 		path = req.files.qqfile?.path
