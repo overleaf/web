@@ -40,7 +40,8 @@ define [
 					enabled: false,
 					requireBase: false,
 					rewriteLinks: false
-				})
+				}).hashPrefix('!')
+				
 			catch e
 				console.error "Error while trying to fix '#' links: ", e
 	)
