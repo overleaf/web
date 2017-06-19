@@ -160,6 +160,16 @@ define [
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 
+		$scope.toggleShowInviteLink = (invite) ->
+			invite._showLink = !(invite._showLink)
+
+		$scope.shouldShowInviteLink = (invite) ->
+			return invite._showLink
+
+		$scope.buildInviteLink = (invite) ->
+			baseUrl = "#{window.location.protocol}//#{window.location.host}"
+			return "#{baseUrl}/project/#{invite.projectId}/invite/token/#{invite.token}"
+
 		$scope.resendInvite = (invite, event) ->
 			$scope.state.error = null
 			$scope.state.inflight = true

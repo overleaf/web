@@ -44,22 +44,31 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					)
 						i.fa.fa-times
 			.row.project-invite(ng-repeat="invite in project.invites")
-				.col-xs-8 {{ invite.email }}&nbsp;
-					div.small
-						| #{translate("invite_not_accepted")}.&nbsp;
-						a(href="#", ng-click="resendInvite(invite, $event)") #{translate("resend")}
-				.col-xs-3.text-left
-					// todo: get invite privileges
-					span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
-					span(ng-show="invite.privileges == 'readOnly'") #{translate("read_only")}
-				.col-xs-1
-					a(
-						href
-						tooltip=translate('revoke_invite')
-						tooltip-placement="bottom"
-						ng-click="revokeInvite(invite)"
-					)
-						i.fa.fa-times
+				.col-xs-12
+					.row
+						.col-xs-8 {{ invite.email }}&nbsp;
+							div.small
+								| #{translate("invite_not_accepted")}.&nbsp;
+								a(href="#", ng-click="resendInvite(invite, $event)") #{translate("resend")}
+								span |
+								a(href="#", ng-click="toggleShowInviteLink(invite, $event)")
+									span(ng-if="shouldShowInviteLink(invite)") #{translate("hide_link")}
+									span(ng-if="!shouldShowInviteLink(invite)") #{translate("show_link")}
+						.col-xs-3.text-left
+							// todo: get invite privileges
+							span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
+							span(ng-show="invite.privileges == 'readOnly'") #{translate("read_only")}
+						.col-xs-1
+							a(
+								href
+								tooltip=translate('revoke_invite')
+								tooltip-placement="bottom"
+								ng-click="revokeInvite(invite)"
+							)
+								i.fa.fa-times
+					.row.project-invite-link(ng-show="shouldShowInviteLink(invite, $event)")
+						.col-xs-12
+							code {{ buildInviteLink(invite) }}
 			.row.invite-controls
 				form(ng-show="canAddCollaborators")
 					.small #{translate("share_with_your_collabs")}
