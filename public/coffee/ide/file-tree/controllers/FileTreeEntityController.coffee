@@ -43,6 +43,11 @@ define [
 				return
 				
 			delete $scope.entity.renaming
+			
+			if ide.fileTreeManager.existsInFolder(ide.fileTreeManager.getCurrentFolder, name)
+				$scope.inputs.name = $scope.entity.name
+				return
+			
 			if !name? or name.length == 0
 				$scope.inputs.name = $scope.entity.name
 				return
