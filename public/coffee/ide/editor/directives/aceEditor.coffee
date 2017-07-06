@@ -10,8 +10,9 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
+	"ide/editor/directives/aceEditor/context/ContextManager"
 	"ide/labels/services/labels"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager, ContextManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
@@ -64,6 +65,7 @@ define [
 				trackChangesEnabled: "="
 				docId: "="
 				rendererData: "="
+				context: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -94,9 +96,9 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				labelsManager = new LabelsManager(scope, editor, element, labels)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager)
-
+				labelsManager         = new LabelsManager(scope, editor, element, labels)
+				autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
+				contextManager        = new ContextManager(scope, editor, element)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand

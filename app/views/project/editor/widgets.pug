@@ -1,0 +1,5 @@
+div(ng-controller="WidgetsController")
+	.preview-widget(ng-if="widgets.math")
+		div.header.small Quick preview
+		hr
+		div(mathjax, mathjax-model="widgets.math")

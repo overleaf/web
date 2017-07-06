@@ -4,23 +4,30 @@ define [
 ], (App) ->
 	mathjaxConfig =
 		messageStyle: "none"
-		imageFont:null
-		"HTML-CSS": { availableFonts: ["TeX"] },
+		"HTML-CSS":
+			availableFonts: ["TeX"]
+			matchFontHeight: false
 		TeX:
-			equationNumbers: { autoNumber: "AMS" },
+			equationNumbers: { autoNumber: "none" },
 			useLabelIDs: false
 		tex2jax:
 			inlineMath: [ ['$','$'], ["\\(","\\)"] ],
 			displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
 			processEscapes: true
 		skipStartupTypeset: true
+		showMathMenu: false
 
 	MathJax?.Hub?.Config(mathjaxConfig);
 	
 	App.directive "mathjax", () ->
 		return {
 			link: (scope, element, attrs) ->
-				setTimeout () ->
-					MathJax?.Hub?.Queue(["Typeset", MathJax?.Hub, element.get(0)])
-				, 0
+				scope.$watch attrs['mathjaxModel'], (value) ->
+					element.text(value)
+					# element.css(visibility: "hidden")
+					MathJax?.Hub?.Queue(
+						["Typeset", MathJax?.Hub, element.get(0), () -> console.log("typeset", arguments)],
+						# () ->
+						# 	element.css(visibility: "visible")
+					)
 		}

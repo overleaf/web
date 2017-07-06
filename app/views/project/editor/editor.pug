@@ -60,9 +60,11 @@ div.full-size(
 			track-changes= "editor.trackChanges",
 			doc-id="editor.open_doc_id"
 			renderer-data="reviewPanel.rendererData"
+			context="widgets.context"
 		)
 
 		include ./review-panel
+		include ./widgets
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

@@ -6,6 +6,7 @@ define [
 	"ide/online-users/OnlineUsersManager"
 	"ide/history/HistoryManager"
 	"ide/permissions/PermissionsManager"
+	"ide/widgets/WidgetsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
@@ -43,6 +44,7 @@ define [
 	OnlineUsersManager
 	HistoryManager
 	PermissionsManager
+	WidgetsManager
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
@@ -129,6 +131,7 @@ define [
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 		ide.labelsManager = new LabelsManager(ide, $scope, labels)
+		ide.widgetsManager = new WidgetsManager(ide, $scope)
 
 		inited = false
 		$scope.$on "project:joined", () ->
