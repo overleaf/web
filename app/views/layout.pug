@@ -18,8 +18,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 		-else
 			title= translate(title) + ' - ShareLaTeX, ' + translate("online_latex_editor") 
 
-		link(rel="icon", href="/favicon.ico")
-		link(rel="icon", sizes="192x192", href="/touch-icon-192x192.png")
 		link(rel="apple-touch-icon-precomposed", href="/apple-touch-icon-precomposed.png")
 		link(rel="mask-icon", href="/mask-favicon.svg", color="#a93529")
 		
@@ -29,6 +27,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 		-else
 			link(rel='stylesheet', href=buildCssPath('/style.css'))
 			link(rel="icon", href="/favicon.ico")
+			link(rel="icon", sizes="192x192", href="/touch-icon-192x192.png")
+
 
 		block _headLinks
 

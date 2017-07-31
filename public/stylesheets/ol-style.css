@@ -535,10 +535,10 @@ a.text-success:hover {
   color: #183a18;
 }
 .text-info {
-  color: #263873;
+  color: #040d05;
 }
 a.text-info:hover {
-  color: #1a264c;
+  color: #000000;
 }
 .text-warning {
   color: #c67605;
@@ -575,10 +575,10 @@ a.bg-success:hover {
   background-color: #cdeacd;
 }
 .bg-info {
-  background-color: #f4f5fb;
+  background-color: #8bdb98;
 }
 a.bg-info:hover {
-  background-color: #cdd5ee;
+  background-color: #64cf75;
 }
 .bg-warning {
   background-color: #fef4e5;
@@ -1520,13 +1520,13 @@ table th[class*="col-"] {
 .table > thead > tr.info > th,
 .table > tbody > tr.info > th,
 .table > tfoot > tr.info > th {
-  background-color: #f4f5fb;
+  background-color: #8bdb98;
 }
 .table-hover > tbody > tr > td.info:hover,
 .table-hover > tbody > tr > th.info:hover,
 .table-hover > tbody > tr.info:hover > td,
 .table-hover > tbody > tr.info:hover > th {
-  background-color: #e0e5f5;
+  background-color: #78d587;
 }
 .table > thead > tr > td.warning,
 .table > tbody > tr > td.warning,
@@ -2183,8 +2183,8 @@ fieldset[disabled] .btn-success.active {
 }
 .btn-info {
   color: #ffffff;
-  background-color: #405ebf;
-  border-color: #2d4286;
+  background-color: #1c5b26;
+  border-color: #0a210e;
 }
 .btn-info:hover,
 .btn-info:focus,
@@ -2193,8 +2193,8 @@ fieldset[disabled] .btn-success.active {
 .btn-info.checked,
 .open .dropdown-toggle.btn-info {
   color: #ffffff;
-  background-color: #364fa0;
-  border-color: #1d2b58;
+  background-color: #123c19;
+  border-color: #000000;
 }
 .btn-info:active,
 .btn-info.active,
@@ -2216,11 +2216,11 @@ fieldset[disabled] .btn-info:active,
 .btn-info.disabled.active,
 .btn-info[disabled].active,
 fieldset[disabled] .btn-info.active {
-  background-color: #405ebf;
-  border-color: #2d4286;
+  background-color: #1c5b26;
+  border-color: #0a210e;
 }
 .btn-info .badge {
-  color: #405ebf;
+  color: #1c5b26;
   background-color: #ffffff;
 }
 .btn-warning {
@@ -4251,11 +4251,11 @@ footer.site-footer li.lngOption img {
   background-color: #378137;
 }
 .label-info {
-  background-color: #405ebf;
+  background-color: #1c5b26;
 }
 .label-info[href]:hover,
 .label-info[href]:focus {
-  background-color: #334b99;
+  background-color: #103416;
 }
 .label-warning,
 .beta-feature-badge {
@@ -4337,15 +4337,15 @@ a.thumbnail.active {
   color: #183a18;
 }
 .alert-info {
-  background-color: #f4f5fb;
-  border-color: #3751a4;
-  color: #263873;
+  background-color: #8bdb98;
+  border-color: #14401b;
+  color: #040d05;
 }
 .alert-info hr {
-  border-top-color: #314791;
+  border-top-color: #0e2c12;
 }
 .alert-info .alert-link {
-  color: #1a264c;
+  color: #000000;
 }
 .alert-warning {
   background-color: #fef4e5;
@@ -4426,7 +4426,7 @@ a.thumbnail.active {
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .progress-bar-info {
-  background-color: #405ebf;
+  background-color: #1c5b26;
 }
 .progress-striped .progress-bar-info {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -4631,7 +4631,7 @@ button.close {
   line-height: 25px;
   color: #ffffff;
   text-align: center;
-  background-color: #405ebf;
+  background-color: #1c5b26;
   -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   -webkit-transition: width 0.6s ease;
@@ -6186,10 +6186,10 @@ aside#file-tree ul.file-tree-list li i.toggle {
   color: #7a7a7a;
 }
 aside#file-tree ul.file-tree-list li.multi-selected > .entity > .entity-name {
-  background-color: #d9dff2;
+  background-color: #70d380;
 }
 aside#file-tree ul.file-tree-list li.multi-selected > .entity > .entity-name:hover {
-  background-color: #b3bfe5;
+  background-color: #49c75d;
 }
 aside#file-tree ul.file-tree-list li .dropdown {
   position: absolute;
@@ -6944,7 +6944,7 @@ aside#file-tree ul.droppable-hover {
   background-color: #fee9cc;
 }
 .pdf-logs .alert.alert-info:hover {
-  background-color: #e0e5f5;
+  background-color: #78d587;
 }
 .pdf-logs pre {
   font-size: 12px;
@@ -7015,7 +7015,7 @@ aside#file-tree ul.droppable-hover {
   color: #f89406;
 }
 .alert-info .card-hint-icon-container {
-  color: #3751a4;
+  color: #14401b;
 }
 .card-hint-text,
 .card-hint-feedback-label {
@@ -7047,7 +7047,7 @@ aside#file-tree ul.droppable-hover {
 }
 .alert-info .card-hint-actions a,
 .alert-info .card-hint-text a {
-  color: #263873;
+  color: #040d05;
 }
 .card-hint-feedback {
   color: #505050;
