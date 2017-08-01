@@ -77,13 +77,18 @@ app.use OldAssetProxy
 
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
+
+webRouter.use (req, res, next)->
+	req.isOverleaf = req.headers.host.indexOf("overleaf") != -1
+	next()
+
 webRouter.use session
 	resave: false
 	saveUninitialized:false
 	secret:Settings.security.sessionSecret
 	proxy: Settings.behindProxy
 	cookie:
-		domain: Settings.cookieDomain
+		domain: if Settings.isOverleaf then Settings.overleaf.cookieDomain else Settings.cookieDomain
 		maxAge: Settings.cookieSessionLength
 		secure: Settings.secureCookie
 	store: sessionStore

@@ -114,6 +114,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 		res.locals.lib = PackageVersions.lib
 
+		res.locals.isOverleaf = -> req.isOverleaf
+
+
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 

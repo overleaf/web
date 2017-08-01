@@ -21,7 +21,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="apple-touch-icon-precomposed", href="/apple-touch-icon-precomposed.png")
 		link(rel="mask-icon", href="/mask-favicon.svg", color="#a93529")
 		
-		-if (settings.isOverleaf == true)
+		-if (isOverleaf())
 			link(rel='stylesheet', href=buildCssPath('/ol-style.css'))
 			link(rel="icon", href="/ol-favicon.ico")
 		-else
