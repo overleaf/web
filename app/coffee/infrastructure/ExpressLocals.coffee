@@ -91,6 +91,19 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
+		res.locals.isOverleaf = -> req.isOverleaf
+
+		res.locals.getProductName = ->
+			if req.isOverleaf
+				"Overleaf"
+			else
+				"ShareLaTeX"
+
+
+		next()
+
+
+	webRouter.use (req, res, next)->
 
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked
 		user_id = AuthenticationController.getLoggedInUserId(req)
@@ -114,7 +127,6 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 		res.locals.lib = PackageVersions.lib
 
-		res.locals.isOverleaf = -> req.isOverleaf
 
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
