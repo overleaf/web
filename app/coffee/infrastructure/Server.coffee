@@ -1,6 +1,7 @@
 Path = require "path"
 express = require('express')
 Settings = require('settings-sharelatex')
+
 logger = require 'logger-sharelatex'
 metrics = require('metrics-sharelatex')
 crawlerLogger = require('./CrawlerLogger')
@@ -78,22 +79,26 @@ app.use OldAssetProxy
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
 
-webRouter.use (req, res, next)->
-	req.isOverleaf = req.headers.host.indexOf("overleaf") != -1
-	next()
-
-webRouter.use session
+sessionConfig = 
 	resave: false
 	saveUninitialized:false
 	secret:Settings.security.sessionSecret
 	proxy: Settings.behindProxy
 	cookie:
-		domain: if Settings.isOverleaf then Settings.overleaf.cookieDomain else Settings.cookieDomain
+		domain: Settings.cookieDomain
 		maxAge: Settings.cookieSessionLength
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
 	rolling: true
+
+webRouter.use (req, res, next)->
+	req.isOverleaf = req.headers.host.indexOf("overleaf") != -1
+	if req.isOverleaf
+		sessionConfig.cookie.domain = Settings.overleaf.cookieDomain
+		session(sessionConfig)(req, res, next)
+	else
+		session(sessionConfig)(req, res, next)
 
 # passport
 webRouter.use passport.initialize()
@@ -147,14 +152,6 @@ webRouter.use (req, res, next) ->
 	else
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
-
-onlyOnOverleaf = (req, res, next)->
-	if req.isOverleaf
-		next()
-	else
-		ErrorController.notFound(req, res)
-		
-webRouter.use(onlyOnOverleaf, require('../ol_router'));
 
 profiler = require "v8-profiler"
 privateApiRouter.get "/profile", (req, res) ->
