@@ -1,6 +1,7 @@
 Path = require "path"
 express = require('express')
 Settings = require('settings-sharelatex')
+
 logger = require 'logger-sharelatex'
 metrics = require('metrics-sharelatex')
 crawlerLogger = require('./CrawlerLogger')
@@ -77,7 +78,8 @@ app.use OldAssetProxy
 
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
-webRouter.use session
+
+sessionConfig = 
 	resave: false
 	saveUninitialized:false
 	secret:Settings.security.sessionSecret
@@ -89,6 +91,14 @@ webRouter.use session
 	store: sessionStore
 	key: Settings.cookieName
 	rolling: true
+
+webRouter.use (req, res, next)->
+	req.isOverleaf = req.headers.host.indexOf("overleaf") != -1
+	if req.isOverleaf
+		sessionConfig.cookie.domain = Settings.overleaf.cookieDomain
+		session(sessionConfig)(req, res, next)
+	else
+		session(sessionConfig)(req, res, next)
 
 # passport
 webRouter.use passport.initialize()
@@ -176,6 +186,7 @@ if enableWebRouter or notDefined(enableWebRouter)
 	app.use(ErrorController.handleApiError)
 	app.use(webRouter)
 	app.use(ErrorController.handleError)
+
 
 router = new Router(webRouter, privateApiRouter, publicApiRouter)
 

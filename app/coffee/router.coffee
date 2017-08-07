@@ -48,11 +48,19 @@ LabelsController = require('./Features/Labels/LabelsController')
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
+onlyOnOverleaf = (req, res, next)->
+	if req.isOverleaf
+		next()
+	else
+		ErrorController.notFound(req, res)
+
 module.exports = class Router
 	constructor: (webRouter, privateApiRouter, publicApiRouter)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
+		webRouter.get '/is_ol', onlyOnOverleaf, (req, res)->
+			res.send("true")
 
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'

@@ -16,6 +16,15 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 sessionSecret = "secret-please-change"
 
 module.exports = settings =
+
+
+	# Overleaf overide settings
+	# -------------------------
+	# These should be named the same as corisponding ShareLaTeX setting when possible.
+	overleaf: 
+
+		cookieDomain:".overleaf.local"
+
 	# File storage
 	# ------------
 	#
