@@ -148,6 +148,14 @@ webRouter.use (req, res, next) ->
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
 
+onlyOnOverleaf = (req, res, next)->
+	if req.isOverleaf
+		next()
+	else
+		ErrorController.notFound(req, res)
+		
+webRouter.use(onlyOnOverleaf, require('../ol_router'));
+
 profiler = require "v8-profiler"
 privateApiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
@@ -181,6 +189,7 @@ if enableWebRouter or notDefined(enableWebRouter)
 	app.use(ErrorController.handleApiError)
 	app.use(webRouter)
 	app.use(ErrorController.handleError)
+
 
 router = new Router(webRouter, privateApiRouter, publicApiRouter)
 
