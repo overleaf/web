@@ -53,7 +53,7 @@ pipeline {
     }
     stage('Unit Test') {
       steps {
-        sh '$NODE /bin/bash -c "env NODE_ENV=development grunt test:unit --reporter=tap"'
+        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && env NODE_ENV=development grunt test:unit --reporter=tap"'
       }
     }
     stage('Package') {
