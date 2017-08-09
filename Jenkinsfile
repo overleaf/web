@@ -14,7 +14,8 @@ pipeline {
   stages {
     stage('Clone Dependencies') {
       steps {
-        sh 'rm -rf public/brand modules'        
+        sh 'rm -rf public/brand modules'
+        
         git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/brand-sharelatex public/brand'
         git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/external-pages-sharelatex app/views/external'
         git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/web-sharelatex-modules modules'
