@@ -15,18 +15,16 @@ pipeline {
     stage('Clone Dependencies') {
       steps {
         sh 'rm -rf public/brand modules'
-        sshagent(credentials: ['GIT_DEPLOY_KEY']) {
-          sh 'git clone --depth 1 git@github.com:sharelatex/brand-sharelatex public/brand'
-          sh 'git clone --depth 1 git@github.com:sharelatex/external-pages-sharelatex app/views/external'
-          sh 'git clone --depth 1 git@github.com:sharelatex/web-sharelatex-modules modules'
-          sh 'git clone --depth 1 git@github.com:sharelatex/admin-panel.git modules/admin-panel'
-          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/groovehq.git modules/groovehq'
-          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/references-search.git modules/references-search'
-          sh 'git clone --depth 1 git@github.com:sharelatex/tpr-webmodule.git modules/tpr-webmodule'
-          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/learn-wiki-web-module.git modules/learn-wiki'
-          sh 'git clone --depth 1 git@github.com:sharelatex/templates-webmodule.git modules/templates'
-          sh 'git clone --depth 1 git@github.com:sharelatex/track-changes-web-module.git modules/track-changes'
-        }
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'public/brand'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/brand-sharelatex']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'app/views/external'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/external-pages-sharelatex']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/web-sharelatex-modules']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/admin-panel'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/admin-panel']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/groovehq'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/groovehq']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/references-search'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/references-search.git']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/tpr-webmodule'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/tpr-webmodule.git ']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/learn-wiki'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/learn-wiki-web-module.git']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/templates'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/templates-webmodule.git']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/track-changes'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git']]])
         sh 'rm -rf node_modules/*'
       }
     }
