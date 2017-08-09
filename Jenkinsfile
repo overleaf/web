@@ -8,28 +8,58 @@ pipeline {
   }
   
   environment {
-     NODE = "docker run --rm -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:4"
+     NODE = "docker run --rm -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
   }
  
   stages {
+    stage('Clone Dependencies') {
+      steps {
+        sh 'rm -rf public/brand modules'
+        sh 'git clone --depth=1 git@github.com:sharelatex/brand-sharelatex public/brand'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/external-pages-sharelatex app/views/external'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/web-sharelatex-modules modules'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/admin-panel.git modules/admin-panel'
+        sh 'git clone --depth=1 -b master git@bitbucket.org:sharelatex/groovehq.git modules/groovehq'
+        sh 'git clone --depth=1 -b master git@bitbucket.org:sharelatex/references-search.git modules/references-search'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/tpr-webmodule.git modules/tpr-webmodule'
+        sh 'git clone --depth=1 -b master git@bitbucket.org:sharelatex/learn-wiki-web-module.git modules/learn-wiki'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/templates-webmodule.git modules/templates'
+        sh 'git clone --depth=1 -b master git@github.com:sharelatex/track-changes-web-module.git modules/track-changes'
+
+        sh 'rm -rf node_modules/*'
+      }
+    }
     stage('Install') {
       steps {
+        sh 'mv app/views/external/robots.txt public/robots.txt'
+        sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh '$NODE npm install'
         sh '$NODE npm rebuild'
       }
     }
     stage('Compile') {
       steps {
-        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && grunt compile:app"'
+        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && grunt compile  --verbose"'
       }
     }
-    stage('Test') {
+    stage('Smoke Test') {
       steps {
-        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && grunt test:unit"'
+        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && grunt compile:smoke_tests"'
+      }
+    }
+    stage('Minify') {
+      steps {
+        sh '$NODE /bin/bash -c "npm install --quiet -g grunt && grunt compile:minify"'
+      }
+    }
+    stage('Unit Test') {
+      steps {
+        sh '$NODE /bin/bash -c "env NODE_ENV=development grunt test:unit --reporter=tap"'
       }
     }
     stage('Package') {
       steps {
+        sh 'rm -rf ./node_modules/grunt*'
         sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
       }
@@ -49,10 +79,10 @@ pipeline {
   
   post {
     failure {
-      mail(from: "alerts@sharelatex.com", 
-           to: "team@sharelatex.com", 
-           subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
-           body: "Build: ${BUILD_URL}")
+      //mail(from: "alerts@sharelatex.com", 
+      //     to: "team@sharelatex.com", 
+      //     subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
+      //     body: "Build: ${BUILD_URL}")
     }
   }
   
