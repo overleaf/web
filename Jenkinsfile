@@ -15,18 +15,18 @@ pipeline {
     stage('Clone Dependencies') {
       steps {
         sh 'rm -rf public/brand modules'
-        
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/brand-sharelatex public/brand'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/external-pages-sharelatex app/views/external'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/web-sharelatex-modules modules'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/admin-panel.git modules/admin-panel'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/groovehq.git modules/groovehq'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/references-search.git modules/references-search'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/tpr-webmodule.git modules/tpr-webmodule'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/learn-wiki-web-module.git modules/learn-wiki'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/templates-webmodule.git modules/templates'
-        git credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git modules/track-changes'
-
+        sshagent(credentials: ['GIT_DEPLOY_KEY']) {
+          sh 'git clone --depth 1 git@github.com:sharelatex/brand-sharelatex public/brand'
+          sh 'git clone --depth 1 git@github.com:sharelatex/external-pages-sharelatex app/views/external'
+          sh 'git clone --depth 1 git@github.com:sharelatex/web-sharelatex-modules modules'
+          sh 'git clone --depth 1 git@github.com:sharelatex/admin-panel.git modules/admin-panel'
+          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/groovehq.git modules/groovehq'
+          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/references-search.git modules/references-search'
+          sh 'git clone --depth 1 git@github.com:sharelatex/tpr-webmodule.git modules/tpr-webmodule'
+          sh 'git clone --depth 1 git@bitbucket.org:sharelatex/learn-wiki-web-module.git modules/learn-wiki'
+          sh 'git clone --depth 1 git@github.com:sharelatex/templates-webmodule.git modules/templates'
+          sh 'git clone --depth 1 git@github.com:sharelatex/track-changes-web-module.git modules/track-changes'
+        }
         sh 'rm -rf node_modules/*'
       }
     }
