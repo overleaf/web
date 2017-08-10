@@ -41,6 +41,10 @@ pipeline {
       steps {
         sh 'mv app/views/external/robots.txt public/robots.txt'
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
+        
+        // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
+        // which does not exist in the container's /etc/passwd file, causing the clone to fail.
+        sh 'git config --global core.logallrefupdates false'
         sh 'npm install'
         sh 'npm rebuild'
         sh 'ls -l'
