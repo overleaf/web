@@ -21,8 +21,6 @@ pipeline {
         sh 'git config --global core.logallrefupdates false'
         
         sh 'rm -rf node_modules/*'
-        sh 'npm install --quiet grunt'
-        sh 'npm install --quiet grunt-cli'
       }
     }
     
@@ -48,6 +46,8 @@ pipeline {
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh 'npm install'
         sh 'npm rebuild'
+        sh 'npm install --quiet grunt'
+        sh 'npm install --quiet grunt-cli'
         sh 'ls -l node_modules/.bin'
       }
     }
