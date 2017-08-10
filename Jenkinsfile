@@ -83,7 +83,24 @@ pipeline {
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
       }
     }
+    stage('Publish') {
+      steps {
+        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:'us-east-1') {
+            s3Upload(file:'file.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+        }
+      }
+    }
   }
+  
+//  post {
+//    failure {
+//      mail(from: "alerts@sharelatex.com", 
+//           to: "team@sharelatex.com", 
+//           subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
+//           body: "Build: ${BUILD_URL}")
+//    }
+//  }
+  
 
   // The options directive is for configuration that applies to the whole job.
   options {
