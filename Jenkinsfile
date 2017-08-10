@@ -43,24 +43,27 @@ pipeline {
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh 'npm install'
         sh 'npm rebuild'
+        sh 'ls -l'
+        sh 'ls -l node_modules'
+        sh 'ls -l node_modules/.bin'
       }
     }
 
     stage('Compile') {
       steps {
-        sh './node_modules/.bin/grunt compile  --verbose'
+        sh 'node_modules/.bin/grunt compile  --verbose'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        sh './node_modules/.bin/grunt compile:smoke_tests'
+        sh 'node_modules/.bin/grunt compile:smoke_tests'
       }
     }
 
     stage('Minify') {
       steps {
-        sh './node_modules/.bin/grunt compile:minify'
+        sh 'node_modules/.bin/grunt compile:minify'
       }
     }
     
