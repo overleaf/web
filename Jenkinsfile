@@ -1,7 +1,10 @@
 pipeline {
   
   agent {
-    docker 'node:6.9.5'
+    docker {
+      image 'node:6.9.5'
+      args "-v /var/lib/jenkins/.npm:/tmp/.npm"
+    }
   }
   
   environment  {
