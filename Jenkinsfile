@@ -86,7 +86,7 @@ pipeline {
     stage('Publish') {
       steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:'us-east-1') {
-            s3Upload(file:'file.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
         }
       }
     }
