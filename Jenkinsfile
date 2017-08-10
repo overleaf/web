@@ -95,14 +95,14 @@ pipeline {
     }
   }
   
-//  post {
-//    failure {
-//      mail(from: "alerts@sharelatex.com", 
-//           to: "team@sharelatex.com", 
-//           subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
-//           body: "Build: ${BUILD_URL}")
-//    }
-//  }
+  post {
+    failure {
+      mail(from: "alerts@sharelatex.com", 
+           to: "team@sharelatex.com", 
+           subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
+           body: "Build: ${BUILD_URL}")
+    }
+  }
   
 
   // The options directive is for configuration that applies to the whole job.
