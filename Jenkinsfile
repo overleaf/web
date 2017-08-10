@@ -48,25 +48,25 @@ pipeline {
 
     stage('Compile') {
       steps {
-        sh 'grunt compile  --verbose'
+        sh './node_modules/.bin/grunt compile  --verbose'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        sh 'grunt compile:smoke_tests'
+        sh './node_modules/.bin/grunt compile:smoke_tests'
       }
     }
 
     stage('Minify') {
       steps {
-        sh 'grunt compile:minify'
+        sh './node_modules/.bin/grunt compile:minify'
       }
     }
     
     stage('Unit Test') {
       steps {
-        sh 'env NODE_ENV=development grunt test:unit --reporter=tap'
+        sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
       }
     }
     
