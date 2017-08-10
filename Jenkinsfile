@@ -17,7 +17,7 @@ pipeline {
     stage('Set up') {
       steps {
         sh 'rm -rf node_modules/*'
-        sh 'npm install --quiet grunt'
+        sh 'npm install --quiet grunt-cli'
       }
     }
     
