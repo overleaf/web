@@ -8,7 +8,7 @@ pipeline {
   }
   
   environment {
-     UNIX_USER_ID = $(id -u)
+     UNIX_USER_ID = sh '$(id -u)'
      NODE = "docker run --rm -u $UNIX_USER_ID -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
   }
  
