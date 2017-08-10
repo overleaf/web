@@ -8,7 +8,8 @@ pipeline {
   }
   
   environment {
-     NODE = "docker run --rm -u $(id -u) -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
+     UNIX_USER_ID = $(id -u)
+     NODE = "docker run --rm -u $UNIX_USER_ID -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
   }
  
   stages {
