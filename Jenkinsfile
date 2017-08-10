@@ -16,7 +16,7 @@ pipeline {
   stages {
     stage('Set up') {
       steps {
-        sh 'npm install --quiet -g grunt'
+        sh 'npm install --quiet grunt'
       }
     }
     
