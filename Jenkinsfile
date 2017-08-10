@@ -14,12 +14,6 @@ pipeline {
   }
   
   stages {
-    stage('Clone') {
-      steps {
-        checkout scm
-      }
-    }
-    
     stage('Set up') {
       steps {
         sh 'rm -rf node_modules/*'
