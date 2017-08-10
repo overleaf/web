@@ -8,7 +8,7 @@ pipeline {
   }
   
   environment {
-     NODE = "docker run --rm -u jenkins -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
+     NODE = "docker run --rm -u $(id -u) -v /var/lib/jenkins/.npm:/root/.npm -v $WORKSPACE:/app --workdir /app node:6.9.5"
   }
  
   stages {
