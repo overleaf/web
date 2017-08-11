@@ -88,7 +88,7 @@ pipeline {
     }
     stage('Publish') {
       steps {
-        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:'us-east-1') {
+        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
         }
       }
@@ -97,8 +97,8 @@ pipeline {
   
   post {
     failure {
-      mail(from: "alerts@sharelatex.com", 
-           to: "team@sharelatex.com", 
+      mail(from: "${EMAIL_ALERT_FROM}", 
+           to: "${EMAIL_ALERT_TO}", 
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
     }
