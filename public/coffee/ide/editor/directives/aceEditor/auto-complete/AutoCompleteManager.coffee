@@ -172,8 +172,13 @@ define [
 				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			commandName = getCommandNameFromFragment(commandFragment)
+			# If we're in a begin/end command, only offer autocomplete
+			# when the user is beginning to type an environment.
+			# Don't autocomplete if they already have a substantial environment
+			# under the cursom
 			if commandName in ['begin', 'end']
-				return
+				if lineUpToCursor.match(/^.*[a-z]{2,}$/)
+					return
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
 			# NOTE: this is also the case when a user backspaces over a highlighted region
