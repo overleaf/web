@@ -15,6 +15,36 @@ describe "Sessions", ->
 			(cb) => @user1.logout cb
 		], done
 
+	describe "csrf invalidation", ->
+		before ->
+			@token = null
+
+		it 'should not accept csrf token from a previous session', (done) ->
+			async.series(
+				[
+					(cb) => @user1.login cb
+					, (cb) =>
+						@user1.getCsrfToken (err, token) =>
+							@token = token
+							cb()
+					, (cb) => @user1.logout cb
+					, (cb) => @user1.login cb
+					, (cb) =>
+						request.post {
+							url: "/project/new",
+							json:
+								projectName: "Shouldn't be created"
+							headers:
+								"x-csrf-token": @token
+						}, (error, response, body) ->
+							expect(error).to.not.exist
+							expect(response.statusCode).to.equal 403
+							cb()
+				], (err, result) =>
+					expect(err).to.not.exist
+					done()
+			)
+
 	describe "one session", ->
 
 		it "should have one session in UserSessions set", (done) ->

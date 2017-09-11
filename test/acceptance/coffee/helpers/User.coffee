@@ -128,7 +128,7 @@ class User
 			return callback(error) if error?
 			callback(null)
 
-	getCsrfToken: (callback = (error) ->) ->
+	getCsrfToken: (callback = (error, token) ->) ->
 		@request.get {
 			url: "/register"
 		}, (err, response, body) =>
@@ -140,7 +140,7 @@ class User
 				headers:
 					"x-csrf-token": csrfMatches[1]
 			})
-			callback()
+			callback(null, csrfMatches[1])
 
 	changePassword: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
