@@ -13,12 +13,6 @@ pipeline {
   
   stages {
     stage('Set up') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
       steps {
         // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
         // which does not exist in the container's /etc/passwd file, causing the clone to fail.
@@ -29,12 +23,6 @@ pipeline {
     }
     
     stage('Clone Dependencies') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
       steps {
         sh 'rm -rf public/brand modules'
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'public/brand'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/brand-sharelatex']]])
@@ -109,7 +97,6 @@ pipeline {
       agent {
         docker {
           image 'node:6.9.5'
-          args "-v /var/lib/jenkins/.npm:/tmp/.npm"
           reuseNode true
         }
       }
@@ -124,6 +111,12 @@ pipeline {
         sh 'echo ${BUILD_NUMBER} > build_number.txt'
         sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
+      }
+    }
+    
+    stage('Sync OSS') {
+      steps {
+        sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
       }
     }
     
