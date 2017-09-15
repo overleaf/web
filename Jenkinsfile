@@ -13,6 +13,12 @@ pipeline {
   
   stages {
     stage('Set up') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
         // which does not exist in the container's /etc/passwd file, causing the clone to fail.
@@ -114,12 +120,6 @@ pipeline {
       }
     }
     
-    stage('Sync OSS') {
-      steps {
-        sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
-      }
-    }
-    
     stage('Publish') {
       steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
@@ -129,16 +129,22 @@ pipeline {
         }
       }
     }
-  }
-  
-  post {
-    failure {
-      mail(from: "${EMAIL_ALERT_FROM}", 
-           to: "${EMAIL_ALERT_TO}", 
-           subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
-           body: "Build: ${BUILD_URL}")
+    
+    stage('Sync OSS') {
+      steps {
+        sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
+      }
     }
   }
+  
+  //post {
+  //  failure {
+  //    mail(from: "${EMAIL_ALERT_FROM}", 
+  //         to: "${EMAIL_ALERT_TO}", 
+  //         subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
+  //         body: "Build: ${BUILD_URL}")
+  //  }
+  //}
   
 
   // The options directive is for configuration that applies to the whole job.
