@@ -2,6 +2,7 @@ pipeline {
   
   agent {
     docker {
+      label 'docker'
       image 'node:6.9.5'
       args "-v /var/lib/jenkins/.npm:/tmp/.npm"
     }
@@ -18,6 +19,7 @@ pipeline {
   
   stages {
     stage('Set up') {
+      agent { label 'docker' }
       steps {
         // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
         // which does not exist in the container's /etc/passwd file, causing the clone to fail.
