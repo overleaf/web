@@ -133,7 +133,9 @@ pipeline {
     
     stage('Sync OSS') {
       steps {
-        sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
+        sshagent (credentials: ['GIT_DEPLOY_KEY']) {
+            sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:ja-oss-test'
+        }
       }
     }
   }
