@@ -41,7 +41,7 @@ describe "UserGetter", ->
 				error.should.exist
 				done()
 
-	describe "getUserFullEmails", -
+	describe "getUserFullEmails", ->
 		it "should get user", (done)->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
 			projection = email: 1, emails: 1
