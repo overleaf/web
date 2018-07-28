@@ -199,7 +199,7 @@ define [
 				localStorage("draft:#{$scope.project_id}", new_value)
 
 		sendCompileRequest = (options = {}) ->
-			url = "/project/#{$scope.project_id}/compile"
+			url = "project/#{$scope.project_id}/compile"
 			params = {}
 			if options.isAutoCompileOnLoad or options.isAutoCompileOnChange
 				params["auto_compile"]=true
@@ -228,7 +228,8 @@ define [
 			if pdfDownloadDomain?
 				return "#{pdfDownloadDomain}#{path}"
 			else
-				return path
+				if path[0] == '/' then path = path.substring(1)
+				return document.head.baseURI + path
 
 		parseCompileResponse = (response) ->
 
@@ -249,7 +250,6 @@ define [
 			$scope.pdf.failedCheck = false
 			$scope.pdf.compileInProgress = false
 			$scope.pdf.autoCompileDisabled = false
-
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -335,7 +335,7 @@ define [
 				$scope.pdf.url += createQueryString qs
 				# Save all downloads as files
 				qs.popupDownload = true
-				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
+				$scope.pdf.downloadUrl = "project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
 				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 
