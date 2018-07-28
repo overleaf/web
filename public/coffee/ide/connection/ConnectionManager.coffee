@@ -58,6 +58,7 @@ define [], () ->
 					@tryReconnectWithRateLimit()
 
 			@ide.socket = io.connect null,
+				resource: document.head.baseURI.substring(location.origin.length+1) + 'socket.io'
 				reconnect: false
 				'connect timeout': 30 * 1000
 				"force new connection": true
