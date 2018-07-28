@@ -242,6 +242,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			return AuthenticationController.isUserLoggedIn(req)
 		res.locals.getSessionUser = ->
 			return AuthenticationController.getSessionUser(req)
+		res.locals.base_path = Path.join(req.get('X-Script-Name') || '', '/')
 
 		next()
 

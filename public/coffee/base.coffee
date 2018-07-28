@@ -1,6 +1,7 @@
 define [
 	"libraries"
 	"modules/recursionHelper"
+	"modules/pathPatcher"
 	"modules/errorCatcher"
 	"modules/localStorage"
 	"utils/underscore"
@@ -14,6 +15,7 @@ define [
 		"ngSanitize"
 		"ipCookie"
 		"mvdSixpack"
+		"PathPatcher"
 		"ErrorCatcher"
 		"localStorage"
 		"ngTagsInput"
