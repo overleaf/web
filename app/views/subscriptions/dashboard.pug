@@ -22,7 +22,7 @@ mixin printPlan(plan)
 					| {{prices[plan.planCode]}} / #{translate("month")}
 			td
 				-if (subscription.state == "free-trial")
-					a(href="/user/subscription/new?planCode="+plan.planCode).btn.btn-success #{translate("subscribe_to_this_plan")}
+					a(href="user/subscription/new?planCode="+plan.planCode).btn.btn-success #{translate("subscribe_to_this_plan")}
 				-else if (typeof(subscription.planCode) != "undefined" && plan.planCode == subscription.planCode.split("_")[0])
 					button.btn.disabled #{translate("your_plan")}
 				-else
@@ -75,7 +75,7 @@ block content
 										input(type="submit",value="Reactivate your subscription").btn.btn-success
 								when "expired"
 									p !{translate("your_subscription_has_expired")}	
-										a(href="/user/subscription/plans") !{translate("create_new_subscription")}
+										a(href="user/subscription/plans") !{translate("create_new_subscription")}
 								default
 									-if(groupSubscriptions.length == 0)
 										p !{translate("problem_with_subscription_contact_us")}
@@ -115,7 +115,7 @@ block content
 
 						-if(subscription.groupPlan && user._id+'' == subscription.admin_id+'')
 							div
-								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
+								a(href="subscription/group").btn.btn-primary !{translate("manage_group")}
 							hr
 
 						if settings.overleaf && v1Subscriptions && v1Subscriptions.has_subscription
@@ -156,7 +156,7 @@ block content
 
 						div(ng-show="showBasicCancel")
 							p #{translate("sure_you_want_to_cancel")}
-							a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+							a(href="project").btn.btn-info #{translate("i_want_to_stay")}
 							| &nbsp;
 							a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 

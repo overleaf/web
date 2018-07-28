@@ -4,11 +4,11 @@ nav.navbar.navbar-default.navbar-main
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
 			if settings.nav.custom_logo
-				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
+				a(href='', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
 			else if (nav.title)
-				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
+				a(href='', aria-label=settings.appName).navbar-title #{nav.title}
 			else
-				a(href='/', aria-label=settings.appName).navbar-brand
+				a(href='', aria-label=settings.appName).navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
 
@@ -20,9 +20,9 @@ nav.navbar.navbar-default.navbar-main
 							b.caret
 						ul.dropdown-menu
 							li
-								a(href="/admin") Manage Site
+								a(href="admin") Manage Site
 							li
-								a(href="/admin/user") Manage Users
+								a(href="admin/user") Manage Users
 
 
 				// loop over header_extras
@@ -56,16 +56,16 @@ nav.navbar.navbar-default.navbar-main
 					// register link
 					if hasFeature('registration')
 						li
-							a(href="/register") #{translate('register')}
+							a(href="register") #{translate('register')}
 
 					// login link
 					li
-						a(href="/login") #{translate('log_in')}
+						a(href="login") #{translate('log_in')}
 
 				// projects link and account menu
 				if getSessionUser()
 					li
-						a(href="/project") #{translate('Projects')}
+						a(href="project") #{translate('Projects')}
 					li.dropdown(dropdown)
 						a.dropbodw-toggle(href, dropdown-toggle)
 							| #{translate('Account')}
@@ -75,10 +75,10 @@ nav.navbar.navbar-default.navbar-main
 								div.subdued #{getUserEmail()}
 							li.divider
 							li
-								a(href="/user/settings") #{translate('Account Settings')}
+								a(href="user/settings") #{translate('Account Settings')}
 							if nav.showSubscriptionLink
 								li
-									a(href="/user/subscription") #{translate('subscription')}
+									a(href="user/subscription") #{translate('subscription')}
 							li.divider
 							li
-								a(href="/logout") #{translate('log_out')}
+								a(href="logout") #{translate('log_out')}
