@@ -142,7 +142,7 @@ define [], () ->
 		reportConnectionError: (err) ->
 			sl_console.log "[socket.io] reporting connection error"
 			if err?.message == "not authorized" or err?.message == "invalid session"
-				window.location = "/login?redir=#{encodeURI(window.location.pathname)}"
+				window.location = "login?redir=#{encodeURI(window.location.pathname)}"
 			else
 				@ide.socket.disconnect()
 				@ide.showGenericMessageModal("Something went wrong connecting", """

@@ -285,7 +285,7 @@ define [
 			)
 
 			modalInstance.result.then (project_id) ->
-				window.location = "/project/#{project_id}"
+				window.location = "project/#{project_id}"
 
 		$scope.renameProject = (project, newName) ->
 			return queuedHttp.post "/project/#{project.id}/rename", {
@@ -447,9 +447,9 @@ define [
 		$scope.downloadProjectsById = (projectIds) ->
 			event_tracking.send 'project-list-page-interaction', 'project action', 'Download Zip'
 			if projectIds.length > 1
-				path = "/project/download/zip?project_ids=#{projectIds.join(',')}"
+				path = "project/download/zip?project_ids=#{projectIds.join(',')}"
 			else
-				path = "/project/#{projectIds[0]}/download/zip"
+				path = "project/#{projectIds[0]}/download/zip"
 			window.location = path
 
 		$scope.openV1ImportModal = (project) ->

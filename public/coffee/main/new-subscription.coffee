@@ -16,7 +16,7 @@ define [
 			currentPlanCode = window.plan_code
 			planCode = currentPlanCode.replace('collaborator', 'student')
 			event_tracking.sendMB 'subscription-form-switch-to-student', { plan: window.plan_code, variant: $scope.plansVariant }
-			window.location = "/user/subscription/new?planCode=#{planCode}&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
+			window.location = "user/subscription/new?planCode=#{planCode}&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
 
 		event_tracking.sendMB "subscription-form", { plan : window.plan_code, variant: $scope.plansVariant }
 

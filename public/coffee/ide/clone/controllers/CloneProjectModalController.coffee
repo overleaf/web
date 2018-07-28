@@ -25,7 +25,7 @@ define [
 			cloneProject($scope.inputs.projectName)
 				.then (response) ->
 					{ data } = response
-					window.location = "/project/#{data.project_id}"
+					window.location = "project/#{data.project_id}"
 				.catch (response) ->
 					{ data, status } = response
 					$scope.state.inflight = false

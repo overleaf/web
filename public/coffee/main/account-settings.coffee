@@ -69,7 +69,7 @@ define [
 						$scope.state.invalidCredentials = false
 						setTimeout(
 							() ->
-								window.location = "/login"
+								window.location = "login"
 							, 1000
 						)
 					.catch (response) ->
