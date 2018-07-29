@@ -57,8 +57,13 @@ define [], () ->
 					# user is editing, try to reconnect
 					@tryReconnectWithRateLimit()
 
+			baseURI = document.baseURI
+			if not baseURI
+				# IE does not have baseURI, so get it another way.
+				baseTags = document.getElementsByTagName "base"
+				baseURI = baseTags[0].href
 			@ide.socket = io.connect null,
-				resource: document.head.baseURI.substring(location.origin.length+1) + 'socket.io'
+				resource: baseURI.substring(location.origin.length+1) + 'socket.io'
 				reconnect: false
 				'connect timeout': 30 * 1000
 				"force new connection": true

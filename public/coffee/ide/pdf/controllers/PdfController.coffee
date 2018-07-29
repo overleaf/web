@@ -229,7 +229,12 @@ define [
 				return "#{pdfDownloadDomain}#{path}"
 			else
 				if path[0] == '/' then path = path.substring(1)
-				return document.head.baseURI + path
+				baseURI = document.baseURI
+				if not baseURI
+					# IE does not have baseURI, so get it another way.
+					baseTags = document.getElementsByTagName "base"
+					baseURI = baseTags[0].href
+				return baseURI + path
 
 		parseCompileResponse = (response) ->
 
