@@ -1878,9 +1878,9 @@ qq.FineUploader = function(o){
             '<span class="qq-upload-finished"></span>' +
             '<span class="qq-upload-file"></span>' +
             '<span class="qq-upload-size"></span>' +
-            '<a class="qq-upload-cancel" href="#">{cancelButtonText}</a>' +
-            '<a class="qq-upload-retry" href="#">{retryButtonText}</a>' +
-            '<a class="qq-upload-delete" href="#">{deleteButtonText}</a>' +
+            '<a class="qq-upload-cancel" href="javascript:void(0)">{cancelButtonText}</a>' +
+            '<a class="qq-upload-retry" href="javascript:void(0)">{retryButtonText}</a>' +
+            '<a class="qq-upload-delete" href="javascript:void(0)">{deleteButtonText}</a>' +
             '<span class="qq-upload-status-text">{statusText}</span>' +
             '</li>',
         classes: {

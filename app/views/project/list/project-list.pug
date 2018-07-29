@@ -65,7 +65,7 @@
 							ng-controller="TagDropdownItemController"
 							ng-if="!tag.isV1"
 						)
-							a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
+							a(href="javascript:void(0)", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
 								i.fa(
 									ng-class="{\
 										'fa-check-square-o': areSelectedProjectsInTag == true,\

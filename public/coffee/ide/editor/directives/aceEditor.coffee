@@ -534,7 +534,7 @@ define [
 						<strong>Watch out!</strong>
 						We had to undo some of your collaborators changes before we could undo yours.
 						<a
-							href="#"
+							href="javascript:void(0)"
 							class="pull-right"
 							ng-click="undo.show_remote_warning = false"
 						>Dismiss</a>

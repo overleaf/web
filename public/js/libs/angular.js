@@ -25887,7 +25887,7 @@ var ngBindTemplateDirective = ['$interpolate', '$compile', function($interpolate
          .controller('ExampleController', ['$scope', function($scope) {
            $scope.myHTML =
               'I am an <code>HTML</code>string with ' +
-              '<a href="#">links!</a> and other <em>stuff</em>';
+              '<a href="javascript:void(0)">links!</a> and other <em>stuff</em>';
          }]);
      </file>
 
