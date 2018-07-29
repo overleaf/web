@@ -137,6 +137,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 
 			if opts.cdn != false
 				path = Url.resolve(staticFilesBase, path)
+			path = Path.join(req.get('X-Script-Name') || '', path)
 
 			qs = querystring.stringify(opts.qs)
 
@@ -157,14 +158,14 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 				return res.locals.buildJsPath(jsFile, opts)
 
 		res.locals.buildCssPath = (cssFile, opts)->
-			path = Path.join("/stylesheets/", cssFile)
+			path = Path.join(req.get('X-Script-Name') || '', "/stylesheets/", cssFile)
 			if opts?.hashedPath && hashedFiles[path]?
 				hashedPath = hashedFiles[path]
 				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path)
 
 		res.locals.buildImgPath = (imgFile)->
-			path = Path.join("/img/", imgFile)
+			path = Path.join(req.get('X-Script-Name') || '', "/img/", imgFile)
 			return Url.resolve(staticFilesBase, path)
 
 		res.locals.mathJaxPath = res.locals.buildJsPath(
