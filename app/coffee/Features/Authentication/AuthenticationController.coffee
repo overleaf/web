@@ -70,7 +70,7 @@ module.exports = AuthenticationController =
 		)(req, res, next)
 
 	finishLogin: (user, req, res, next) ->
-		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
+		redir = AuthenticationController._getRedirectFromSession(req) || "project"
 		AuthenticationController._loginAsyncHandlers(req, user)
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 			if err?
@@ -171,7 +171,7 @@ module.exports = AuthenticationController =
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
 			AuthenticationController._setRedirectInSession(req)
-			return res.redirect "/login"
+			return res.redirect "login"
 
 	httpAuth: basicAuth (user, pass)->
 		isValid = Settings.httpAuthUsers[user] == pass
@@ -180,7 +180,7 @@ module.exports = AuthenticationController =
 		return isValid
 
 	_redirectToLoginOrRegisterPage: (req, res)->
-		if (req.query.zipUrl? or req.query.project_name? or req.path == '/user/subscription/new')
+		if (req.query.zipUrl? or req.query.project_name? or req.path == 'user/subscription/new')
 			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
 			AuthenticationController._redirectToLoginPage(req, res)
@@ -188,14 +188,14 @@ module.exports = AuthenticationController =
 	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
 		AuthenticationController._setRedirectInSession(req)
-		url = "/login?#{querystring.stringify(req.query)}"
+		url = "login?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
 
 	_redirectToRegisterPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"
 		AuthenticationController._setRedirectInSession(req)
-		url = "/register?#{querystring.stringify(req.query)}"
+		url = "register?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
 
