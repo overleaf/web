@@ -70,7 +70,7 @@ block content
 								when "canceled"
 									p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + subscription.name + "</strong>"})}
 									p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
-									p: form(action="/user/subscription/reactivate",method="post")
+									p: form(action="user/subscription/reactivate",method="post")
 										input(type="hidden", name="_csrf", value=csrfToken)
 										input(type="submit",value="Reactivate your subscription").btn.btn-success
 								when "expired"
