@@ -4,6 +4,7 @@ UserUpdater = require "../User/UserUpdater"
 Metrics = require('metrics-sharelatex')
 logger = require("logger-sharelatex")
 querystring = require('querystring')
+Path = require("path")
 Url = require("url")
 Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
@@ -220,7 +221,7 @@ module.exports = AuthenticationController =
 			!value.match(new RegExp('^\/(socket.io|js|stylesheets|img)\/.*$')) &&
 			!value.match(new RegExp('^.*\.(png|jpeg|svg)$'))
 		)
-			req.session.postLoginRedirect = value
+			req.session.postLoginRedirect = Path.join(req.get('X-Script-Name') || '', value)
 
 	_getRedirectFromSession: (req) ->
 		return req?.session?.postLoginRedirect || null
