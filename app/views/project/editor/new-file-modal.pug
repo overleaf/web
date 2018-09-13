@@ -65,7 +65,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 								a(href, ng-click="cancel()").btn.btn-default Cancel
 						div(
 							fine-upload
-							endpoint="/project/{{ project_id }}/upload"
+							endpoint="project/{{ project_id }}/upload"
 							template-id="qq-file-uploader-template"
 							multiple="true"
 							auto-upload="false"
