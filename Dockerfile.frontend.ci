@@ -2,10 +2,12 @@ ARG PROJECT_NAME
 ARG BRANCH_NAME
 ARG BUILD_NUMBER
 
-FROM ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+FROM ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER AS build
 
-USER root
+FROM node:6.15.1
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list && \
     apt-get update && apt-get install -y google-chrome-stable
+
+COPY --from=build /app /app
