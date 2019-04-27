@@ -207,7 +207,7 @@ clean_modules:
 clean_css:
 	rm -f public/stylesheets/*.css*
 
-clean_ci:
+clean_ci: clean_test_frontend
 	$(DOCKER_COMPOSE) down -v -t 0
 
 test: test_unit test_frontend test_acceptance
@@ -276,6 +276,10 @@ build:
 
 build_test_frontend:
 	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend
+
+clean_test_frontend:
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	docker rmi -f frontend_$(BUILD_DIR_NAME)_test_frontend
 
 publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
