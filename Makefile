@@ -174,11 +174,7 @@ compile_modules_full: $(MODULE_MAKEFILES)
 	done
 
 $(MODULE_MAKEFILES): Makefile.module
-	@set -e; \
-	for makefile in $(MODULE_MAKEFILES); \
-	do \
-		cp Makefile.module $$makefile; \
-	done
+	cp Makefile.module $@
 
 clean: clean_app clean_frontend clean_css clean_tests clean_modules
 
