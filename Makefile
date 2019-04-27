@@ -209,9 +209,6 @@ clean_css:
 
 clean_ci:
 	$(DOCKER_COMPOSE) down -v -t 0
-	docker container list | grep 'days ago' | cut -d ' ' -f 1 - | xargs -r docker container stop
-	docker image prune -af --filter "until=48h"
-	docker network prune -f
 
 test: test_unit test_frontend test_acceptance
 
