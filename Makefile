@@ -148,30 +148,11 @@ compile_full:
 compile_css_full:
 	$(MAKE) css_full
 
-compile_modules: $(MODULE_MAKEFILES)
-	@set -e; \
-	for dir in $(MODULE_DIRS); \
-	do \
-		if [ -e $$dir/Makefile ]; then \
-			(cd $$dir && $(MAKE) compile); \
-		fi; \
-		if [ ! -e $$dir/Makefile ]; then \
-			echo "No makefile found in $$dir"; \
-		fi; \
-	done
+COMPILE_MODULES = $(addsuffix /compile,$(MODULE_DIRS))
+compile_modules: $(COMPILE_MODULES)
 
-compile_modules_full: $(MODULE_MAKEFILES)
-	@set -e; \
-	for dir in $(MODULE_DIRS); \
-	do \
-		if [ -e $$dir/Makefile ]; then \
-			echo "Compiling $$dir in full"; \
-			(cd $$dir && $(MAKE) compile_full); \
-		fi; \
-		if [ ! -e $$dir/Makefile ]; then \
-			echo "No makefile found in $$dir"; \
-		fi; \
-	done
+COMPILE_FULL_MODULES = $(addsuffix /compile_full,$(MODULE_DIRS))
+compile_modules_full: $(COMPILE_FULL_MODULES)
 
 $(MODULE_MAKEFILES): Makefile.module
 	@set -e; \
@@ -287,7 +268,15 @@ tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm tar
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
+MODULE_TARGETS = \
+	$(COMPILE_MODULES) \
+	$(COMPILE_FULL_MODULES) \
+
+$(MODULE_TARGETS): $(MODULE_MAKEFILES)
+	$(MAKE) -C $(dir $@) $(notdir $@)
+
 .PHONY:
+	$(MODULE_TARGETS) \
 	all add install update test test_unit test_frontend test_acceptance \
 	test_acceptance_start_service test_acceptance_stop_service \
 	test_acceptance_run ci ci_clean compile clean css
