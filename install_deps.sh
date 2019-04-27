@@ -12,9 +12,6 @@ wait $FORMAT && echo "Format complete" || exit 1
 wait $TRANSLATIONS && echo "Translations install complete" || exit 1
 wait $MINIFY && echo "Minifiy complete" || exit 1
 
-chmod -R 0755 /app/public
-chown -R node:node /app/public
-
 set -B
 
 rm -rf /app/data
