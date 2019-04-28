@@ -77,33 +77,21 @@ test/smoke/js/%.js: test/smoke/coffee/%.coffee
 
 
 public/js/ide.js: public/src/ide.js $(MODULE_IDE_SRC_FILES)
-	@echo Compiling and injecting module includes into public/js/ide.js
-	@INCLUDES=""; \
-	for dir in modules/*; \
-	do \
-		MODULE=`echo $$dir | cut -d/ -f2`; \
-		if [ -e $$dir/public/src/ide/index.js ]; then \
-			INCLUDES="\"ide/$$MODULE/index\",$$INCLUDES"; \
-		fi \
-	done; \
-	INCLUDES=$${INCLUDES%?}; \
-	$(BABEL) $< | \
-		sed -e s=\'__IDE_CLIENTSIDE_INCLUDES__\'=$$INCLUDES= \
-		> $@
-
 public/js/main.js: public/src/main.js $(MODULE_MAIN_SRC_FILES)
-	@echo Compiling and injecting module includes into public/js/main.js
+public/js/main.js public/js/ide.js:
+	@echo Compiling and injecting module includes into $@
 	@INCLUDES=""; \
+	DEST=$(shell basename $(basename $@)); \
 	for dir in modules/*; \
 	do \
 		MODULE=`echo $$dir | cut -d/ -f2`; \
-		if [ -e $$dir/public/src/main/index.js ]; then \
-			INCLUDES="\"main/$$MODULE/index\",$$INCLUDES"; \
+		if [ -e $$dir/$(basename $<)/index.js ]; then \
+			INCLUDES="\"$$DEST/$$MODULE/index\",$$INCLUDES"; \
 		fi \
 	done; \
 	INCLUDES=$${INCLUDES%?}; \
 	$(BABEL) $< | \
-		sed -e s=\'__MAIN_CLIENTSIDE_INCLUDES__\'=$$INCLUDES= \
+		sed -E s=\'__[A-Z]+_CLIENTSIDE_INCLUDES__\'=$$INCLUDES= \
 		> $@
 
 public/stylesheets/%.css: $(LESS_FILES)
