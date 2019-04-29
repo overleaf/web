@@ -209,7 +209,6 @@ clean_css:
 
 clean_ci: clean_build
 clean_ci: clean_test_frontend
-	$(DOCKER_COMPOSE) down -v -t 0
 
 test: test_unit test_frontend test_acceptance
 
