@@ -9,7 +9,7 @@ module.exports = FileSystemImportManager =
 	addDoc: (user_id, project_id, folder_id, name, path, charset, replace, callback = (error, doc)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
 			if !isSafe
-				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add doc is from symlink, stopping process"
+				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, docName:name, path:path, "add doc is from symlink, stopping process"
 				return callback("path is symlink")
 			fs.readFile path, charset, (error, content) ->
 				return callback(error) if error?
@@ -23,7 +23,7 @@ module.exports = FileSystemImportManager =
 	addFile: (user_id, project_id, folder_id, name, path, replace, callback = (error, file)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
 			if !isSafe
-				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add file is from symlink, stopping insert"
+				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, fileName:name, path:path, "add file is from symlink, stopping insert"
 				return callback("path is symlink")
 
 			if replace

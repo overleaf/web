@@ -52,7 +52,7 @@ module.exports = ProjectUploadController =
 		project_id   = req.params.Project_id
 		folder_id    = req.query.folder_id
 		if !name? or name.length == 0 or name.length > 150
-			logger.err project_id:project_id, name:name, "bad name when trying to upload file"
+			logger.err project_id:project_id, originalName:name, "bad name when trying to upload file"
 			return res.send success: false
 		logger.log folder_id:folder_id, project_id:project_id, "getting upload file request"
 		user_id = AuthenticationController.getLoggedInUserId(req)

@@ -131,7 +131,7 @@ module.exports = ProjectController =
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		projectName = req.body.projectName?.trim()
 		template = req.body.template
-		logger.log user: user_id, projectType: template, name: projectName, "creating project"
+		logger.log user: user_id, projectType: template, projectName: projectName, "creating project"
 		async.waterfall [
 			(cb)->
 				if template == 'example'
@@ -140,7 +140,7 @@ module.exports = ProjectController =
 					projectCreationHandler.createBasicProject user_id, projectName, cb
 		], (err, project)->
 			return next(err) if err?
-			logger.log project: project, user: user_id, name: projectName, templateType: template, "created project"
+			logger.log project: project, user: user_id, projectName: projectName, templateType: template, "created project"
 			res.send {project_id:project._id}
 
 

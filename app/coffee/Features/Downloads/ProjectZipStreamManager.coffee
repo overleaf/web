@@ -22,12 +22,12 @@ module.exports = ProjectZipStreamManager =
 				jobs.push (callback) ->
 					ProjectGetter.getProject project_id, name: true, (error, project) ->
 						return callback(error) if error?
-						logger.log project_id: project_id, name: project.name, "appending project to zip stream"
+						logger.log project_id: project_id, projectName: project.name, "appending project to zip stream"
 						ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->
 							return callback(error) if error?
 							archive.append stream, name: "#{project.name}.zip"
 							stream.on "end", () ->
-								logger.log project_id: project_id, name: project.name, "zip stream ended"
+								logger.log project_id: project_id, projectName: project.name, "zip stream ended"
 								callback()
 
 		async.series jobs, () ->
