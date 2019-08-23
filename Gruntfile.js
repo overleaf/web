@@ -14,6 +14,8 @@ const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 const Settings = require('settings-sharelatex')
 require('es6-promise').polyfill()
 
+// TEST DO NOT MERGE
+
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-requirejs')
   grunt.loadNpmTasks('grunt-file-append')
