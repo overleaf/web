@@ -68,7 +68,7 @@ const UserGetter = {
       }
 
       if (!Features.hasFeature('affiliations')) {
-        return callback(null, decorateFullEmails(user.email, user.emails, []))
+        return callback(null, decorateFullEmails(user.email, user.emails || [], []))
       }
 
       return getUserAffiliations(userId, function(error, affiliationsData) {
