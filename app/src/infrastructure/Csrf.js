@@ -47,6 +47,10 @@ module.exports = Csrf = class Csrf {
     // the request, to get a new csrf token for any rendered forms. For excluded routes we'll then ignore a 'bad csrf
     // token' error from csurf and continue on...
 
+    // do not check csrf token for real-time
+    if (req.path.startsWith('/socket.io/'))
+      return csrf(req, res, err => { next() });
+
     // check whether the request method is excluded for the specified route
     if (
       (this.excluded_routes[req.path] != null
