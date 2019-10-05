@@ -242,7 +242,7 @@ define(['base'], App =>
                   return ($scope.state.errorReason = null)
                 }
               })
-          }, ExposedSettings.recaptchaDisabled.invite)
+          }, ExposedSettings.recaptchaDisabled == null || ExposedSettings.recaptchaDisabled.invite)
         })()
       }
 
