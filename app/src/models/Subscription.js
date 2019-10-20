@@ -23,7 +23,16 @@ const SubscriptionSchema = new Schema({
     ref: 'User',
     index: { unique: true, dropDups: true }
   },
-  manager_ids: { type: [ObjectId], ref: 'User', required: true },
+  manager_ids: {
+    type: [ObjectId],
+    ref: 'User',
+    required: true,
+    unique: true,
+    validate: function(managers) {
+      // require at least one manager
+      return !!managers.length
+    }
+  },
   member_ids: [{ type: ObjectId, ref: 'User' }],
   invited_emails: [String],
   teamInvites: [TeamInviteSchema],
