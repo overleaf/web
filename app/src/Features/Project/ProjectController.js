@@ -349,7 +349,8 @@ const ProjectController = {
           }
           const entities = docs
             .concat(files)
-            .sort((a, b) => a.path > b.path) // Sort by path ascending
+            // Sort by path ascending
+            .sort((a, b) => (a.path > b.path ? 1 : -1))
             .map(e => ({
               path: e.path,
               type: e.doc != null ? 'doc' : 'file'
