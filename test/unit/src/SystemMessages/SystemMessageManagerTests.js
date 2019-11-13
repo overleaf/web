@@ -75,6 +75,19 @@ describe('SystemMessageManager', function() {
         return this.callback.calledWith(null, this.messages).should.equal(true)
       })
     })
+
+    describe('with many requests inflight', function() {
+      beforeEach(function() {
+        this.SystemMessage.find = sinon.stub()
+        for (let i of Array.from({ length: 100 })) {
+          this.SystemMessageManager.getMessages()
+        }
+      })
+
+      it('should send only one database request', function() {
+        this.SystemMessage.find.callCount.should.equal(1)
+      })
+    })
   })
 
   describe('clearMessages', function() {
