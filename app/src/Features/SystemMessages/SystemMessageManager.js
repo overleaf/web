@@ -13,21 +13,26 @@ let SystemMessageManager
 const { SystemMessage } = require('../../models/SystemMessage')
 
 module.exports = SystemMessageManager = {
+  pending: [],
+
   getMessages(callback) {
     if (callback == null) {
       callback = function(error, messages) {}
     }
     if (this._cachedMessages != null) {
       return callback(null, this._cachedMessages)
-    } else {
-      return this.getMessagesFromDB((error, messages) => {
-        if (error != null) {
-          return callback(error)
-        }
-        this._cachedMessages = messages
-        return callback(null, messages)
-      })
     }
+    if (this.pending.push(callback) !== 1) {
+      return
+    }
+    this.getMessagesFromDB((error, messages) => {
+      if (error == null) {
+        this._cachedMessages = messages
+      }
+      const pending = this.pending
+      this.pending = []
+      pending.forEach(cb => process.nextTick(cb, error, messages))
+    })
   },
 
   getMessagesFromDB(callback) {
