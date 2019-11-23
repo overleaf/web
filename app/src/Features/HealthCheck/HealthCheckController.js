@@ -96,7 +96,9 @@ var Reporter = res =>
     const tests = []
     const passes = []
     const failures = []
+    let runnerProcessedAnyTestSuite = false
 
+    runner.on('suite', () => (runnerProcessedAnyTestSuite = true))
     runner.on('test end', test => tests.push(test))
     runner.on('pass', test => passes.push(test))
     runner.on('fail', test => failures.push(test))
@@ -119,6 +121,10 @@ var Reporter = res =>
       if (failures.length > 0) {
         logger.err({ failures }, 'health check failed')
         return res.status(500).send(JSON.stringify(results, null, 2))
+      } else if (!runnerProcessedAnyTestSuite) {
+        const err = 'no test suites were processed'
+        logger.err({ err }, 'health check failed soft')
+        return res.status(500).send({ err })
       } else {
         return res.status(200).send(JSON.stringify(results, null, 2))
       }
