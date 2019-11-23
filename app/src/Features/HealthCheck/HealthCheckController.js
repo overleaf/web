@@ -33,27 +33,7 @@ module.exports = HealthCheckController = {
     return d.run(function() {
       const mocha = new Mocha({ reporter: Reporter(res), timeout: 10000 })
       mocha.addFile('test/smoke/src/SmokeTests.js')
-      return mocha.run(function() {
-        // TODO: combine this with the smoke-test-sharelatex module
-        // we need to clean up all references to the smokeTest module
-        // so it can be garbage collected.  The only reference should
-        // be in its parent, when it is loaded by mocha.addFile.
-        const path = require.resolve(
-          __dirname + '/../../../../test/smoke/src/SmokeTests.js'
-        )
-        const smokeTestModule = require.cache[path]
-        if (smokeTestModule != null) {
-          let idx
-          const { parent } = smokeTestModule
-          while ((idx = parent.children.indexOf(smokeTestModule)) !== -1) {
-            parent.children.splice(idx, 1)
-          }
-        } else {
-          logger.warn({ path }, 'smokeTestModule not defined')
-        }
-        // remove the smokeTest from the module cache
-        return delete require.cache[path]
-      })
+      return mocha.run(evictSmokeTestsModule)
     })
   },
 
@@ -89,6 +69,24 @@ module.exports = HealthCheckController = {
       }
     })
   }
+}
+
+function evictSmokeTestsModule() {
+  const path = require.resolve(
+    __dirname + '/../../../../test/smoke/src/SmokeTests.js'
+  )
+  const smokeTestModule = require.cache[path]
+  if (!smokeTestModule) {
+    return logger.warn({ path }, 'smokeTestModule not defined')
+  }
+
+  let idx
+  const { parent } = smokeTestModule
+  while ((idx = parent.children.indexOf(smokeTestModule)) !== -1) {
+    parent.children.splice(idx, 1)
+  }
+  // remove the smokeTest from the module cache
+  delete require.cache[path]
 }
 
 var Reporter = res =>
