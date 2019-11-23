@@ -33,7 +33,19 @@ module.exports = HealthCheckController = {
     return d.run(function() {
       const mocha = new Mocha({ reporter: Reporter(res), timeout: 10000 })
       mocha.addFile('test/smoke/src/SmokeTests.js')
-      return mocha.run(evictSmokeTestsModule)
+
+      // there is a race between loading, executing and unloading of the test
+      //  module: the module registers its suites only once during its lifecycle
+      // running health checks in parallel could result in the loading of a
+      //  cached copy of the module and mocha would see 0 (new) test suites.
+      // here is a hack to evict the cache immediately after loading.
+      mocha.loadFiles()
+      evictSmokeTestsModule()
+      mocha.loadFiles = function(fn) {
+        return fn && fn()
+      }
+
+      mocha.run()
     })
   },
 
