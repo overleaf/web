@@ -166,12 +166,6 @@ webRouter.use(function(req, res, next) {
 webRouter.use(ReferalConnect.use)
 expressLocals(webRouter, privateApiRouter, publicApiRouter)
 
-if (app.get('env') === 'production') {
-  logger.info('Production Enviroment')
-  app.enable('view cache')
-  Views.precompileViews(app)
-}
-
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
     next()
@@ -237,6 +231,12 @@ if (enableWebRouter || notDefined(enableWebRouter)) {
   app.use(Validation.errorMiddleware)
   app.use(HttpErrorController.handleError)
   app.use(ErrorController.handleError)
+
+  if (app.get('env') === 'production') {
+    logger.info('Production Enviroment')
+    app.enable('view cache')
+    Views.precompileViews(app)
+  }
 }
 
 metrics.injectMetricsRoute(webRouter)
