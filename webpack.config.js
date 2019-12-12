@@ -95,7 +95,13 @@ module.exports = {
         test: /\.less$/,
         use: [
           // Allows the CSS to be extracted to a separate .css file
-          { loader: MiniCssExtractPlugin.loader },
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // filename is `stylesheets/....css` downstream, drop 1 level
+              publicPath: '../'
+            }
+          },
           // Resolves any CSS dependencies (e.g. url())
           { loader: 'css-loader' },
           {
