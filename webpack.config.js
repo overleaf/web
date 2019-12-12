@@ -173,6 +173,18 @@ module.exports = {
             options: 'AlgoliaSearch'
           }
         ]
+      },
+      {
+        // preserve assets that are already in the output directory
+        test: new RegExp(`^${path.join(__dirname, 'public')}`),
+        loader: 'file-loader',
+        options: {
+          // preserve the exact filepath
+          context: 'public',
+          name: '[path][name].[ext]',
+          // use the file inplace
+          emitFile: false
+        }
       }
     ]
   },
