@@ -95,7 +95,13 @@ module.exports = {
         test: /\.less$/,
         use: [
           // Allows the CSS to be extracted to a separate .css file
-          { loader: MiniCssExtractPlugin.loader },
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // filename is `stylesheets/....css` downstream, drop 1 level
+              publicPath: '../'
+            }
+          },
           // Resolves any CSS dependencies (e.g. url())
           { loader: 'css-loader' },
           {
@@ -191,6 +197,18 @@ module.exports = {
             options: 'AlgoliaSearch'
           }
         ]
+      },
+      {
+        // preserve assets that are already in the output directory
+        test: new RegExp(`^${path.join(__dirname, 'public')}`),
+        loader: 'file-loader',
+        options: {
+          // preserve the exact filepath
+          context: 'public',
+          name: '[path][name].[ext]',
+          // use the file inplace
+          emitFile: false
+        }
       }
     ]
   },
