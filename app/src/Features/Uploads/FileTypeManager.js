@@ -33,7 +33,8 @@ module.exports = FileTypeManager = {
     'lbx',
     'bbx',
     'cbx',
-    'm'
+    'm',
+    'csv'
   ],
 
   IGNORE_EXTENSIONS: [
