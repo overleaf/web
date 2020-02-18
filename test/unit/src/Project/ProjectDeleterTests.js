@@ -287,11 +287,15 @@ describe('ProjectDeleter', function() {
       this.ProjectMock.expects('remove')
         .chain('exec')
         .resolves()
-      this.DeletedProjectMock.expects('create')
-        .withArgs({
-          project: this.project,
-          deleterData: this.deleterData
-        })
+      this.DeletedProjectMock.expects('update')
+        .withArgs(
+          { 'deleterData.deletedProjectId': this.project._id },
+          {
+            project: this.project,
+            deleterData: this.deleterData
+          },
+          { upsert: true }
+        )
         .resolves()
 
       this.ProjectDeleter.deleteProject(
@@ -309,7 +313,7 @@ describe('ProjectDeleter', function() {
       this.ProjectMock.expects('remove')
         .chain('exec')
         .resolves()
-      this.DeletedProjectMock.expects('create').resolves()
+      this.DeletedProjectMock.expects('update').resolves()
 
       this.ProjectDeleter.deleteProject(
         this.project_id,
@@ -327,7 +331,7 @@ describe('ProjectDeleter', function() {
       this.ProjectMock.expects('remove')
         .chain('exec')
         .resolves()
-      this.DeletedProjectMock.expects('create').resolves()
+      this.DeletedProjectMock.expects('update').resolves()
 
       this.ProjectDeleter.deleteProject(this.project_id, () => {
         sinon.assert.calledWith(
@@ -349,7 +353,7 @@ describe('ProjectDeleter', function() {
         .withArgs({ _id: this.project_id })
         .chain('exec')
         .resolves()
-      this.DeletedProjectMock.expects('create').resolves()
+      this.DeletedProjectMock.expects('update').resolves()
 
       this.ProjectDeleter.deleteProject(this.project_id, () => {
         this.ProjectMock.verify()
@@ -428,28 +432,6 @@ describe('ProjectDeleter', function() {
       expect(this.DocstoreManager.destroyProject).to.have.been.calledWith(
         this.deletedProjects[0].project._id
       )
-    })
-  })
-
-  describe('legacyArchiveProject', function() {
-    beforeEach(function() {
-      this.ProjectMock.expects('update')
-        .withArgs(
-          {
-            _id: this.project_id
-          },
-          {
-            $set: { archived: true }
-          }
-        )
-        .yields()
-    })
-
-    it('should update the project', function(done) {
-      this.ProjectDeleter.legacyArchiveProject(this.project_id, () => {
-        this.ProjectMock.verify()
-        done()
-      })
     })
   })
 

@@ -323,8 +323,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       chatMessageBgSaturation: '85%',
       chatMessageBgLightness: '40%',
       defaultFontFamily: 'lucida',
-      defaultLineHeight: 'normal',
-      renderAnnouncements: false
+      defaultLineHeight: 'normal'
     }
     next()
   })
@@ -361,6 +360,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
       siteUrl: Settings.siteUrl,
+      emailConfirmationDisabled: Settings.emailConfirmationDisabled,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:

@@ -35,6 +35,11 @@ const port = Settings.port || Settings.internal.web.port || 3000
 const host = Settings.internal.web.host || 'localhost'
 if (!module.parent) {
   // Called directly
+
+  // We want to make sure that we provided a password through the environment.
+  if (!process.env['WEB_API_USER'] || !process.env['WEB_API_PASSWORD']) {
+    throw new Error('No API user and password provided')
+  }
   Server.server.listen(port, host, function() {
     logger.info(`web starting up, listening on ${host}:${port}`)
     logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
@@ -42,5 +47,11 @@ if (!module.parent) {
     metrics.event_loop.monitor(logger)
   })
 }
+
+// handle SIGTERM for graceful shutdown in kubernetes
+process.on('SIGTERM', function(signal) {
+  logger.warn({ signal: signal }, 'received signal, shutting down')
+  Settings.shuttingDown = true
+})
 
 module.exports = Server.server

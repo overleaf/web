@@ -250,15 +250,13 @@ module.exports = {
     )
   },
 
-  buildViewModel() {
+  buildPlansList() {
     const { plans } = Settings
 
     const allPlans = {}
     plans.forEach(plan => (allPlans[plan.planCode] = plan))
 
     const result = { allPlans }
-
-    result.personalAccount = _.find(plans, plan => plan.planCode === 'personal')
 
     result.studentAccounts = _.filter(
       plans,
@@ -280,7 +278,7 @@ module.exports = {
       plan =>
         !plan.groupPlan &&
         !plan.annual &&
-        plan.planCode !== 'personal' &&
+        plan.planCode !== 'personal' && // Prevent the personal plan from appearing on the change-plans page
         plan.planCode.indexOf('student') === -1
     )
 

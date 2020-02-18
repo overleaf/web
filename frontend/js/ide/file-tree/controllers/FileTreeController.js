@@ -124,6 +124,15 @@ define(['base'], function(App) {
     return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
   })
 
+  App.controller('DuplicateFileModalController', function(
+    $scope,
+    $modalInstance,
+    fileName
+  ) {
+    $scope.fileName = fileName
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
+  })
+
   App.controller('NewFileModalController', function(
     $scope,
     ide,
@@ -182,12 +191,6 @@ define(['base'], function(App) {
 
   App.controller('NewDocModalController', function($scope, ide, $timeout) {
     $scope.inputs = { name: 'name.tex' }
-
-    const validate = function() {
-      const { name } = $scope.inputs
-      $scope.state.valid = name != null && name.length > 0
-    }
-    $scope.$watch('inputs.name', validate)
 
     $timeout(() => $scope.$broadcast('open'), 200)
 

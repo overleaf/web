@@ -6,13 +6,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const version = {
-  pdfjs: '2.0.943',
-  moment: '2.9.0',
   ace: '1.4.5', // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
-  fineuploader: '5.15.4',
-  // For frontend. Backend has a different version defined in package.json
-  underscore: '1.9.1',
-  algolia: '2.5.2'
+  fineuploader: '5.15.4'
 }
 
 module.exports = {

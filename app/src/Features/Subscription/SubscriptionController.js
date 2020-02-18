@@ -29,12 +29,13 @@ const FeaturesUpdater = require('./FeaturesUpdater')
 const planFeatures = require('./planFeatures')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
+const Errors = require('../Errors/Errors')
 const SubscriptionErrors = require('./Errors')
 const HttpErrors = require('@overleaf/o-error/http')
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
-    const plans = SubscriptionViewModelBuilder.buildViewModel()
+    const plans = SubscriptionViewModelBuilder.buildPlansList()
     let viewName = 'subscriptions/plans'
     if (req.query.v != null) {
       viewName = `${viewName}_${req.query.v}`
@@ -128,6 +129,7 @@ module.exports = SubscriptionController = {
                     showCouponField: req.query.scf,
                     showVatField: req.query.svf,
                     couponCode: req.query.cc || '',
+                    gaOptimize: true,
                     ITMCampaign: req.query.itm_campaign,
                     ITMContent: req.query.itm_content
                   })
@@ -165,7 +167,7 @@ module.exports = SubscriptionController = {
             return next(error)
           }
           const fromPlansPage = req.query.hasSubscription
-          const plans = SubscriptionViewModelBuilder.buildViewModel()
+          const plans = SubscriptionViewModelBuilder.buildPlansList()
           const data = {
             title: 'your_subscription',
             plans,
@@ -216,6 +218,10 @@ module.exports = SubscriptionController = {
           }
 
           if (err instanceof SubscriptionErrors.RecurlyTransactionError) {
+            return next(
+              new HttpErrors.UnprocessableEntityError({}).withCause(err)
+            )
+          } else if (err instanceof Errors.InvalidError) {
             return next(
               new HttpErrors.UnprocessableEntityError({}).withCause(err)
             )

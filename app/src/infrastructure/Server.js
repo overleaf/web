@@ -12,6 +12,7 @@ const Csrf = require('./Csrf')
 
 const sessionsRedisClient = UserSessionsRedis.client()
 
+const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
 const SessionStoreManager = require('./SessionStoreManager')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
@@ -95,6 +96,7 @@ RedirectManager.apply(webRouter)
 ProxyManager.apply(publicApiRouter)
 
 webRouter.use(cookieParser(Settings.security.sessionSecret))
+SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
 webRouter.use(
   session({
     resave: false,
@@ -104,7 +106,8 @@ webRouter.use(
     cookie: {
       domain: Settings.cookieDomain,
       maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
-      secure: Settings.secureCookie
+      secure: Settings.secureCookie,
+      sameSite: Settings.sameSiteCookie
     },
     store: sessionStore,
     key: Settings.cookieName,
@@ -149,22 +152,26 @@ webRouter.use(translations.setLangBasedOnDomainMiddlewear)
 
 // Measure expiry from last request, not last login
 webRouter.use(function(req, res, next) {
-  req.session.touch()
-  if (AuthenticationController.isUserLoggedIn(req)) {
-    UserSessionsManager.touch(
-      AuthenticationController.getSessionUser(req),
-      err => {
-        if (err) {
-          logger.err({ err }, 'error extending user session')
+  if (!req.session.noSessionCallback) {
+    req.session.touch()
+    if (AuthenticationController.isUserLoggedIn(req)) {
+      UserSessionsManager.touch(
+        AuthenticationController.getSessionUser(req),
+        err => {
+          if (err) {
+            logger.err({ err }, 'error extending user session')
+          }
         }
-      }
-    )
+      )
+    }
   }
   next()
 })
 
 webRouter.use(ReferalConnect.use)
 expressLocals(webRouter, privateApiRouter, publicApiRouter)
+
+webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
 webRouter.use(function(req, res, next) {
   if (Settings.siteIsOpen) {
@@ -240,6 +247,7 @@ if (enableWebRouter || notDefined(enableWebRouter)) {
 }
 
 metrics.injectMetricsRoute(webRouter)
+
 Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports = {

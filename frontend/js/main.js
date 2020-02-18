@@ -11,11 +11,11 @@
  */
 define([
   'main/project-list/index',
-  'main/user-details',
   'main/account-settings',
   'main/clear-sessions',
   'main/account-upgrade',
   'main/plans',
+  'main/post-gateway',
   'main/user-membership',
   'main/scribtex-popup',
   'main/event',
@@ -25,9 +25,9 @@ define([
   'main/subscription-dashboard',
   'main/new-subscription',
   'main/annual-upgrade',
-  'main/announcements',
   'main/register-users',
   'main/subscription/team-invite-controller',
+  'main/subscription/upgrade-subscription',
   'main/contact-us',
   'main/learn',
   'main/exposed-settings',

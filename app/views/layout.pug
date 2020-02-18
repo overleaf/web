@@ -1,3 +1,4 @@
+
 doctype html
 html(
 	lang=(currentLngCode || 'en')
@@ -35,12 +36,21 @@ html(
 				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
-				script(type='text/javascript').
-					ga('require', '#{gaOptimizeId}')
 			script(type='text/javascript').
 				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
 				ga('send', 'pageview');
+			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
+				script(type='text/javascript').
+					ga('require', '#{gaOptimizeId}')
+				//- Anti-flicker snippet
+				style(type='text/css') .async-hide { opacity: 0 !important}
+				script(type='text/javascript').
+					(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+					h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+					(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+					})(window,document.documentElement,'async-hide','dataLayer',4000,
+					{'#{gaOptimizeId}':true});
+
 		- else
 			script(type='text/javascript').
 				window.ga = function() { console.log("would send to GA", arguments) };
@@ -51,18 +61,7 @@ html(
 			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
 			window.baseAssetPath = "#{buildBaseAssetPath()}"
 
-		script(src=buildCopiedJsAssetPath('js/libs/jquery-1.11.1.min.js'))
-		script(type="text/javascript").
-			var noCdnKey = "nocdn=true"
-			var cdnBlocked = typeof jQuery === 'undefined'
-			var noCdnAlreadyInUrl = window.location.href.indexOf(noCdnKey) != -1 //prevent loops
-			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
-				window.location.search += '&'+noCdnKey;
-			}
-
 		block head-scripts
-
-		script(src=buildCopiedJsAssetPath('js/libs/angular-1.6.4.min.js'))
 
 		script.
 			window.sharelatex = {
@@ -91,7 +90,7 @@ html(
 
 
 	body
-		if(settings.recaptcha)
+		if(settings.recaptcha && (settings.recaptcha.siteKey || settings.recaptcha.siteKeyV3))
 			if (settings.recaptcha.siteKeyV3)
 				script(src="https://www.google.com/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
 			else
@@ -119,3 +118,12 @@ html(
 		block foot-scripts
 			script(src=buildJsPath('libraries.js'))
 			script(src=buildJsPath('main.js'))
+			script(type="text/javascript").
+				//- Look for bundle
+				var cdnBlocked = typeof Frontend === 'undefined'
+				//- Prevent loops
+				var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
+				if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+					//- Set query param, server will not set CDN url
+					window.location.search += "&nocdn=true";
+				}

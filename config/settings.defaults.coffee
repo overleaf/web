@@ -8,10 +8,11 @@ minutes = 60 * seconds
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
-httpAuthUser = process.env['WEB_API_USER'] or "sharelatex"
-httpAuthPass = process.env['WEB_API_PASSWORD'] or "password"
+httpAuthUser = process.env['WEB_API_USER']
+httpAuthPass = process.env['WEB_API_PASSWORD']
 httpAuthUsers = {}
-httpAuthUsers[httpAuthUser] = httpAuthPass
+if httpAuthUser and httpAuthPass
+	httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = process.env['SESSION_SECRET'] or "secret-please-change"
 
@@ -389,6 +390,11 @@ module.exports = settings =
 	# cookie with a secure flag (recommended).
 	secureCookie: false
 
+	# 'SameSite' cookie setting. Can be set to 'lax', 'none' or 'strict'
+	# 'lax' is recommended, as 'strict' will prevent people linking to projects
+	# https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7
+	sameSiteCookie: 'lax'
+
 	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
@@ -482,6 +488,11 @@ module.exports = settings =
 		# Example:
 		#   header_extras: [{text: "Some Page", url: "http://example.com/some/page", class: "subdued"}]
 
+	recaptcha:
+		disabled:
+			invite: true
+			register: true
+
 	customisation: {}
 
 #	templates: [{
@@ -565,6 +576,8 @@ module.exports = settings =
 	compileBodySizeLimitMb: process.env['COMPILE_BODY_SIZE_LIMIT_MB'] or 5
 
 	validRootDocExtensions: ['tex', 'Rtex', 'ltx']
+
+	emailConfirmationDisabled: (process.env['EMAIL_CONFIRMATION_DISABLED'] == "true") or false
 
 	# allowedImageNames: [
 	# 	{imageName: 'texlive-full:2017.1', imageDesc: 'TeXLive 2017'}

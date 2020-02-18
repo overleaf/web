@@ -1,4 +1,4 @@
-define(['base', 'moment'], (App, moment) =>
+define(['base'], App =>
   App.controller('BinaryFileController', function(
     $scope,
     $rootScope,
@@ -15,7 +15,34 @@ define(['base', 'moment'], (App, moment) =>
     const TAIL_OF_URL_LENGTH =
       MAX_URL_LENGTH - FRONT_OF_URL_LENGTH - FILLER.length
 
-    const textExtensions = ['bib', 'tex', 'txt', 'cls', 'sty']
+    const textExtensions = [
+      'tex',
+      'latex',
+      'sty',
+      'cls',
+      'bst',
+      'bib',
+      'bibtex',
+      'txt',
+      'tikz',
+      'rtex',
+      'md',
+      'asy',
+      'latexmkrc',
+      'lbx',
+      'bbx',
+      'cbx',
+      'm',
+      'lco',
+      'dtx',
+      'ins',
+      'ist',
+      'def',
+      'clo',
+      'ldf',
+      'rmd',
+      'lua'
+    ]
     const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
     const previewableExtensions = []
 

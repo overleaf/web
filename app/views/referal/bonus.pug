@@ -1,32 +1,5 @@
 extends ../layout
 
-block head-scripts
-	script(type='text/javascript').
-		$(document).ready(function () {
-			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
-				window.fbAsyncInit = function() {
-					FB.init({appId: '#{settings.social.facebook.appId}', xfbml: true});
-				}
-			});
-		});
-
-		function postToFeed() {
-			// calling the API ...
-			var obj = {
-				method: 'feed',
-				redirect_uri: '#{settings.social.facebook.redirectUri}',
-				link: '!{buildReferalUrl("fb")}',
-				picture: '#{settings.social.facebook.picture}',
-				name: '#{translate("bonus_facebook_name").replace(/'/g, "\\x27")}',
-				caption: '#{translate("bonus_facebook_caption").replace(/'/g, "\\x27")}',
-				description: '#{translate("bonus_facebook_description").replace(/'/g, "\\x27")}'
-			};
-
-			if (typeof FB !== "undefined" && FB !== null) {
-				FB.ui(obj);
-			}
-		}
-
 block content
 	.content.content-alt
 		.container.bonus
@@ -55,7 +28,7 @@ block content
 											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden)
 											|
 											| Tweet
-									
+
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
@@ -105,7 +78,7 @@ block content
 										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
 
 							.row.ab-bonus
-								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")
+								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 110px;")
 									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
 									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
 									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
@@ -120,14 +93,16 @@ block content
 										p.thanks !{translate("you_introed_small_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
 									- else
 										p.thanks !{translate("you_introed_high_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
-						
+
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
 								button.close(
 									type="button"
 									data-dismiss="modal"
 									ng-click="cancel()"
-								) &times;
+									aria-label="Close"
+								)
+									span(aria-hidden="true") &times;
 								h3 #{translate("link_to_sl")}
 							.modal-body.modal-body-share.link-modal
 
@@ -146,15 +121,32 @@ block content
 									span #{translate("close")}
 
 
+block append foot-scripts
+	script(type='text/javascript').
+		$(document).ready(function () {
+			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
+				window.fbAsyncInit = function() {
+					FB.init({appId: '#{settings.social.facebook.appId}', xfbml: true});
+				}
+			});
+		});
 
+		function postToFeed() {
+			// calling the API ...
+			var obj = {
+				method: 'feed',
+				redirect_uri: '#{settings.social.facebook.redirectUri}',
+				link: '!{buildReferalUrl("fb")}',
+				picture: '#{settings.social.facebook.picture}',
+				name: '#{translate("bonus_facebook_name").replace(/\'/g, "\\x27")}',
+				caption: '#{translate("bonus_facebook_caption").replace(/\'/g, "\\x27")}',
+				description: '#{translate("bonus_facebook_description").replace(/\'/g, "\\x27")}'
+			};
 
-
-
-
-
-
-
-
+			if (typeof FB !== "undefined" && FB !== null) {
+				FB.ui(obj);
+			}
+		}
 
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
 
@@ -173,4 +165,3 @@ block content
 				ga('send', 'event', 'referal-button', 'clicked', "direct-link")
 			});
 		});
-
