@@ -16,6 +16,7 @@ const Errors = require('../Errors/Errors')
 const OError = require('@overleaf/o-error')
 const HttpErrors = require('@overleaf/o-error/http')
 const EmailHandler = require('../Email/EmailHandler')
+const EmailHelper = require('../Helpers/EmailHelper')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
 
@@ -337,7 +338,7 @@ const UserController = {
   },
 
   register(req, res, next) {
-    const { email } = req.body
+    const email = EmailHelper.parseEmail(req.body.email)
     if (email == null || email === '') {
       return res.sendStatus(422) // Unprocessable Entity
     }
