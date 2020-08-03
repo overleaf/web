@@ -342,7 +342,7 @@ const ProjectController = {
         // _buildProjectList already converts archived/trashed to booleans so isArchivedOrTrashed should not be used here
         projects = ProjectController._buildProjectList(projects, userId)
           .filter(p => !(p.archived || p.trashed))
-          .map(p => ({ _id: p.id, name: p.name, accessLevel: p.accessLevel }))
+          .map(p => ({ _id: p.id, name: p.name, accessLevel: p.accessLevel, lastUpdated: p.lastUpdated }))
 
         res.json({ projects })
       }
