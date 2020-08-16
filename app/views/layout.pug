@@ -75,7 +75,7 @@ html(
 			};
 			window.ab = {};
 			window.user_id = '#{getLoggedInUserId()}';
-			window.ExposedSettings = JSON.parse('!{StringHelper.stringifyJsonForScript(ExposedSettings)}');
+			window.ExposedSettings = !{StringHelper.stringifyJsonForScript(ExposedSettings)};
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
