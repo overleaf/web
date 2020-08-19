@@ -175,7 +175,7 @@ block content
 		window.aceBasePath = "/js/#{lib('ace')}"
 		//- Set path for PDFjs CMaps
 		window.pdfCMapsPath = "/js/cmaps/"
-		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
+		window.uiConfig = !{StringHelper.stringifyJsonForScript(uiConfig)};
 		//- enable doc hash checking for all projects
 		//- used in public/js/libs/sharejs.js
 		window.useShareJsHash = true
@@ -183,7 +183,7 @@ block content
 
 	- if (settings.overleaf != null)
 		script(type='text/javascript').
-			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
+			window.overallThemes = !{StringHelper.stringifyJsonForScript(overallThemes)};
 
 block foot-scripts
 	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
