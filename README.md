@@ -1,4 +1,4 @@
-overleaf/web
+Overleaf-Web
 ==============
 
 overleaf/web is the front-end web service of the open-source web-based collaborative LaTeX editor,
@@ -10,7 +10,7 @@ a lot of logic around creating and editing projects, and account management.
 The rest of the Overleaf stack, along with information about contributing can be found in the
 [overleaf/overleaf](https://github.com/overleaf/overleaf) repository.
 
-Build process
+Build Process
 ----------------
 
 overleaf/web uses [Grunt](http://gruntjs.com/) to build its front-end related assets.
@@ -23,7 +23,7 @@ New Docker-based build process
 Note that the Grunt workflow from above should still work, but we are transitioning to a
 Docker based testing workflow, which is documented below:
 
-### Running the app
+### Running the App
 
 The app runs natively using npm and Node on the local system:
 
@@ -121,7 +121,7 @@ License and Credits
 
 This project is licensed under the [AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html)
 
-### Stylesheets
+### StyleSheets
 
 Overleaf is based on [Bootstrap](http://getbootstrap.com/), which is licensed under the
 [MIT license](http://opensource.org/licenses/MIT).
