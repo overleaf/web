@@ -455,10 +455,16 @@ App.directive('aceEditor', function(
       scope.$watch('showPrintMargin', value => editor.setShowPrintMargin(value))
 
       scope.$watch('keybindings', function(value) {
-        if (['vim', 'emacs'].includes(value)) {
-          return editor.setKeyboardHandler(`ace/keyboard/${value}`)
-        } else {
-          return editor.setKeyboardHandler(null)
+        switch (value) {
+          case 'vim':
+            editor.setKeyboardHandler('ace/keyboard/vim');
+            return editor.setOption('relativeLineNumbers', true);
+          case 'emacs':
+            editor.setKeyboardHandler('ace/keyboard/emacs');
+            return editor.setOption('relativeLineNumbers', false);
+          default:
+            editor.setKeyboardHandler(null);
+            return editor.setOption('relativeLineNumbers', false);
         }
       })
 
