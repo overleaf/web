@@ -264,8 +264,8 @@ module.exports = CompileController = {
   },
 
   _getSafeProjectName(project) {
-    const wordRegExp = /\W/g
-    const safeProjectName = project.name.replace(wordRegExp, '_')
+    // Only allow alphanumeric and ( ) @ - characters in filenames
+    const safeProjectName = project.name.replace(new RegExp('[^\\w\\(\\)\\@\\-]', 'g'), '_')
     return sanitize.escape(safeProjectName)
   },
 
