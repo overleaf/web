@@ -1,7 +1,10 @@
 {
   "trashed_projects": "已删除项目",
   "archived_projects": "已归档项目",
+  "archived_projects_info_note": "存档现在基于每个用户运行。您决定存档的项目只会为您存档，并不为您的协作者存档。",
+  "trashed_projects_info_note": "Overleaf现在对您希望离开的项目提供一个废纸篓，该操作不会影响您的协作者。",
   "archive": "归档",
+  "trash": "删除(回收)",
   "best_value": "最佳性价比",
   "faq_how_free_trial_works_question": "如何体验免费使用？",
   "faq_change_plans_question": "之后可以更改付款方案吗？",
@@ -226,6 +229,10 @@
   "beta_program_opt_out_action": "退出 Beta 计划",
   "disable_beta": "禁用Beta版本",
   "beta_program_badge_description": "在使用 __appName__ 过程中，测试功能会被这样标记：",
+  "thank_you_for_being_part_of_our_beta_program": "Thank you for being part of our Beta Program, where you can have early access to new features and help us understand your needs better",
+  "you_will_be_able_to_contact_us_any_time_to_share_your_feedback": "You will be able to contact us any time to share your feedback",
+  "we_may_also_contact_you_from_time_to_time_by_email_with_a_survey": "We may also contact you from time to time by email with a survey, or to see if you would like to participate in other user research initiatives",
+  "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "You can opt in and out of the program at any time on this page",
   "beta_program_current_beta_features_description": "在Beta版本中，我们正在测试以下新功能：",
   "enable_beta": "开启Beta版本",
   "user_in_beta_program": "用户在参加Beta版测试",
@@ -487,7 +494,7 @@
   "compiling": "正在编译",
   "click_here_to_preview_pdf": "点击预览PDF",
   "server_error": "服务器错误",
-  "somthing_went_wrong_compiling": "抱歉，出错了，您的项目无法编译。请在几分钟后再试。",
+  "somthing_went_wrong_compiling": "抱歉，出错了，您的项目无法编译。请在几分钟后再试。这可能是由于您使用了未受支持的字体，或是写出了无限循环的代码，请联系makiras@bupt.edu.cn获取支持。",
   "timedout": "超时",
   "proj_timed_out_reason": "抱歉，您的编译超时。原因可能是存在大量高分辨率的图像，或者程序过于复杂。",
   "no_errors_good_job": "没有错误，好样的！",
@@ -901,5 +908,8 @@
   "unlink_github": "取消与您的GitHub账户的关联",
   "link_to_github": "建立与您的GitHub账户的关联",
   "github_integration": "GitHub 整合",
-  "github_is_premium": "与GitHub同步是一项付费功能"
+  "github_is_premium": "与GitHub同步是一项付费功能",
+  "notification_project_invite_message": "<b>__userName__</b> 希望邀请您加入项目 <b>__projectName__</b>",
+  "notification_project_invite_accepted_message": "您已成功加入 <b>__projectName__</b>" ,
+  "no_selection_select_file": "没有已选中的文件"
 }

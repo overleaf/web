@@ -59,7 +59,7 @@
 		li(ng-class="{active: (filter == 'shared')}", ng-click="filterProjects('shared')")
 			a(href) #{translate("shared_with_you")}
 		li.folders-menu-item-with-tooltip(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
-			a(href) #{settings.overleaf ? translate("archived_projects") : translate("deleted_projects")}
+			a(href) #{translate("archived_projects")}
 			.folders-menu-tooltip-trigger(
 				href
 				tooltip=translate('archived_projects_info_note')
