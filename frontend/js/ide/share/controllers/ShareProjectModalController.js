@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import App from '../../../base'
-App.controller('ShareProjectModalController', function(
+App.controller('ShareProjectModalController', function (
   $scope,
   $modalInstance,
   $timeout,
@@ -17,14 +17,14 @@ App.controller('ShareProjectModalController', function(
 ) {
   $scope.inputs = {
     privileges: 'readAndWrite',
-    contacts: []
+    contacts: [],
   }
   $scope.state = {
     error: null,
     errorReason: null,
     inflight: false,
     startedFreeTrial: false,
-    invites: []
+    invites: [],
   }
 
   $modalInstance.opened.then(() =>
@@ -33,7 +33,7 @@ App.controller('ShareProjectModalController', function(
 
   const INFINITE_COLLABORATORS = -1
 
-  $scope.refreshCanAddCollaborators = function() {
+  $scope.refreshCanAddCollaborators = function () {
     const allowedNoOfMembers = $scope.project.features.collaborators
     $scope.canAddCollaborators =
       $scope.project.members.length + $scope.project.invites.length <
@@ -41,7 +41,7 @@ App.controller('ShareProjectModalController', function(
   }
   $scope.refreshCanAddCollaborators()
 
-  $scope.$watch('canAddCollaborators', function() {
+  $scope.$watch('canAddCollaborators', function () {
     if (!$scope.canAddCollaborators) {
       eventTracking.send(
         'subscription-funnel',
@@ -69,7 +69,7 @@ App.controller('ShareProjectModalController', function(
   function processContactsResponse(response) {
     const { data } = response
     $scope.autocompleteContacts = data.contacts || []
-    for (let contact of $scope.autocompleteContacts) {
+    for (const contact of $scope.autocompleteContacts) {
       if (contact.type === 'user') {
         if (
           contact.first_name === contact.email.split('@')[0] &&
@@ -94,16 +94,16 @@ App.controller('ShareProjectModalController', function(
   const getCurrentInviteEmails = () =>
     ($scope.project.invites || []).map(u => u.email)
 
-  $scope.filterAutocompleteUsers = function($query) {
+  $scope.filterAutocompleteUsers = function ($query) {
     const currentMemberEmails = getCurrentMemberEmails()
-    return $scope.autocompleteContacts.filter(function(contact) {
+    return $scope.autocompleteContacts.filter(function (contact) {
       if (
         contact.email != null &&
         currentMemberEmails.includes(contact.email)
       ) {
         return false
       }
-      for (let text of [contact.name, contact.email]) {
+      for (const text of [contact.name, contact.email]) {
         if (
           text != null &&
           text.toLowerCase().indexOf($query.toLowerCase()) > -1
@@ -115,8 +115,8 @@ App.controller('ShareProjectModalController', function(
     })
   }
 
-  $scope.addMembers = function() {
-    const addMembers = function() {
+  $scope.addMembers = function () {
+    const addMembers = function () {
       if ($scope.inputs.contacts.length === 0) {
         return
       }
@@ -159,7 +159,7 @@ App.controller('ShareProjectModalController', function(
         validateCaptchaV3('invite')
         // do v2 captcha
         const ExposedSettings = window.ExposedSettings
-        validateCaptcha(function(response) {
+        validateCaptcha(function (response) {
           $scope.grecaptchaResponse = response
           const invites = $scope.project.invites || []
           const invite = _.find(invites, invite => invite.email === email)
@@ -175,7 +175,7 @@ App.controller('ShareProjectModalController', function(
           }
 
           request
-            .then(function(response) {
+            .then(function (response) {
               const { data } = response
               if (data.error) {
                 $scope.setError(data.error)
@@ -189,8 +189,8 @@ App.controller('ShareProjectModalController', function(
                     data.users != null
                       ? data.users
                       : data.user != null
-                        ? [data.user]
-                        : []
+                      ? [data.user]
+                      : []
                   $scope.project.members.push(...users)
                 }
               }
@@ -204,7 +204,7 @@ App.controller('ShareProjectModalController', function(
                 0
               )
             })
-            .catch(function(httpResponse) {
+            .catch(function (httpResponse) {
               const { data } = httpResponse
               $scope.state.inflight = false
               $scope.setError(data.errorReason)
@@ -216,9 +216,9 @@ App.controller('ShareProjectModalController', function(
     $timeout(addMembers, 50) // Give email list a chance to update
   }
 
-  $scope.removeMember = function(member) {
+  $scope.removeMember = function (member) {
     $scope.monitorRequest(
-      projectMembers.removeMember(member).then(function() {
+      projectMembers.removeMember(member).then(function () {
         const index = $scope.project.members.indexOf(member)
         if (index === -1) {
           return
@@ -228,9 +228,9 @@ App.controller('ShareProjectModalController', function(
     )
   }
 
-  $scope.revokeInvite = function(invite) {
+  $scope.revokeInvite = function (invite) {
     $scope.monitorRequest(
-      projectInvites.revokeInvite(invite._id).then(function() {
+      projectInvites.revokeInvite(invite._id).then(function () {
         const index = $scope.project.invites.indexOf(invite)
         if (index === -1) {
           return
@@ -240,31 +240,31 @@ App.controller('ShareProjectModalController', function(
     )
   }
 
-  $scope.resendInvite = function(invite, event) {
+  $scope.resendInvite = function (invite, event) {
     $scope.monitorRequest(
       projectInvites
         .resendInvite(invite._id)
-        .then(function() {
+        .then(function () {
           event.target.blur()
         })
-        .catch(function() {
+        .catch(function () {
           event.target.blur()
         })
     )
   }
 
-  $scope.makeTokenBased = function() {
+  $scope.makeTokenBased = function () {
     $scope.project.publicAccesLevel = 'tokenBased'
     settings.saveProjectAdminSettings({ publicAccessLevel: 'tokenBased' })
     eventTracking.sendMB('project-make-token-based')
   }
 
-  $scope.makePrivate = function() {
+  $scope.makePrivate = function () {
     $scope.project.publicAccesLevel = 'private'
     settings.saveProjectAdminSettings({ publicAccessLevel: 'private' })
   }
 
-  $scope.$watch('project.tokens.readAndWrite', function(token) {
+  $scope.$watch('project.tokens.readAndWrite', function (token) {
     if (token != null) {
       $scope.readAndWriteTokenLink = `${location.origin}/${token}`
     } else {
@@ -272,7 +272,7 @@ App.controller('ShareProjectModalController', function(
     }
   })
 
-  $scope.$watch('project.tokens.readOnly', function(token) {
+  $scope.$watch('project.tokens.readOnly', function (token) {
     if (token != null) {
       $scope.readOnlyTokenLink = `${location.origin}/read/${token}`
     } else {

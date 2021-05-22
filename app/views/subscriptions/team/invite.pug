@@ -1,24 +1,22 @@
 extends ../../layout
 
-block head-scripts
-	script(type='text/javascript').
-		window.teamId = '#{teamId}'
-		window.hasIndividualRecurlySubscription = #{hasIndividualRecurlySubscription}
-		window.inviteToken = '#{inviteToken}'
+block append meta
+	meta(name="ol-hasIndividualRecurlySubscription" data-type="boolean" content=hasIndividualRecurlySubscription)
+	meta(name="ol-inviteToken" content=inviteToken)
 
 block content
-	.content.content-alt.team-invite
+	main.content.content-alt.team-invite
 		.container
 			.row
 				.col-md-8.col-md-offset-2
-					-if (expired)
+					if (expired)
 						.alert.alert-warning #{translate("email_link_expired")}
 
 			.row.row-spaced
 				.col-md-8.col-md-offset-2.text-center(ng-cloak)
 					.card(ng-controller="TeamInviteController")
 						.page-header
-							h1.text-centered #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
+							h1.text-centered(ng-non-bindable) #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
 
 						div(ng-show="view =='hasIndividualRecurlySubscription'")
 							p #{translate("cancel_personal_subscription_first")}
@@ -36,6 +34,6 @@ block content
 								a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
 
 						div(ng-show="view =='inviteAccepted'")
-							p #{translate("joined_team", {inviterName: inviterName})}
+							p(ng-non-bindable) #{translate("joined_team", {inviterName: inviterName})}
 							p
 								a.btn.btn.btn-primary(href="/project") #{translate("done")}

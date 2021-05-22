@@ -1,106 +1,106 @@
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
-const modulePath = path.join(
+const sinon = require('sinon')
+
+const MODULE_PATH = path.join(
   __dirname,
   '../../../../app/src/Features/Analytics/AnalyticsManager'
 )
-const sinon = require('sinon')
-const { expect } = require('chai')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('AnalyticsManager', function() {
-  beforeEach(function() {
+describe('AnalyticsManager', function () {
+  beforeEach(function () {
     this.fakeUserId = '123abc'
-    this.settings = {
-      overleaf: true,
-      apis: { analytics: { url: 'analytics.test' } }
+    this.Settings = {
+      analytics: { enabled: true },
+    }
+    this.analyticsEventsQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
+    this.analyticsEditingSessionQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
+    this.onboardingEmailsQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
+    this.analyticsUserPropertiesQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
+    const self = this
+    this.Queues = {
+      getAnalyticsEventsQueue: () => {
+        return self.analyticsEventsQueue
+      },
+      getAnalyticsEditingSessionsQueue: () => {
+        return self.analyticsEditingSessionQueue
+      },
+      getOnboardingEmailsQueue: () => {
+        return self.onboardingEmailsQueue
+      },
+      getAnalyticsUserPropertiesQueue: () => {
+        return self.analyticsUserPropertiesQueue
+      },
     }
     this.backgroundRequest = sinon.stub().yields()
     this.request = sinon.stub().yields()
-    this.AnalyticsManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+    this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': this.settings,
-        '../../infrastructure/FaultTolerantRequest': {
-          backgroundRequest: this.backgroundRequest
-        },
-        '../Errors/Errors': Errors,
-        request: this.request,
-        'logger-sharelatex': {
-          log() {}
-        }
-      }
+        'settings-sharelatex': this.Settings,
+        '../../infrastructure/Queues': this.Queues,
+      },
     })
   })
 
-  describe('checkAnalyticsRequest', function() {
-    it('ignores smoke test user', function(done) {
-      this.settings.smokeTest = { userId: this.fakeUserId }
-      this.AnalyticsManager.identifyUser(this.fakeUserId, '', error => {
-        expect(error).to.not.exist
-        sinon.assert.notCalled(this.request)
-        done()
-      })
+  describe('ignores when', function () {
+    it('user is smoke test user', function () {
+      this.Settings.smokeTest = { userId: this.fakeUserId }
+      this.AnalyticsManager.identifyUser(this.fakeUserId, '')
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
-    it('return error if analytics service is not configured', function(done) {
-      this.settings.apis.analytics = null
-      this.AnalyticsManager.identifyUser(this.fakeUserId, '', error => {
-        expect(error).to.be.instanceof(Errors.ServiceNotConfiguredError)
-        sinon.assert.notCalled(this.request)
-        done()
-      })
+    it('analytics service is disabled', function () {
+      this.Settings.analytics.enabled = false
+      this.AnalyticsManager.identifyUser(this.fakeUserId, '')
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
   })
 
-  describe('makes correct request to analytics', function() {
-    it('identifyUser', function(done) {
+  describe('queues the appropriate message for', function () {
+    it('identifyUser', function () {
       const oldUserId = '456def'
-      this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId, error => {
-        expect(error).to.not.exist
-        sinon.assert.calledWithMatch(this.backgroundRequest, {
-          body: { old_user_id: oldUserId },
-          url: 'analytics.test/user/123abc/identify'
-        })
-        done()
+      this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId)
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
+        userId: this.fakeUserId,
+        oldUserId,
       })
     })
 
-    it('recordEvent', function(done) {
+    it('recordEvent', function () {
       const event = 'fake-event'
-      this.AnalyticsManager.recordEvent(this.fakeUserId, event, null, error => {
-        expect(error).to.not.exist
-        sinon.assert.calledWithMatch(this.backgroundRequest, {
-          body: { event },
-          qs: { fromV2: 1 },
-          url: 'analytics.test/user/123abc/event',
-          timeout: 30000,
-          maxAttempts: 9,
-          backoffBase: 3000,
-          backoffMultiplier: 3
-        })
-        done()
+      this.AnalyticsManager.recordEvent(this.fakeUserId, event, null)
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        event,
+        userId: this.fakeUserId,
+        segmentation: null,
       })
     })
 
-    it('updateEditingSession', function(done) {
+    it('updateEditingSession', function () {
       const projectId = '789ghi'
       const countryCode = 'fr'
       this.AnalyticsManager.updateEditingSession(
         this.fakeUserId,
         projectId,
-        countryCode,
-        error => {
-          expect(error).to.not.exist
-          sinon.assert.calledWithMatch(this.backgroundRequest, {
-            qs: { userId: this.fakeUserId, projectId, countryCode, fromV2: 1 },
-            url: 'analytics.test/editingSession'
-          })
-          done()
-        }
+        countryCode
       )
+      sinon.assert.calledWithMatch(this.analyticsEditingSessionQueue.add, {
+        userId: this.fakeUserId,
+        projectId,
+        countryCode,
+      })
     })
   })
 })

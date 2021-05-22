@@ -30,18 +30,18 @@ module.exports = {
 
     const userId = AuthenticationController.getLoggedInUserId(req)
     url = `/user/${userId}${url}`
-    req.headers['Host'] = Settings.apis.spelling.host
+    req.headers.Host = Settings.apis.spelling.host
     return request({
       url: Settings.apis.spelling.url + url,
       method: req.method,
       headers: req.headers,
       json: req.body,
-      timeout: TEN_SECONDS
+      timeout: TEN_SECONDS,
     })
-      .on('error', function(error) {
+      .on('error', function (error) {
         logger.error({ err: error }, 'Spelling API error')
         return res.status(500).end()
       })
       .pipe(res)
-  }
+  },
 }

@@ -14,6 +14,8 @@
 @import './editor/rich-text.less';
 @import './editor/publish-modal.less';
 @import './editor/outline.less';
+@import './editor/logs.less';
+@import './editor/symbol-palette.less';
 
 @ui-layout-toggler-def-height: 50px;
 @ui-resizer-size: 7px;
@@ -189,6 +191,10 @@
   background-color: #fafafa;
 }
 
+.loading-panel-binary-files {
+  background-color: @gray-lightest;
+}
+
 .error-panel {
   .full-size;
   padding: @line-height-computed;
@@ -224,6 +230,7 @@
     color: @project-rename-link-color;
     padding: 5px;
     border-radius: @border-radius-small;
+    cursor: pointer;
     &:hover {
       text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
       color: @project-rename-link-color-hover;
@@ -493,6 +500,7 @@ CodeMirror
     margin-top: @line-height-computed / 2;
     .scroll-container {
       max-height: 360px;
+      width: 100%;
       background-color: white;
       font-size: 0.8em;
       line-height: 1.1em;
@@ -618,6 +626,10 @@ CodeMirror
 .teaser-title,
 .dropbox-teaser-title {
   margin-top: 0;
+  text-align: center;
+}
+
+.teaser-refresh-label {
   text-align: center;
 }
 

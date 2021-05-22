@@ -1,73 +1,134 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const { assert } = require('chai')
-require('chai').should()
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Notifications/NotificationsBuilder.js'
 )
 
-describe('NotificationsBuilder', function() {
-  const user_id = '123nd3ijdks'
+describe('NotificationsBuilder', function () {
+  const userId = '123nd3ijdks'
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.handler = { createNotification: sinon.stub().callsArgWith(6) }
-
     this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
-    this.body = { id: 1, name: 'stanford', enrolment_ad_html: 'v1 ad content' }
-    const response = { statusCode: 200 }
-    this.request = sinon
-      .stub()
-      .returns(this.stubResponse)
-      .callsArgWith(1, null, response, this.body)
-    return (this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+    this.request = sinon.stub()
+    this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './NotificationsHandler': this.handler,
         'settings-sharelatex': this.settings,
         request: this.request,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
-    }))
+      },
+    })
   })
 
-  it('should call v1 and create affiliation notifications', function(done) {
-    const ip = '192.168.0.1'
-    return this.controller
-      .ipMatcherAffiliation(user_id)
-      .create(ip, callback => {
-        this.request.calledOnce.should.equal(true)
-        const expectedOpts = {
-          university_name: this.body.name,
-          content: this.body.enrolment_ad_html
-        }
-        this.handler.createNotification
-          .calledWith(
-            user_id,
-            `ip-matched-affiliation-${this.body.id}`,
-            'notification_ip_matched_affiliation',
-            expectedOpts
+  describe('dropboxUnlinkedDueToLapsedReconfirmation', function (done) {
+    it('should create the notification', function (done) {
+      this.controller
+        .dropboxUnlinkedDueToLapsedReconfirmation(userId)
+        .create(error => {
+          expect(error).to.not.exist
+          expect(this.handler.createNotification).to.have.been.calledWith(
+            userId,
+            'drobox-unlinked-due-to-lapsed-reconfirmation',
+            'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
+            {},
+            null,
+            true
           )
-          .should.equal(true)
-        return done()
+          done()
+        })
+    })
+    describe('NotificationsHandler error', function () {
+      let anError
+      beforeEach(function () {
+        anError = new Error('oops')
+        this.handler.createNotification.yields(anError)
       })
+      it('should return errors from NotificationsHandler', function (done) {
+        this.controller
+          .dropboxUnlinkedDueToLapsedReconfirmation(userId)
+          .create(error => {
+            expect(error).to.exist
+            expect(error).to.deep.equal(anError)
+            done()
+          })
+      })
+    })
+  })
+
+  describe('ipMatcherAffiliation', function () {
+    describe('with portal and with SSO', function () {
+      beforeEach(function () {
+        this.body = {
+          id: 1,
+          name: 'stanford',
+          enrolment_ad_html: 'v1 ad content',
+          is_university: true,
+          portal_slug: null,
+          sso_enabled: false,
+        }
+        this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
+      })
+
+      it('should call v1 and create affiliation notifications', function (done) {
+        const ip = '192.168.0.1'
+        this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
+          this.request.calledOnce.should.equal(true)
+          const expectedOpts = {
+            institutionId: this.body.id,
+            university_name: this.body.name,
+            content: this.body.enrolment_ad_html,
+            ssoEnabled: false,
+            portalPath: undefined,
+          }
+          this.handler.createNotification
+            .calledWith(
+              userId,
+              `ip-matched-affiliation-${this.body.id}`,
+              'notification_ip_matched_affiliation',
+              expectedOpts
+            )
+            .should.equal(true)
+          done()
+        })
+      })
+    })
+    describe('without portal and without SSO', function () {
+      beforeEach(function () {
+        this.body = {
+          id: 1,
+          name: 'stanford',
+          enrolment_ad_html: 'v1 ad content',
+          is_university: true,
+          portal_slug: 'stanford',
+          sso_enabled: true,
+        }
+        this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
+      })
+
+      it('should call v1 and create affiliation notifications', function (done) {
+        const ip = '192.168.0.1'
+        this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
+          this.request.calledOnce.should.equal(true)
+          const expectedOpts = {
+            institutionId: this.body.id,
+            university_name: this.body.name,
+            content: this.body.enrolment_ad_html,
+            ssoEnabled: true,
+            portalPath: '/edu/stanford',
+          }
+          this.handler.createNotification
+            .calledWith(
+              userId,
+              `ip-matched-affiliation-${this.body.id}`,
+              'notification_ip_matched_affiliation',
+              expectedOpts
+            )
+            .should.equal(true)
+          done()
+        })
+      })
+    })
   })
 })

@@ -11,7 +11,7 @@
  */
 let EditorShareJsCodec
 
-export default (EditorShareJsCodec = {
+export default EditorShareJsCodec = {
   rangeToShareJs(range, lines) {
     let offset = 0
     for (let i = 0; i < lines.length; i++) {
@@ -46,5 +46,5 @@ export default (EditorShareJsCodec = {
       offset -= lines[row].length + 1
     } // + 1 for newline char
     return { row, column: offset }
-  }
-})
+  },
+}

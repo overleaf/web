@@ -1,25 +1,40 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
+
 import MessageList from './message-list'
 import MessageInput from './message-input'
 import InfiniteScroll from './infinite-scroll'
 import Icon from '../../../shared/components/icon'
-import { useTranslation } from 'react-i18next'
+import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useApplicationContext } from '../../../shared/context/application-context'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
+import { useChatContext } from '../context/chat-context'
 
-function ChatPane({
-  atEnd,
-  loading,
-  loadMoreMessages,
-  messages,
-  resetUnreadMessages,
-  sendMessage,
-  userId
-}) {
+function ChatPane() {
+  const { t } = useTranslation()
+
+  const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
+  const { user } = useApplicationContext()
+
+  const {
+    status,
+    messages,
+    initialMessagesLoaded,
+    atEnd,
+    loadInitialMessages,
+    loadMoreMessages,
+    sendMessage,
+    markMessagesAsRead,
+  } = useChatContext()
+
   useEffect(() => {
-    loadMoreMessages()
-  }, [])
+    if (chatIsOpen && !initialMessagesLoaded) {
+      loadInitialMessages()
+    }
+  }, [chatIsOpen, loadInitialMessages, initialMessagesLoaded])
 
-  const shouldDisplayPlaceholder = !loading && messages.length === 0
+  const shouldDisplayPlaceholder = status !== 'pending' && messages.length === 0
 
   const messageContentCount = messages.reduce(
     (acc, { contents }) => acc + contents.length,
@@ -32,21 +47,22 @@ function ChatPane({
         atEnd={atEnd}
         className="messages"
         fetchData={loadMoreMessages}
-        isLoading={loading}
+        isLoading={status === 'pending'}
         itemCount={messageContentCount}
       >
         <div>
-          {loading && <LoadingSpinner />}
+          <h2 className="sr-only">{t('chat')}</h2>
+          {status === 'pending' && <LoadingSpinner />}
           {shouldDisplayPlaceholder && <Placeholder />}
           <MessageList
             messages={messages}
-            userId={userId}
-            resetUnreadMessages={resetUnreadMessages}
+            userId={user.id}
+            resetUnreadMessages={markMessagesAsRead}
           />
         </div>
       </InfiniteScroll>
       <MessageInput
-        resetUnreadMessages={resetUnreadMessages}
+        resetUnreadMessages={markMessagesAsRead}
         sendMessage={sendMessage}
       />
     </aside>
@@ -77,14 +93,4 @@ function Placeholder() {
   )
 }
 
-ChatPane.propTypes = {
-  atEnd: PropTypes.bool,
-  loading: PropTypes.bool,
-  loadMoreMessages: PropTypes.func.isRequired,
-  messages: PropTypes.array.isRequired,
-  resetUnreadMessages: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired
-}
-
-export default ChatPane
+export default withErrorBoundary(ChatPane)

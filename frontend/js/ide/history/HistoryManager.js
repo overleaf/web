@@ -22,11 +22,12 @@ import './controllers/HistoryDiffController'
 import './directives/infiniteScroll'
 let HistoryManager
 
-export default (HistoryManager = (function() {
+export default HistoryManager = (function () {
   HistoryManager = class HistoryManager {
     static initClass() {
       this.prototype.BATCH_SIZE = 10
     }
+
     constructor(ide, $scope) {
       this.ide = ide
       this.$scope = $scope
@@ -81,10 +82,10 @@ export default (HistoryManager = (function() {
             fromV: null,
             toV: null,
             start_ts: null,
-            end_ts: null
-          }
+            end_ts: null,
+          },
         },
-        diff: null
+        diff: null,
       })
     }
 
@@ -108,10 +109,9 @@ export default (HistoryManager = (function() {
         indexOfLastUpdateNotByMe
       ].selectedFrom = true)
     }
+
     fetchNextBatchOfUpdates() {
-      let url = `/project/${this.ide.project_id}/updates?min_count=${
-        this.BATCH_SIZE
-      }`
+      let url = `/project/${this.ide.project_id}/updates?min_count=${this.BATCH_SIZE}`
       if (this.$scope.history.nextBeforeTimestamp != null) {
         url += `&before=${this.$scope.history.nextBeforeTimestamp}`
       }
@@ -134,7 +134,7 @@ export default (HistoryManager = (function() {
         fromV,
         toV,
         start_ts,
-        end_ts
+        end_ts,
       } = this._calculateRangeFromSelection()
 
       if (doc == null) {
@@ -157,7 +157,7 @@ export default (HistoryManager = (function() {
         end_ts,
         doc,
         error: false,
-        pathname: doc.name
+        pathname: doc.name,
       }
 
       if (!doc.deleted) {
@@ -176,7 +176,7 @@ export default (HistoryManager = (function() {
             diff.text = text
             return (diff.highlights = highlights)
           })
-          .catch(function() {
+          .catch(function () {
             diff.loading = false
             return (diff.error = true)
           })
@@ -192,14 +192,12 @@ export default (HistoryManager = (function() {
       const url = `/project/${this.$scope.project_id}/doc/${doc.id}/restore`
       return this.ide.$http.post(url, {
         name: doc.name,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
 
     restoreDiff(diff) {
-      const url = `/project/${this.$scope.project_id}/doc/${
-        diff.doc.id
-      }/version/${diff.fromV}/restore`
+      const url = `/project/${this.$scope.project_id}/doc/${diff.doc.id}/version/${diff.fromV}/restore`
       return this.ide.$http.post(url, { _csrf: window.csrfToken })
     }
 
@@ -233,12 +231,12 @@ export default (HistoryManager = (function() {
         const range = {
           start: {
             row: startRow,
-            column: startColumn
+            column: startColumn,
           },
           end: {
             row: endRow,
-            column: endColumn
-          }
+            column: endColumn,
+          },
         }
 
         if (entry.i != null || entry.d != null) {
@@ -250,7 +248,7 @@ export default (HistoryManager = (function() {
               highlight: range,
               hue: ColorManager.getHueForUserId(
                 entry.meta.user != null ? entry.meta.user.id : undefined
-              )
+              ),
             })
           } else if (entry.d != null) {
             highlights.push({
@@ -258,7 +256,7 @@ export default (HistoryManager = (function() {
               strikeThrough: range,
               hue: ColorManager.getHueForUserId(
                 entry.meta.user != null ? entry.meta.user.id : undefined
-              )
+              ),
             })
           }
         }
@@ -275,18 +273,18 @@ export default (HistoryManager = (function() {
         this.$scope.history.updates.length - 1
       ]
 
-      for (let update of Array.from(updates)) {
+      for (const update of Array.from(updates)) {
         update.pathnames = [] // Used for display
         const object = update.docs || {}
-        for (let doc_id in object) {
+        for (const doc_id in object) {
           const doc = object[doc_id]
           doc.entity = this.ide.fileTreeManager.findEntityById(doc_id, {
-            includeDeleted: true
+            includeDeleted: true,
           })
           update.pathnames.push(doc.entity.name)
         }
 
-        for (let user of Array.from(update.meta.users || [])) {
+        for (const user of Array.from(update.meta.users || [])) {
           if (user != null) {
             user.hue = ColorManager.getHueForUserId(user.id)
           }
@@ -324,10 +322,10 @@ export default (HistoryManager = (function() {
           ? this.$scope.history.selection.doc.id
           : undefined
 
-      for (let update of Array.from(
+      for (const update of Array.from(
         this.$scope.history.selection.updates || []
       )) {
-        for (let doc_id in update.docs) {
+        for (const doc_id in update.docs) {
           const doc = update.docs[doc_id]
           if (doc_id === selected_doc_id) {
             if (fromV != null && toV != null) {
@@ -355,7 +353,7 @@ export default (HistoryManager = (function() {
     _selectDocFromUpdates() {
       let doc, doc_id
       const affected_docs = {}
-      for (let update of Array.from(this.$scope.history.selection.updates)) {
+      for (const update of Array.from(this.$scope.history.selection.updates)) {
         for (doc_id in update.docs) {
           doc = update.docs[doc_id]
           affected_docs[doc_id] = doc.entity
@@ -366,10 +364,11 @@ export default (HistoryManager = (function() {
       if (selected_doc != null && affected_docs[selected_doc.id] != null) {
         // Selected doc is already open
       } else {
-        for (doc_id in affected_docs) {
+        const doc_ids = Object.keys(affected_docs)
+        if (doc_ids.length > 0) {
+          const doc_id = doc_ids[0]
           doc = affected_docs[doc_id]
           selected_doc = doc
-          break
         }
       }
 
@@ -378,7 +377,7 @@ export default (HistoryManager = (function() {
     }
 
     _updateContainsUserId(update, user_id) {
-      for (let user of Array.from(update.meta.users)) {
+      for (const user of Array.from(update.meta.users)) {
         if ((user != null ? user.id : undefined) === user_id) {
           return true
         }
@@ -388,4 +387,4 @@ export default (HistoryManager = (function() {
   }
   HistoryManager.initClass()
   return HistoryManager
-})())
+})()

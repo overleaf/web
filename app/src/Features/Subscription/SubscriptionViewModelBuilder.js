@@ -1,34 +1,17 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Settings = require('settings-sharelatex')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
-const LimitationsManager = require('./LimitationsManager')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const PublishersGetter = require('../Publishers/PublishersGetter')
 const sanitizeHtml = require('sanitize-html')
-const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const async = require('async')
+const SubscriptionHelper = require('./SubscriptionHelper')
 
-const buildHostedLink = function(recurlySubscription, type) {
+function buildHostedLink(recurlySubscription, type) {
   const recurlySubdomain = Settings.apis.recurly.subdomain
   const hostedLoginToken = recurlySubscription.account.hosted_login_token
   let path = ''
@@ -41,54 +24,48 @@ const buildHostedLink = function(recurlySubscription, type) {
       recurlySubdomain,
       '.recurly.com/account/',
       path,
-      hostedLoginToken
+      hostedLoginToken,
     ].join('')
   }
 }
 
 module.exports = {
   buildUsersSubscriptionViewModel(user, callback) {
-    if (callback == null) {
-      callback = function(error, data) {}
-    }
-    return async.auto(
+    async.auto(
       {
         personalSubscription(cb) {
-          return SubscriptionLocator.getUsersSubscription(user, cb)
+          SubscriptionLocator.getUsersSubscription(user, cb)
         },
         recurlySubscription: [
           'personalSubscription',
-          function(cb, { personalSubscription }) {
+          (cb, { personalSubscription }) => {
             if (
-              (personalSubscription != null
-                ? personalSubscription.recurlySubscription_id
-                : undefined) == null ||
-              (personalSubscription != null
-                ? personalSubscription.recurlySubscription_id
-                : undefined) === ''
+              personalSubscription == null ||
+              personalSubscription.recurlySubscription_id == null ||
+              personalSubscription.recurlySubscription_id === ''
             ) {
               return cb(null, null)
             }
-            return RecurlyWrapper.getSubscription(
+            RecurlyWrapper.getSubscription(
               personalSubscription.recurlySubscription_id,
               { includeAccount: true },
               cb
             )
-          }
+          },
         ],
         recurlyCoupons: [
           'recurlySubscription',
-          function(cb, { recurlySubscription }) {
+          (cb, { recurlySubscription }) => {
             if (!recurlySubscription) {
               return cb(null, null)
             }
             const accountId = recurlySubscription.account.account_code
-            return RecurlyWrapper.getAccountActiveCoupons(accountId, cb)
-          }
+            RecurlyWrapper.getAccountActiveCoupons(accountId, cb)
+          },
         ],
         plan: [
           'personalSubscription',
-          function(cb, { personalSubscription }) {
+          (cb, { personalSubscription }) => {
             if (personalSubscription == null) {
               return cb()
             }
@@ -98,44 +75,42 @@ module.exports = {
             if (plan == null) {
               return cb(
                 new Error(
-                  `No plan found for planCode '${
-                    personalSubscription.planCode
-                  }'`
+                  `No plan found for planCode '${personalSubscription.planCode}'`
                 )
               )
             }
-            return cb(null, plan)
-          }
+            cb(null, plan)
+          },
         ],
         memberGroupSubscriptions(cb) {
-          return SubscriptionLocator.getMemberSubscriptions(user, cb)
+          SubscriptionLocator.getMemberSubscriptions(user, cb)
         },
         managedGroupSubscriptions(cb) {
-          return SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
+          SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
         },
         confirmedMemberAffiliations(cb) {
-          return InstitutionsGetter.getConfirmedAffiliations(user._id, cb)
+          InstitutionsGetter.getConfirmedAffiliations(user._id, cb)
         },
         managedInstitutions(cb) {
-          return InstitutionsGetter.getManagedInstitutions(user._id, cb)
+          InstitutionsGetter.getManagedInstitutions(user._id, cb)
         },
         managedPublishers(cb) {
-          return PublishersGetter.getManagedPublishers(user._id, cb)
+          PublishersGetter.getManagedPublishers(user._id, cb)
         },
         v1SubscriptionStatus(cb) {
-          return V1SubscriptionManager.getSubscriptionStatusFromV1(
+          V1SubscriptionManager.getSubscriptionStatusFromV1(
             user._id,
-            function(error, status, v1Id) {
-              if (error != null) {
+            (error, status, v1Id) => {
+              if (error) {
                 return cb(error)
               }
-              return cb(null, status)
+              cb(null, status)
             }
           )
-        }
+        },
       },
-      function(err, results) {
-        if (err != null) {
+      (err, results) => {
+        if (err) {
           return callback(err)
         }
         let {
@@ -148,7 +123,7 @@ module.exports = {
           v1SubscriptionStatus,
           recurlySubscription,
           recurlyCoupons,
-          plan
+          plan,
         } = results
         if (memberGroupSubscriptions == null) {
           memberGroupSubscriptions = []
@@ -170,9 +145,8 @@ module.exports = {
         }
 
         if (
-          (personalSubscription != null
-            ? personalSubscription.toObject
-            : undefined) != null
+          personalSubscription &&
+          typeof personalSubscription.toObject === 'function'
         ) {
           // Downgrade from Mongoose object, so we can add a recurly and plan attribute
           personalSubscription = personalSubscription.toObject()
@@ -182,55 +156,108 @@ module.exports = {
           personalSubscription.plan = plan
         }
 
-        if (personalSubscription != null && recurlySubscription != null) {
-          const tax =
-            (recurlySubscription != null
-              ? recurlySubscription.tax_in_cents
-              : undefined) || 0
+        if (personalSubscription && recurlySubscription) {
+          const tax = recurlySubscription.tax_in_cents || 0
+          // Some plans allow adding more seats than the base plan provides.
+          // This is recorded as a subscription add on.
+          // Note: tax_in_cents already includes the tax for any addon.
+          let addOnPrice = 0
+          let additionalLicenses = 0
+          if (
+            plan.membersLimitAddOn &&
+            Array.isArray(recurlySubscription.subscription_add_ons)
+          ) {
+            recurlySubscription.subscription_add_ons.forEach(addOn => {
+              if (addOn.add_on_code === plan.membersLimitAddOn) {
+                addOnPrice += addOn.quantity * addOn.unit_amount_in_cents
+                additionalLicenses += addOn.quantity
+              }
+            })
+          }
+          const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
           personalSubscription.recurly = {
             tax,
-            taxRate: parseFloat(
-              __guard__(
-                recurlySubscription != null
-                  ? recurlySubscription.tax_rate
-                  : undefined,
-                x => x._
-              )
-            ),
+            taxRate: recurlySubscription.tax_rate
+              ? parseFloat(recurlySubscription.tax_rate._)
+              : 0,
             billingDetailsLink: buildHostedLink(
               recurlySubscription,
               'billingDetails'
             ),
             accountManagementLink: buildHostedLink(recurlySubscription),
-            price: SubscriptionFormatters.formatPrice(
-              (recurlySubscription != null
-                ? recurlySubscription.unit_amount_in_cents
-                : undefined) + tax,
-              recurlySubscription != null
-                ? recurlySubscription.currency
-                : undefined
-            ),
+            additionalLicenses,
+            totalLicenses,
             nextPaymentDueAt: SubscriptionFormatters.formatDate(
-              recurlySubscription != null
-                ? recurlySubscription.current_period_ends_at
-                : undefined
+              recurlySubscription.current_period_ends_at
             ),
             currency: recurlySubscription.currency,
             state: recurlySubscription.state,
             trialEndsAtFormatted: SubscriptionFormatters.formatDate(
-              recurlySubscription != null
-                ? recurlySubscription.trial_ends_at
-                : undefined
+              recurlySubscription.trial_ends_at
             ),
             trial_ends_at: recurlySubscription.trial_ends_at,
             activeCoupons: recurlyCoupons,
-            account: recurlySubscription.account
+            account: recurlySubscription.account,
+          }
+          if (recurlySubscription.pending_subscription) {
+            const pendingPlan = PlansLocator.findLocalPlanInSettings(
+              recurlySubscription.pending_subscription.plan.plan_code
+            )
+            if (pendingPlan == null) {
+              return callback(
+                new Error(
+                  `No plan found for planCode '${personalSubscription.planCode}'`
+                )
+              )
+            }
+            let pendingAdditionalLicenses = 0
+            let pendingAddOnTax = 0
+            let pendingAddOnPrice = 0
+            if (recurlySubscription.pending_subscription.subscription_add_ons) {
+              if (
+                pendingPlan.membersLimitAddOn &&
+                Array.isArray(
+                  recurlySubscription.pending_subscription.subscription_add_ons
+                )
+              ) {
+                recurlySubscription.pending_subscription.subscription_add_ons.forEach(
+                  addOn => {
+                    if (addOn.add_on_code === pendingPlan.membersLimitAddOn) {
+                      pendingAddOnPrice +=
+                        addOn.quantity * addOn.unit_amount_in_cents
+                      pendingAdditionalLicenses += addOn.quantity
+                    }
+                  }
+                )
+              }
+              // Need to calculate tax ourselves as we don't get tax amounts for pending subs
+              pendingAddOnTax =
+                personalSubscription.recurly.taxRate * pendingAddOnPrice
+            }
+            const pendingSubscriptionTax =
+              personalSubscription.recurly.taxRate *
+              recurlySubscription.pending_subscription.unit_amount_in_cents
+            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
+              recurlySubscription.pending_subscription.unit_amount_in_cents +
+                pendingAddOnPrice +
+                pendingAddOnTax +
+                pendingSubscriptionTax,
+              recurlySubscription.currency
+            )
+            const pendingTotalLicenses =
+              (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
+            personalSubscription.recurly.pendingAdditionalLicenses = pendingAdditionalLicenses
+            personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
+            personalSubscription.pendingPlan = pendingPlan
+          } else {
+            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
+              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+              recurlySubscription.currency
+            )
           }
         }
 
-        for (let memberGroupSubscription of Array.from(
-          memberGroupSubscriptions
-        )) {
+        for (const memberGroupSubscription of memberGroupSubscriptions) {
           if (memberGroupSubscription.teamNotice) {
             memberGroupSubscription.teamNotice = sanitizeHtml(
               memberGroupSubscription.teamNotice
@@ -238,26 +265,42 @@ module.exports = {
           }
         }
 
-        return callback(null, {
+        callback(null, {
           personalSubscription,
           managedGroupSubscriptions,
           memberGroupSubscriptions,
           confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
-          v1SubscriptionStatus
+          v1SubscriptionStatus,
         })
       }
     )
   },
 
-  buildPlansList() {
+  buildPlansList(currentPlan) {
     const { plans } = Settings
 
     const allPlans = {}
-    plans.forEach(plan => (allPlans[plan.planCode] = plan))
+    plans.forEach(plan => {
+      allPlans[plan.planCode] = plan
+    })
 
     const result = { allPlans }
+
+    if (currentPlan) {
+      result.planCodesChangingAtTermEnd = _.pluck(
+        _.filter(plans, plan => {
+          if (!plan.hideFromUsers) {
+            return SubscriptionHelper.shouldPlanChangeAtTermEnd(
+              currentPlan,
+              plan
+            )
+          }
+        }),
+        'planCode'
+      )
+    }
 
     result.studentAccounts = _.filter(
       plans,
@@ -292,11 +335,5 @@ module.exports = {
     )
 
     return result
-  }
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
+  },
 }

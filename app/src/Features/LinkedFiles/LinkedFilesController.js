@@ -33,7 +33,7 @@ const {
   NotOriginalImporterError,
   FeatureNotAvailableError,
   RemoteServiceError,
-  FileCannotRefreshError
+  FileCannotRefreshError,
 } = require('./LinkedFilesErrors')
 const Modules = require('../../infrastructure/Modules')
 
@@ -42,13 +42,18 @@ module.exports = LinkedFilesController = {
     {
       url: require('./UrlAgent'),
       project_file: require('./ProjectFileAgent'),
-      project_output_file: require('./ProjectOutputFileAgent')
+      project_output_file: require('./ProjectOutputFileAgent'),
     },
     Modules.linkedFileAgentsIncludes()
   ),
 
   _getAgent(provider) {
-    if (!LinkedFilesController.Agents.hasOwnProperty(provider)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        LinkedFilesController.Agents,
+        provider
+      )
+    ) {
       return null
     }
     if (!Array.from(Settings.enabledLinkedFileTypes).includes(provider)) {
@@ -75,7 +80,7 @@ module.exports = LinkedFilesController = {
       name,
       parent_folder_id,
       user_id,
-      function(err, newFileId) {
+      function (err, newFileId) {
         if (err != null) {
           return LinkedFilesController.handleError(err, req, res, next)
         }
@@ -88,53 +93,50 @@ module.exports = LinkedFilesController = {
     const { project_id, file_id } = req.params
     const user_id = AuthenticationController.getLoggedInUserId(req)
 
-    return LinkedFilesHandler.getFileById(project_id, file_id, function(
-      err,
-      file,
-      path,
-      parentFolder
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      if (file == null) {
-        return res.sendStatus(404)
-      }
-      const { name } = file
-      const { linkedFileData } = file
-      if (
-        linkedFileData == null ||
-        (linkedFileData != null ? linkedFileData.provider : undefined) == null
-      ) {
-        return res.sendStatus(409)
-      }
-      const { provider } = linkedFileData
-      const parent_folder_id = parentFolder._id
-      const Agent = LinkedFilesController._getAgent(provider)
-      if (Agent == null) {
-        return res.sendStatus(400)
-      }
-
-      return Agent.refreshLinkedFile(
-        project_id,
-        linkedFileData,
-        name,
-        parent_folder_id,
-        user_id,
-        function(err, newFileId) {
-          if (err != null) {
-            return LinkedFilesController.handleError(err, req, res, next)
-          }
-          return res.json({ new_file_id: newFileId })
+    return LinkedFilesHandler.getFileById(
+      project_id,
+      file_id,
+      function (err, file, path, parentFolder) {
+        if (err != null) {
+          return next(err)
         }
-      )
-    })
+        if (file == null) {
+          return res.sendStatus(404)
+        }
+        const { name } = file
+        const { linkedFileData } = file
+        if (
+          linkedFileData == null ||
+          (linkedFileData != null ? linkedFileData.provider : undefined) == null
+        ) {
+          return res.sendStatus(409)
+        }
+        const { provider } = linkedFileData
+        const parent_folder_id = parentFolder._id
+        const Agent = LinkedFilesController._getAgent(provider)
+        if (Agent == null) {
+          return res.sendStatus(400)
+        }
+
+        return Agent.refreshLinkedFile(
+          project_id,
+          linkedFileData,
+          name,
+          parent_folder_id,
+          user_id,
+          function (err, newFileId) {
+            if (err != null) {
+              return LinkedFilesController.handleError(err, req, res, next)
+            }
+            return res.json({ new_file_id: newFileId })
+          }
+        )
+      }
+    )
   },
 
   handleError(error, req, res, next) {
-    if (error instanceof BadDataError) {
-      return res.status(400).send('The submitted data is not valid')
-    } else if (error instanceof AccessDeniedError) {
+    if (error instanceof AccessDeniedError) {
       return res.status(403).send('You do not have access to this project')
     } else if (error instanceof BadDataError) {
       return res.status(400).send('The submitted data is not valid')
@@ -156,9 +158,7 @@ module.exports = LinkedFilesController = {
       return res
         .status(422)
         .send(
-          `Your URL could not be reached (${
-            error.statusCode
-          } status code). Please check it and try again.`
+          `Your URL could not be reached (${error.statusCode} status code). Please check it and try again.`
         )
     } else if (error instanceof InvalidUrlError) {
       return res
@@ -179,5 +179,5 @@ module.exports = LinkedFilesController = {
     } else {
       return next(error)
     }
-  }
+  },
 }

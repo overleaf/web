@@ -20,12 +20,20 @@ const Path = require('path')
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 
 const User = require('./helpers/User')
-const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
-const MockDocstoreApi = require('./helpers/MockDocstoreApi')
-const MockFileStoreApi = require('./helpers/MockFileStoreApi')
+const MockProjectHistoryApiClass = require('./mocks/MockProjectHistoryApi')
+const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
+const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
 
-describe('RestoringFiles', function() {
-  beforeEach(function(done) {
+let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi
+
+before(function () {
+  MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
+  MockDocstoreApi = MockDocstoreApiClass.instance()
+  MockFilestoreApi = MockFilestoreApiClass.instance()
+})
+
+describe('RestoringFiles', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {
@@ -45,8 +53,8 @@ describe('RestoringFiles', function() {
     })
   })
 
-  describe('restoring a deleted doc', function() {
-    beforeEach(function(done) {
+  describe('restoring a deleted doc', function () {
+    beforeEach(function (done) {
       return this.owner.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -58,7 +66,7 @@ describe('RestoringFiles', function() {
         return this.owner.request(
           {
             method: 'DELETE',
-            url: `/project/${this.project_id}/doc/${this.doc._id}`
+            url: `/project/${this.project_id}/doc/${this.doc._id}`,
           },
           (error, response, body) => {
             if (error != null) {
@@ -70,8 +78,8 @@ describe('RestoringFiles', function() {
                 method: 'POST',
                 url: `/project/${this.project_id}/doc/${this.doc._id}/restore`,
                 json: {
-                  name: 'main.tex'
-                }
+                  name: 'main.tex',
+                },
               },
               (error, response, body) => {
                 if (error != null) {
@@ -88,7 +96,7 @@ describe('RestoringFiles', function() {
       })
     })
 
-    it('should have restored the doc', function(done) {
+    it('should have restored the doc', function (done) {
       return this.owner.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -109,9 +117,9 @@ describe('RestoringFiles', function() {
     })
   })
 
-  describe('restoring from v2 history', function() {
-    describe('restoring a text file', function() {
-      beforeEach(function(done) {
+  describe('restoring from v2 history', function () {
+    describe('restoring a text file', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -124,8 +132,8 @@ describe('RestoringFiles', function() {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'foo.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -137,7 +145,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created a doc', function(done) {
+      it('should have created a doc', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -153,8 +161,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring a binary file', function() {
-      beforeEach(function(done) {
+    describe('restoring a binary file', function () {
+      beforeEach(function (done) {
         this.pngData = fs.readFileSync(
           Path.resolve(__dirname, '../files/1pixel.png'),
           'binary'
@@ -171,8 +179,8 @@ describe('RestoringFiles', function() {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'image.png',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -184,7 +192,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created a file', function(done) {
+      it('should have created a file', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -193,15 +201,15 @@ describe('RestoringFiles', function() {
             project.rootFolder[0].fileRefs,
             file => file.name === 'image.png'
           )
-          file = MockFileStoreApi.files[this.project_id][file._id]
+          file = MockFilestoreApi.files[this.project_id][file._id]
           expect(file.content).to.equal(this.pngData)
           return done()
         })
       })
     })
 
-    describe('restoring to a directory that exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a directory that exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -212,8 +220,8 @@ describe('RestoringFiles', function() {
           {
             uri: `project/${this.project_id}/folder`,
             json: {
-              name: 'foldername'
-            }
+              name: 'foldername',
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -226,8 +234,8 @@ describe('RestoringFiles', function() {
                 url: `/project/${this.project_id}/restore_file`,
                 json: {
                   pathname: 'foldername/foo2.tex',
-                  version: 42
-                }
+                  version: 42,
+                },
               },
               (error, response, body) => {
                 if (error != null) {
@@ -241,7 +249,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the doc in the named folder', function(done) {
+      it('should have created the doc in the named folder', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -258,8 +266,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring to a directory that no longer exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a directory that no longer exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -272,8 +280,8 @@ describe('RestoringFiles', function() {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'nothere/foo3.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -285,7 +293,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the folder and restored the doc to it', function(done) {
+      it('should have created the folder and restored the doc to it', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -303,8 +311,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring to a filename that already exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a filename that already exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -317,8 +325,8 @@ describe('RestoringFiles', function() {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'main.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -330,7 +338,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the doc in the root folder', function(done) {
+      it('should have created the doc in the root folder', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error

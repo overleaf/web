@@ -1,51 +1,39 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Subscription/FeaturesUpdater'
-const { assert } = require('chai')
 const { ObjectId } = require('mongodb')
 
-describe('FeaturesUpdater', function() {
-  beforeEach(function() {
+describe('FeaturesUpdater', function () {
+  beforeEach(function () {
     this.user_id = ObjectId().toString()
 
-    return (this.FeaturesUpdater = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
+    this.FeaturesUpdater = SandboxedModule.require(modulePath, {
       requires: {
         './UserFeaturesUpdater': (this.UserFeaturesUpdater = {}),
         './SubscriptionLocator': (this.SubscriptionLocator = {}),
         './PlansLocator': (this.PlansLocator = {}),
-        'logger-sharelatex': {
-          log() {},
-          warn() {}
-        },
         'settings-sharelatex': (this.Settings = {}),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {}),
-        '../User/UserGetter': (this.UserGetter = {})
-      }
-    }))
+        '../User/UserGetter': (this.UserGetter = {}),
+        '../../infrastructure/Modules': (this.Modules = {
+          hooks: { fire: sinon.stub() },
+        }),
+      },
+    })
   })
 
-  describe('refreshFeatures', function() {
-    beforeEach(function() {
-      this.UserFeaturesUpdater.updateFeatures = sinon.stub().yields()
+  describe('refreshFeatures', function () {
+    beforeEach(function () {
+      this.user = {
+        _id: this.user_id,
+        features: {},
+      }
+      this.UserFeaturesUpdater.updateFeatures = sinon
+        .stub()
+        .yields(null, { some: 'features' }, true)
       this.FeaturesUpdater._getIndividualFeatures = sinon
         .stub()
         .yields(null, { individual: 'features' })
@@ -64,346 +52,382 @@ describe('FeaturesUpdater', function() {
       this.FeaturesUpdater._mergeFeatures = sinon
         .stub()
         .returns({ merged: 'features' })
-      this.UserGetter.getUser = sinon.stub().yields(null, {})
-      return (this.callback = sinon.stub())
+      this.UserGetter.getUser = sinon.stub().yields(null, this.user)
+      this.callback = sinon.stub()
     })
 
-    describe('normally', function() {
-      beforeEach(function() {
-        return this.FeaturesUpdater.refreshFeatures(this.user_id, this.callback)
+    it('should return features and featuresChanged', function () {
+      this.FeaturesUpdater.refreshFeatures(
+        this.user_id,
+        'test',
+        (err, features, featuresChanged) => {
+          expect(err).to.not.exist
+          expect(features).to.exist
+          expect(featuresChanged).to.exist
+        }
+      )
+    })
+
+    describe('normally', function () {
+      beforeEach(function () {
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
       })
 
-      it('should get the individual features', function() {
-        return this.FeaturesUpdater._getIndividualFeatures
+      it('should get the individual features', function () {
+        this.FeaturesUpdater._getIndividualFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should get the group features', function() {
-        return this.FeaturesUpdater._getGroupFeatureSets
+      it('should get the group features', function () {
+        this.FeaturesUpdater._getGroupFeatureSets
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should get the institution features', function() {
-        return this.InstitutionsFeatures.getInstitutionsFeatures
+      it('should get the institution features', function () {
+        this.InstitutionsFeatures.getInstitutionsFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should get the v1 features', function() {
-        return this.FeaturesUpdater._getV1Features
+      it('should get the v1 features', function () {
+        this.FeaturesUpdater._getV1Features
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should get the bonus features', function() {
-        return this.ReferalFeatures.getBonusFeatures
+      it('should get the bonus features', function () {
+        this.ReferalFeatures.getBonusFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should merge from the default features', function() {
-        return this.FeaturesUpdater._mergeFeatures
+      it('should merge from the default features', function () {
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(this.Settings.defaultFeatures)
           .should.equal(true)
       })
 
-      it('should merge the individual features', function() {
-        return this.FeaturesUpdater._mergeFeatures
+      it('should merge the individual features', function () {
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { individual: 'features' })
           .should.equal(true)
       })
 
-      it('should merge the group features', function() {
+      it('should merge the group features', function () {
         this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { group: 'features' })
           .should.equal(true)
-        return this.FeaturesUpdater._mergeFeatures
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { group: 'features2' })
           .should.equal(true)
       })
 
-      it('should merge the institutions features', function() {
-        return this.FeaturesUpdater._mergeFeatures
+      it('should merge the institutions features', function () {
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { institutions: 'features' })
           .should.equal(true)
       })
 
-      it('should merge the v1 features', function() {
-        return this.FeaturesUpdater._mergeFeatures
+      it('should merge the v1 features', function () {
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { v1: 'features' })
           .should.equal(true)
       })
 
-      it('should merge the bonus features', function() {
-        return this.FeaturesUpdater._mergeFeatures
+      it('should merge the bonus features', function () {
+        this.FeaturesUpdater._mergeFeatures
           .calledWith(sinon.match.any, { bonus: 'features' })
           .should.equal(true)
       })
 
-      it('should update the user with the merged features', function() {
-        return this.UserFeaturesUpdater.updateFeatures
+      it('should update the user with the merged features', function () {
+        this.UserFeaturesUpdater.updateFeatures
           .calledWith(this.user_id, { merged: 'features' })
+          .should.equal(true)
+      })
+    })
+    describe('when losing dropbox feature', function () {
+      beforeEach(function () {
+        this.user = {
+          _id: this.user_id,
+          features: { dropbox: true },
+        }
+        this.UserGetter.getUser = sinon.stub().yields(null, this.user)
+        this.FeaturesUpdater._mergeFeatures = sinon
+          .stub()
+          .returns({ dropbox: false })
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
+      })
+      it('should fire module hook to unlink dropbox', function () {
+        this.Modules.hooks.fire
+          .calledWith('removeDropbox', this.user._id, 'test')
           .should.equal(true)
       })
     })
   })
 
-  describe('_mergeFeatures', function() {
-    it('should prefer priority over standard for compileGroup', function() {
+  describe('_mergeFeatures', function () {
+    it('should prefer priority over standard for compileGroup', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           },
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           },
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           },
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
-      return expect(
+      expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           },
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'standard'
+        compileGroup: 'standard',
       })
     })
 
-    it('should prefer -1 over any other for collaborators', function() {
+    it('should prefer -1 over any other for collaborators', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: -1
+            collaborators: -1,
           },
           {
-            collaborators: 10
+            collaborators: 10,
           }
         )
       ).to.deep.equal({
-        collaborators: -1
+        collaborators: -1,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: 10
+            collaborators: 10,
           },
           {
-            collaborators: -1
+            collaborators: -1,
           }
         )
       ).to.deep.equal({
-        collaborators: -1
+        collaborators: -1,
       })
-      return expect(
+      expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: 4
+            collaborators: 4,
           },
           {
-            collaborators: 10
+            collaborators: 10,
           }
         )
       ).to.deep.equal({
-        collaborators: 10
+        collaborators: 10,
       })
     })
 
-    it('should prefer the higher of compileTimeout', function() {
+    it('should prefer the higher of compileTimeout', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileTimeout: 20
+            compileTimeout: 20,
           },
           {
-            compileTimeout: 10
+            compileTimeout: 10,
           }
         )
       ).to.deep.equal({
-        compileTimeout: 20
+        compileTimeout: 20,
       })
-      return expect(
+      expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileTimeout: 10
+            compileTimeout: 10,
           },
           {
-            compileTimeout: 20
+            compileTimeout: 20,
           }
         )
       ).to.deep.equal({
-        compileTimeout: 20
+        compileTimeout: 20,
       })
     })
 
-    it('should prefer the true over false for other keys', function() {
+    it('should prefer the true over false for other keys', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: true
+            github: true,
           },
           {
-            github: false
+            github: false,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: false
+            github: false,
           },
           {
-            github: true
+            github: true,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: true
+            github: true,
           },
           {
-            github: true
+            github: true,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
-      return expect(
+      expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: false
+            github: false,
           },
           {
-            github: false
+            github: false,
           }
         )
       ).to.deep.equal({
-        github: false
+        github: false,
       })
     })
   })
 
-  describe('doSyncFromV1', function() {
-    beforeEach(function() {
+  describe('doSyncFromV1', function () {
+    beforeEach(function () {
       this.v1UserId = 1
       this.user = {
         _id: this.user_id,
         email: 'user@example.com',
         overleaf: {
-          id: this.v1UserId
-        }
+          id: this.v1UserId,
+        },
       }
 
       this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
       this.FeaturesUpdater.refreshFeatures = sinon.stub().yields(null)
-      return (this.call = cb => {
-        return this.FeaturesUpdater.doSyncFromV1(this.v1UserId, cb)
-      })
+      this.call = cb => {
+        this.FeaturesUpdater.doSyncFromV1(this.v1UserId, cb)
+      }
     })
 
-    describe('when all goes well', function() {
-      it('should call getUser', function(done) {
-        return this.call(() => {
+    describe('when all goes well', function () {
+      it('should call getUser', function (done) {
+        this.call(() => {
           expect(this.UserGetter.getUser.callCount).to.equal(1)
           expect(
             this.UserGetter.getUser.calledWith({ 'overleaf.id': this.v1UserId })
           ).to.equal(true)
-          return done()
+          done()
         })
       })
 
-      it('should call refreshFeatures', function(done) {
-        return this.call(() => {
+      it('should call refreshFeatures', function (done) {
+        this.call(() => {
           expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(1)
           expect(
             this.FeaturesUpdater.refreshFeatures.calledWith(this.user_id)
           ).to.equal(true)
-          return done()
+          done()
         })
       })
 
-      it('should not produce an error', function(done) {
-        return this.call(err => {
+      it('should not produce an error', function (done) {
+        this.call(err => {
           expect(err).to.not.exist
-          return done()
+          done()
         })
       })
     })
 
-    describe('when getUser produces an error', function() {
-      beforeEach(function() {
-        return (this.UserGetter.getUser = sinon
+    describe('when getUser produces an error', function () {
+      beforeEach(function () {
+        this.UserGetter.getUser = sinon
           .stub()
-          .callsArgWith(2, new Error('woops')))
+          .callsArgWith(2, new Error('woops'))
       })
 
-      it('should not call refreshFeatures', function() {
+      it('should not call refreshFeatures', function () {
         expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(0)
       })
 
-      it('should produce an error', function(done) {
-        return this.call(err => {
+      it('should produce an error', function (done) {
+        this.call(err => {
           expect(err).to.exist
-          return done()
+          done()
         })
       })
     })
 
-    describe('when getUser does not find a user', function() {
-      beforeEach(function() {
-        return (this.UserGetter.getUser = sinon
-          .stub()
-          .callsArgWith(2, null, null))
+    describe('when getUser does not find a user', function () {
+      beforeEach(function () {
+        this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
       })
 
-      it('should not call refreshFeatures', function(done) {
-        return this.call(() => {
+      it('should not call refreshFeatures', function (done) {
+        this.call(() => {
           expect(this.FeaturesUpdater.refreshFeatures.callCount).to.equal(0)
-          return done()
+          done()
         })
       })
 
-      it('should not produce an error', function(done) {
-        return this.call(err => {
+      it('should not produce an error', function (done) {
+        this.call(err => {
           expect(err).to.not.exist
-          return done()
+          done()
         })
       })
     })

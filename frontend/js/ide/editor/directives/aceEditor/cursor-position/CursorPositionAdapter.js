@@ -12,7 +12,7 @@
 import EditorShareJsCodec from '../../../EditorShareJsCodec'
 let CursorPositionAdapter
 
-export default (CursorPositionAdapter = class CursorPositionAdapter {
+export default CursorPositionAdapter = class CursorPositionAdapter {
   constructor(editor) {
     this.editor = editor
   }
@@ -46,11 +46,8 @@ export default (CursorPositionAdapter = class CursorPositionAdapter {
   }
 
   gotoOffset(offset) {
-    const lines = this.editor
-      .getSession()
-      .getDocument()
-      .getAllLines()
+    const lines = this.editor.getSession().getDocument().getAllLines()
     const position = EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
     return this.gotoLine(position.row + 1, position.column)
   }
-})
+}

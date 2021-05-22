@@ -5,7 +5,7 @@ const { ObjectId } = Schema
 
 const EXPIRY_IN_SECONDS = 60 * 60 * 24 * 30
 
-const ExpiryDate = function() {
+const ExpiryDate = function () {
   const timestamp = new Date()
   timestamp.setSeconds(timestamp.getSeconds() + EXPIRY_IN_SECONDS)
   return timestamp
@@ -22,11 +22,11 @@ const ProjectInviteSchema = new Schema(
     expires: {
       type: Date,
       default: ExpiryDate,
-      index: { expireAfterSeconds: 10 }
-    }
+      index: { expireAfterSeconds: 10 },
+    },
   },
   {
-    collection: 'projectInvites'
+    collection: 'projectInvites',
   }
 )
 

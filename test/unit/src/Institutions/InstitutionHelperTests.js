@@ -5,59 +5,59 @@ const InstitutionsHelper = require(path.join(
   '/../../../../app/src/Features/Institutions/InstitutionsHelper'
 ))
 
-describe('InstitutionsHelper', function() {
-  describe('emailHasLicence', function() {
-    it('returns licence', function() {
+describe('InstitutionsHelper', function () {
+  describe('emailHasLicence', function () {
+    it('returns licence', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.true
     })
 
-    it('returns false if licence is free', function() {
+    it('returns false if licence is free', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: 'free'
-        }
+          licence: 'free',
+        },
       })
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if licence is null', function() {
+    it('returns false if licence is null', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: null
-        }
+          licence: null,
+        },
       })
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if institution is not confirmed', function() {
+    it('returns false if institution is not confirmed', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: false },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if email is not confirmed', function() {
+    it('returns false if email is not confirmed', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: null,
         affiliation: {
           institution: { confirmed: true },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.false
     })

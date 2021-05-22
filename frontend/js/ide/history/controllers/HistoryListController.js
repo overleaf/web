@@ -16,12 +16,12 @@ import _ from 'lodash'
  */
 import App from '../../../base'
 import displayNameForUser from '../util/displayNameForUser'
-App.controller('HistoryListController', function($scope, $modal, ide) {
+App.controller('HistoryListController', function ($scope, $modal, ide) {
   $scope.hoveringOverListSelectors = false
 
   $scope.projectUsers = []
 
-  $scope.$watch('project.members', function(newVal) {
+  $scope.$watch('project.members', function (newVal) {
     if (newVal != null) {
       return ($scope.projectUsers = newVal.concat($scope.project.owner))
     }
@@ -31,7 +31,7 @@ App.controller('HistoryListController', function($scope, $modal, ide) {
   // injected into the history API responses, so we won't need to fetch user data from other
   // local data structures.
   const _getUserById = id =>
-    _.find($scope.projectUsers, function(user) {
+    _.find($scope.projectUsers, function (user) {
       const curUserId =
         (user != null ? user._id : undefined) ||
         (user != null ? user.id : undefined)
@@ -47,21 +47,21 @@ App.controller('HistoryListController', function($scope, $modal, ide) {
       resolve: {
         labelDetails() {
           return labelDetails
-        }
-      }
+        },
+      },
     })
 
   $scope.loadMore = () => {
     return ide.historyManager.fetchNextBatchOfUpdates()
   }
 
-  $scope.recalculateSelectedUpdates = function() {
+  $scope.recalculateSelectedUpdates = function () {
     let beforeSelection = true
     let afterSelection = false
     $scope.history.selection.updates = []
     return (() => {
       const result = []
-      for (let update of Array.from($scope.history.updates)) {
+      for (const update of Array.from($scope.history.updates)) {
         var inSelection
         if (update.selectedTo) {
           inSelection = true
@@ -87,7 +87,7 @@ App.controller('HistoryListController', function($scope, $modal, ide) {
     })()
   }
 
-  $scope.recalculateHoveredUpdates = function() {
+  $scope.recalculateHoveredUpdates = function () {
     let inHoverSelection
     let hoverSelectedFrom = false
     let hoverSelectedTo = false
@@ -140,7 +140,7 @@ App.controller('HistoryListController', function($scope, $modal, ide) {
   $scope.resetHoverState = () =>
     (() => {
       const result = []
-      for (let update of Array.from($scope.history.updates)) {
+      for (const update of Array.from($scope.history.updates)) {
         delete update.hoverSelectedFrom
         delete update.hoverSelectedTo
         result.push(delete update.inHoverSelection)
@@ -153,59 +153,62 @@ App.controller('HistoryListController', function($scope, $modal, ide) {
   )
 })
 
-export default App.controller('HistoryListItemController', function(
-  $scope,
-  eventTracking
-) {
-  $scope.$watch('update.selectedFrom', function(selectedFrom, oldSelectedFrom) {
-    if (selectedFrom) {
-      for (let update of Array.from($scope.history.updates)) {
-        if (update !== $scope.update) {
-          update.selectedFrom = false
+export default App.controller(
+  'HistoryListItemController',
+  function ($scope, eventTracking) {
+    $scope.$watch(
+      'update.selectedFrom',
+      function (selectedFrom, oldSelectedFrom) {
+        if (selectedFrom) {
+          for (const update of Array.from($scope.history.updates)) {
+            if (update !== $scope.update) {
+              update.selectedFrom = false
+            }
+          }
+          return $scope.recalculateSelectedUpdates()
         }
       }
-      return $scope.recalculateSelectedUpdates()
-    }
-  })
+    )
 
-  $scope.$watch('update.selectedTo', function(selectedTo, oldSelectedTo) {
-    if (selectedTo) {
-      for (let update of Array.from($scope.history.updates)) {
-        if (update !== $scope.update) {
-          update.selectedTo = false
+    $scope.$watch('update.selectedTo', function (selectedTo, oldSelectedTo) {
+      if (selectedTo) {
+        for (const update of Array.from($scope.history.updates)) {
+          if (update !== $scope.update) {
+            update.selectedTo = false
+          }
         }
+        return $scope.recalculateSelectedUpdates()
       }
-      return $scope.recalculateSelectedUpdates()
+    })
+
+    $scope.select = function () {
+      eventTracking.sendMB('history-view-change')
+      $scope.update.selectedTo = true
+      return ($scope.update.selectedFrom = true)
     }
-  })
 
-  $scope.select = function() {
-    eventTracking.sendMB('history-view-change')
-    $scope.update.selectedTo = true
-    return ($scope.update.selectedFrom = true)
+    $scope.mouseOverSelectedFrom = function () {
+      $scope.history.hoveringOverListSelectors = true
+      $scope.update.hoverSelectedFrom = true
+      return $scope.recalculateHoveredUpdates()
+    }
+
+    $scope.mouseOutSelectedFrom = function () {
+      $scope.history.hoveringOverListSelectors = false
+      return $scope.resetHoverState()
+    }
+
+    $scope.mouseOverSelectedTo = function () {
+      $scope.history.hoveringOverListSelectors = true
+      $scope.update.hoverSelectedTo = true
+      return $scope.recalculateHoveredUpdates()
+    }
+
+    $scope.mouseOutSelectedTo = function () {
+      $scope.history.hoveringOverListSelectors = false
+      return $scope.resetHoverState()
+    }
+
+    return ($scope.displayName = displayNameForUser)
   }
-
-  $scope.mouseOverSelectedFrom = function() {
-    $scope.history.hoveringOverListSelectors = true
-    $scope.update.hoverSelectedFrom = true
-    return $scope.recalculateHoveredUpdates()
-  }
-
-  $scope.mouseOutSelectedFrom = function() {
-    $scope.history.hoveringOverListSelectors = false
-    return $scope.resetHoverState()
-  }
-
-  $scope.mouseOverSelectedTo = function() {
-    $scope.history.hoveringOverListSelectors = true
-    $scope.update.hoverSelectedTo = true
-    return $scope.recalculateHoveredUpdates()
-  }
-
-  $scope.mouseOutSelectedTo = function() {
-    $scope.history.hoveringOverListSelectors = false
-    return $scope.resetHoverState()
-  }
-
-  return ($scope.displayName = displayNameForUser)
-})
+)

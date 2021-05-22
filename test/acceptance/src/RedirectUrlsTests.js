@@ -9,30 +9,28 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const async = require('async')
 const request = require('./helpers/request')
-const MockV1Api = require('./helpers/MockV1Api')
 
 const assertRedirect = (method, path, expectedStatusCode, destination, cb) =>
   request[method](path, (error, response) => {
-    should.not.exist(error)
+    expect(error).not.to.exist
     response.statusCode.should.equal(expectedStatusCode)
     response.headers.location.should.equal(destination)
     return cb()
   })
 
-describe('RedirectUrls', function() {
-  beforeEach(function() {
+describe('RedirectUrls', function () {
+  beforeEach(function () {
     return this.timeout(1000)
   })
 
-  it('proxy static URLs', function(done) {
+  it('proxy static URLs', function (done) {
     return assertRedirect('get', '/redirect/one', 302, '/destination/one', done)
   })
 
-  it('proxy dynamic URLs', function(done) {
+  it('proxy dynamic URLs', function (done) {
     return assertRedirect(
       'get',
       '/redirect/params/42',
@@ -42,7 +40,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with baseUrl', function(done) {
+  it('proxy URLs with baseUrl', function (done) {
     return assertRedirect(
       'get',
       '/redirect/base_url',
@@ -52,7 +50,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with POST with a 307', function(done) {
+  it('proxy URLs with POST with a 307', function (done) {
     return assertRedirect(
       'post',
       '/redirect/get_and_post',
@@ -62,7 +60,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with multiple support methods', function(done) {
+  it('proxy URLs with multiple support methods', function (done) {
     return assertRedirect(
       'get',
       '/redirect/get_and_post',
@@ -72,7 +70,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('redirects with query params', function(done) {
+  it('redirects with query params', function (done) {
     return assertRedirect(
       'get',
       '/redirect/qs?foo=bar&baz[]=qux1&baz[]=qux2',
@@ -82,11 +80,11 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it("skips redirects if the 'skip-redirects' header is set", function(done) {
+  it("skips redirects if the 'skip-redirects' header is set", function (done) {
     return request.get(
       { url: '/redirect/one', headers: { 'x-skip-redirects': 'true' } },
       (error, response) => {
-        should.not.exist(error)
+        expect(error).not.to.exist
         response.statusCode.should.equal(404)
         return done()
       }

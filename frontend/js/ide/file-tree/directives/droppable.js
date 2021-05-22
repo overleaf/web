@@ -1,5 +1,3 @@
-/* eslint-disable
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -11,16 +9,16 @@ import App from '../../../base'
 
 export default App.directive('droppable', () => ({
   link(scope, element, attrs) {
-    return scope.$watch(attrs.droppable, function(droppable) {
+    return scope.$watch(attrs.droppable, function (droppable) {
       if (droppable) {
         return element.droppable({
           greedy: true,
           hoverClass: 'droppable-hover',
           tolerance: 'pointer',
           accept: attrs.accept,
-          drop: scope.$eval(attrs.onDropCallback)
+          drop: scope.$eval(attrs.onDropCallback),
         })
       }
     })
-  }
+  },
 }))

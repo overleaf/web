@@ -15,7 +15,7 @@ import SocketIoShim from './SocketIoShim'
 let ConnectionManager
 const ONEHOUR = 1000 * 60 * 60
 
-export default (ConnectionManager = (function() {
+export default ConnectionManager = (function () {
   ConnectionManager = class ConnectionManager {
     static initClass() {
       this.prototype.disconnectAfterMs = ONEHOUR * 24
@@ -72,6 +72,7 @@ export default (ConnectionManager = (function() {
       this.connected = false
       this.userIsInactive = false
       this.gracefullyReconnecting = false
+      this.shuttingDown = false
 
       this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
 
@@ -82,7 +83,7 @@ export default (ConnectionManager = (function() {
         // If we need to force everyone to reload the editor
         forced_disconnect: false,
         inactive_disconnect: false,
-        jobId: 0
+        jobId: 0,
       }
 
       this.$scope.tryReconnectNow = () => {
@@ -99,7 +100,11 @@ export default (ConnectionManager = (function() {
       })
 
       document.querySelector('body').addEventListener('click', e => {
-        if (!this.connected && e.target.id !== 'try-reconnect-now-button') {
+        if (
+          !this.shuttingDown &&
+          !this.connected &&
+          e.target.id !== 'try-reconnect-now-button'
+        ) {
           // user is editing, try to reconnect
           return this.tryReconnectWithRateLimit()
         }
@@ -122,23 +127,20 @@ export default (ConnectionManager = (function() {
         }
         parsedURL = {
           origin: null,
-          pathname: this.wsUrl || '/socket.io'
+          pathname: this.wsUrl || '/socket.io',
         }
       }
-      this.ide.socket = SocketIoShim.connect(
-        parsedURL.origin,
-        {
-          resource: parsedURL.pathname.slice(1),
-          reconnect: false,
-          'connect timeout': 30 * 1000,
-          'force new connection': true
-        }
-      )
+      this.ide.socket = SocketIoShim.connect(parsedURL.origin, {
+        resource: parsedURL.pathname.slice(1),
+        reconnect: false,
+        'connect timeout': 30 * 1000,
+        'force new connection': true,
+      })
 
       // handle network-level websocket errors (e.g. failed dns lookups)
 
       let connectionAttempt = 1
-      let connectionErrorHandler = err => {
+      const connectionErrorHandler = err => {
         if (
           window.wsRetryHandshake &&
           connectionAttempt++ < window.wsRetryHandshake
@@ -193,7 +195,7 @@ export default (ConnectionManager = (function() {
         })
 
         // we have passed authentication so we can now join the project
-        let connectionJobId = this.$scope.connection.jobId
+        const connectionJobId = this.$scope.connection.jobId
         setTimeout(() => {
           this.joinProject(connectionJobId)
         }, 100)
@@ -235,7 +237,8 @@ export default (ConnectionManager = (function() {
         if (!this.$scope.connection.state.match(/^waiting/)) {
           if (
             !this.$scope.connection.forced_disconnect &&
-            !this.userIsInactive
+            !this.userIsInactive &&
+            !this.shuttingDown
           ) {
             this.startAutoReconnectCountdown()
           } else {
@@ -246,22 +249,25 @@ export default (ConnectionManager = (function() {
 
       // Site administrators can send the forceDisconnect event to all users
 
-      this.ide.socket.on('forceDisconnect', message => {
+      this.ide.socket.on('forceDisconnect', (message, delay = 10) => {
         this.updateConnectionManagerState('inactive')
+        this.shuttingDown = true // prevent reconnection attempts
         this.$scope.$apply(() => {
           this.$scope.permissions.write = false
           return (this.$scope.connection.forced_disconnect = true)
         })
-        this.ide.socket.disconnect()
-        this.ide.showGenericMessageModal(
-          'Please Refresh',
+        // flush changes before disconnecting
+        this.ide.$scope.$broadcast('flush-changes')
+        setTimeout(() => this.ide.socket.disconnect(), 1000)
+        this.ide.showLockEditorMessageModal(
+          'Please wait',
           `\
-We're performing maintenance on Overleaf and you need to refresh the editor.
+We're performing maintenance on Overleaf and you need to wait a moment.
 Sorry for any inconvenience.
-The editor will refresh in automatically in 10 seconds.\
+The editor will refresh automatically in ${delay} seconds.\
 `
         )
-        return setTimeout(() => location.reload(), 10 * 1000)
+        return setTimeout(() => location.reload(), delay * 1000)
       })
 
       this.ide.socket.on('reconnectGracefully', () => {
@@ -273,11 +279,9 @@ The editor will refresh in automatically in 10 seconds.\
     updateConnectionManagerState(state) {
       this.$scope.$apply(() => {
         this.$scope.connection.jobId += 1
-        let jobId = this.$scope.connection.jobId
+        const jobId = this.$scope.connection.jobId
         sl_console.log(
-          `[updateConnectionManagerState ${jobId}] from ${
-            this.$scope.connection.state
-          } to ${state}`
+          `[updateConnectionManagerState ${jobId}] from ${this.$scope.connection.state} to ${state}`
         )
         this.$scope.connection.state = state
 
@@ -383,7 +387,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         return
       }
       const data = {
-        project_id: this.ide.project_id
+        project_id: this.ide.project_id,
       }
       if (window.anonymousAccessToken) {
         data.anonymousAccessToken = window.anonymousAccessToken
@@ -437,7 +441,8 @@ Something went wrong connecting to your project. Please refresh if this continue
           this.$scope.$apply(() => {
             this.updateConnectionManagerState('ready')
             this.$scope.protocolVersion = protocolVersion
-            this.$scope.project = project
+            const defaultProjectAttributes = { rootDoc_id: null }
+            this.$scope.project = { ...defaultProjectAttributes, ...project }
             this.$scope.permissionsLevel = permissionsLevel
             this.ide.loadingManager.socketLoaded()
             this.$scope.$broadcast('project:joined')
@@ -451,8 +456,12 @@ Something went wrong connecting to your project. Please refresh if this continue
       return this.tryReconnect()
     }
 
-    disconnect() {
-      if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
+    disconnect(options) {
+      if (options && options.permanent) {
+        sl_console.log('[disconnect] shutting down ConnectionManager')
+        this.updateConnectionManagerState('inactive')
+        this.shuttingDown = true // prevent reconnection attempts
+      } else if (this.ide.socket.socket && !this.ide.socket.socket.connected) {
         sl_console.log(
           '[socket.io] skipping disconnect because socket.io has not connected'
         )
@@ -464,7 +473,7 @@ Something went wrong connecting to your project. Please refresh if this continue
 
     startAutoReconnectCountdown() {
       this.updateConnectionManagerState('waitingCountdown')
-      let connectionId = this.$scope.connection.jobId
+      const connectionId = this.$scope.connection.jobId
       let countdown
       sl_console.log('[ConnectionManager] starting autoreconnect countdown')
       const twoMinutes = 2 * 60 * 1000
@@ -548,7 +557,11 @@ Something went wrong connecting to your project. Please refresh if this continue
 
     tryReconnect() {
       sl_console.log('[ConnectionManager] tryReconnect')
-      if (this.connected || this.$scope.connection.reconnecting) {
+      if (
+        this.connected ||
+        this.shuttingDown ||
+        this.$scope.connection.reconnecting
+      ) {
         return
       }
       this.updateConnectionManagerState('reconnecting')
@@ -617,6 +630,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         }) // 5 minutes
       }
     }
+
     reconnectGracefully(force) {
       if (this.reconnectGracefullyStarted == null) {
         this.reconnectGracefullyStarted = new Date()
@@ -660,4 +674,4 @@ Something went wrong connecting to your project. Please refresh if this continue
   }
   ConnectionManager.initClass()
   return ConnectionManager
-})())
+})()

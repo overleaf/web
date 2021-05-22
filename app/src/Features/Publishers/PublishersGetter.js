@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -21,12 +21,12 @@ const _ = require('underscore')
 module.exports = PublishersGetter = {
   getManagedPublishers(user_id, callback) {
     if (callback == null) {
-      callback = function(error, managedPublishers) {}
+      callback = function (error, managedPublishers) {}
     }
     return UserMembershipsHandler.getEntitiesByUser(
       UserMembershipEntityConfigs.publisher,
       user_id,
       (error, managedPublishers) => callback(error, managedPublishers)
     )
-  }
+  },
 }

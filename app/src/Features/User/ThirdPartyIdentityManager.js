@@ -5,6 +5,7 @@ const EmailOptionsHelper = require(`${APP_ROOT}/Features/Email/EmailOptionsHelpe
 const Errors = require('../Errors/Errors')
 const _ = require('lodash')
 const logger = require('logger-sharelatex')
+const OError = require('@overleaf/o-error')
 const settings = require('settings-sharelatex')
 const { User } = require(`${APP_ROOT}/models/User`)
 const { promisifyAll } = require(`${APP_ROOT}/util/promises`)
@@ -13,10 +14,15 @@ const oauthProviders = settings.oauthProviders || {}
 
 function getUser(providerId, externalUserId, callback) {
   if (providerId == null || externalUserId == null) {
-    return callback(new Error('invalid arguments'))
+    return callback(
+      new OError('invalid SSO arguments', {
+        externalUserId,
+        providerId,
+      })
+    )
   }
   const query = _getUserQuery(providerId, externalUserId)
-  User.findOne(query, function(err, user) {
+  User.findOne(query, function (err, user) {
     if (err != null) {
       return callback(err)
     }
@@ -28,25 +34,26 @@ function getUser(providerId, externalUserId, callback) {
 }
 
 function login(providerId, externalUserId, externalData, callback) {
-  ThirdPartyIdentityManager.getUser(providerId, externalUserId, function(
-    err,
-    user
-  ) {
-    if (err != null) {
-      return callback(err)
+  ThirdPartyIdentityManager.getUser(
+    providerId,
+    externalUserId,
+    function (err, user) {
+      if (err != null) {
+        return callback(err)
+      }
+      if (!externalData) {
+        return callback(null, user)
+      }
+      const query = _getUserQuery(providerId, externalUserId)
+      const update = _thirdPartyIdentifierUpdate(
+        user,
+        providerId,
+        externalUserId,
+        externalData
+      )
+      User.findOneAndUpdate(query, update, { new: true }, callback)
     }
-    if (!externalData) {
-      return callback(null, user)
-    }
-    const query = _getUserQuery(providerId, externalUserId)
-    const update = _thirdPartyIdentifierUpdate(
-      user,
-      providerId,
-      externalUserId,
-      externalData
-    )
-    User.findOneAndUpdate(query, update, { new: true }, callback)
-  })
+  )
 }
 
 function link(
@@ -69,7 +76,7 @@ function link(
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      providerId
+      providerId,
     },
     error => {
       if (error) {
@@ -78,17 +85,17 @@ function link(
       const query = {
         _id: userId,
         'thirdPartyIdentifiers.providerId': {
-          $ne: providerId
-        }
+          $ne: providerId,
+        },
       }
       const update = {
         $push: {
           thirdPartyIdentifiers: {
             externalUserId,
             externalData,
-            providerId
-          }
-        }
+            providerId,
+          },
+        },
       }
       // add new tpi only if an entry for the provider does not exist
       // projection includes thirdPartyIdentifiers for tests
@@ -109,7 +116,7 @@ function link(
             userId,
             providerId,
             auditLog,
-            function(err) {
+            function (err) {
               if (err != null) {
                 return callback(err)
               }
@@ -141,21 +148,21 @@ function unlink(userId, providerId, auditLog, callback) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      providerId
+      providerId,
     },
     error => {
       if (error) {
         return callback(error)
       }
       const query = {
-        _id: userId
+        _id: userId,
       }
       const update = {
         $pull: {
           thirdPartyIdentifiers: {
-            providerId
-          }
-        }
+            providerId,
+          },
+        },
       }
       // projection includes thirdPartyIdentifiers for tests
       User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
@@ -178,7 +185,7 @@ function _getUserQuery(providerId, externalUserId) {
   providerId = providerId.toString()
   const query = {
     'thirdPartyIdentifiers.externalUserId': externalUserId,
-    'thirdPartyIdentifiers.providerId': providerId
+    'thirdPartyIdentifiers.providerId': providerId,
   }
   return query
 }
@@ -222,7 +229,7 @@ const ThirdPartyIdentityManager = {
   getUser,
   login,
   link,
-  unlink
+  unlink,
 }
 
 ThirdPartyIdentityManager.promises = promisifyAll(ThirdPartyIdentityManager)

@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -13,54 +13,49 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai').should()
 const modulePath =
   '../../../../app/src/Features/Project/ProjectUpdateHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('ProjectUpdateHandler', function() {
-  beforeEach(function() {
+describe('ProjectUpdateHandler', function () {
+  beforeEach(function () {
     this.fakeTime = new Date()
     this.clock = sinon.useFakeTimers(this.fakeTime.getTime())
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     let Project
     this.ProjectModel = Project = class Project {}
-    this.ProjectModel.update = sinon.stub().callsArg(3)
+    this.ProjectModel.updateOne = sinon.stub().callsArg(3)
     return (this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Project': { Project: this.ProjectModel },
-        'logger-sharelatex': { log: sinon.stub() }
-      }
+      },
     }))
   })
 
-  describe('marking a project as recently updated', function() {
-    beforeEach(function() {
+  describe('marking a project as recently updated', function () {
+    beforeEach(function () {
       this.project_id = 'project_id'
       this.lastUpdatedAt = 987654321
       return (this.lastUpdatedBy = 'fake-last-updater-id')
     })
 
-    it('should send an update to mongo', function(done) {
+    it('should send an update to mongo', function (done) {
       return this.handler.markAsUpdated(
         this.project_id,
         this.lastUpdatedAt,
         this.lastUpdatedBy,
         err => {
           sinon.assert.calledWith(
-            this.ProjectModel.update,
+            this.ProjectModel.updateOne,
             {
               _id: this.project_id,
-              lastUpdated: { $lt: this.lastUpdatedAt }
+              lastUpdated: { $lt: this.lastUpdatedAt },
             },
             {
               lastUpdated: this.lastUpdatedAt,
-              lastUpdatedBy: this.lastUpdatedBy
+              lastUpdatedBy: this.lastUpdatedBy,
             }
           )
           return done()
@@ -68,17 +63,17 @@ describe('ProjectUpdateHandler', function() {
       )
     })
 
-    it('should set smart fallbacks', function(done) {
+    it('should set smart fallbacks', function (done) {
       return this.handler.markAsUpdated(this.project_id, null, null, err => {
         sinon.assert.calledWithMatch(
-          this.ProjectModel.update,
+          this.ProjectModel.updateOne,
           {
             _id: this.project_id,
-            lastUpdated: { $lt: this.fakeTime }
+            lastUpdated: { $lt: this.fakeTime },
           },
           {
             lastUpdated: this.fakeTime,
-            lastUpdatedBy: null
+            lastUpdatedBy: null,
           }
         )
         return done()
@@ -86,11 +81,11 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsOpened', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsOpened', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsOpened(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         const date = args[1].lastOpened + ''
         const now = Date.now() + ''
@@ -100,11 +95,11 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsInactive', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsInactive', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsInactive(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         args[1].active.should.equal(false)
         return done()
@@ -112,11 +107,11 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsActive', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsActive', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsActive(project_id, err => {
-        const args = this.ProjectModel.update.args[0]
+        const args = this.ProjectModel.updateOne.args[0]
         args[0]._id.should.equal(project_id)
         args[1].active.should.equal(true)
         return done()

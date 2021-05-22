@@ -6,24 +6,17 @@ const modulePath = require('path').join(
 )
 const BufferedStream = require('bufferedstream')
 
-describe('UpdateMerger :', function() {
-  beforeEach(function() {
+describe('UpdateMerger :', function () {
+  beforeEach(function () {
     this.updateMerger = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         fs: (this.fs = { unlink: sinon.stub().callsArgWith(1) }),
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         '../Editor/EditorController': (this.EditorController = {}),
         '../Uploads/FileTypeManager': (this.FileTypeManager = {}),
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        'settings-sharelatex': { path: { dumpPath: 'dump_here' } }
-      }
+        'settings-sharelatex': { path: { dumpPath: 'dump_here' } },
+      },
     })
     this.project_id = 'project_id_here'
     this.user_id = 'mock-user-id'
@@ -49,9 +42,9 @@ describe('UpdateMerger :', function() {
     this.callback = sinon.stub()
   })
 
-  describe('mergeUpdate', function() {
-    describe('doc updates for a new doc', function() {
-      beforeEach(function() {
+  describe('mergeUpdate', function () {
+    describe('doc updates for a new doc', function () {
+      beforeEach(function () {
         this.FileTypeManager.getType = sinon
           .stub()
           .yields(null, { binary: false, encoding: 'utf-8' })
@@ -66,11 +59,11 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should look at the file contents', function() {
+      it('should look at the file contents', function () {
         this.FileTypeManager.getType.called.should.equal(true)
       })
 
-      it('should process update as doc', function() {
+      it('should process update as doc', function () {
         this.updateMerger.p.processDoc
           .calledWith(
             this.project_id,
@@ -82,13 +75,13 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function () {
         this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
 
-    describe('file updates for a new file ', function() {
-      beforeEach(function() {
+    describe('file updates for a new file ', function () {
+      beforeEach(function () {
         this.FileTypeManager.getType = sinon
           .stub()
           .yields(null, { binary: true })
@@ -103,11 +96,11 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should look at the file contents', function() {
+      it('should look at the file contents', function () {
         this.FileTypeManager.getType.called.should.equal(true)
       })
 
-      it('should process update as file', function() {
+      it('should process update as file', function () {
         this.updateMerger.p.processFile
           .calledWith(
             this.project_id,
@@ -119,13 +112,13 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function () {
         this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
 
-    describe('doc updates for an existing doc', function() {
-      beforeEach(function() {
+    describe('doc updates for an existing doc', function () {
+      beforeEach(function () {
         this.FileTypeManager.getType = sinon
           .stub()
           .yields(null, { binary: false, encoding: 'utf-8' })
@@ -140,11 +133,11 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should look at the file contents', function() {
+      it('should look at the file contents', function () {
         this.FileTypeManager.getType.called.should.equal(true)
       })
 
-      it('should process update as doc', function() {
+      it('should process update as doc', function () {
         this.updateMerger.p.processDoc
           .calledWith(
             this.project_id,
@@ -156,13 +149,13 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function () {
         this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
 
-    describe('file updates for an existing file', function() {
-      beforeEach(function() {
+    describe('file updates for an existing file', function () {
+      beforeEach(function () {
         this.FileTypeManager.getType = sinon
           .stub()
           .yields(null, { binary: true })
@@ -177,11 +170,11 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should look at the file contents', function() {
+      it('should look at the file contents', function () {
         this.FileTypeManager.getType.called.should.equal(true)
       })
 
-      it('should process update as file', function() {
+      it('should process update as file', function () {
         this.updateMerger.p.processFile
           .calledWith(
             this.project_id,
@@ -193,14 +186,14 @@ describe('UpdateMerger :', function() {
           .should.equal(true)
       })
 
-      it('removes the temp file from disk', function() {
+      it('removes the temp file from disk', function () {
         this.fs.unlink.calledWith(this.fsPath).should.equal(true)
       })
     })
   })
 
-  describe('file updates for an existing doc', function() {
-    beforeEach(function() {
+  describe('file updates for an existing doc', function () {
+    beforeEach(function () {
       this.FileTypeManager.getType = sinon.stub().yields(null, { binary: true })
       this.updateMerger.deleteUpdate = sinon.stub().yields()
       this.updateMerger.p.processFile = sinon.stub().yields()
@@ -214,11 +207,11 @@ describe('UpdateMerger :', function() {
       )
     })
 
-    it('should look at the file contents', function() {
+    it('should look at the file contents', function () {
       this.FileTypeManager.getType.called.should.equal(true)
     })
 
-    it('should delete the existing doc', function() {
+    it('should delete the existing doc', function () {
       this.updateMerger.deleteUpdate
         .calledWith(
           this.user_id,
@@ -229,7 +222,7 @@ describe('UpdateMerger :', function() {
         .should.equal(true)
     })
 
-    it('should process update as file', function() {
+    it('should process update as file', function () {
       this.updateMerger.p.processFile
         .calledWith(
           this.project_id,
@@ -241,13 +234,13 @@ describe('UpdateMerger :', function() {
         .should.equal(true)
     })
 
-    it('removes the temp file from disk', function() {
+    it('removes the temp file from disk', function () {
       this.fs.unlink.calledWith(this.fsPath).should.equal(true)
     })
   })
 
-  describe('doc updates for an existing file', function() {
-    beforeEach(function() {
+  describe('doc updates for an existing file', function () {
+    beforeEach(function () {
       this.FileTypeManager.getType = sinon.stub().yields(null, { binary: true })
       this.updateMerger.deleteUpdate = sinon.stub().yields()
       this.updateMerger.p.processFile = sinon.stub().yields()
@@ -261,15 +254,15 @@ describe('UpdateMerger :', function() {
       )
     })
 
-    it('should look at the file contents', function() {
+    it('should look at the file contents', function () {
       this.FileTypeManager.getType.called.should.equal(true)
     })
 
-    it('should not delete the existing file', function() {
+    it('should not delete the existing file', function () {
       this.updateMerger.deleteUpdate.called.should.equal(false)
     })
 
-    it('should process update as file', function() {
+    it('should process update as file', function () {
       this.updateMerger.p.processFile
         .calledWith(
           this.project_id,
@@ -281,13 +274,13 @@ describe('UpdateMerger :', function() {
         .should.equal(true)
     })
 
-    it('removes the temp file from disk', function() {
+    it('removes the temp file from disk', function () {
       this.fs.unlink.calledWith(this.fsPath).should.equal(true)
     })
   })
 
-  describe('deleteUpdate', function() {
-    beforeEach(function() {
+  describe('deleteUpdate', function () {
+    beforeEach(function () {
       this.EditorController.deleteEntityWithPath = sinon.stub().yields()
       this.updateMerger.deleteUpdate(
         this.user_id,
@@ -298,16 +291,16 @@ describe('UpdateMerger :', function() {
       )
     })
 
-    it('should delete the entity in the editor controller', function() {
+    it('should delete the entity in the editor controller', function () {
       this.EditorController.deleteEntityWithPath
         .calledWith(this.project_id, this.docPath, this.source, this.user_id)
         .should.equal(true)
     })
   })
 
-  describe('private methods', function() {
-    describe('processDoc', function() {
-      beforeEach(function() {
+  describe('private methods', function () {
+    describe('processDoc', function () {
+      beforeEach(function () {
         this.docLines =
           '\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\n\\title{42}\n\\author{Jane Doe}\n\\date{June 2011}'
         this.updateMerger.p.readFileIntoTextArray = sinon
@@ -325,13 +318,13 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('reads the temp file from disk', function() {
+      it('reads the temp file from disk', function () {
         this.updateMerger.p.readFileIntoTextArray
           .calledWith(this.fsPath)
           .should.equal(true)
       })
 
-      it('should upsert the doc in the editor controller', function() {
+      it('should upsert the doc in the editor controller', function () {
         this.EditorController.upsertDocWithPath
           .calledWith(
             this.project_id,
@@ -344,8 +337,8 @@ describe('UpdateMerger :', function() {
       })
     })
 
-    describe('processFile', function() {
-      beforeEach(function() {
+    describe('processFile', function () {
+      beforeEach(function () {
         this.EditorController.upsertFileWithPath = sinon.stub().yields()
         this.updateMerger.p.processFile(
           this.project_id,
@@ -357,7 +350,7 @@ describe('UpdateMerger :', function() {
         )
       })
 
-      it('should upsert the file in the editor controller', function() {
+      it('should upsert the file in the editor controller', function () {
         this.EditorController.upsertFileWithPath
           .calledWith(
             this.project_id,

@@ -15,7 +15,7 @@ App.directive('complexPassword', () => ({
       pattern: '',
       length: {
         min: 6,
-        max: 72
+        max: 72,
       },
       allowEmpty: false,
       allowAnyChars: false,
@@ -29,8 +29,8 @@ App.directive('complexPassword', () => ({
         digits: '1234567890',
         letters: 'abcdefghijklmnopqrstuvwxyz',
         letters_up: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        symbols: '@#$%^&*()-_=+[]{};:<>/?!£€.,'
-      }
+        symbols: '@#$%^&*()-_=+[]{};:<>/?!£€.,',
+      },
     }
 
     const opts = _.defaults(
@@ -56,7 +56,7 @@ App.directive('complexPassword', () => ({
     const passField = new PassField.Field('passwordField', opts)
     const [asyncFormCtrl, ngModelCtrl] = Array.from(ctrl)
 
-    ngModelCtrl.$parsers.unshift(function(modelValue) {
+    ngModelCtrl.$parsers.unshift(function (modelValue) {
       let isValid = passField.validatePass()
       const email = asyncFormCtrl.getEmail() || window.usersEmail
 
@@ -75,17 +75,16 @@ App.directive('complexPassword', () => ({
       }
       if (opts.length.max != null && modelValue.length >= opts.length.max) {
         isValid = false
-        scope.complexPasswordErrorMessage = `Maximum password length ${opts
-          .length.max - 1} exceeded`
+        scope.complexPasswordErrorMessage = `Maximum password length ${
+          opts.length.max - 1
+        } exceeded`
       }
       if (opts.length.min != null && modelValue.length < opts.length.min) {
         isValid = false
-        scope.complexPasswordErrorMessage = `Password too short, minimum ${
-          opts.length.min
-        }`
+        scope.complexPasswordErrorMessage = `Password too short, minimum ${opts.length.min}`
       }
       ngModelCtrl.$setValidity('complexPassword', isValid)
       return modelValue
     })
-  }
+  },
 }))

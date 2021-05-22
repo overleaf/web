@@ -20,6 +20,7 @@ services:
     environment:
       BCRYPT_ROUNDS: 1
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
       PROJECT_HISTORY_ENABLED: 'true'
@@ -29,6 +30,12 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       SHARELATEX_CONFIG:
+      COOKIE_DOMAIN: .overleaf.test
+      PUBLIC_URL: 'http://www.overleaf.test:3000'
+      HTTP_TEST_HOST: www.overleaf.test
+      OT_JWT_AUTH_KEY: "very secret key"
+    extra_hosts:
+      - 'www.overleaf.test:127.0.0.1'
     command: npm run test:acceptance:app
     user: root
     depends_on:

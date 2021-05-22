@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -17,7 +17,7 @@ const logger = require('logger-sharelatex')
 module.exports = {
   markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     if (lastUpdatedAt == null) {
       lastUpdatedAt = new Date()
@@ -25,20 +25,20 @@ module.exports = {
 
     const conditions = {
       _id: projectId,
-      lastUpdated: { $lt: lastUpdatedAt }
+      lastUpdated: { $lt: lastUpdatedAt },
     }
 
     const update = {
       lastUpdated: lastUpdatedAt || new Date().getTime(),
-      lastUpdatedBy
+      lastUpdatedBy,
     }
-    return Project.update(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {}, callback)
   },
 
   markAsOpened(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { lastOpened: Date.now() }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }
@@ -48,7 +48,7 @@ module.exports = {
   markAsInactive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: false }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }
@@ -58,10 +58,10 @@ module.exports = {
   markAsActive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: true }
-    return Project.update(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }
     })
-  }
+  },
 }

@@ -1,6 +1,8 @@
+const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
+const UserSessionsManager = require('./UserSessionsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
 const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
@@ -12,13 +14,11 @@ const { expressify } = require('../../util/promises')
 async function _sendSecurityAlertEmail(user, email) {
   const emailOptions = {
     to: user.email,
-    actionDescribed: `a secondary email address has been added to your account ${
-      user.email
-    }`,
+    actionDescribed: `a secondary email address has been added to your account ${user.email}`,
     message: [
-      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`,
     ],
-    action: 'secondary email address added'
+    action: 'secondary email address added',
   }
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
@@ -34,7 +34,7 @@ async function add(req, res, next) {
   const affiliationOptions = {
     university: req.body.university,
     role: req.body.role,
-    department: req.body.department
+    department: req.body.department,
   }
 
   try {
@@ -44,7 +44,7 @@ async function add(req, res, next) {
       affiliationOptions,
       {
         initiatorId: user._id,
-        ipAddress: req.ip
+        ipAddress: req.ip,
       }
     )
   } catch (error) {
@@ -67,28 +67,56 @@ function resendConfirmation(req, res, next) {
   if (!email) {
     return res.sendStatus(422)
   }
-  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function(error, user) {
+  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (error, user) {
     if (error) {
       return next(error)
     }
     if (!user || user._id.toString() !== userId) {
       return res.sendStatus(422)
     }
-    UserEmailsConfirmationHandler.sendConfirmationEmail(userId, email, function(
-      error
-    ) {
-      if (error) {
-        return next(error)
+    UserEmailsConfirmationHandler.sendConfirmationEmail(
+      userId,
+      email,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
       }
-      res.sendStatus(200)
-    })
+    )
+  })
+}
+
+function sendReconfirmation(req, res, next) {
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(400)
+  }
+  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (error, user) {
+    if (error) {
+      return next(error)
+    }
+    if (!user || user._id.toString() !== userId) {
+      return res.sendStatus(422)
+    }
+    UserEmailsConfirmationHandler.sendReconfirmationEmail(
+      userId,
+      email,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
+      }
+    )
   })
 }
 
 const UserEmailsController = {
   list(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
-    UserGetter.getUserFullEmails(userId, function(error, fullEmails) {
+    UserGetter.getUserFullEmails(userId, function (error, fullEmails) {
       if (error) {
         return next(error)
       }
@@ -105,7 +133,7 @@ const UserEmailsController = {
       return res.sendStatus(422)
     }
 
-    UserUpdater.removeEmailAddress(userId, email, function(error) {
+    UserUpdater.removeEmailAddress(userId, email, function (error) {
       if (error) {
         return next(error)
       }
@@ -121,7 +149,7 @@ const UserEmailsController = {
     }
     const auditLog = {
       initiatorId: userId,
-      ipAddress: req.ip
+      ipAddress: req.ip,
     }
     UserUpdater.setDefaultEmailAddress(
       userId,
@@ -134,6 +162,18 @@ const UserEmailsController = {
           return UserEmailsController._handleEmailError(err, req, res, next)
         }
         AuthenticationController.setInSessionUser(req, { email: email })
+        const user = AuthenticationController.getSessionUser(req)
+        UserSessionsManager.revokeAllUserSessions(
+          user,
+          [req.sessionID],
+          err => {
+            if (err)
+              logger.warn(
+                { err },
+                'failed revoking secondary sessions after changing default email'
+              )
+          }
+        )
         res.sendStatus(200)
       }
     )
@@ -151,7 +191,7 @@ const UserEmailsController = {
       email,
       req.body.role,
       req.body.department,
-      function(error) {
+      function (error) {
         if (error) {
           return next(error)
         }
@@ -162,10 +202,12 @@ const UserEmailsController = {
 
   resendConfirmation,
 
+  sendReconfirmation,
+
   showConfirm(req, res, next) {
     res.render('user/confirm_email', {
       token: req.query.token,
-      title: 'confirm_email'
+      title: 'confirm_email',
     })
   },
 
@@ -173,22 +215,25 @@ const UserEmailsController = {
     const { token } = req.body
     if (!token) {
       return res.status(422).json({
-        message: req.i18n.translate('confirmation_link_broken')
+        message: req.i18n.translate('confirmation_link_broken'),
       })
     }
-    UserEmailsConfirmationHandler.confirmEmailFromToken(token, function(error) {
-      if (error) {
-        if (error instanceof Errors.NotFoundError) {
-          res.status(404).json({
-            message: req.i18n.translate('confirmation_token_invalid')
-          })
+    UserEmailsConfirmationHandler.confirmEmailFromToken(
+      token,
+      function (error) {
+        if (error) {
+          if (error instanceof Errors.NotFoundError) {
+            res.status(404).json({
+              message: req.i18n.translate('confirmation_token_invalid'),
+            })
+          } else {
+            next(error)
+          }
         } else {
-          next(error)
+          res.sendStatus(200)
         }
-      } else {
-        res.sendStatus(200)
       }
-    })
+    )
   },
 
   _handleEmailError(error, req, res, next) {
@@ -202,7 +247,7 @@ const UserEmailsController = {
       return HttpErrorHandler.conflict(req, res, message)
     }
     next(error)
-  }
+  },
 }
 
 module.exports = UserEmailsController

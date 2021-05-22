@@ -251,7 +251,7 @@ const countriesList = [
   { code: 'eh', name: 'Western Sahara' },
   { code: 'ye', name: 'Yemen' },
   { code: 'zm', name: 'Zambia' },
-  { code: 'zw', name: 'Zimbabwe' }
+  { code: 'zw', name: 'Zimbabwe' },
 ]
 const universities = {}
 const universitiesByDomain = {}
@@ -267,7 +267,7 @@ const defaultRoleHints = [
   'Associate Professor ',
   'Assistant Professor ',
   'Professor',
-  'Emeritus Professor'
+  'Emeritus Professor',
 ]
 const defaultDepartmentHints = [
   'Aeronautics & Astronautics',
@@ -343,7 +343,7 @@ const defaultDepartmentHints = [
   'Structural Biology',
   'Surgery',
   'Theater and Performance Studies',
-  'Urology'
+  'Urology',
 ]
 
 const domainsBlackList = { 'overleaf.com': true }
@@ -370,7 +370,7 @@ const commonTLDs = [
   'pl',
   'it',
   'co.in',
-  'com.mx'
+  'com.mx',
 ]
 const commonDomains = [
   'gmail',
@@ -397,16 +397,16 @@ const commonDomains = [
   'yandex',
   'yeah',
   'web',
-  'foxmail'
+  'foxmail',
 ]
 
-for (let domain of commonDomains) {
-  for (let tld of commonTLDs) {
+for (const domain of commonDomains) {
+  for (const tld of commonTLDs) {
     domainsBlackList[`${domain}.${tld}`] = true
   }
 }
 
-App.factory('UserAffiliationsDataService', function($http, $q) {
+App.factory('UserAffiliationsDataService', function ($http, $q) {
   const getCountries = () => $q.resolve(countriesList)
 
   const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)
@@ -426,21 +426,21 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
       _.find(userEmails, userEmail => userEmail.default)
     )
 
-  const getUniversitiesFromCountry = function(country) {
+  const getUniversitiesFromCountry = function (country) {
     let universitiesFromCountry
     if (universities[country.code] != null) {
       universitiesFromCountry = universities[country.code]
     } else {
       universitiesFromCountry = $http
         .get('/institutions/list', {
-          params: { country_code: country.code }
+          params: { country_code: country.code },
         })
         .then(response => (universities[country.code] = response.data))
     }
     return $q.resolve(universitiesFromCountry)
   }
 
-  const getUniversityDomainFromPartialDomainInput = function(
+  const getUniversityDomainFromPartialDomainInput = function (
     partialDomainInput
   ) {
     if (universitiesByDomain[partialDomainInput] != null) {
@@ -448,9 +448,9 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
     } else {
       return $http
         .get('/institutions/domains', {
-          params: { hostname: partialDomainInput, limit: 1 }
+          params: { hostname: partialDomainInput, limit: 1 },
         })
-        .then(function(response) {
+        .then(function (response) {
           const university = response.data[0]
           if (university != null && !isDomainBlacklisted(university.hostname)) {
             universitiesByDomain[university.hostname] = university
@@ -470,7 +470,7 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
   const addUserEmail = email =>
     $http.post('/user/emails', {
       email,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const addUserAffiliationWithUnknownUniversity = (
@@ -484,22 +484,22 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
       email,
       university: {
         name: unknownUniversityName,
-        country_code: unknownUniversityCountryCode
+        country_code: unknownUniversityCountryCode,
       },
       role,
       department,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const addUserAffiliation = (email, universityId, role, department) =>
     $http.post('/user/emails', {
       email,
       university: {
-        id: universityId
+        id: universityId,
       },
       role,
       department,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const addRoleAndDepartment = (email, role, department) =>
@@ -507,25 +507,25 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
       email,
       role,
       department,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const setDefaultUserEmail = email =>
     $http.post('/user/emails/default', {
       email,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const removeUserEmail = email =>
     $http.post('/user/emails/delete', {
       email,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   const resendConfirmationEmail = email =>
     $http.post('/user/emails/resend_confirmation', {
       email,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
 
   var isDomainBlacklisted = domain => domain.toLowerCase() in domainsBlackList
@@ -547,6 +547,6 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
     setDefaultUserEmail,
     removeUserEmail,
     resendConfirmationEmail,
-    isDomainBlacklisted
+    isDomainBlacklisted,
   }
 })

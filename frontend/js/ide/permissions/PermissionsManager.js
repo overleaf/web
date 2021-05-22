@@ -12,7 +12,7 @@
  */
 let PermissionsManager
 
-export default (PermissionsManager = class PermissionsManager {
+export default PermissionsManager = class PermissionsManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -20,7 +20,7 @@ export default (PermissionsManager = class PermissionsManager {
       read: false,
       write: false,
       admin: false,
-      comment: false
+      comment: false,
     }
     this.$scope.$watch('permissionsLevel', permissionsLevel => {
       if (permissionsLevel != null) {
@@ -46,4 +46,4 @@ export default (PermissionsManager = class PermissionsManager {
       }
     })
   }
-})
+}

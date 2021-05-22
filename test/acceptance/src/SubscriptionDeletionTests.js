@@ -4,11 +4,10 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
 const SubscriptionUpdater = require('../../../app/src/Features/Subscription/SubscriptionUpdater')
-require('./helpers/MockV1Api')
 
-describe('Subscriptions', function() {
-  describe('deletion', function() {
-    beforeEach(function(done) {
+describe('Subscriptions', function () {
+  describe('deletion', function () {
+    beforeEach(function (done) {
       this.adminUser = new User()
       this.memberUser = new User()
       async.series(
@@ -23,20 +22,20 @@ describe('Subscriptions', function() {
               teamInvites: [{ email: 'foo@baz.com' }],
               groupPlan: true,
               state: 'expired',
-              planCode: 'professional'
+              planCode: 'professional',
             })
             this.subscription = this.recurlySubscription.subscription
             this.recurlySubscription.ensureExists(cb)
           },
-          cb => this.subscription.refreshUsersFeatures(cb)
+          cb => this.subscription.refreshUsersFeatures(cb),
         ],
         done
       )
     })
 
-    it('deletes via Recurly callback', function(done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+    it('deletes via Recurly callback', function (done) {
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       request.post({ url, body }, (error, { statusCode }) => {
         if (error) {
@@ -47,9 +46,9 @@ describe('Subscriptions', function() {
       })
     })
 
-    it('refresh features', function(done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+    it('refresh features', function (done) {
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       request.post({ url, body }, (error, { statusCode }) => {
         if (error) {
@@ -62,9 +61,9 @@ describe('Subscriptions', function() {
       })
     })
 
-    it('allows deletion when deletedSubscription exists', function(done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+    it('allows deletion when deletedSubscription exists', function (done) {
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       // create fake deletedSubscription
       SubscriptionUpdater._createDeletedSubscription(

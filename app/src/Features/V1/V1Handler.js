@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -22,19 +22,19 @@ const logger = require('logger-sharelatex')
 module.exports = V1Handler = {
   authWithV1(email, password, callback) {
     if (callback == null) {
-      callback = function(err, isValid, v1Profile) {}
+      callback = function (err, isValid, v1Profile) {}
     }
     return V1Api.request(
       {
         method: 'POST',
         url: '/api/v1/sharelatex/login',
         json: { email, password },
-        expectedStatusCodes: [403]
+        expectedStatusCodes: [403],
       },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           OError.tag(err, '[V1Handler] error while talking to v1 login api', {
-            email
+            email,
           })
           return callback(err)
         }
@@ -48,7 +48,7 @@ module.exports = V1Handler = {
               v1UserId: __guard__(
                 body != null ? body.user_profile : undefined,
                 x => x.id
-              )
+              ),
             },
             '[V1Handler] got response from v1 login api'
           )
@@ -65,7 +65,7 @@ module.exports = V1Handler = {
 
   doPasswordReset(v1_user_id, password, callback) {
     if (callback == null) {
-      callback = function(err, created) {}
+      callback = function (err, created) {}
     }
 
     return V1Api.request(
@@ -74,14 +74,14 @@ module.exports = V1Handler = {
         url: '/api/v1/sharelatex/reset_password',
         json: {
           user_id: v1_user_id,
-          password
+          password,
         },
-        expectedStatusCodes: [200]
+        expectedStatusCodes: [200],
       },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           OError.tag(err, 'error while talking to v1 password reset api', {
-            v1_user_id
+            v1_user_id,
           })
           return callback(err, false)
         }
@@ -93,15 +93,13 @@ module.exports = V1Handler = {
           return callback(null, true)
         } else {
           err = new Error(
-            `Unexpected status from v1 password reset api: ${
-              response.statusCode
-            }`
+            `Unexpected status from v1 password reset api: ${response.statusCode}`
           )
           return callback(err, false)
         }
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

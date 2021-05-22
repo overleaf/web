@@ -1,17 +1,22 @@
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Helpers/UrlHelper.js'
 )
 
-describe('UrlHelper', function() {
-  beforeEach(function() {
-    this.UrlHelper = SandboxedModule.require(modulePath, {})
+describe('UrlHelper', function () {
+  beforeEach(function () {
+    this.settings = {
+      apis: { linkedUrlProxy: { url: undefined } },
+      siteUrl: 'http://localhost:3000',
+    }
+    this.UrlHelper = SandboxedModule.require(modulePath, {
+      requires: { 'settings-sharelatex': this.settings },
+    })
   })
-  describe('getSafeRedirectPath', function() {
-    it('sanitize redirect path to prevent open redirects', function() {
+  describe('getSafeRedirectPath', function () {
+    it('sanitize redirect path to prevent open redirects', function () {
       expect(this.UrlHelper.getSafeRedirectPath('https://evil.com')).to.be
         .undefined
 

@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
 */
@@ -17,33 +17,30 @@ const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipsHandler'
 const SandboxedModule = require('sandboxed-module')
 
-describe('UserMembershipsHandler', function() {
-  beforeEach(function() {
+describe('UserMembershipsHandler', function () {
+  beforeEach(function () {
     this.user = { _id: ObjectId() }
 
     this.Institution = { updateMany: sinon.stub().yields(null) }
     this.Subscription = { updateMany: sinon.stub().yields(null) }
     this.Publisher = { updateMany: sinon.stub().yields(null) }
     return (this.UserMembershipsHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Institution': {
-          Institution: this.Institution
+          Institution: this.Institution,
         },
         '../../models/Subscription': {
-          Subscription: this.Subscription
+          Subscription: this.Subscription,
         },
         '../../models/Publisher': {
-          Publisher: this.Publisher
-        }
-      }
+          Publisher: this.Publisher,
+        },
+      },
     }))
   })
 
-  describe('remove user', function() {
-    it('remove user from all entities', function(done) {
+  describe('remove user', function () {
+    it('remove user from all entities', function (done) {
       return this.UserMembershipsHandler.removeUserFromAllEntities(
         this.user._id,
         error => {

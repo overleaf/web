@@ -2,7 +2,7 @@ const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const path = require('path')
 const request = require('request-promise-native')
 const settings = require('settings-sharelatex')
@@ -37,11 +37,11 @@ async function addEntity(options) {
         sl_entity_rev: options.rev,
         sl_project_id: options.project_id,
         sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0]
+        sl_project_owner_user_id: projectUserIds[0],
       },
       uri: buildTpdsUrl(userId, options.project_name, options.path),
       title: 'addFile',
-      streamOrigin: options.streamOrigin
+      streamOrigin: options.streamOrigin,
     }
 
     await enqueue(userId, 'pipeStreamFrom', job)
@@ -62,12 +62,12 @@ function buildMovePaths(options) {
   if (options.newProjectName) {
     return {
       startPath: path.join('/', options.project_name, '/'),
-      endPath: path.join('/', options.newProjectName, '/')
+      endPath: path.join('/', options.newProjectName, '/'),
     }
   } else {
     return {
       startPath: path.join('/', options.project_name, '/', options.startPath),
-      endPath: path.join('/', options.project_name, '/', options.endPath)
+      endPath: path.join('/', options.project_name, '/', options.endPath),
     }
   }
 }
@@ -88,14 +88,41 @@ async function deleteEntity(options) {
       headers: {
         sl_project_id: options.project_id,
         sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0]
+        sl_project_owner_user_id: projectUserIds[0],
       },
       uri: buildTpdsUrl(userId, options.project_name, options.path),
       title: 'deleteEntity',
-      sl_all_user_ids: JSON.stringify([userId])
+      sl_all_user_ids: JSON.stringify([userId]),
     }
 
     await enqueue(userId, 'standardHttpRequest', job)
+  }
+}
+
+async function deleteProject(options) {
+  // deletion only applies to project archiver
+  const projectArchiverUrl = _.get(settings, [
+    'apis',
+    'project_archiver',
+    'url',
+  ])
+  // silently do nothing if project archiver url is not in settings
+  if (!projectArchiverUrl) {
+    return
+  }
+  metrics.inc('tpds.delete-project')
+  // send the request directly to project archiver, bypassing third-party-datastore
+  try {
+    const response = await request({
+      uri: `${settings.apis.project_archiver.url}/project/${options.project_id}`,
+      method: 'delete',
+    })
+    return response
+  } catch (err) {
+    logger.error(
+      { err, project_id: options.project_id },
+      'error deleting project in third party datastore (project_archiver)'
+    )
   }
 }
 
@@ -110,7 +137,7 @@ async function enqueue(group, method, job) {
       uri: `${tpdsWorkerUrl}/enqueue/web_to_tpds_http_requests`,
       json: { group, job, method },
       method: 'post',
-      timeout: 5 * 1000
+      timeout: 5 * 1000,
     })
     return response
   } catch (err) {
@@ -134,10 +161,10 @@ async function getProjectUsersIds(projectId) {
   const dropboxUsers = await UserGetter.getUsers(
     {
       _id: { $in: invitedUserIds.map(id => ObjectId(id)) },
-      'dropbox.access_token.uid': { $ne: null }
+      'dropbox.access_token.uid': { $ne: null },
     },
     {
-      _id: 1
+      _id: 1,
     }
   )
   const dropboxUserIds = dropboxUsers.map(user => user._id)
@@ -159,13 +186,13 @@ async function moveEntity(options) {
         sl_project_id: options.project_id,
         sl_entity_rev: options.rev,
         sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0]
+        sl_project_owner_user_id: projectUserIds[0],
       },
       json: {
         user_id: userId,
         endPath,
-        startPath
-      }
+        startPath,
+      },
     }
 
     await enqueue(userId, 'standardHttpRequest', job)
@@ -179,8 +206,8 @@ async function pollDropboxForUser(userId) {
     method: 'post',
     uri: `${tpdsUrl}/user/poll`,
     json: {
-      user_ids: [userId]
-    }
+      user_ids: [userId],
+    },
   }
 
   return enqueue(`poll-dropbox:${userId}`, 'standardHttpRequest', job)
@@ -191,6 +218,7 @@ const TpdsUpdateSender = {
   addEntity: callbackify(addEntity),
   addFile: callbackify(addFile),
   deleteEntity: callbackify(deleteEntity),
+  deleteProject: callbackify(deleteProject),
   enqueue: callbackify(enqueue),
   moveEntity: callbackify(moveEntity),
   pollDropboxForUser: callbackify(pollDropboxForUser),
@@ -199,10 +227,11 @@ const TpdsUpdateSender = {
     addEntity,
     addFile,
     deleteEntity,
+    deleteProject,
     enqueue,
     moveEntity,
-    pollDropboxForUser
-  }
+    pollDropboxForUser,
+  },
 }
 
 module.exports = TpdsUpdateSender

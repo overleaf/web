@@ -3,10 +3,10 @@ const settings = require('settings-sharelatex')
 const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')
-const BaseWithHeaderEmailLayout = require(`./Layouts/BaseWithHeaderEmailLayout`)
+const BaseWithHeaderEmailLayout = require('./Layouts/BaseWithHeaderEmailLayout')
 const SpamSafe = require('./SpamSafe')
 const ctaEmailBody = require('./Bodies/cta-email')
-const NoCTAEmailBody = require(`./Bodies/NoCTAEmailBody`)
+const NoCTAEmailBody = require('./Bodies/NoCTAEmailBody')
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
   let emailBody = `${content.greeting(opts, true)}`
@@ -79,9 +79,9 @@ function ctaTemplate(content) {
         ctaText: content.ctaText(opts),
         ctaURL: content.ctaURL(opts),
         gmailGoToAction: content.gmailGoToAction(opts),
-        StringHelper
+        StringHelper,
       })
-    }
+    },
   }
 }
 
@@ -113,9 +113,9 @@ The ${settings.appName} Team - ${settings.siteUrl}\
           typeof content.title === 'function' ? content.title(opts) : undefined,
         greeting: content.greeting(opts),
         message: content.message(opts),
-        StringHelper
+        StringHelper,
       })
-    }
+    },
   }
 }
 
@@ -126,7 +126,7 @@ function buildEmail(templateName, opts) {
   return {
     subject: template.subject(opts),
     html: template.layout(opts),
-    text: template.plainTextTemplate && template.plainTextTemplate(opts)
+    text: template.plainTextTemplate && template.plainTextTemplate(opts),
   }
 }
 
@@ -141,14 +141,12 @@ templates.registered = ctaTemplate({
       `Congratulations, you've just had an account created for you on ${
         settings.appName
       } with the email address '${_.escape(opts.to)}'.`,
-      'Click here to set your password and log in:'
+      'Click here to set your password and log in:',
     ]
   },
   secondaryMessage() {
     return [
-      `If you have any questions or problems, please contact ${
-        settings.adminEmail
-      }`
+      `If you have any questions or problems, please contact ${settings.adminEmail}`,
     ]
   },
   ctaText() {
@@ -156,7 +154,7 @@ templates.registered = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.setNewPasswordUrl
-  }
+  },
 })
 
 templates.canceledSubscription = ctaTemplate({
@@ -165,9 +163,7 @@ templates.canceledSubscription = ctaTemplate({
   },
   message() {
     return [
-      `We are sorry to see you cancelled your ${
-        settings.appName
-      } premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`
+      `We are sorry to see you cancelled your ${settings.appName} premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`,
     ]
   },
   secondaryMessage() {
@@ -178,7 +174,7 @@ templates.canceledSubscription = ctaTemplate({
   },
   ctaURL(opts) {
     return 'https://docs.google.com/forms/d/e/1FAIpQLSfa7z_s-cucRRXm70N4jEcSbFsZeb0yuKThHGQL8ySEaQzF0Q/viewform?usp=sf_link'
-  }
+  },
 })
 
 templates.reactivatedSubscription = ctaTemplate({
@@ -193,7 +189,7 @@ templates.reactivatedSubscription = ctaTemplate({
   },
   ctaURL(opts) {
     return `${settings.siteUrl}/user/subscription`
-  }
+  },
 })
 
 templates.passwordResetRequested = ctaTemplate({
@@ -209,7 +205,7 @@ templates.passwordResetRequested = ctaTemplate({
   secondaryMessage() {
     return [
       "If you ignore this message, your password won't be changed.",
-      "If you didn't request a password reset, let us know."
+      "If you didn't request a password reset, let us know.",
     ]
   },
   ctaText() {
@@ -217,7 +213,7 @@ templates.passwordResetRequested = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.setNewPasswordUrl
-  }
+  },
 })
 
 templates.confirmEmail = ctaTemplate({
@@ -227,15 +223,23 @@ templates.confirmEmail = ctaTemplate({
   title() {
     return 'Confirm Email'
   },
-  message() {
-    return [`Please confirm your email on ${settings.appName}.`]
+  message(opts) {
+    return [
+      `Please confirm that you have added a new email, ${opts.to}, to your ${settings.appName} account.`,
+    ]
+  },
+  secondaryMessage() {
+    return [
+      'If you did not request this, you can simply ignore this message.',
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
+    ]
   },
   ctaText() {
     return 'Confirm Email'
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
-  }
+  },
 })
 
 templates.projectInvite = ctaTemplate({
@@ -259,7 +263,7 @@ templates.projectInvite = ctaTemplate({
         SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
       )} wants to share ${_.escape(
         SpamSafe.safeProjectName(opts.project.name, 'a new project')
-      )} with you.`
+      )} with you.`,
     ]
   },
   ctaText() {
@@ -274,9 +278,35 @@ templates.projectInvite = ctaTemplate({
       name: 'View project',
       description: `Join ${_.escape(
         SpamSafe.safeProjectName(opts.project.name, 'project')
-      )} at ${settings.appName}`
+      )} at ${settings.appName}`,
     }
-  }
+  },
+})
+
+templates.reconfirmEmail = ctaTemplate({
+  subject() {
+    return `Reconfirm Email - ${settings.appName}`
+  },
+  title() {
+    return 'Reconfirm Email'
+  },
+  message(opts) {
+    return [
+      `Please reconfirm your email address, ${opts.to}, on your ${settings.appName} account.`,
+    ]
+  },
+  secondaryMessage() {
+    return [
+      'If you did not request this, you can simply ignore this message.',
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
+    ]
+  },
+  ctaText() {
+    return 'Reconfirm Email'
+  },
+  ctaURL(opts) {
+    return opts.confirmEmailUrl
+  },
 })
 
 templates.verifyEmailToJoinTeam = ctaTemplate({
@@ -292,9 +322,7 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   },
   message(opts) {
     return [
-      `Please click the button below to join the team and enjoy the benefits of an upgraded ${
-        settings.appName
-      } account.`
+      `Please click the button below to join the team and enjoy the benefits of an upgraded ${settings.appName} account.`,
     ]
   },
   ctaText(opts) {
@@ -302,7 +330,7 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.acceptInviteUrl
-  }
+  },
 })
 
 templates.testEmail = ctaTemplate({
@@ -323,7 +351,7 @@ templates.testEmail = ctaTemplate({
   },
   ctaURL() {
     return settings.siteUrl
-  }
+  },
 })
 
 templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
@@ -348,11 +376,9 @@ templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
       : `<b>${projectName}</b>`
     return [
       `As per your request, we have made ${nameAndEmail} the owner of ${projectNameDisplay}.`,
-      `If you haven't asked to change the owner of ${projectNameDisplay}, please get in touch with us via ${
-        settings.adminEmail
-      }.`
+      `If you haven't asked to change the owner of ${projectNameDisplay}, please get in touch with us via ${settings.adminEmail}.`,
     ]
-  }
+  },
 })
 
 templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
@@ -376,7 +402,7 @@ templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
       ? projectName
       : `<b>${projectName}</b>`
     return [
-      `${nameAndEmail} has made you the owner of ${projectNameEmphasized}. You can now manage ${projectName} sharing settings.`
+      `${nameAndEmail} has made you the owner of ${projectNameEmphasized}. You can now manage ${projectName} sharing settings.`,
     ]
   },
   ctaText(opts) {
@@ -387,7 +413,7 @@ templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
       settings.siteUrl
     }/project/${opts.project._id.toString()}`
     return projectUrl
-  }
+  },
 })
 
 templates.userOnboardingEmail = NoCTAEmailTemplate({
@@ -403,23 +429,17 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
   message(opts, isPlainText) {
     const learnLatexLink = EmailMessageHelper.displayLink(
       'Learn LaTeX in 30 minutes',
-      `${
-        settings.siteUrl
-      }/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      `${settings.siteUrl}/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
       isPlainText
     )
     const templatesLinks = EmailMessageHelper.displayLink(
       'Find a beautiful template',
-      `${
-        settings.siteUrl
-      }/latex/templates?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      `${settings.siteUrl}/latex/templates?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
       isPlainText
     )
     const collaboratorsLink = EmailMessageHelper.displayLink(
       'Work with your collaborators',
-      `${
-        settings.siteUrl
-      }/learn/how-to/Sharing_a_project?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
+      `${settings.siteUrl}/learn/how-to/Sharing_a_project?utm_source=overleaf&utm_medium=email&utm_campaign=onboarding`,
       isPlainText
     )
     const siteLink = EmailMessageHelper.displayLink(
@@ -438,9 +458,7 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       isPlainText
     )
     return [
-      `Thanks for signing up for ${
-        settings.appName
-      } recently. We hope you've been finding it useful! Here are some key features to help you get the most out of the service:`,
+      `Thanks for signing up for ${settings.appName} recently. We hope you've been finding it useful! Here are some key features to help you get the most out of the service:`,
       `${learnLatexLink}: In this tutorial we provide a quick and easy first introduction to LaTeX with no prior knowledge required. By the time you are finished, you will have written your first LaTeX document!`,
       `${templatesLinks}: If you're looking for a template or example to get started, we've a large selection available in our template gallery, including CVs, project reports, journal articles and more.`,
       `${collaboratorsLink}: One of the key features of Overleaf is the ability to share projects and collaborate on them with other users. Find out how to share your projecs with your colleagues in this quick how-to guide.`,
@@ -448,9 +466,9 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       'Thanks again for using Overleaf :)',
       `John`,
       `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
-      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`
+      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
     ]
-  }
+  },
 })
 
 templates.securityAlert = NoCTAEmailTemplate({
@@ -485,14 +503,38 @@ templates.securityAlert = NoCTAEmailTemplate({
       `We are writing to let you know that ${actionDescribed} on ${dateFormatted} at ${timeFormatted} GMT.`,
       ...message,
       `If this was you, you can ignore this email.`,
-      `If this was not you, we recommend getting in touch with our support team at ${
-        settings.adminEmail
-      } to report this as potentially suspicious activity on your account.`,
-      `We also encourage you to read our ${helpLink} to keeping your ${
-        settings.appName
-      } account safe.`
+      `If this was not you, we recommend getting in touch with our support team at ${settings.adminEmail} to report this as potentially suspicious activity on your account.`,
+      `We also encourage you to read our ${helpLink} to keeping your ${settings.appName} account safe.`,
     ]
-  }
+  },
+})
+
+templates.SAMLDataCleared = ctaTemplate({
+  subject(opts) {
+    return `Institutional Login No Longer Linked - ${settings.appName}`
+  },
+  title(opts) {
+    return 'Institutional Login No Longer Linked'
+  },
+  message(opts, isPlainText) {
+    return [
+      `We're writing to let you know that due to a bug on our end, we've had to temporarily disable logging into your ${settings.appName} through your institution.`,
+      `To get it going again, you'll need to relink your institutional email address to your ${settings.appName} account via your settings.`,
+    ]
+  },
+  secondaryMessage() {
+    return [
+      `If you ordinarily log in to your ${settings.appName} account through your institution, you may need to set or reset your password to regain access to your account first.`,
+      'This bug did not affect the security of any accounts, but it may have affected license entitlements for a small number of users. We are sorry for any inconvenience that this may cause for you.',
+      `If you have any questions, please get in touch with our support team at ${settings.adminEmail} or by replying to this email.`,
+    ]
+  },
+  ctaText(opts) {
+    return 'Update my Emails and Affiliations'
+  },
+  ctaURL(opts) {
+    return `${settings.siteUrl}/user/settings`
+  },
 })
 
 function _formatUserNameAndEmail(user, placeholder) {
@@ -513,5 +555,5 @@ module.exports = {
   templates,
   ctaTemplate,
   NoCTAEmailTemplate,
-  buildEmail
+  buildEmail,
 }

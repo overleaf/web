@@ -20,7 +20,7 @@
 @ol-blue-gray-6: #1e2530;
 
 @ol-green: #138a07;
-@ol-type-green: #0f7a06;
+@ol-type-green: #107206;
 @ol-dark-green: #004a0e;
 @ol-blue: #3e70bb;
 @ol-dark-blue: #2857a1;
@@ -33,6 +33,7 @@
 @red: #a93529;
 @yellow: #a1a729;
 @orange: #f89406;
+@orange-dark: #9e5e04;
 @pink: #c3325f;
 @purple: #7a43b6;
 
@@ -85,7 +86,8 @@
 
 @font-size-base: 16px;
 @font-size-large: ceil((@font-size-base * 1.25)); // ~18px
-@font-size-small: ceil((@font-size-base * 0.85)); // ~12px
+@font-size-small: ceil((@font-size-base * 0.85)); // ~14px
+@font-size-extra-small: ceil((@font-size-base * 0.7)); // ~12px
 
 @font-size-h1: floor((@font-size-base * 2)); // ~36px
 @font-size-h2: floor((@font-size-base * 1.6)); // ~30px
@@ -301,11 +303,11 @@
 
 @zindex-navbar: 1000;
 @zindex-dropdown: 1000;
-@zindex-popover: 1010;
-@zindex-tooltip: 1030;
 @zindex-navbar-fixed: 1030;
 @zindex-modal-background: 1040;
 @zindex-modal: 1050;
+@zindex-popover: 1060;
+@zindex-tooltip: 1070;
 
 //== Media queries breakpoints
 //
@@ -956,7 +958,6 @@
 @folders-tag-border-color: @folders-tag-menu-color;
 @folders-tag-menu-active-hover: rgba(0, 0, 0, 0.1);
 @folders-tag-menu-hover: rgba(0, 0, 0, 0.1);
-@info-badge-size: 21px;
 @info-badge-bg: @ol-blue;
 // Progress bars
 @progress-border-radius: @line-height-computed;
@@ -1000,7 +1001,6 @@
 @file-tree-line-height: 2.05;
 @file-tree-item-color: #fff;
 @file-tree-item-focus-color: @file-tree-item-color;
-@file-tree-item-focus-selected-color: @file-tree-item-color;
 @file-tree-item-selected-color: @file-tree-item-color;
 @file-tree-item-toggle-color: @ol-blue-gray-2;
 @file-tree-item-icon-color: @ol-blue-gray-2;
@@ -1011,6 +1011,7 @@
 @file-tree-multiselect-bg: @ol-blue;
 @file-tree-multiselect-hover-bg: @ol-dark-blue;
 @file-tree-droppable-bg-color: @ol-blue-gray-2;
+@file-tree-error-color: @ol-blue-gray-1;
 
 // File outline
 @outline-v-rhythm: 24px;
@@ -1018,7 +1019,7 @@
 @outline-item-h-padding: @outline-h-rhythm * 0.25;
 @outline-line-guide-color: @ol-blue-gray-3;
 @outline-expand-collapse-color: @ol-blue-gray-2;
-@outline-no-items-color: @ol-blue-gray-2;
+@outline-no-items-color: @file-tree-item-color;
 @outline-header-hover-bg: @ol-blue-gray-6;
 @outline-highlight-bg: tint(@file-tree-bg, 15%);
 @vertical-resizable-resizer-bg: @ol-blue-gray-5;
@@ -1048,6 +1049,7 @@
 
 // Chat
 @chat-bg: @ol-blue-gray-5;
+@chat-instructions-color: @ol-blue-gray-1;
 @chat-message-color: #fff;
 @chat-message-date-color: @ol-blue-gray-2;
 @chat-message-name-color: #fff;
@@ -1060,11 +1062,12 @@
 @chat-new-message-textarea-color: @ol-blue-gray-6;
 @chat-new-message-border-color: @editor-border-color;
 
-// PDF
+// PDF and logs
 @pdf-top-offset: @toolbar-small-height;
 @pdf-bg: @ol-blue-gray-1;
 @pdfjs-bg: transparent;
 @pdf-page-shadow-color: rgba(0, 0, 0, 0.5);
+@logs-pane-bg: @ol-blue-gray-5;
 @log-line-no-color: #fff;
 @log-hints-color: @ol-blue-gray-4;
 
@@ -1095,11 +1098,12 @@
 @history-entry-selected-label-bg-color: #fff;
 @history-entry-selected-label-color: @ol-blue;
 @history-entry-selected-pseudo-label-color: @ol-green;
-@history-entry-day-bg: @ol-blue-gray-2;
+@history-entry-day-bg: @ol-blue-gray-1;
+@history-entry-day-color: @ol-blue-gray-3;
 @history-entry-selected-bg: @ol-green;
 @history-entry-handle-bg: darken(@ol-green, 10%);
 @history-entry-handle-height: 8px;
-@history-base-color: @ol-blue-gray-2;
+@history-base-color: @ol-blue-gray-3;
 @history-highlight-color: @ol-type-color;
 @history-toolbar-bg-color: @editor-toolbar-bg;
 @history-toolbar-color: #fff;
@@ -1108,3 +1112,12 @@
 
 // Input suggestions
 @input-suggestion-v-offset: 4px;
+
+// Symbol Palette
+@symbol-palette-bg: @ol-blue-gray-4;
+@symbol-palette-color: #fff;
+@symbol-palette-header-background: @ol-blue-gray-5;
+@symbol-palette-item-bg: @ol-blue-gray-5;
+@symbol-palette-item-color: #fff;
+@symbol-palette-selected-tab-bg: @ol-blue-gray-4;
+@symbol-palette-selected-tab-color: #fff;

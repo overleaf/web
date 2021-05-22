@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import App from '../../base'
 import './services/project-list'
-App.controller('ProjectPageController', function(
+App.controller('ProjectPageController', function (
   $scope,
   $modal,
   $window,
@@ -22,7 +22,7 @@ App.controller('ProjectPageController', function(
   $scope.nUntagged = 0
   $scope.reverse = true
   $scope.searchText = { value: '' }
-  $scope.$watch('predicate', function(newValue) {
+  $scope.$watch('predicate', function (newValue) {
     $scope.comparator =
       newValue === 'ownerName' ? ownerNameComparator : defaultComparator
   })
@@ -40,7 +40,7 @@ App.controller('ProjectPageController', function(
     newVal => ($scope.nUntagged = newVal)
   )
 
-  var recalculateProjectListHeight = function() {
+  var recalculateProjectListHeight = function () {
     const $projListCard = $('.project-list-card')
     if (!$projListCard || !$projListCard.offset()) return
 
@@ -112,7 +112,7 @@ App.controller('ProjectPageController', function(
     }
   }
 
-  angular.element($window).bind('resize', function() {
+  angular.element($window).bind('resize', function () {
     recalculateProjectListHeight()
     $scope.$apply()
   })
@@ -123,15 +123,15 @@ App.controller('ProjectPageController', function(
 
   // Allow tags to be accessed on projects as well
   const projectsById = {}
-  for (let project of $scope.projects) {
+  for (const project of $scope.projects) {
     projectsById[project.id] = project
   }
 
   $scope.getProjectById = id => projectsById[id]
 
-  for (let tag of $scope.tags) {
-    for (let projectId of tag.project_ids || []) {
-      let project = projectsById[projectId]
+  for (const tag of $scope.tags) {
+    for (const projectId of tag.project_ids || []) {
+      const project = projectsById[projectId]
       if (project) {
         if (!project.tags) {
           project.tags = []
@@ -141,14 +141,14 @@ App.controller('ProjectPageController', function(
     }
   }
 
-  $scope.changePredicate = function(newPredicate) {
+  $scope.changePredicate = function (newPredicate) {
     if ($scope.predicate === newPredicate) {
       $scope.reverse = !$scope.reverse
     }
     $scope.predicate = newPredicate
   }
 
-  $scope.getSortIconClass = function(column) {
+  $scope.getSortIconClass = function (column) {
     if (column === $scope.predicate && $scope.reverse) {
       return 'fa-caret-down'
     } else if (column === $scope.predicate && !$scope.reverse) {
@@ -158,7 +158,7 @@ App.controller('ProjectPageController', function(
     }
   }
 
-  $scope.searchProjects = function() {
+  $scope.searchProjects = function () {
     eventTracking.send(
       'project-list-page-interaction',
       'project-search',
@@ -167,19 +167,19 @@ App.controller('ProjectPageController', function(
     $scope.updateVisibleProjects()
   }
 
-  $scope.clearSearchText = function() {
+  $scope.clearSearchText = function () {
     $scope.searchText.value = ''
     $scope.filter = 'all'
     $scope.$emit('search:clear')
     $scope.updateVisibleProjects()
   }
 
-  $scope.setFilter = function(filter) {
+  $scope.setFilter = function (filter) {
     $scope.filter = filter
     $scope.updateVisibleProjects()
   }
 
-  $scope.updateSelectedProjects = function() {
+  $scope.updateSelectedProjects = function () {
     $scope.selectedProjects = $scope.projects.filter(
       project => project.selected
     )
@@ -204,10 +204,10 @@ App.controller('ProjectPageController', function(
       project => project.accessLevel === 'owner' && project.trashed
     )
 
-  $scope.updateVisibleProjects = function() {
+  $scope.updateVisibleProjects = function () {
     $scope.visibleProjects = []
     const selectedTag = $scope.getSelectedTag()
-    for (let project of $scope.projects) {
+    for (const project of $scope.projects) {
       let visible = true
       // Only show if it matches any search text
       if ($scope.searchText.value !== '') {
@@ -282,14 +282,14 @@ App.controller('ProjectPageController', function(
       'project_list',
       JSON.stringify({
         filter: $scope.filter,
-        selectedTagId: selectedTag != null ? selectedTag._id : undefined
+        selectedTagId: selectedTag != null ? selectedTag._id : undefined,
       })
     )
     $scope.updateSelectedProjects()
   }
 
-  $scope.getSelectedTag = function() {
-    for (let tag of $scope.tags) {
+  $scope.getSelectedTag = function () {
+    for (const tag of $scope.tags) {
       if (tag.selected) {
         return tag
       }
@@ -297,11 +297,11 @@ App.controller('ProjectPageController', function(
     return null
   }
 
-  $scope._removeProjectIdsFromTagArray = function(tag, removeProjectIds) {
+  $scope._removeProjectIdsFromTagArray = function (tag, removeProjectIds) {
     // Remove project_id from tag.project_ids
     const remainingProjectIds = []
     const removedProjectIds = []
-    for (let projectId of tag.project_ids) {
+    for (const projectId of tag.project_ids) {
       if (!removeProjectIds.includes(projectId)) {
         remainingProjectIds.push(projectId)
       } else {
@@ -312,14 +312,14 @@ App.controller('ProjectPageController', function(
     return removedProjectIds
   }
 
-  $scope._removeProjectFromList = function(project) {
+  $scope._removeProjectFromList = function (project) {
     const index = $scope.projects.indexOf(project)
     if (index > -1) {
       $scope.projects.splice(index, 1)
     }
   }
 
-  $scope.removeSelectedProjectsFromTag = function(tag) {
+  $scope.removeSelectedProjectsFromTag = function (tag) {
     tag.showWhenEmpty = true
 
     const selectedProjectIds = $scope.getSelectedProjectIds()
@@ -331,7 +331,7 @@ App.controller('ProjectPageController', function(
     )
 
     // Remove tag from project.tags
-    for (let project of selectedProjects) {
+    for (const project of selectedProjects) {
       if (!project.tags) {
         project.tags = []
       }
@@ -341,13 +341,13 @@ App.controller('ProjectPageController', function(
       }
     }
 
-    for (let projectId of removedProjectIds) {
+    for (const projectId of removedProjectIds) {
       queuedHttp({
         method: 'DELETE',
         url: `/tag/${tag._id}/project/${projectId}`,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
     }
 
@@ -356,7 +356,7 @@ App.controller('ProjectPageController', function(
     $scope.updateVisibleProjects()
   }
 
-  $scope.removeProjectFromTag = function(project, tag) {
+  $scope.removeProjectFromTag = function (project, tag) {
     tag.showWhenEmpty = true
 
     if (!project.tags) {
@@ -371,14 +371,14 @@ App.controller('ProjectPageController', function(
         method: 'DELETE',
         url: `/tag/${tag._id}/project/${project.id}`,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
       $scope.updateVisibleProjects()
     }
   }
 
-  $scope.addSelectedProjectsToTag = function(tag) {
+  $scope.addSelectedProjectsToTag = function (tag) {
     const selectedProjects = $scope.getSelectedProjects()
     eventTracking.send(
       'project-list-page-interaction',
@@ -388,7 +388,7 @@ App.controller('ProjectPageController', function(
 
     // Add project_ids into tag.project_ids
     const addedProjectIds = []
-    for (let projectId of $scope.getSelectedProjectIds()) {
+    for (const projectId of $scope.getSelectedProjectIds()) {
       if (!tag.project_ids.includes(projectId)) {
         tag.project_ids.push(projectId)
         addedProjectIds.push(projectId)
@@ -396,7 +396,7 @@ App.controller('ProjectPageController', function(
     }
 
     // Add tag into each project.tags
-    for (let project of selectedProjects) {
+    for (const project of selectedProjects) {
       if (!project.tags) {
         project.tags = []
       }
@@ -405,21 +405,21 @@ App.controller('ProjectPageController', function(
       }
     }
 
-    for (let projectId of addedProjectIds) {
+    for (const projectId of addedProjectIds) {
       queuedHttp.post(`/tag/${tag._id}/project/${projectId}`, {
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
   }
 
-  $scope.openNewTagModal = function(e) {
+  $scope.openNewTagModal = function (e) {
     const modalInstance = $modal.open({
       templateUrl: 'newTagModalTemplate',
-      controller: 'NewTagModalController'
+      controller: 'NewTagModalController',
     })
 
-    modalInstance.result.then(function(tag) {
-      const tagIsDuplicate = $scope.tags.find(function(existingTag) {
+    modalInstance.result.then(function (tag) {
+      const tagIsDuplicate = $scope.tags.find(function (existingTag) {
         return tag.name === existingTag.name
       })
 
@@ -430,7 +430,7 @@ App.controller('ProjectPageController', function(
     })
   }
 
-  $scope.createProject = function(name, template) {
+  $scope.createProject = function (name, template) {
     if (template == null) {
       template = 'none'
     }
@@ -438,15 +438,15 @@ App.controller('ProjectPageController', function(
       .post('/project/new', {
         _csrf: window.csrfToken,
         projectName: name,
-        template
+        template,
       })
-      .then(function(response) {
+      .then(function (response) {
         const { data } = response
         $scope.projects.push({
           name,
           _id: data.project_id,
           accessLevel: 'owner',
-          owner: data.owner
+          owner: data.owner,
           // TODO: Check access level if correct after adding it in
           // to the rest of the app
         })
@@ -454,7 +454,7 @@ App.controller('ProjectPageController', function(
       })
   }
 
-  $scope.openCreateProjectModal = function(template) {
+  $scope.openCreateProjectModal = function (template) {
     if (template == null) {
       template = 'none'
     }
@@ -465,9 +465,9 @@ App.controller('ProjectPageController', function(
       resolve: {
         template() {
           return template
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
 
     modalInstance.result.then(
@@ -479,12 +479,12 @@ App.controller('ProjectPageController', function(
     queuedHttp
       .post(`/project/${project.id}/rename`, {
         newProjectName: newName,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
       .then(() => (project.name = newName))
 
-  $scope.openRenameProjectModal = function() {
-    let project = $scope.getFirstSelectedProject()
+  $scope.openRenameProjectModal = function () {
+    const project = $scope.getFirstSelectedProject()
     if (!project || project.accessLevel !== 'owner') {
       return
     }
@@ -499,13 +499,13 @@ App.controller('ProjectPageController', function(
       resolve: {
         project() {
           return project
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
   }
 
-  $scope.cloneProject = function(project, cloneName) {
+  $scope.cloneProject = function (project, cloneName) {
     eventTracking.send(
       'project-list-page-interaction',
       'project action',
@@ -514,15 +514,15 @@ App.controller('ProjectPageController', function(
     return queuedHttp
       .post(`/project/${project.id}/clone`, {
         _csrf: window.csrfToken,
-        projectName: cloneName
+        projectName: cloneName,
       })
-      .then(function(response) {
+      .then(function (response) {
         const { data } = response
         $scope.projects.push({
           name: data.name,
           id: data.project_id,
           accessLevel: 'owner',
-          owner: data.owner
+          owner: data.owner,
           // TODO: Check access level if correct after adding it in
           // to the rest of the app
         })
@@ -530,8 +530,7 @@ App.controller('ProjectPageController', function(
       })
   }
 
-  $scope.openCloneProjectModal = function() {
-    let project = $scope.getFirstSelectedProject()
+  $scope.openCloneProjectModal = function (project) {
     if (!project) {
       return
     }
@@ -542,14 +541,14 @@ App.controller('ProjectPageController', function(
       resolve: {
         project() {
           return project
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
   }
 
   // Methods to create modals for archiving, trashing, leaving and deleting projects
-  const _createArchiveTrashLeaveOrDeleteProjectsModal = function(
+  const _createArchiveTrashLeaveOrDeleteProjectsModal = function (
     action,
     projects
   ) {
@@ -567,28 +566,28 @@ App.controller('ProjectPageController', function(
         },
         action() {
           return action
-        }
-      }
+        },
+      },
     })
   }
 
-  $scope.createArchiveProjectsModal = function(projects) {
+  $scope.createArchiveProjectsModal = function (projects) {
     return _createArchiveTrashLeaveOrDeleteProjectsModal('archive', projects)
   }
 
-  $scope.createTrashProjectsModal = function(projects) {
+  $scope.createTrashProjectsModal = function (projects) {
     return _createArchiveTrashLeaveOrDeleteProjectsModal('trash', projects)
   }
 
-  $scope.createLeaveProjectsModal = function(projects) {
+  $scope.createLeaveProjectsModal = function (projects) {
     return _createArchiveTrashLeaveOrDeleteProjectsModal('leave', projects)
   }
 
-  $scope.createDeleteProjectsModal = function(projects) {
+  $scope.createDeleteProjectsModal = function (projects) {
     return _createArchiveTrashLeaveOrDeleteProjectsModal('delete', projects)
   }
 
-  $scope.createLeaveOrDeleteProjectsModal = function(projects) {
+  $scope.createLeaveOrDeleteProjectsModal = function (projects) {
     return _createArchiveTrashLeaveOrDeleteProjectsModal(
       'leaveOrDelete',
       projects
@@ -596,14 +595,14 @@ App.controller('ProjectPageController', function(
   }
 
   //
-  $scope.openArchiveProjectsModal = function() {
+  $scope.openArchiveProjectsModal = function () {
     const modalInstance = $scope.createArchiveProjectsModal(
       $scope.getSelectedProjects()
     )
     modalInstance.result.then(() => $scope.archiveSelectedProjects())
   }
 
-  $scope.openTrashProjectsModal = function() {
+  $scope.openTrashProjectsModal = function () {
     const modalInstance = $scope.createTrashProjectsModal(
       $scope.getSelectedProjects()
     )
@@ -611,21 +610,21 @@ App.controller('ProjectPageController', function(
     modalInstance.result.then(() => $scope.trashSelectedProjects())
   }
 
-  $scope.openLeaveProjectsModal = function() {
+  $scope.openLeaveProjectsModal = function () {
     const modalInstance = $scope.createLeaveProjectsModal(
       $scope.getSelectedProjects()
     )
     modalInstance.result.then(() => $scope.leaveSelectedProjects())
   }
 
-  $scope.openDeleteProjectsModal = function() {
+  $scope.openDeleteProjectsModal = function () {
     const modalInstance = $scope.createDeleteProjectsModal(
       $scope.getSelectedProjects()
     )
     modalInstance.result.then(() => $scope.deleteSelectedProjects())
   }
 
-  $scope.openLeaveOrDeleteProjectsModal = function() {
+  $scope.openLeaveOrDeleteProjectsModal = function () {
     const modalInstance = $scope.createLeaveOrDeleteProjectsModal(
       $scope.getSelectedProjects()
     )
@@ -655,8 +654,8 @@ App.controller('ProjectPageController', function(
     $scope.leaveOrDeleteProjects($scope.getSelectedProjects())
 
   //
-  $scope.archiveProjects = function(projects) {
-    for (let project of projects) {
+  $scope.archiveProjects = function (projects) {
+    for (const project of projects) {
       project.archived = true
       project.trashed = false
       _archiveProject(project)
@@ -664,16 +663,16 @@ App.controller('ProjectPageController', function(
     $scope.updateVisibleProjects()
   }
 
-  $scope.unarchiveProjects = function(projects) {
-    for (let project of projects) {
+  $scope.unarchiveProjects = function (projects) {
+    for (const project of projects) {
       project.archived = false
       _unarchiveProject(project)
     }
     $scope.updateVisibleProjects()
   }
 
-  $scope.trashProjects = function(projects) {
-    for (let project of projects) {
+  $scope.trashProjects = function (projects) {
+    for (const project of projects) {
       project.trashed = true
       project.archived = false
       _trashProject(project)
@@ -681,33 +680,33 @@ App.controller('ProjectPageController', function(
     $scope.updateVisibleProjects()
   }
 
-  $scope.untrashProjects = function(projects) {
-    for (let project of projects) {
+  $scope.untrashProjects = function (projects) {
+    for (const project of projects) {
       project.trashed = false
       _untrashProject(project)
     }
     $scope.updateVisibleProjects()
   }
 
-  $scope.leaveProjects = function(projects) {
+  $scope.leaveProjects = function (projects) {
     _deleteOrLeaveProjectsLocally(projects)
-    for (let project of projects) {
+    for (const project of projects) {
       _leaveProject(project)
     }
     $scope.updateVisibleProjects()
   }
 
-  $scope.deleteProjects = function(projects) {
+  $scope.deleteProjects = function (projects) {
     _deleteOrLeaveProjectsLocally(projects)
-    for (let project of projects) {
+    for (const project of projects) {
       _deleteProject(project)
     }
     $scope.updateVisibleProjects()
   }
 
-  $scope.leaveOrDeleteProjects = function(projects) {
+  $scope.leaveOrDeleteProjects = function (projects) {
     _deleteOrLeaveProjectsLocally(projects)
-    for (let project of projects) {
+    for (const project of projects) {
       if (project.accessLevel === 'owner') {
         _deleteProject(project)
       } else {
@@ -718,77 +717,77 @@ App.controller('ProjectPageController', function(
   }
 
   // Actual interaction with the backend---we could move this into a service
-  const _archiveProject = function(project) {
+  const _archiveProject = function (project) {
     return queuedHttp({
       method: 'POST',
       url: `/project/${project.id}/archive`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _unarchiveProject = function(project) {
+  const _unarchiveProject = function (project) {
     return queuedHttp({
       method: 'DELETE',
       url: `/project/${project.id}/archive`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _trashProject = function(project) {
+  const _trashProject = function (project) {
     return queuedHttp({
       method: 'POST',
       url: `/project/${project.id}/trash`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _untrashProject = function(project) {
+  const _untrashProject = function (project) {
     return queuedHttp({
       method: 'DELETE',
       url: `/project/${project.id}/trash`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _leaveProject = function(project) {
+  const _leaveProject = function (project) {
     return queuedHttp({
       method: 'POST',
       url: `/project/${project.id}/leave`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _deleteProject = function(project) {
+  const _deleteProject = function (project) {
     return queuedHttp({
       method: 'DELETE',
       url: `/project/${project.id}`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
-  const _deleteOrLeaveProjectsLocally = function(projects) {
+  const _deleteOrLeaveProjectsLocally = function (projects) {
     const projectIds = projects.map(p => p.id)
-    for (let tag of $scope.tags || []) {
+    for (const tag of $scope.tags || []) {
       $scope._removeProjectIdsFromTagArray(tag, projectIds)
     }
-    for (let project of projects || []) {
+    for (const project of projects || []) {
       $scope._removeProjectFromList(project)
     }
   }
 
-  $scope.getValueForCurrentPredicate = function(project) {
+  $scope.getValueForCurrentPredicate = function (project) {
     if ($scope.predicate === 'ownerName') {
       return ProjectListService.getOwnerName(project)
     } else {
@@ -796,17 +795,17 @@ App.controller('ProjectPageController', function(
     }
   }
 
-  $scope.openUploadProjectModal = function() {
+  $scope.openUploadProjectModal = function () {
     $modal.open({
       templateUrl: 'uploadProjectModalTemplate',
-      controller: 'UploadProjectModalController'
+      controller: 'UploadProjectModalController',
     })
   }
 
   $scope.downloadSelectedProjects = () =>
     $scope.downloadProjectsById($scope.getSelectedProjectIds())
 
-  $scope.downloadProjectsById = function(projectIds) {
+  $scope.downloadProjectsById = function (projectIds) {
     let path
     eventTracking.send(
       'project-list-page-interaction',
@@ -822,7 +821,7 @@ App.controller('ProjectPageController', function(
   }
 
   const markTagAsSelected = id => {
-    for (let tag of $scope.tags) {
+    for (const tag of $scope.tags) {
       if (tag._id === id) {
         tag.selected = true
       } else {
@@ -843,100 +842,81 @@ App.controller('ProjectPageController', function(
   }
 })
 
-App.controller('ProjectListItemController', function(
-  $scope,
-  $modal,
-  queuedHttp,
-  ProjectListService
-) {
-  $scope.projectLink = function(project) {
-    return `/project/${project.id}`
-  }
-
-  $scope.isLinkSharingProject = project => project.source === 'token'
-
-  $scope.hasGenericOwnerName = () => {
-    /* eslint-disable camelcase */
-    const { first_name, last_name, email } = $scope.project.owner
-    return !first_name && !last_name && !email
-    /* eslint-enable camelcase */
-  }
-
-  $scope.getOwnerName = ProjectListService.getOwnerName
-
-  $scope.getUserName = ProjectListService.getUserName
-
-  $scope.isOwner = () =>
-    $scope.project.owner && window.user_id === $scope.project.owner._id
-
-  $scope.$watch('project.selected', function(value) {
-    if (value != null) {
-      $scope.updateSelectedProjects()
+App.controller(
+  'ProjectListItemController',
+  function ($scope, $modal, queuedHttp, ProjectListService) {
+    $scope.projectLink = function (project) {
+      return `/project/${project.id}`
     }
-  })
 
-  $scope.clone = function(e) {
-    e.stopPropagation()
-    $scope.project.isTableActionInflight = true
-    return $scope
-      .cloneProject($scope.project, `${$scope.project.name} (Copy)`)
-      .then(() => ($scope.project.isTableActionInflight = false))
-      .catch(function(response) {
-        const { data, status } = response
-        const error = status === 400 ? { message: data } : true
-        $modal.open({
-          templateUrl: 'showErrorModalTemplate',
-          controller: 'ShowErrorModalController',
-          resolve: {
-            error() {
-              return error
-            }
-          }
-        })
-        $scope.project.isTableActionInflight = false
+    $scope.isLinkSharingProject = project => project.source === 'token'
+
+    $scope.hasGenericOwnerName = () => {
+      /* eslint-disable camelcase */
+      const { first_name, last_name, email } = $scope.project.owner
+      return !first_name && !last_name && !email
+      /* eslint-enable camelcase */
+    }
+
+    $scope.getOwnerName = ProjectListService.getOwnerName
+
+    $scope.getUserName = ProjectListService.getUserName
+
+    $scope.isOwner = () =>
+      $scope.project.owner && window.user_id === $scope.project.owner._id
+
+    $scope.$watch('project.selected', function (value) {
+      if (value != null) {
+        $scope.updateSelectedProjects()
+      }
+    })
+
+    $scope.clone = function (e) {
+      e.stopPropagation()
+      $scope.openCloneProjectModal($scope.project)
+    }
+
+    $scope.download = function (e) {
+      e.stopPropagation()
+      $scope.downloadProjectsById([$scope.project.id])
+    }
+
+    $scope.archive = function (e) {
+      e.stopPropagation()
+      $scope.createArchiveProjectsModal([$scope.project]).result.then(() => {
+        $scope.archiveProjects([$scope.project])
       })
-  }
+    }
 
-  $scope.download = function(e) {
-    e.stopPropagation()
-    $scope.downloadProjectsById([$scope.project.id])
-  }
+    $scope.unarchive = function (e) {
+      e.stopPropagation()
+      $scope.unarchiveProjects([$scope.project])
+    }
 
-  $scope.archive = function(e) {
-    e.stopPropagation()
-    $scope.createArchiveProjectsModal([$scope.project]).result.then(() => {
-      $scope.archiveProjects([$scope.project])
-    })
-  }
+    $scope.trash = function (e) {
+      e.stopPropagation()
+      $scope.createTrashProjectsModal([$scope.project]).result.then(() => {
+        $scope.trashProjects([$scope.project])
+      })
+    }
 
-  $scope.unarchive = function(e) {
-    e.stopPropagation()
-    $scope.unarchiveProjects([$scope.project])
-  }
+    $scope.untrash = function (e) {
+      e.stopPropagation()
+      $scope.untrashProjects([$scope.project])
+    }
 
-  $scope.trash = function(e) {
-    e.stopPropagation()
-    $scope.createTrashProjectsModal([$scope.project]).result.then(() => {
-      $scope.trashProjects([$scope.project])
-    })
-  }
+    $scope.leave = function (e) {
+      e.stopPropagation()
+      $scope.createLeaveProjectsModal([$scope.project]).result.then(() => {
+        $scope.leaveProjects([$scope.project])
+      })
+    }
 
-  $scope.untrash = function(e) {
-    e.stopPropagation()
-    $scope.untrashProjects([$scope.project])
+    $scope.delete = function (e) {
+      e.stopPropagation()
+      $scope.createDeleteProjectsModal([$scope.project]).result.then(() => {
+        $scope.deleteProjects([$scope.project])
+      })
+    }
   }
-
-  $scope.leave = function(e) {
-    e.stopPropagation()
-    $scope.createLeaveProjectsModal([$scope.project]).result.then(() => {
-      $scope.leaveProjects([$scope.project])
-    })
-  }
-
-  $scope.delete = function(e) {
-    e.stopPropagation()
-    $scope.createDeleteProjectsModal([$scope.project]).result.then(() => {
-      $scope.deleteProjects([$scope.project])
-    })
-  }
-})
+)

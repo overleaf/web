@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -15,28 +15,28 @@ const { SystemMessage } = require('../../models/SystemMessage')
 module.exports = SystemMessageManager = {
   getMessages(callback) {
     if (callback == null) {
-      callback = function(error, messages) {}
+      callback = function (error, messages) {}
     }
     callback(null, this._cachedMessages)
   },
 
   getMessagesFromDB(callback) {
     if (callback == null) {
-      callback = function(error, messages) {}
+      callback = function (error, messages) {}
     }
     return SystemMessage.find({}, callback)
   },
 
   clearMessages(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return SystemMessage.remove({}, callback)
+    return SystemMessage.deleteMany({}, callback)
   },
 
   createMessage(content, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const message = new SystemMessage({ content })
     return message.save(callback)
@@ -48,7 +48,7 @@ module.exports = SystemMessageManager = {
         this._cachedMessages = messages
       }
     })
-  }
+  },
 }
 
 const CACHE_TIMEOUT = 10 * 1000 * (Math.random() + 2) // 20-30 seconds

@@ -10,14 +10,13 @@ if (process.env.BATCH_LAST_ID) {
 async function getNextBatch(collection, query, maxId, projection) {
   maxId = maxId || BATCH_LAST_ID
   if (maxId) {
-    query['_id'] = { $gt: maxId }
+    query._id = { $gt: maxId }
   }
   const entries = await collection
-    .find(query)
+    .find(query, { readPreference: ReadPreference.SECONDARY })
     .project(projection)
     .sort({ _id: 1 })
     .limit(BATCH_SIZE)
-    .setReadPreference(ReadPreference.SECONDARY)
     .toArray()
   return entries
 }
@@ -43,13 +42,19 @@ async function batchedUpdate(collectionName, query, update, projection) {
   ) {
     maxId = nextBatch[nextBatch.length - 1]._id
     updated += nextBatch.length
-    console.log(JSON.stringify(nextBatch))
+    console.log(
+      `Running update on batch with ids ${JSON.stringify(
+        nextBatch.map(entry => entry._id)
+      )}`
+    )
 
     if (typeof update === 'function') {
       await update(collection, nextBatch)
     } else {
       await performUpdate(collection, nextBatch, update)
     }
+
+    console.error(`Completed batch ending ${maxId}`)
   }
   return updated
 }
@@ -69,5 +74,5 @@ function batchedUpdateWithResultHandling(collection, query, update) {
 module.exports = {
   getNextBatch,
   batchedUpdate,
-  batchedUpdateWithResultHandling
+  batchedUpdateWithResultHandling,
 }

@@ -11,17 +11,15 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectDownloadsController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 
-describe('ProjectDownloadsController', function() {
-  beforeEach(function() {
+describe('ProjectDownloadsController', function () {
+  beforeEach(function () {
     this.project_id = 'project-id-123'
     this.req = new MockRequest()
     this.res = new MockResponse()
@@ -30,23 +28,19 @@ describe('ProjectDownloadsController', function() {
     return (this.ProjectDownloadsController = SandboxedModule.require(
       modulePath,
       {
-        globals: {
-          console: console
-        },
         requires: {
           './ProjectZipStreamManager': (this.ProjectZipStreamManager = {}),
           '../Project/ProjectGetter': (this.ProjectGetter = {}),
-          'metrics-sharelatex': (this.metrics = {}),
-          'logger-sharelatex': (this.logger = { log: sinon.stub() }),
+          '@overleaf/metrics': (this.metrics = {}),
           '../DocumentUpdater/DocumentUpdaterHandler': this
-            .DocumentUpdaterHandler
-        }
+            .DocumentUpdaterHandler,
+        },
       }
     ))
   })
 
-  describe('downloadProject', function() {
-    beforeEach(function() {
+  describe('downloadProject', function () {
+    beforeEach(function () {
       this.stream = { pipe: sinon.stub() }
       this.ProjectZipStreamManager.createZipStreamForProject = sinon
         .stub()
@@ -69,47 +63,47 @@ describe('ProjectDownloadsController', function() {
       )
     })
 
-    it('should create a zip from the project', function() {
+    it('should create a zip from the project', function () {
       return this.ProjectZipStreamManager.createZipStreamForProject
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should stream the zip to the request', function() {
+    it('should stream the zip to the request', function () {
       return this.stream.pipe.calledWith(this.res).should.equal(true)
     })
 
-    it('should set the correct content type on the request', function() {
+    it('should set the correct content type on the request', function () {
       return this.res.contentType
         .calledWith('application/zip')
         .should.equal(true)
     })
 
-    it('should flush the project to mongo', function() {
+    it('should flush the project to mongo', function () {
       return this.DocumentUpdaterHandler.flushProjectToMongo
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it("should look up the project's name", function() {
+    it("should look up the project's name", function () {
       return this.ProjectGetter.getProject
         .calledWith(this.project_id, { name: true })
         .should.equal(true)
     })
 
-    it('should name the downloaded file after the project', function() {
+    it('should name the downloaded file after the project', function () {
       return this.res.setContentDisposition
         .calledWith('attachment', { filename: `${this.project_name}.zip` })
         .should.equal(true)
     })
 
-    it('should record the action via Metrics', function() {
+    it('should record the action via Metrics', function () {
       return this.metrics.inc.calledWith('zip-downloads').should.equal(true)
     })
   })
 
-  describe('downloadMultipleProjects', function() {
-    beforeEach(function() {
+  describe('downloadMultipleProjects', function () {
+    beforeEach(function () {
       this.stream = { pipe: sinon.stub() }
       this.ProjectZipStreamManager.createZipStreamForMultipleProjects = sinon
         .stub()
@@ -129,37 +123,37 @@ describe('ProjectDownloadsController', function() {
       )
     })
 
-    it('should create a zip from the project', function() {
+    it('should create a zip from the project', function () {
       return this.ProjectZipStreamManager.createZipStreamForMultipleProjects
         .calledWith(this.project_ids)
         .should.equal(true)
     })
 
-    it('should stream the zip to the request', function() {
+    it('should stream the zip to the request', function () {
       return this.stream.pipe.calledWith(this.res).should.equal(true)
     })
 
-    it('should set the correct content type on the request', function() {
+    it('should set the correct content type on the request', function () {
       return this.res.contentType
         .calledWith('application/zip')
         .should.equal(true)
     })
 
-    it('should flush the projects to mongo', function() {
+    it('should flush the projects to mongo', function () {
       return this.DocumentUpdaterHandler.flushMultipleProjectsToMongo
         .calledWith(this.project_ids)
         .should.equal(true)
     })
 
-    it('should name the downloaded file after the project', function() {
+    it('should name the downloaded file after the project', function () {
       return this.res.setContentDisposition
         .calledWith('attachment', {
-          filename: 'Overleaf Projects (2 items).zip'
+          filename: 'Overleaf Projects (2 items).zip',
         })
         .should.equal(true)
     })
 
-    it('should record the action via Metrics', function() {
+    it('should record the action via Metrics', function () {
       return this.metrics.inc
         .calledWith('zip-downloads-multiple')
         .should.equal(true)

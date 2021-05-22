@@ -17,7 +17,7 @@ const FileStoreHandler = {
   RETRY_ATTEMPTS: 3,
 
   uploadFileFromDisk(projectId, fileArgs, fsPath, callback) {
-    fs.lstat(fsPath, function(err, stat) {
+    fs.lstat(fsPath, function (err, stat) {
       if (err) {
         logger.warn({ err, projectId, fileArgs, fsPath }, 'error stating file')
         callback(err)
@@ -45,11 +45,11 @@ const FileStoreHandler = {
             fsPath,
             cb
           ),
-        function(err, result) {
+        function (err, result) {
           if (err) {
             OError.tag(err, 'Error uploading file, retries failed', {
               projectId,
-              fileArgs
+              fileArgs,
             })
             return callback(err)
           }
@@ -62,44 +62,42 @@ const FileStoreHandler = {
   _doUploadFileFromDisk(projectId, fileArgs, fsPath, callback) {
     const callbackOnce = _.once(callback)
 
-    FileHashManager.computeHash(fsPath, function(err, hashValue) {
+    FileHashManager.computeHash(fsPath, function (err, hashValue) {
       if (err) {
         return callbackOnce(err)
       }
       const fileRef = new File(Object.assign({}, fileArgs, { hash: hashValue }))
       const fileId = fileRef._id
       const readStream = fs.createReadStream(fsPath)
-      readStream.on('error', function(err) {
+      readStream.on('error', function (err) {
         logger.warn(
           { err, projectId, fileId, fsPath },
           'something went wrong on the read stream of uploadFileFromDisk'
         )
         callbackOnce(err)
       })
-      readStream.on('open', function() {
+      readStream.on('open', function () {
         const url = FileStoreHandler._buildUrl(projectId, fileId)
         const opts = {
           method: 'post',
           uri: url,
           timeout: FIVE_MINS_IN_MS,
           headers: {
-            'X-File-Hash-From-Web': hashValue
-          } // send the hash to the filestore as a custom header so it can be checked
+            'X-File-Hash-From-Web': hashValue,
+          }, // send the hash to the filestore as a custom header so it can be checked
         }
         const writeStream = request(opts)
-        writeStream.on('error', function(err) {
+        writeStream.on('error', function (err) {
           logger.warn(
             { err, projectId, fileId, fsPath },
             'something went wrong on the write stream of uploadFileFromDisk'
           )
           callbackOnce(err)
         })
-        writeStream.on('response', function(response) {
+        writeStream.on('response', function (response) {
           if (![200, 201].includes(response.statusCode)) {
             err = new OError(
-              `non-ok response from filestore for upload: ${
-                response.statusCode
-              }`,
+              `non-ok response from filestore for upload: ${response.statusCode}`,
               { statusCode: response.statusCode }
             )
             return callbackOnce(err)
@@ -113,19 +111,19 @@ const FileStoreHandler = {
 
   getFileStream(projectId, fileId, query, callback) {
     let queryString = ''
-    if (query != null && query['format'] != null) {
-      queryString = `?format=${query['format']}`
+    if (query != null && query.format != null) {
+      queryString = `?format=${query.format}`
     }
     const opts = {
       method: 'get',
       uri: `${this._buildUrl(projectId, fileId)}${queryString}`,
       timeout: FIVE_MINS_IN_MS,
-      headers: {}
+      headers: {},
     }
-    if (query != null && query['range'] != null) {
-      const rangeText = query['range']
+    if (query != null && query.range != null) {
+      const rangeText = query.range
       if (rangeText && rangeText.match != null && rangeText.match(/\d+-\d+/)) {
-        opts.headers['range'] = `bytes=${query['range']}`
+        opts.headers.range = `bytes=${query.range}`
       }
     }
     const readStream = request(opts)
@@ -144,7 +142,7 @@ const FileStoreHandler = {
       if (err) {
         OError.tag(err, 'failed to get file size from filestore', {
           projectId,
-          fileId
+          fileId,
         })
         return callback(err)
       }
@@ -168,9 +166,9 @@ const FileStoreHandler = {
     const opts = {
       method: 'delete',
       uri: this._buildUrl(projectId, fileId),
-      timeout: FIVE_MINS_IN_MS
+      timeout: FIVE_MINS_IN_MS,
     }
-    return request(opts, function(err, response) {
+    return request(opts, function (err, response) {
       if (err) {
         logger.warn(
           { err, projectId, fileId },
@@ -186,7 +184,7 @@ const FileStoreHandler = {
       {
         method: 'delete',
         uri: this._buildUrl(projectId),
-        timeout: FIVE_MINS_IN_MS
+        timeout: FIVE_MINS_IN_MS,
       },
       err => {
         if (err) {
@@ -213,13 +211,13 @@ const FileStoreHandler = {
       json: {
         source: {
           project_id: oldProjectId,
-          file_id: oldFileId
-        }
+          file_id: oldFileId,
+        },
       },
       uri: this._buildUrl(newProjectId, newFileId),
-      timeout: FIVE_MINS_IN_MS
+      timeout: FIVE_MINS_IN_MS,
     }
-    return request(opts, function(err, response) {
+    return request(opts, function (err, response) {
       if (err) {
         OError.tag(
           err,
@@ -228,7 +226,7 @@ const FileStoreHandler = {
             oldProjectId,
             oldFileId,
             newProjectId,
-            newFileId
+            newFileId,
           }
         )
         return callback(err)
@@ -240,7 +238,7 @@ const FileStoreHandler = {
           `non-ok response from filestore for copyFile: ${response.statusCode}`,
           {
             uri: opts.uri,
-            statusCode: response.statusCode
+            statusCode: response.statusCode,
           }
         )
         return callback(err)
@@ -253,12 +251,12 @@ const FileStoreHandler = {
       `${settings.apis.filestore.url}/project/${projectId}` +
       (fileId ? `/file/${fileId}` : '')
     )
-  }
+  },
 }
 
 module.exports = FileStoreHandler
 module.exports.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
-    uploadFileFromDisk: ['url', 'fileRef']
-  }
+    uploadFileFromDisk: ['url', 'fileRef'],
+  },
 })

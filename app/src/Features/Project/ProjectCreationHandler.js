@@ -1,21 +1,6 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-path-concat,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const async = require('async')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const Settings = require('settings-sharelatex')
 const { ObjectId } = require('mongodb')
 const { Project } = require('../../models/Project')
@@ -25,311 +10,240 @@ const ProjectDetailsHandler = require('./ProjectDetailsHandler')
 const HistoryManager = require('../History/HistoryManager')
 const { User } = require('../../models/User')
 const fs = require('fs')
-const Path = require('path')
-const { promisify } = require('util')
+const path = require('path')
+const { callbackify } = require('util')
 const _ = require('underscore')
-const AnalyticsManger = require('../Analytics/AnalyticsManager')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
-const ProjectCreationHandler = {
-  createBlankProject(owner_id, projectName, attributes, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    metrics.inc('project-creation')
-    if (arguments.length === 3) {
-      callback = attributes
-      attributes = {}
-    }
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+const EXAMPLE_PROJECT_SPLITTEST_ID = 'example-project-v2'
 
-    return ProjectDetailsHandler.validateProjectName(projectName, function(
-      error
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (attributes.overleaf !== undefined && attributes.overleaf != null) {
-        return ProjectCreationHandler._createBlankProject(
-          owner_id,
-          projectName,
-          attributes,
-          function(error, project) {
-            if (error != null) {
-              return callback(error)
-            }
-            AnalyticsManger.recordEvent(owner_id, 'project-imported', {
-              projectId: project._id,
-              attributes
-            })
-            return callback(error, project)
-          }
-        )
-      } else {
-        return HistoryManager.initializeProject(function(error, history) {
-          if (error != null) {
-            return callback(error)
-          }
-          attributes.overleaf = {
-            history: { id: history != null ? history.overleaf_id : undefined }
-          }
-          return ProjectCreationHandler._createBlankProject(
-            owner_id,
-            projectName,
-            attributes,
-            function(error, project) {
-              if (error != null) {
-                return callback(error)
-              }
-              AnalyticsManger.recordEvent(owner_id, 'project-created', {
-                projectId: project._id,
-                attributes
-              })
-              return callback(error, project)
-            }
-          )
-        })
-      }
+async function createBlankProject(ownerId, projectName, attributes = {}) {
+  const isImport = attributes && attributes.overleaf
+  const project = await _createBlankProject(ownerId, projectName, attributes)
+  if (isImport) {
+    AnalyticsManager.recordEvent(ownerId, 'project-imported', {
+      projectId: project._id,
+      attributes,
     })
-  },
-
-  _createBlankProject(owner_id, projectName, attributes, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    const rootFolder = new Folder({ name: 'rootFolder' })
-
-    attributes.lastUpdatedBy = attributes.owner_ref = new ObjectId(owner_id)
-    attributes.name = projectName
-    const project = new Project(attributes)
-
-    Object.assign(project, attributes)
-
-    if (Settings.apis.project_history.displayHistoryForNewProjects) {
-      project.overleaf.history.display = true
-    }
-    if (Settings.currentImageName != null) {
-      // avoid clobbering any imageName already set in attributes (e.g. importedImageName)
-      if (project.imageName == null) {
-        project.imageName = Settings.currentImageName
-      }
-    }
-    project.rootFolder[0] = rootFolder
-    return User.findById(owner_id, 'ace.spellCheckLanguage', function(
-      err,
-      user
-    ) {
-      project.spellCheckLanguage = user.ace.spellCheckLanguage
-      return project.save(function(err) {
-        if (err != null) {
-          return callback(err)
-        }
-        return callback(err, project)
-      })
+  } else {
+    AnalyticsManager.recordEvent(ownerId, 'project-created', {
+      projectId: project._id,
+      attributes,
     })
-  },
+  }
+  return project
+}
 
-  createProjectFromSnippet(owner_id, projectName, docLines, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    return ProjectCreationHandler.createBlankProject(
-      owner_id,
-      projectName,
-      function(error, project) {
-        if (error != null) {
-          return callback(error)
-        }
-        return ProjectCreationHandler._createRootDoc(
-          project,
-          owner_id,
-          docLines,
-          callback
-        )
-      }
-    )
-  },
+async function createProjectFromSnippet(ownerId, projectName, docLines) {
+  const project = await _createBlankProject(ownerId, projectName)
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
+    projectId: project._id,
+  })
+  await _createRootDoc(project, ownerId, docLines)
+  return project
+}
 
-  createBasicProject(owner_id, projectName, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    return ProjectCreationHandler.createBlankProject(
-      owner_id,
-      projectName,
-      function(error, project) {
-        if (error != null) {
-          return callback(error)
-        }
-        return ProjectCreationHandler._buildTemplate(
-          'mainbasic.tex',
-          owner_id,
-          projectName,
-          function(error, docLines) {
-            if (error != null) {
-              return callback(error)
-            }
-            return ProjectCreationHandler._createRootDoc(
-              project,
-              owner_id,
-              docLines,
-              callback
-            )
-          }
-        )
-      }
-    )
-  },
+async function createBasicProject(ownerId, projectName) {
+  const project = await _createBlankProject(ownerId, projectName)
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
+    projectId: project._id,
+  })
+  const docLines = await _buildTemplate('mainbasic.tex', ownerId, projectName)
+  await _createRootDoc(project, ownerId, docLines)
+  return project
+}
 
-  createExampleProject(owner_id, projectName, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
-    }
-    return ProjectCreationHandler.createBlankProject(
-      owner_id,
-      projectName,
-      function(error, project) {
-        if (error != null) {
-          return callback(error)
-        }
-        return async.series(
-          [
-            callback =>
-              ProjectCreationHandler._buildTemplate(
-                'main.tex',
-                owner_id,
-                projectName,
-                function(error, docLines) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  return ProjectCreationHandler._createRootDoc(
-                    project,
-                    owner_id,
-                    docLines,
-                    callback
-                  )
-                }
-              ),
-            callback =>
-              ProjectCreationHandler._buildTemplate(
-                'references.bib',
-                owner_id,
-                projectName,
-                function(error, docLines) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  return ProjectEntityUpdateHandler.addDoc(
-                    project._id,
-                    project.rootFolder[0]._id,
-                    'references.bib',
-                    docLines,
-                    owner_id,
-                    (error, doc) => callback(error)
-                  )
-                }
-              ),
-            function(callback) {
-              const universePath = Path.resolve(
-                __dirname + '/../../../templates/project_files/universe.jpg'
-              )
-              return ProjectEntityUpdateHandler.addFile(
-                project._id,
-                project.rootFolder[0]._id,
-                'universe.jpg',
-                universePath,
-                null,
-                owner_id,
-                callback
-              )
-            }
-          ],
-          error => callback(error, project)
-        )
-      }
-    )
-  },
+async function createExampleProject(ownerId, projectName) {
+  const project = await _createBlankProject(ownerId, projectName)
 
-  _createRootDoc(project, owner_id, docLines, callback) {
-    if (callback == null) {
-      callback = function(error, project) {}
+  const testSegmentation = SplitTestHandler.getTestSegmentation(
+    ownerId,
+    EXAMPLE_PROJECT_SPLITTEST_ID
+  )
+
+  if (testSegmentation.variant === 'example-frog') {
+    await _addSplitTestExampleProjectFiles(ownerId, projectName, project)
+  } else {
+    await _addDefaultExampleProjectFiles(ownerId, projectName, project)
+  }
+
+  if (testSegmentation.enabled) {
+    AnalyticsManager.recordEvent(ownerId, 'project-created', {
+      projectId: project._id,
+      splitTestId: EXAMPLE_PROJECT_SPLITTEST_ID,
+      splitTestVariantId: testSegmentation.variant,
+    })
+  } else {
+    AnalyticsManager.recordEvent(ownerId, 'project-created', {
+      projectId: project._id,
+    })
+  }
+
+  return project
+}
+
+async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
+  const mainDocLines = await _buildTemplate('main.tex', ownerId, projectName)
+  await _createRootDoc(project, ownerId, mainDocLines)
+
+  const referenceDocLines = await _buildTemplate(
+    'references.bib',
+    ownerId,
+    projectName
+  )
+  await ProjectEntityUpdateHandler.promises.addDoc(
+    project._id,
+    project.rootFolder[0]._id,
+    'references.bib',
+    referenceDocLines,
+    ownerId
+  )
+
+  const universePath = path.resolve(
+    __dirname + '/../../../templates/project_files/universe.jpg'
+  )
+  await ProjectEntityUpdateHandler.promises.addFile(
+    project._id,
+    project.rootFolder[0]._id,
+    'universe.jpg',
+    universePath,
+    null,
+    ownerId
+  )
+}
+
+async function _addSplitTestExampleProjectFiles(ownerId, projectName, project) {
+  const mainDocLines = await _buildTemplate(
+    'test-example-project/main.tex',
+    ownerId,
+    projectName
+  )
+  await _createRootDoc(project, ownerId, mainDocLines)
+
+  const bibDocLines = await _buildTemplate(
+    'test-example-project/sample.bib',
+    ownerId,
+    projectName
+  )
+  await ProjectEntityUpdateHandler.promises.addDoc(
+    project._id,
+    project.rootFolder[0]._id,
+    'sample.bib',
+    bibDocLines,
+    ownerId
+  )
+
+  const frogPath = path.resolve(
+    __dirname +
+      '/../../../templates/project_files/test-example-project/frog.jpg'
+  )
+  await ProjectEntityUpdateHandler.promises.addFile(
+    project._id,
+    project.rootFolder[0]._id,
+    'frog.jpg',
+    frogPath,
+    null,
+    ownerId
+  )
+}
+
+async function _createBlankProject(ownerId, projectName, attributes = {}) {
+  metrics.inc('project-creation')
+  await ProjectDetailsHandler.promises.validateProjectName(projectName)
+
+  if (!attributes.overleaf) {
+    const history = await HistoryManager.promises.initializeProject()
+    attributes.overleaf = {
+      history: { id: history ? history.overleaf_id : undefined },
     }
-    return ProjectEntityUpdateHandler.addDoc(
+  }
+
+  const rootFolder = new Folder({ name: 'rootFolder' })
+
+  attributes.lastUpdatedBy = attributes.owner_ref = new ObjectId(ownerId)
+  attributes.name = projectName
+  const project = new Project(attributes)
+
+  Object.assign(project, attributes)
+
+  if (Settings.apis.project_history.displayHistoryForNewProjects) {
+    project.overleaf.history.display = true
+  }
+  if (Settings.currentImageName) {
+    // avoid clobbering any imageName already set in attributes (e.g. importedImageName)
+    if (!project.imageName) {
+      project.imageName = Settings.currentImageName
+    }
+  }
+  project.rootFolder[0] = rootFolder
+  const user = await User.findById(ownerId, 'ace.spellCheckLanguage')
+  project.spellCheckLanguage = user.ace.spellCheckLanguage
+  return await project.save()
+}
+
+async function _createRootDoc(project, ownerId, docLines) {
+  try {
+    const { doc } = await ProjectEntityUpdateHandler.promises.addDoc(
       project._id,
       project.rootFolder[0]._id,
       'main.tex',
       docLines,
-      owner_id,
-      function(error, doc) {
-        if (error != null) {
-          OError.tag(error, 'error adding root doc when creating project')
-          return callback(error)
-        }
-        return ProjectEntityUpdateHandler.setRootDoc(
-          project._id,
-          doc._id,
-          error => callback(error, project)
-        )
-      }
+      ownerId
     )
-  },
-
-  _buildTemplate(template_name, user_id, project_name, callback) {
-    if (callback == null) {
-      callback = function(error, output) {}
-    }
-    return User.findById(user_id, 'first_name last_name', function(
-      error,
-      user
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      const monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-      ]
-
-      const templatePath = Path.resolve(
-        __dirname + `/../../../templates/project_files/${template_name}`
-      )
-      return fs.readFile(templatePath, function(error, template) {
-        if (error != null) {
-          return callback(error)
-        }
-        const data = {
-          project_name,
-          user,
-          year: new Date().getUTCFullYear(),
-          month: monthNames[new Date().getUTCMonth()]
-        }
-        const output = _.template(template.toString(), data)
-        return callback(null, output.split('\n'))
-      })
-    })
+    await ProjectEntityUpdateHandler.promises.setRootDoc(project._id, doc._id)
+  } catch (error) {
+    throw OError.tag(error, 'error adding root doc when creating project')
   }
 }
 
+async function _buildTemplate(templateName, userId, projectName) {
+  const user = await User.findById(userId, 'first_name last_name')
+
+  const templatePath = path.resolve(
+    __dirname + `/../../../templates/project_files/${templateName}`
+  )
+  const template = fs.readFileSync(templatePath)
+  const data = {
+    project_name: projectName,
+    user,
+    year: new Date().getUTCFullYear(),
+    month: MONTH_NAMES[new Date().getUTCMonth()],
+  }
+  const output = _.template(template.toString())(data)
+  return output.split('\n')
+}
+
+module.exports = {
+  createBlankProject: callbackify(createBlankProject),
+  createProjectFromSnippet: callbackify(createProjectFromSnippet),
+  createBasicProject: callbackify(createBasicProject),
+  createExampleProject: callbackify(createExampleProject),
+  promises: {
+    createBlankProject,
+    createProjectFromSnippet,
+    createBasicProject,
+    createExampleProject,
+  },
+}
+
 metrics.timeAsyncMethod(
-  ProjectCreationHandler,
+  module.exports,
   'createBlankProject',
   'mongo.ProjectCreationHandler',
   logger
 )
-
-const promises = {
-  createBlankProject: promisify(ProjectCreationHandler.createBlankProject)
-}
-
-ProjectCreationHandler.promises = promises
-
-module.exports = ProjectCreationHandler

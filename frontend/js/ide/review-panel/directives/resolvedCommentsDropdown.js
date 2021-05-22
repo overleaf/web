@@ -26,14 +26,14 @@ export default App.directive('resolvedCommentsDropdown', () => ({
     onOpen: '&',
     onUnresolve: '&',
     onDelete: '&',
-    isLoading: '='
+    isLoading: '=',
   },
 
   link(scope, element, attrs) {
     let filterResolvedComments
     scope.state = { isOpen: false }
 
-    scope.toggleOpenState = function() {
+    scope.toggleOpenState = function () {
       scope.state.isOpen = !scope.state.isOpen
       if (scope.state.isOpen) {
         return scope.onOpen().then(() => filterResolvedComments())
@@ -42,21 +42,21 @@ export default App.directive('resolvedCommentsDropdown', () => ({
 
     scope.resolvedComments = []
 
-    scope.handleUnresolve = function(threadId) {
+    scope.handleUnresolve = function (threadId) {
       scope.onUnresolve({ threadId })
       return (scope.resolvedComments = scope.resolvedComments.filter(
         c => c.threadId !== threadId
       ))
     }
 
-    scope.handleDelete = function(entryId, docId, threadId) {
+    scope.handleDelete = function (entryId, docId, threadId) {
       scope.onDelete({ entryId, docId, threadId })
       return (scope.resolvedComments = scope.resolvedComments.filter(
         c => c.threadId !== threadId
       ))
     }
 
-    const getDocNameById = function(docId) {
+    const getDocNameById = function (docId) {
       const doc = _.find(scope.docs, doc => doc.doc.id === docId)
       if (doc != null) {
         return doc.path
@@ -65,7 +65,7 @@ export default App.directive('resolvedCommentsDropdown', () => ({
       }
     }
 
-    return (filterResolvedComments = function() {
+    return (filterResolvedComments = function () {
       scope.resolvedComments = []
 
       return (() => {
@@ -75,7 +75,7 @@ export default App.directive('resolvedCommentsDropdown', () => ({
           result.push(
             (() => {
               const result1 = []
-              for (let entryId in docEntries) {
+              for (const entryId in docEntries) {
                 const entry = docEntries[entryId]
                 if (
                   entry.type === 'comment' &&
@@ -105,5 +105,5 @@ export default App.directive('resolvedCommentsDropdown', () => ({
         return result
       })()
     })
-  }
+  },
 }))

@@ -16,7 +16,7 @@ import _ from 'lodash'
 import CryptoJSSHA1 from 'crypto-js/sha1'
 let ReferencesManager
 
-export default (ReferencesManager = class ReferencesManager {
+export default ReferencesManager = class ReferencesManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -89,7 +89,7 @@ export default (ReferencesManager = class ReferencesManager {
     const opts = {
       docIds,
       shouldBroadcast,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     }
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/index`, opts)
@@ -101,7 +101,7 @@ export default (ReferencesManager = class ReferencesManager {
   indexAllReferences(shouldBroadcast) {
     const opts = {
       shouldBroadcast,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     }
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/indexAll`, opts)
@@ -109,7 +109,7 @@ export default (ReferencesManager = class ReferencesManager {
         return this._storeReferencesKeys(response.data.keys)
       })
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

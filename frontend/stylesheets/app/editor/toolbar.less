@@ -24,10 +24,14 @@
   }
 
   > a:not(.btn),
+  > button,
   .toolbar-left > a:not(.btn),
-  .toolbar-right > a:not(.btn) {
+  .toolbar-left > button,
+  .toolbar-right > a:not(.btn),
+  .toolbar-right > button {
     display: inline-block;
     color: @toolbar-icon-btn-color;
+    background-color: transparent;
     padding: 4px 2px;
     line-height: 1;
     height: 24px;
@@ -40,6 +44,7 @@
     &:hover {
       text-shadow: @toolbar-icon-btn-hover-shadow;
       color: @toolbar-icon-btn-hover-color;
+      background-color: transparent;
       text-decoration: none;
     }
     &.active,
@@ -353,4 +358,10 @@
 // Disable border on left-most icon in menu
 .formatting-menu-item:nth-of-type(4n + 1) > .formatting-btn {
   border-left: none;
+}
+
+.toolbar.toolbar-pdf > a[disabled] {
+  cursor: not-allowed;
+  .opacity(0.65);
+  .box-shadow(none);
 }

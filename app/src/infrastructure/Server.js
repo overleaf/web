@@ -2,9 +2,10 @@ const Path = require('path')
 const express = require('express')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const expressLocals = require('./ExpressLocals')
 const Validation = require('./Validation')
+const csp = require('./CSP')
 const Router = require('../router')
 const helmet = require('helmet')
 const UserSessionsRedis = require('../Features/User/UserSessionsRedis')
@@ -82,7 +83,7 @@ if (Settings.exposeHostname) {
 
 webRouter.use(
   express.static(Path.join(__dirname, '/../../../public'), {
-    maxAge: STATIC_CACHE_AGE
+    maxAge: STATIC_CACHE_AGE,
   })
 )
 app.set('views', Path.join(__dirname, '/../../views'))
@@ -110,11 +111,11 @@ webRouter.use(
       domain: Settings.cookieDomain,
       maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
       secure: Settings.secureCookie,
-      sameSite: Settings.sameSiteCookie
+      sameSite: Settings.sameSiteCookie,
     },
     store: sessionStore,
     key: Settings.cookieName,
-    rolling: true
+    rolling: true,
   })
 )
 
@@ -132,7 +133,7 @@ passport.use(
     {
       passReqToCallback: true,
       usernameField: 'email',
-      passwordField: 'password'
+      passwordField: 'password',
     },
     AuthenticationController.doPassportLogin
   )
@@ -140,7 +141,7 @@ passport.use(
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
 
-Modules.hooks.fire('passportSetup', passport, function(err) {
+Modules.hooks.fire('passportSetup', passport, function (err) {
   if (err != null) {
     logger.err({ err }, 'error setting up passport in modules')
   }
@@ -154,7 +155,7 @@ webRouter.use(translations.i18nMiddleware)
 webRouter.use(translations.setLangBasedOnDomainMiddleware)
 
 // Measure expiry from last request, not last login
-webRouter.use(function(req, res, next) {
+webRouter.use(function (req, res, next) {
   if (!req.session.noSessionCallback) {
     req.session.touch()
     if (AuthenticationController.isUserLoggedIn(req)) {
@@ -176,7 +177,7 @@ expressLocals(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
-webRouter.use(function(req, res, next) {
+webRouter.use(function (req, res, next) {
   if (Settings.siteIsOpen) {
     next()
   } else if (
@@ -189,7 +190,7 @@ webRouter.use(function(req, res, next) {
   }
 })
 
-webRouter.use(function(req, res, next) {
+webRouter.use(function (req, res, next) {
   if (Settings.editorIsOpen) {
     next()
   } else if (req.url.indexOf('/admin') === 0) {
@@ -203,7 +204,7 @@ webRouter.use(AuthenticationController.validateAdmin)
 
 // add security headers using Helmet
 const noCacheMiddleware = require('nocache')()
-webRouter.use(function(req, res, next) {
+webRouter.use(function (req, res, next) {
   const isLoggedIn = AuthenticationController.isUserLoggedIn(req)
   const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
   if (isLoggedIn || isProjectPage) {
@@ -217,9 +218,15 @@ webRouter.use(
     // note that more headers are added by default
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
-    hsts: false
+    hsts: false,
   })
 )
+
+// add CSP header to HTML-rendering routes, if enabled
+if (Settings.csp && Settings.csp.enabled) {
+  logger.info('adding CSP header to rendered routes', Settings.csp)
+  webRouter.use(csp(Settings.csp))
+}
 
 logger.info('creating HTTP server'.yellow)
 const server = require('http').createServer(app)
@@ -235,7 +242,7 @@ if (Settings.enabledServices.includes('api')) {
 if (Settings.enabledServices.includes('web')) {
   logger.info('providing web router')
 
-  if (app.get('env') === 'production') {
+  if (Settings.precompilePugTemplatesAtBootTime) {
     logger.info('precompiling views for web in production environment')
     Views.precompileViews(app)
   }
@@ -260,5 +267,5 @@ Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports = {
   app,
-  server
+  server,
 }

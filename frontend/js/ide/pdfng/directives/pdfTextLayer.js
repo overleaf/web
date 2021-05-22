@@ -15,7 +15,7 @@ import App from '../../../base'
 // uses the PDFJS text layer renderer to provide invisible overlayed
 // text for searching
 
-App.factory('pdfTextLayer', function() {
+App.factory('pdfTextLayer', function () {
   let pdfTextLayer
   return (pdfTextLayer = class pdfTextLayer {
     constructor(options) {
@@ -46,7 +46,7 @@ App.factory('pdfTextLayer', function() {
         viewport: this.viewport,
         textDivs: this.textDivs,
         timeout,
-        enhanceTextSelection: this.enhanceTextSelection
+        enhanceTextSelection: this.enhanceTextSelection,
       })
 
       const textLayerSuccess = () => {
@@ -54,7 +54,7 @@ App.factory('pdfTextLayer', function() {
         return (this.renderingDone = true)
       }
 
-      const textLayerFailure = function() {
+      const textLayerFailure = function () {
         // canceled or failed to render text layer -- skipping errors
       }
 

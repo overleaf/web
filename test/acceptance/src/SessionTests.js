@@ -3,8 +3,8 @@ const async = require('async')
 const User = require('./helpers/User')
 const redis = require('./helpers/redis')
 
-describe('Sessions', function() {
-  beforeEach(function(done) {
+describe('Sessions', function () {
+  beforeEach(function (done) {
     this.timeout(20000)
     this.user1 = new User()
     this.site_admin = new User({ email: 'admin@example.com' })
@@ -14,8 +14,8 @@ describe('Sessions', function() {
     )
   })
 
-  describe('one session', function() {
-    it('should have one session in UserSessions set', function(done) {
+  describe('one session', function () {
+    it('should have one session in UserSessions set', function (done) {
       async.series(
         [
           next => {
@@ -56,7 +56,7 @@ describe('Sessions', function() {
               expect(sessions.length).to.equal(0)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -68,15 +68,15 @@ describe('Sessions', function() {
     })
   })
 
-  describe('two sessions', function() {
-    beforeEach(function() {
+  describe('two sessions', function () {
+    beforeEach(function () {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
       this.user2.password = this.user1.password
     })
 
-    it('should have two sessions in UserSessions set', function(done) {
+    it('should have two sessions in UserSessions set', function (done) {
       async.series(
         [
           next => {
@@ -180,7 +180,7 @@ describe('Sessions', function() {
               expect(statusCode).to.equal(302)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -192,8 +192,8 @@ describe('Sessions', function() {
     })
   })
 
-  describe('three sessions, password reset', function() {
-    beforeEach(function() {
+  describe('three sessions, password reset', function () {
+    beforeEach(function () {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
@@ -203,7 +203,7 @@ describe('Sessions', function() {
       this.user3.password = this.user1.password
     })
 
-    it('should erase both sessions when password is reset', function(done) {
+    it('should erase both sessions when password is reset', function (done) {
       async.series(
         [
           next => {
@@ -304,7 +304,7 @@ describe('Sessions', function() {
               expect(sessions.length).to.equal(0)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -316,8 +316,8 @@ describe('Sessions', function() {
     })
   })
 
-  describe('three sessions, sessions page', function() {
-    beforeEach(function(done) {
+  describe('three sessions, sessions page', function () {
+    beforeEach(function (done) {
       // set up second session for this user
       this.user2 = new User()
       this.user2.email = this.user1.email
@@ -328,7 +328,7 @@ describe('Sessions', function() {
       async.series([this.user2.login.bind(this.user2)], done)
     })
 
-    it('should allow the user to erase the other two sessions', function(done) {
+    it('should allow the user to erase the other two sessions', function (done) {
       async.series(
         [
           next => {
@@ -383,7 +383,7 @@ describe('Sessions', function() {
           next => {
             this.user2.request.get(
               {
-                uri: '/user/sessions'
+                uri: '/user/sessions',
               },
               (err, response, body) => {
                 expect(err).to.be.oneOf([null, undefined])
@@ -399,7 +399,7 @@ describe('Sessions', function() {
               expect(err).to.be.oneOf([null, undefined])
               this.user2.request.post(
                 {
-                  uri: '/user/sessions/clear'
+                  uri: '/user/sessions/clear',
                 },
                 err => next(err)
               )
@@ -455,17 +455,17 @@ describe('Sessions', function() {
 
           // the user audit log should have been updated
           next => {
-            this.user1.get((error, user) => {
+            this.user1.getAuditLogWithoutNoise((error, auditLog) => {
               expect(error).not.to.exist
-              expect(user.auditLog).to.exist
-              expect(user.auditLog[0].operation).to.equal('clear-sessions')
-              expect(user.auditLog[0].ipAddress).to.exist
-              expect(user.auditLog[0].initiatorId).to.exist
-              expect(user.auditLog[0].timestamp).to.exist
-              expect(user.auditLog[0].info.sessions.length).to.equal(2)
+              expect(auditLog).to.exist
+              expect(auditLog[0].operation).to.equal('clear-sessions')
+              expect(auditLog[0].ipAddress).to.exist
+              expect(auditLog[0].initiatorId).to.exist
+              expect(auditLog[0].timestamp).to.exist
+              expect(auditLog[0].info.sessions.length).to.equal(2)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {

@@ -1,123 +1,82 @@
 import React from 'react'
 import { expect } from 'chai'
-import { screen, render } from '@testing-library/react'
+import { screen, waitForElementToBeRemoved } from '@testing-library/react'
+import fetchMock from 'fetch-mock'
 
 import ChatPane from '../../../../../frontend/js/features/chat/components/chat-pane'
 import {
-  stubGlobalUser,
-  stubMathJax,
-  stubUIConfig,
-  tearDownGlobalUserStub,
-  tearDownMathJaxStubs,
-  tearDownUIConfigStubs
-} from './stubs'
+  renderWithChatContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
+import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
-describe('<ChatPane />', function() {
-  const currentUser = {
+describe('<ChatPane />', function () {
+  const user = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
-    email: 'fake@example.com'
+    email: 'fake@example.com',
   }
 
-  function createMessages() {
-    return [
-      {
-        contents: ['a message'],
-        user: currentUser,
-        timestamp: new Date()
-      },
-      {
-        contents: ['another message'],
-        user: currentUser,
-        timestamp: new Date()
-      }
-    ]
-  }
+  const testMessages = [
+    {
+      id: 'msg_1',
+      content: 'a message',
+      user,
+      timestamp: new Date().getTime(),
+    },
+    {
+      id: 'msg_2',
+      content: 'another message',
+      user,
+      timestamp: new Date().getTime(),
+    },
+  ]
 
-  before(function() {
-    stubGlobalUser(currentUser) // required by ColorManager
-    stubUIConfig()
+  beforeEach(function () {
+    fetchMock.reset()
+    cleanUpContext()
+
     stubMathJax()
   })
 
-  after(function() {
-    tearDownGlobalUserStub()
-    tearDownUIConfigStubs()
+  afterEach(function () {
     tearDownMathJaxStubs()
   })
 
-  it('renders multiple messages', function() {
-    render(
-      <ChatPane
-        loadMoreMessages={() => {}}
-        sendMessage={() => {}}
-        userId={currentUser.id}
-        messages={createMessages()}
-        resetUnreadMessages={() => {}}
-      />
-    )
+  it('renders multiple messages', async function () {
+    fetchMock.get(/messages/, testMessages)
 
-    screen.getByText('a message')
-    screen.getByText('another message')
+    renderWithChatContext(<ChatPane />, { user })
+
+    await screen.findByText('a message')
+    await screen.findByText('another message')
   })
 
-  describe('loading spinner', function() {
-    it('is rendered while the messages is loading', function() {
-      render(
-        <ChatPane
-          loading
-          loadMoreMessages={() => {}}
-          sendMessage={() => {}}
-          userId={currentUser.id}
-          messages={createMessages()}
-          resetUnreadMessages={() => {}}
-        />
-      )
-      screen.getByText('Loading…')
-    })
+  it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
+    fetchMock.get(/messages/, [])
 
-    it('is not rendered when the messages are not loading', function() {
-      render(
-        <ChatPane
-          loading={false}
-          loadMoreMessages={() => {}}
-          sendMessage={() => {}}
-          userId={currentUser.id}
-          messages={createMessages()}
-          resetUnreadMessages={() => {}}
-        />
-      )
-    })
-    expect(screen.queryByText('Loading…')).to.not.exist
+    renderWithChatContext(<ChatPane />, { user })
+
+    await waitForElementToBeRemoved(() => screen.getByText('Loading…'))
   })
 
-  describe('"send your first message" placeholder', function() {
-    it('is rendered when there are no messages ', function() {
-      render(
-        <ChatPane
-          loadMoreMessages={() => {}}
-          sendMessage={() => {}}
-          userId={currentUser.id}
-          messages={[]}
-          resetUnreadMessages={() => {}}
-        />
-      )
-      screen.getByText('Send your first message to your collaborators')
+  describe('"send your first message" placeholder', function () {
+    it('is rendered when there are no messages ', async function () {
+      fetchMock.get(/messages/, [])
+
+      renderWithChatContext(<ChatPane />, { user })
+
+      await screen.findByText('Send your first message to your collaborators')
     })
 
-    it('is not rendered when there are some messages', function() {
-      render(
-        <ChatPane
-          loading={false}
-          loadMoreMessages={() => {}}
-          sendMessage={() => {}}
-          userId={currentUser.id}
-          messages={createMessages()}
-          resetUnreadMessages={() => {}}
-        />
-      )
+    it('is not rendered when messages are displayed', function () {
+      fetchMock.get(/messages/, testMessages)
+
+      renderWithChatContext(<ChatPane />, { user })
+
+      expect(
+        screen.queryByText('Send your first message to your collaborators')
+      ).to.not.exist
     })
-    expect(screen.queryByText('Send your first message to your collaborators'))
-      .to.not.exist
   })
 })

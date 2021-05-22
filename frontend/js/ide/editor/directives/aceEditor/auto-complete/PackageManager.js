@@ -109,7 +109,7 @@ const packages = [
   'framed',
   'aliascnt',
   'layaureo',
-  'authblk'
+  'authblk',
 ]
 
 class PackageManager {
@@ -120,12 +120,12 @@ class PackageManager {
   getCompletions(editor, session, pos, prefix, callback) {
     const usedPackages = Object.keys(this.metadataManager.getAllPackages())
     const packageSnippets = []
-    for (let pkg of Array.from(packages)) {
+    for (const pkg of Array.from(packages)) {
       if (!Array.from(usedPackages).includes(pkg)) {
         packageSnippets.push({
           caption: `\\usepackage{${pkg}}`,
           snippet: `\\usepackage{${pkg}}`,
-          meta: 'pkg'
+          meta: 'pkg',
         })
       }
     }
@@ -134,7 +134,7 @@ class PackageManager {
       caption: '\\usepackage{}',
       snippet: '\\usepackage{$1}',
       meta: 'pkg',
-      score: 70
+      score: 70,
     })
     return callback(null, packageSnippets)
   }

@@ -3,7 +3,7 @@ import PDFJS from './pdfJsLoader'
 const EXTERNAL_LINK_TARGET = '_blank'
 const REL_NOOPENER = 'noreferrer noopener'
 
-App.factory('pdfAnnotations', function() {
+App.factory('pdfAnnotations', function () {
   class pdfAnnotations {
     constructor(options) {
       this.annotationsLayerDiv = options.annotations
@@ -13,7 +13,7 @@ App.factory('pdfAnnotations', function() {
 
     setAnnotations(annotations) {
       const result = []
-      for (let annotation of annotations) {
+      for (const annotation of annotations) {
         switch (annotation.subtype) {
           case 'Link':
             result.push(this.addLink(annotation))

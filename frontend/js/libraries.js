@@ -11,8 +11,14 @@ import 'libs/passfield'
 import 'libs/ng-tags-input-3.0.0'
 import 'libs/select/select'
 
+// CSS
+import 'angular/angular-csp.css'
+
 // Polyfill fetch for IE11
 import 'isomorphic-unfetch'
+
+// Rewrite meta elements
+import './utils/meta'
 
 // Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 // See: https://webpack.js.org/guides/public-path/#on-the-fly

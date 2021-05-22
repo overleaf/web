@@ -1,12 +1,85 @@
+const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
+const moment = require('moment')
+const settings = require('settings-sharelatex')
 const { promisifyAll } = require('../../util/promises')
-const { getUserAffiliations } = require('../Institutions/InstitutionsAPI')
+const {
+  promises: InstitutionsAPIPromises,
+} = require('../Institutions/InstitutionsAPI')
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
+
+function _lastDayToReconfirm(emailData, institutionData) {
+  const globalReconfirmPeriod = settings.reconfirmNotificationDays
+  if (!globalReconfirmPeriod) return undefined
+
+  // only show notification for institutions with reconfirmation enabled
+  if (!institutionData || !institutionData.maxConfirmationMonths)
+    return undefined
+
+  if (!emailData.confirmedAt) return undefined
+
+  if (institutionData.ssoEnabled && !emailData.samlProviderId) {
+    // For SSO, only show notification for linked email
+    return false
+  }
+
+  // reconfirmedAt will not always be set, use confirmedAt as fallback
+  const lastConfirmed = emailData.reconfirmedAt || emailData.confirmedAt
+
+  return moment(lastConfirmed)
+    .add(institutionData.maxConfirmationMonths, 'months')
+    .toDate()
+}
+
+function _pastReconfirmDate(lastDayToReconfirm) {
+  if (!lastDayToReconfirm) return false
+  return moment(lastDayToReconfirm).isBefore()
+}
+
+function _emailInReconfirmNotificationPeriod(lastDayToReconfirm) {
+  const globalReconfirmPeriod = settings.reconfirmNotificationDays
+
+  if (!globalReconfirmPeriod || !lastDayToReconfirm) return false
+
+  const notificationStarts = moment(lastDayToReconfirm).subtract(
+    globalReconfirmPeriod,
+    'days'
+  )
+
+  return moment().isAfter(notificationStarts)
+}
+
+async function getUserFullEmails(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    emails: 1,
+    samlIdentifiers: 1,
+  })
+
+  if (!user) {
+    throw new Error('User not Found')
+  }
+
+  if (!Features.hasFeature('affiliations')) {
+    return decorateFullEmails(user.email, user.emails, [], [])
+  }
+
+  const affiliationsData = await InstitutionsAPIPromises.getUserAffiliations(
+    userId
+  )
+
+  return decorateFullEmails(
+    user.email,
+    user.emails || [],
+    affiliationsData,
+    user.samlIdentifiers || []
+  )
+}
 
 const UserGetter = {
   getUser(query, projection, callback) {
@@ -28,41 +101,7 @@ const UserGetter = {
     )
   },
 
-  getUserFullEmails(userId, callback) {
-    this.getUser(userId, { email: 1, emails: 1, samlIdentifiers: 1 }, function(
-      error,
-      user
-    ) {
-      if (error) {
-        return callback(error)
-      }
-      if (!user) {
-        return callback(new Error('User not Found'))
-      }
-
-      if (!Features.hasFeature('affiliations')) {
-        return callback(
-          null,
-          decorateFullEmails(user.email, user.emails, [], [])
-        )
-      }
-
-      getUserAffiliations(userId, function(error, affiliationsData) {
-        if (error) {
-          return callback(error)
-        }
-        callback(
-          null,
-          decorateFullEmails(
-            user.email,
-            user.emails || [],
-            affiliationsData,
-            user.samlIdentifiers || []
-          )
-        )
-      })
-    })
-  },
+  getUserFullEmails: callbackify(getUserFullEmails),
 
   getUserByMainEmail(email, projection, callback) {
     email = email.trim()
@@ -104,9 +143,9 @@ const UserGetter = {
         $exists: true,
         $elemMatch: {
           email: { $in: emails },
-          confirmedAt: { $exists: true }
-        }
-      }
+          confirmedAt: { $exists: true },
+        },
+      },
     }
 
     db.users.find(query, { projection }).toArray(callback)
@@ -122,14 +161,10 @@ const UserGetter = {
   },
 
   getUsersByHostname(hostname, projection, callback) {
-    const reversedHostname = hostname
-      .trim()
-      .split('')
-      .reverse()
-      .join('')
+    const reversedHostname = hostname.trim().split('').reverse().join('')
     const query = {
       emails: { $exists: true },
-      'emails.reversedHostname': reversedHostname
+      'emails.reversedHostname': reversedHostname,
     }
     db.users.find(query, { projection }).toArray(callback)
   },
@@ -145,13 +180,13 @@ const UserGetter = {
 
   // check for duplicate email address. This is also enforced at the DB level
   ensureUniqueEmailAddress(newEmail, callback) {
-    this.getUserByAnyEmail(newEmail, function(error, user) {
+    this.getUserByAnyEmail(newEmail, function (error, user) {
       if (user) {
         return callback(new Errors.EmailExistsError())
       }
       callback(error)
     })
-  }
+  },
 }
 
 var decorateFullEmails = (
@@ -159,50 +194,67 @@ var decorateFullEmails = (
   emailsData,
   affiliationsData,
   samlIdentifiers
-) =>
-  emailsData.map(function(emailData) {
+) => {
+  emailsData.forEach(function (emailData) {
     emailData.default = emailData.email === defaultEmail
 
     const affiliation = affiliationsData.find(
       aff => aff.email === emailData.email
     )
     if (affiliation) {
-      const { institution, inferred, role, department, licence } = affiliation
-      emailData.affiliation = {
+      const {
         institution,
         inferred,
         role,
         department,
-        licence
+        licence,
+        portal,
+      } = affiliation
+      const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
+      const pastReconfirmDate = _pastReconfirmDate(lastDayToReconfirm)
+      const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
+        lastDayToReconfirm
+      )
+      emailData.affiliation = {
+        institution,
+        inferred,
+        inReconfirmNotificationPeriod,
+        lastDayToReconfirm,
+        pastReconfirmDate,
+        role,
+        department,
+        licence,
+        portal,
       }
-    } else {
-      emailsData.affiliation = null
     }
 
     if (emailData.samlProviderId) {
       emailData.samlIdentifier = samlIdentifiers.find(
         samlIdentifier => samlIdentifier.providerId === emailData.samlProviderId
       )
-    } else {
-      emailsData.samlIdentifier = null
     }
 
     emailData.emailHasInstitutionLicence = InstitutionsHelper.emailHasLicence(
       emailData
     )
-
-    return emailData
   })
+
+  return emailsData
+}
 ;[
   'getUser',
   'getUserEmail',
   'getUserByMainEmail',
   'getUserByAnyEmail',
   'getUsers',
-  'ensureUniqueEmailAddress'
+  'ensureUniqueEmailAddress',
 ].map(method =>
   metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)
 )
 
-UserGetter.promises = promisifyAll(UserGetter)
+UserGetter.promises = promisifyAll(UserGetter, {
+  without: ['getUserFullEmails'],
+})
+UserGetter.promises.getUserFullEmails = getUserFullEmails
+
 module.exports = UserGetter

@@ -42,11 +42,7 @@ async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
             cachedEntitlment.hasEntitlement !== samlIdentifier.hasEntitlement
           ) {
             console.log(
-              `cached entitlement mismatch for user ${
-                userEntitlement.userId
-              } mongo(${samlIdentifier.hasEntitlement}) postgres(${
-                cachedEntitlment.hasEntitlement
-              })`
+              `cached entitlement mismatch for user ${userEntitlement.userId} mongo(${samlIdentifier.hasEntitlement}) postgres(${cachedEntitlment.hasEntitlement})`
             )
             await syncUserEntitlement(
               userEntitlement.userId,
@@ -80,9 +76,7 @@ async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
       )
       if (!email) {
         console.log(
-          `missing email entry for samlIdentifier for user ${
-            userEntitlement.userId
-          }`
+          `missing email entry for samlIdentifier for user ${userEntitlement.userId}`
         )
       }
     }
@@ -103,9 +97,7 @@ async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
       )
       if (!samlIdentifier || !samlIdentifier.hasEntitlement) {
         console.log(
-          `cached entitlement mismatch for user ${
-            userEntitlement.userId
-          } mongo(false) postgres(true)`
+          `cached entitlement mismatch for user ${userEntitlement.userId} mongo(false) postgres(true)`
         )
         await syncUserEntitlement(
           userEntitlement.userId,
@@ -118,9 +110,7 @@ async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
     // entitlements were not exported
     else {
       console.log(
-        `missing cached entitlement in mongo for user ${
-          cachedEntitlment.userId
-        }`
+        `missing cached entitlement in mongo for user ${cachedEntitlment.userId}`
       )
     }
   }
@@ -138,16 +128,14 @@ async function syncUserEntitlement(userId, email, hasEntitlement) {
     }
   } catch (err) {
     console.error(
-      `error setting entitlement: ${userId}, ${email}, ${hasEntitlement} - ${
-        err.message
-      }`
+      `error setting entitlement: ${userId}, ${email}, ${hasEntitlement} - ${err.message}`
     )
   }
 }
 
 function loadUserEntitlements(userEntitlementsFilename) {
   const userEntitlementsFile = fs.readFileSync(userEntitlementsFilename, {
-    encoding: 'utf8'
+    encoding: 'utf8',
   })
 
   const userEntitlements = {}
@@ -168,7 +156,7 @@ function loadUserEntitlements(userEntitlementsFilename) {
 
 function loadCachedEntitlements(cachedEntitlementsFilename) {
   const cachedEntitlementsFile = fs.readFileSync(cachedEntitlementsFilename, {
-    encoding: 'utf8'
+    encoding: 'utf8',
   })
 
   const cachedEntitlements = {}
@@ -179,7 +167,7 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
       userId,
       email,
       hasEntitlement,
-      providerId
+      providerId,
     ] = cachedEntitlementLine.split(',')
     let hasEntitlementBoolean
     if (ignoreNulls) {
@@ -192,7 +180,7 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
       email,
       hasEntitlement: hasEntitlementBoolean,
       providerId,
-      userId
+      userId,
     }
   }
 

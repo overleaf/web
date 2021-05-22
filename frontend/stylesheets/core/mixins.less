@@ -522,7 +522,7 @@
     display: inline-block;
     font-weight: bold;
     text-decoration: none;
-    .button-variant(#fff, shade(@background, 20%), transparent);
+    .btn-alert-variant(@background);
     .button-size(
       @padding-xs-vertical; @padding-small-horizontal; @font-size-small;
         @line-height-small; @btn-border-radius-small
@@ -536,6 +536,11 @@
   .small {
     color: @text-color;
   }
+}
+
+.btn-alert-variant(@alert-bg) {
+  .button-variant(#fff, shade(@alert-bg, 15%), transparent);
+  border-radius: @btn-border-radius-base;
 }
 
 // Tables
@@ -600,13 +605,24 @@
 // -------------------------
 // Easily pump out default styles, as well as :hover, :focus, :active,
 // and disabled options for all buttons
+.alert-btn(@background) {
+  background-color: darken(@background, 16%);
+  &:hover,
+  &:focus,
+  &:active,
+  &.active,
+  &.checked,
+  .open .dropdown-toggle& {
+    background-color: darken(@background, 24%);
+  }
+}
 .button-variant(@color; @background; @border) {
   color: @color;
   background-color: @background;
   border-color: @border;
 
   .alert & {
-    background-color: darken(@background, 16%);
+    .alert-btn(@background);
   }
 
   &:hover,
@@ -618,9 +634,6 @@
     color: @color;
     background-color: darken(@background, 8%);
     border-color: darken(@border, 12%);
-    .alert & {
-      background-color: darken(@background, 24%);
-    }
   }
   &:active,
   &.active,
@@ -1093,5 +1106,44 @@
   textarea&,
   select[multiple]& {
     height: auto;
+  }
+}
+
+.triangle(@_, @width, @height, @color) {
+  position: absolute;
+  border-color: transparent;
+  border-style: solid;
+  width: 0;
+  height: 0;
+}
+.triangle(top, @width, @height, @color) {
+  border-width: 0 @width / 2 @height @width / 2;
+  border-bottom-color: @color;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.triangle(bottom, @width, @height, @color) {
+  border-width: @height @width / 2 0 @width / 2;
+  border-top-color: @color;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.triangle(right, @width, @height, @color) {
+  border-width: @height / 2 0 @height / 2 @width;
+  border-left-color: @color;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+.triangle(left, @width, @height, @color) {
+  border-width: @height / 2 @width @height / 2 0;
+  border-right-color: @color;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.no-outline-ring-on-click {
+  &:focus,
+  &:focus:active {
+    outline: 0;
   }
 }

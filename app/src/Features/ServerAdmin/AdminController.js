@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -15,7 +15,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
@@ -27,7 +27,7 @@ const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const oneMinInMs = 60 * 1000
 
-var updateOpenConnetionsMetrics = function() {
+var updateOpenConnetionsMetrics = function () {
   metrics.gauge(
     'open_connections.socketio',
     __guard__(
@@ -79,7 +79,7 @@ const AdminController = {
       })()
     }
 
-    return SystemMessageManager.getMessagesFromDB(function(
+    return SystemMessageManager.getMessagesFromDB(function (
       error,
       systemMessages
     ) {
@@ -89,7 +89,7 @@ const AdminController = {
       return res.render('admin/index', {
         title: 'System Admin',
         openSockets,
-        systemMessages
+        systemMessages,
       })
     })
   },
@@ -98,12 +98,20 @@ const AdminController = {
     return res.render('admin/register')
   },
 
-  dissconectAllUsers: (req, res) => {
+  disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
+    const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10
     EditorRealTimeController.emitToAll(
       'forceDisconnect',
-      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.'
+      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.',
+      delay
     )
+    return res.sendStatus(200)
+  },
+
+  openEditor(req, res) {
+    logger.warn('opening editor')
+    Settings.editorIsOpen = true
     return res.sendStatus(200)
   },
 
@@ -116,7 +124,7 @@ const AdminController = {
   writeAllToMongo(req, res) {
     logger.log('writing all docs to mongo')
     Settings.mongo.writeAll = true
-    return DocumentUpdaterHandler.flushAllDocsToMongo(function() {
+    return DocumentUpdaterHandler.flushAllDocsToMongo(function () {
       logger.log('all docs have been saved to mongo')
       return res.sendStatus(200)
     })
@@ -136,24 +144,25 @@ const AdminController = {
   },
 
   createMessage(req, res, next) {
-    return SystemMessageManager.createMessage(req.body.content, function(
-      error
-    ) {
+    return SystemMessageManager.createMessage(
+      req.body.content,
+      function (error) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.sendStatus(200)
+      }
+    )
+  },
+
+  clearMessages(req, res, next) {
+    return SystemMessageManager.clearMessages(function (error) {
       if (error != null) {
         return next(error)
       }
       return res.sendStatus(200)
     })
   },
-
-  clearMessages(req, res, next) {
-    return SystemMessageManager.clearMessages(function(error) {
-      if (error != null) {
-        return next(error)
-      }
-      return res.sendStatus(200)
-    })
-  }
 }
 
 function __guard__(value, transform) {

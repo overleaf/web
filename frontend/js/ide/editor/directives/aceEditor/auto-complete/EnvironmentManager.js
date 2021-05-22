@@ -18,7 +18,7 @@ let staticSnippets = Array.from(Environments.withoutSnippets).map(env => ({
 \t$1
 \\end{${env}}\
 `,
-  meta: 'env'
+  meta: 'env',
 }))
 
 staticSnippets = staticSnippets.concat([
@@ -30,7 +30,7 @@ staticSnippets = staticSnippets.concat([
 \t$4 & $5
 \\end{array}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{figure}...',
@@ -42,7 +42,7 @@ staticSnippets = staticSnippets.concat([
 \t\\label{\${3:fig:my_label}}
 \\end{figure}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{tabular}...',
@@ -52,7 +52,7 @@ staticSnippets = staticSnippets.concat([
 \t$4 & $5
 \\end{tabular}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{table}...',
@@ -67,7 +67,7 @@ staticSnippets = staticSnippets.concat([
 \t\\label{\${8:tab:my_label}}
 \\end{table}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{list}...',
@@ -76,7 +76,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{list}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{enumerate}...',
@@ -85,7 +85,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{enumerate}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{itemize}...',
@@ -94,7 +94,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{itemize}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{frame}...',
@@ -103,8 +103,8 @@ staticSnippets = staticSnippets.concat([
 \t$2
 \\end{frame}\
 `,
-    meta: 'env'
-  }
+    meta: 'env',
+  },
 ])
 
 const documentSnippet = {
@@ -114,7 +114,7 @@ const documentSnippet = {
 $1
 \\end{document}\
 `,
-  meta: 'env'
+  meta: 'env',
 }
 
 const bibliographySnippet = {
@@ -125,11 +125,11 @@ const bibliographySnippet = {
 $3
 \\end{thebibliography}\
 `,
-  meta: 'env'
+  meta: 'env',
 }
 staticSnippets.push(documentSnippet)
 
-const parseCustomEnvironments = function(text) {
+const parseCustomEnvironments = function (text) {
   let match
   const re = /^\\newenvironment{(\w+)}.*$/gm
   const result = []
@@ -144,32 +144,34 @@ const parseCustomEnvironments = function(text) {
   return result
 }
 
-const parseBeginCommands = function(text) {
+const parseBeginCommands = function (text) {
   let match
-  const re = /^\\begin{(\w+)}.*\n([\t ]*).*$/gm
+  const re = /^([\t ]*)\\begin{(\w+)}.*\n([\t ]*)/gm
   const result = []
   let iterations = 0
   while ((match = re.exec(text))) {
+    const whitespaceAlignment = match[3].replace(match[1] || '', '')
     if (
-      !Array.from(Environments.all).includes(match[1]) &&
-      match[1] !== 'document'
+      !Array.from(Environments.all).includes(match[2]) &&
+      match[2] !== 'document'
     ) {
-      result.push({ name: match[1], whitespace: match[2] })
+      result.push({ name: match[2], whitespace: whitespaceAlignment })
       iterations += 1
       if (iterations >= 1000) {
         return result
       }
     }
+    re.lastIndex = match.index + 1
   }
   return result
 }
 
-const hasDocumentEnvironment = function(text) {
+const hasDocumentEnvironment = function (text) {
   const re = /^\\begin{document}/m
   return re.exec(text) !== null
 }
 
-const hasBibliographyEnvironment = function(text) {
+const hasBibliographyEnvironment = function (text) {
   const re = /^\\begin{thebibliography}/m
   return re.exec(text) !== null
 }
@@ -199,10 +201,10 @@ class EnvironmentManager {
     }
 
     const parsedItemsMap = {}
-    for (let environment of Array.from(customEnvironments)) {
+    for (const environment of Array.from(customEnvironments)) {
       parsedItemsMap[environment.name] = environment
     }
-    for (let command of Array.from(beginCommands)) {
+    for (const command of Array.from(beginCommands)) {
       parsedItemsMap[command.name] = command
     }
     const parsedItems = _.values(parsedItemsMap)
@@ -215,7 +217,7 @@ class EnvironmentManager {
 ${item.whitespace || ''}$0
 \\end{${item.name}}\
 `,
-          meta: 'env'
+          meta: 'env',
         }))
       )
       .concat(
@@ -225,7 +227,7 @@ ${item.whitespace || ''}$0
         parsedItems.map(item => ({
           caption: `\\end{${item.name}}`,
           value: `\\end{${item.name}}`,
-          meta: 'env'
+          meta: 'env',
         }))
       )
     return callback(null, snippets)

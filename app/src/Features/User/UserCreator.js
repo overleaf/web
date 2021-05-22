@@ -6,6 +6,8 @@ const { User } = require('../../models/User')
 const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
+const Analytics = require('../Analytics/AnalyticsManager')
+const UserOnboardingEmailQueueManager = require('./UserOnboardingEmailManager')
 
 async function _addAffiliation(user, affiliationOptions) {
   try {
@@ -43,16 +45,12 @@ async function createNewUser(attributes, options = {}) {
     user.featureSwitches.pdfng = true
   }
 
-  const reversedHostname = user.email
-    .split('@')[1]
-    .split('')
-    .reverse()
-    .join('')
+  const reversedHostname = user.email.split('@')[1].split('').reverse().join('')
 
   const emailData = {
     email: user.email,
     createdAt: new Date(),
-    reversedHostname
+    reversedHostname,
   }
   if (Features.hasFeature('affiliations')) {
     emailData.affiliationUnchecked = true
@@ -82,14 +80,25 @@ async function createNewUser(attributes, options = {}) {
     }
   }
 
+  Analytics.recordEvent(user._id, 'user-registered')
+  Analytics.setUserProperty(user._id, 'created-at', new Date())
+  try {
+    await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
+  } catch (error) {
+    logger.error(
+      `Failed to schedule sending of onboarding email for user '${user._id}'`,
+      error
+    )
+  }
+
   return user
 }
 
 const UserCreator = {
   createNewUser: util.callbackify(createNewUser),
   promises: {
-    createNewUser: createNewUser
-  }
+    createNewUser: createNewUser,
+  },
 }
 
 module.exports = UserCreator

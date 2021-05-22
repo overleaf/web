@@ -27,17 +27,17 @@ const SubscriptionUpdater = {
   updateAdmin(subscription, adminId, callback) {
     const query = {
       _id: ObjectId(subscription._id),
-      customAccount: true
+      customAccount: true,
     }
     const update = {
-      $set: { admin_id: ObjectId(adminId) }
+      $set: { admin_id: ObjectId(adminId) },
     }
     if (subscription.groupPlan) {
       update.$addToSet = { manager_ids: ObjectId(adminId) }
     } else {
       update.$set.manager_ids = [ObjectId(adminId)]
     }
-    Subscription.update(query, update, callback)
+    Subscription.updateOne(query, update, callback)
   },
 
   syncSubscription(recurlySubscription, adminUserId, requesterData, callback) {
@@ -45,37 +45,37 @@ const SubscriptionUpdater = {
       callback = requesterData
       requesterData = {}
     }
-    SubscriptionLocator.getUsersSubscription(adminUserId, function(
-      err,
-      subscription
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (subscription != null) {
-        SubscriptionUpdater._updateSubscriptionFromRecurly(
-          recurlySubscription,
-          subscription,
-          requesterData,
-          callback
-        )
-      } else {
-        SubscriptionUpdater._createNewSubscription(adminUserId, function(
-          err,
-          subscription
-        ) {
-          if (err != null) {
-            return callback(err)
-          }
+    SubscriptionLocator.getUsersSubscription(
+      adminUserId,
+      function (err, subscription) {
+        if (err != null) {
+          return callback(err)
+        }
+        if (subscription != null) {
           SubscriptionUpdater._updateSubscriptionFromRecurly(
             recurlySubscription,
             subscription,
             requesterData,
             callback
           )
-        })
+        } else {
+          SubscriptionUpdater._createNewSubscription(
+            adminUserId,
+            function (err, subscription) {
+              if (err != null) {
+                return callback(err)
+              }
+              SubscriptionUpdater._updateSubscriptionFromRecurly(
+                recurlySubscription,
+                subscription,
+                requesterData,
+                callback
+              )
+            }
+          )
+        }
       }
-    })
+    )
   },
 
   addUserToGroup(subscriptionId, userId, callback) {
@@ -86,11 +86,17 @@ const SubscriptionUpdater = {
     SubscriptionUpdater.addUsersToGroupWithoutFeaturesRefresh(
       subscriptionId,
       memberIds,
-      function(err) {
+      function (err) {
         if (err != null) {
           return callback(err)
         }
-        async.map(memberIds, FeaturesUpdater.refreshFeatures, callback)
+        async.map(
+          memberIds,
+          function (userId, cb) {
+            FeaturesUpdater.refreshFeatures(userId, 'add-to-group', cb)
+          },
+          callback
+        )
       }
     )
   },
@@ -99,24 +105,28 @@ const SubscriptionUpdater = {
     const searchOps = { _id: subscriptionId }
     const insertOperation = { $addToSet: { member_ids: { $each: memberIds } } }
 
-    Subscription.findAndModify(searchOps, insertOperation, callback)
+    Subscription.updateOne(searchOps, insertOperation, callback)
   },
 
   removeUserFromGroups(filter, userId, callback) {
     const removeOperation = { $pull: { member_ids: userId } }
-    Subscription.updateMany(filter, removeOperation, function(err) {
+    Subscription.updateMany(filter, removeOperation, function (err) {
       if (err != null) {
         OError.tag(err, 'error removing user from groups', {
           filter,
-          removeOperation
+          removeOperation,
         })
         return callback(err)
       }
-      UserGetter.getUser(userId, function(error, user) {
+      UserGetter.getUser(userId, function (error, user) {
         if (error) {
           return callback(error)
         }
-        FeaturesUpdater.refreshFeatures(userId, callback)
+        FeaturesUpdater.refreshFeatures(
+          userId,
+          'remove-user-from-groups',
+          callback
+        )
       })
     })
   },
@@ -130,23 +140,23 @@ const SubscriptionUpdater = {
   },
 
   removeUserFromAllGroups(userId, callback) {
-    SubscriptionLocator.getMemberSubscriptions(userId, function(
-      error,
-      subscriptions
-    ) {
-      if (error) {
-        return callback(error)
+    SubscriptionLocator.getMemberSubscriptions(
+      userId,
+      function (error, subscriptions) {
+        if (error) {
+          return callback(error)
+        }
+        if (!subscriptions) {
+          return callback()
+        }
+        const subscriptionIds = subscriptions.map(sub => sub._id)
+        SubscriptionUpdater.removeUserFromGroups(
+          { _id: subscriptionIds },
+          userId,
+          callback
+        )
       }
-      if (!subscriptions) {
-        return callback()
-      }
-      const subscriptionIds = subscriptions.map(sub => sub._id)
-      SubscriptionUpdater.removeUserFromGroups(
-        { _id: subscriptionIds },
-        userId,
-        callback
-      )
-    })
+    )
   },
 
   deleteWithV1Id(v1TeamId, callback) {
@@ -155,7 +165,7 @@ const SubscriptionUpdater = {
 
   deleteSubscription(subscription, deleterData, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     async.series(
       [
@@ -168,55 +178,61 @@ const SubscriptionUpdater = {
           ),
         cb =>
           // 2. remove subscription
-          Subscription.remove({ _id: subscription._id }, cb),
+          Subscription.deleteOne({ _id: subscription._id }, cb),
         cb =>
           // 3. refresh users features
-          SubscriptionUpdater._refreshUsersFeatures(subscription, cb)
+          SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
       ],
       callback
     )
   },
 
   restoreSubscription(subscriptionId, callback) {
-    SubscriptionLocator.getDeletedSubscription(subscriptionId, function(
-      err,
-      deletedSubscription
-    ) {
-      if (err) {
-        return callback(err)
+    SubscriptionLocator.getDeletedSubscription(
+      subscriptionId,
+      function (err, deletedSubscription) {
+        if (err) {
+          return callback(err)
+        }
+        const subscription = deletedSubscription.subscription
+        async.series(
+          [
+            cb =>
+              // 1. upsert subscription
+              db.subscriptions.updateOne(
+                { _id: subscription._id },
+                subscription,
+                { upsert: true },
+                cb
+              ),
+            cb =>
+              // 2. refresh users features. Do this before removing the
+              //    subscription so the restore can be retried if this fails
+              SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
+            cb =>
+              // 3. remove deleted subscription
+              DeletedSubscription.deleteOne(
+                { 'subscription._id': subscription._id },
+                callback
+              ),
+          ],
+          callback
+        )
       }
-      let subscription = deletedSubscription.subscription
-      async.series(
-        [
-          cb =>
-            // 1. upsert subscription
-            db.subscriptions.updateOne(
-              { _id: subscription._id },
-              subscription,
-              { upsert: true },
-              cb
-            ),
-          cb =>
-            // 2. refresh users features. Do this before removing the
-            //    subscription so the restore can be retried if this fails
-            SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
-          cb =>
-            // 3. remove deleted subscription
-            DeletedSubscription.deleteOne(
-              { 'subscription._id': subscription._id },
-              callback
-            )
-        ],
-        callback
-      )
-    })
+    )
   },
 
   _refreshUsersFeatures(subscription, callback) {
     const userIds = [subscription.admin_id].concat(
       subscription.member_ids || []
     )
-    async.mapSeries(userIds, FeaturesUpdater.refreshFeatures, callback)
+    async.mapSeries(
+      userIds,
+      function (userId, cb) {
+        FeaturesUpdater.refreshFeatures(userId, 'subscription-updater', cb)
+      },
+      callback
+    )
   },
 
   _createDeletedSubscription(subscription, deleterData, callback) {
@@ -226,9 +242,9 @@ const SubscriptionUpdater = {
     const data = {
       deleterData: {
         deleterId: deleterData.id,
-        deleterIpAddress: deleterData.ip
+        deleterIpAddress: deleterData.ip,
       },
-      subscription: subscription
+      subscription: subscription,
     }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
     DeletedSubscription.findOneAndUpdate(filter, data, options, callback)
@@ -237,9 +253,37 @@ const SubscriptionUpdater = {
   _createNewSubscription(adminUserId, callback) {
     const subscription = new Subscription({
       admin_id: adminUserId,
-      manager_ids: [adminUserId]
+      manager_ids: [adminUserId],
     })
     subscription.save(err => callback(err, subscription))
+  },
+
+  _deleteAndReplaceSubscriptionFromRecurly(
+    recurlySubscription,
+    subscription,
+    requesterData,
+    callback
+  ) {
+    const adminUserId = subscription.admin_id
+    SubscriptionUpdater.deleteSubscription(subscription, requesterData, err => {
+      if (err) {
+        return callback(err)
+      }
+      SubscriptionUpdater._createNewSubscription(
+        adminUserId,
+        (err, newSubscription) => {
+          if (err) {
+            return callback(err)
+          }
+          SubscriptionUpdater._updateSubscriptionFromRecurly(
+            recurlySubscription,
+            newSubscription,
+            requesterData,
+            callback
+          )
+        }
+      )
+    })
   },
 
   _updateSubscriptionFromRecurly(
@@ -255,29 +299,54 @@ const SubscriptionUpdater = {
         callback
       )
     }
-    subscription.recurlySubscription_id = recurlySubscription.uuid
-    subscription.planCode = recurlySubscription.plan.plan_code
-    const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+    const updatedPlanCode = recurlySubscription.plan.plan_code
+    const plan = PlansLocator.findLocalPlanInSettings(updatedPlanCode)
+
     if (plan == null) {
-      return callback(
-        new Error(`plan code not found: ${subscription.planCode}`)
+      return callback(new Error(`plan code not found: ${updatedPlanCode}`))
+    }
+    if (!plan.groupPlan && subscription.groupPlan) {
+      // If downgrading from group to individual plan, delete group sub and create a new one
+      return SubscriptionUpdater._deleteAndReplaceSubscriptionFromRecurly(
+        recurlySubscription,
+        subscription,
+        requesterData,
+        callback
       )
     }
+
+    subscription.recurlySubscription_id = recurlySubscription.uuid
+    subscription.planCode = updatedPlanCode
+
     if (plan.groupPlan) {
       if (!subscription.groupPlan) {
         subscription.member_ids = subscription.member_ids || []
         subscription.member_ids.push(subscription.admin_id)
       }
+
       subscription.groupPlan = true
       subscription.membersLimit = plan.membersLimit
+
+      // Some plans allow adding more seats than the base plan provides.
+      // This is recorded as a subscription add on.
+      if (
+        plan.membersLimitAddOn &&
+        Array.isArray(recurlySubscription.subscription_add_ons)
+      ) {
+        recurlySubscription.subscription_add_ons.forEach(addOn => {
+          if (addOn.add_on_code === plan.membersLimitAddOn) {
+            subscription.membersLimit += addOn.quantity
+          }
+        })
+      }
     }
-    subscription.save(function(error) {
+    subscription.save(function (error) {
       if (error) {
         return callback(error)
       }
       SubscriptionUpdater._refreshUsersFeatures(subscription, callback)
     })
-  }
+  },
 }
 
 SubscriptionUpdater.promises = promisifyAll(SubscriptionUpdater)

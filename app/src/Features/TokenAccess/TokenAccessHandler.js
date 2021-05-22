@@ -8,6 +8,7 @@ const logger = require('logger-sharelatex')
 const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
 const { promisifyAll } = require('../../util/promises')
+const Analytics = require('../Analytics/AnalyticsManager')
 
 const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
 const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
@@ -15,7 +16,7 @@ const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
 const TokenAccessHandler = {
   TOKEN_TYPES: {
     READ_ONLY: PrivilegeLevels.READ_ONLY,
-    READ_AND_WRITE: PrivilegeLevels.READ_AND_WRITE
+    READ_AND_WRITE: PrivilegeLevels.READ_AND_WRITE,
   },
 
   ANONYMOUS_READ_AND_WRITE_ENABLED:
@@ -92,7 +93,7 @@ const TokenAccessHandler = {
         tokens: 1,
         publicAccesLevel: 1,
         owner_ref: 1,
-        name: 1
+        name: 1,
       },
       callback
     )
@@ -118,9 +119,9 @@ const TokenAccessHandler = {
     const numerics = numericPrefixMatch[1]
     TokenAccessHandler._projectFindOne(
       {
-        'tokens.readAndWritePrefix': numerics
+        'tokens.readAndWritePrefix': numerics,
       },
-      function(err, project) {
+      function (err, project) {
         if (err != null) {
           return callback(err)
         }
@@ -164,12 +165,13 @@ const TokenAccessHandler = {
   addReadOnlyUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Project.update(
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-only' })
+    Project.updateOne(
       {
-        _id: projectId
+        _id: projectId,
       },
       {
-        $addToSet: { tokenAccessReadOnly_refs: userId }
+        $addToSet: { tokenAccessReadOnly_refs: userId },
       },
       callback
     )
@@ -178,12 +180,13 @@ const TokenAccessHandler = {
   addReadAndWriteUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Project.update(
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-write' })
+    Project.updateOne(
       {
-        _id: projectId
+        _id: projectId,
       },
       {
-        $addToSet: { tokenAccessReadAndWrite_refs: userId }
+        $addToSet: { tokenAccessReadAndWrite_refs: userId },
       },
       callback
     )
@@ -260,7 +263,7 @@ const TokenAccessHandler = {
     }
     V1Api.request(
       { url: `/api/v1/sharelatex/docs/${token}/is_published` },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           return callback(err)
         }
@@ -273,10 +276,10 @@ const TokenAccessHandler = {
     if (!Settings.apis || !Settings.apis.v1) {
       return callback(null, {
         exists: true,
-        exported: false
+        exported: false,
       })
     }
-    UserGetter.getUser(v2UserId, { overleaf: 1 }, function(err, user) {
+    UserGetter.getUser(v2UserId, { overleaf: 1 }, function (err, user) {
       if (err != null) {
         return callback(err)
       }
@@ -286,7 +289,7 @@ const TokenAccessHandler = {
       }
       V1Api.request(
         { url: `/api/v1/sharelatex/users/${v1UserId}/docs/${token}/info` },
-        function(err, response, body) {
+        function (err, response, body) {
           if (err != null) {
             return callback(err)
           }
@@ -294,7 +297,7 @@ const TokenAccessHandler = {
         }
       )
     })
-  }
+  },
 }
 
 TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
@@ -307,8 +310,8 @@ TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
     'grantSessionTokenAccess',
     'getRequestToken',
     'protectTokens',
-    'validateTokenForAnonymousAccess'
-  ]
+    'validateTokenForAnonymousAccess',
+  ],
 })
 
 module.exports = TokenAccessHandler

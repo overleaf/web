@@ -28,8 +28,8 @@ module.exports = {
       return res.status(422).json({
         error: {
           code: 'invalid_email',
-          message: req.i18n.translate('invalid_email')
-        }
+          message: req.i18n.translate('invalid_email'),
+        },
       })
     }
 
@@ -37,22 +37,22 @@ module.exports = {
       teamManagerId,
       subscription,
       email,
-      function(err, inviteUserData) {
+      function (err, inviteUserData) {
         if (err != null) {
           if (err.alreadyInTeam) {
             return res.status(400).json({
               error: {
                 code: 'user_already_added',
-                message: req.i18n.translate('user_already_added')
-              }
+                message: req.i18n.translate('user_already_added'),
+              },
             })
           }
           if (err.limitReached) {
             return res.status(400).json({
               error: {
                 code: 'group_full',
-                message: req.i18n.translate('group_full')
-              }
+                message: req.i18n.translate('group_full'),
+              },
             })
           }
           return next(err)
@@ -66,58 +66,58 @@ module.exports = {
     const { token } = req.params
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    return TeamInvitesHandler.getInvite(token, function(
-      err,
-      invite,
-      teamSubscription
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-
-      if (!invite) {
-        return ErrorController.notFound(req, res, next)
-      }
-
-      return SubscriptionLocator.getUsersSubscription(userId, function(
-        err,
-        personalSubscription
-      ) {
+    return TeamInvitesHandler.getInvite(
+      token,
+      function (err, invite, teamSubscription) {
         if (err != null) {
           return next(err)
         }
 
-        const hasIndividualRecurlySubscription =
-          personalSubscription != null &&
-          personalSubscription.planCode.match(/(free|trial)/) == null &&
-          personalSubscription.groupPlan === false &&
-          personalSubscription.recurlySubscription_id != null &&
-          personalSubscription.recurlySubscription_id !== ''
+        if (!invite) {
+          return ErrorController.notFound(req, res, next)
+        }
 
-        return res.render('subscriptions/team/invite', {
-          inviterName: invite.inviterName,
-          inviteToken: invite.token,
-          hasIndividualRecurlySubscription,
-          appName: settings.appName,
-          expired: req.query.expired
-        })
-      })
-    })
+        return SubscriptionLocator.getUsersSubscription(
+          userId,
+          function (err, personalSubscription) {
+            if (err != null) {
+              return next(err)
+            }
+
+            const hasIndividualRecurlySubscription =
+              personalSubscription != null &&
+              personalSubscription.planCode.match(/(free|trial)/) == null &&
+              personalSubscription.groupPlan === false &&
+              personalSubscription.recurlySubscription_id != null &&
+              personalSubscription.recurlySubscription_id !== ''
+
+            return res.render('subscriptions/team/invite', {
+              inviterName: invite.inviterName,
+              inviteToken: invite.token,
+              hasIndividualRecurlySubscription,
+              appName: settings.appName,
+              expired: req.query.expired,
+            })
+          }
+        )
+      }
+    )
   },
 
   acceptInvite(req, res, next) {
     const { token } = req.params
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    return TeamInvitesHandler.acceptInvite(token, userId, function(
-      err,
-      results
-    ) {
-      if (err != null) {
-        return next(err)
+    return TeamInvitesHandler.acceptInvite(
+      token,
+      userId,
+      function (err, results) {
+        if (err != null) {
+          return next(err)
+        }
+        return res.sendStatus(204)
       }
-      return res.sendStatus(204)
-    })
+    )
   },
 
   revokeInvite(req, res) {
@@ -132,12 +132,12 @@ module.exports = {
       teamManagerId,
       subscription,
       email,
-      function(err, results) {
+      function (err, results) {
         if (err != null) {
           return next(err)
         }
         return res.sendStatus(204)
       }
     )
-  }
+  },
 }

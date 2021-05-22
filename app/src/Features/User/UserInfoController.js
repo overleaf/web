@@ -17,9 +17,9 @@ module.exports = UserController = {
         role: true,
         institution: true,
         email: true,
-        signUpDate: true
+        signUpDate: true,
       },
-      function(error, user) {
+      function (error, user) {
         if (error) {
           return next(error)
         }
@@ -43,7 +43,7 @@ module.exports = UserController = {
     UserGetter.getUser(
       query,
       { _id: true, first_name: true, last_name: true, email: true },
-      function(error, user) {
+      function (error, user) {
         if (error) {
           return next(error)
         }
@@ -65,18 +65,18 @@ module.exports = UserController = {
       return {}
     }
     const formattedUser = { id: user._id.toString() }
-    for (let key of [
+    for (const key of [
       'first_name',
       'last_name',
       'email',
       'signUpDate',
       'role',
-      'institution'
+      'institution',
     ]) {
       if (user[key]) {
         formattedUser[key] = user[key]
       }
     }
     return formattedUser
-  }
+  },
 }

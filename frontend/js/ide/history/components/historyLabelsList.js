@@ -13,17 +13,17 @@ import _ from 'lodash'
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyLabelsListController = function($scope, $element, $attrs) {
+const historyLabelsListController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.isDragging = false
   ctrl.versionsWithLabels = []
-  $scope.$watchCollection('$ctrl.labels', function(labels) {
+  $scope.$watchCollection('$ctrl.labels', function (labels) {
     if (labels) {
       const groupedLabelsHash = _.groupBy(labels, 'version')
       ctrl.versionsWithLabels = _.map(groupedLabelsHash, (labels, version) => {
         return {
           version: parseInt(version, 10),
-          labels
+          labels,
         }
       })
     }
@@ -31,7 +31,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
   ctrl.initHoveredRange = () => {
     ctrl.hoveredHistoryRange = {
       toV: ctrl.selectedHistoryRange.toV,
-      fromV: ctrl.selectedHistoryRange.fromV
+      fromV: ctrl.selectedHistoryRange.fromV,
     }
   }
   ctrl.resetHoveredRange = () => {
@@ -48,7 +48,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
     }
   }
 
-  ctrl.isVersionSelected = function(version) {
+  ctrl.isVersionSelected = function (version) {
     if (ctrl.rangeSelectionEnabled) {
       return (
         version <= ctrl.selectedHistoryRange.toV &&
@@ -58,7 +58,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
       return version === ctrl.selectedHistoryVersion
     }
   }
-  ctrl.isVersionHoverSelected = function(version) {
+  ctrl.isVersionHoverSelected = function (version) {
     return (
       ctrl.rangeSelectionEnabled &&
       version <= ctrl.hoveredHistoryRange.toV &&
@@ -107,7 +107,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
       // TODO
       ctrl.onRangeSelect({
         selectedToV: versionWithLabel.version,
-        selectedFromV: versionWithLabel.version
+        selectedFromV: versionWithLabel.version,
       })
     } else {
       ctrl.onVersionSelect({ version: versionWithLabel.version })
@@ -117,7 +117,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
     if (version >= ctrl.selectedHistoryRange.fromV) {
       ctrl.onRangeSelect({
         selectedToV: version,
-        selectedFromV: ctrl.selectedHistoryRange.fromV
+        selectedFromV: ctrl.selectedHistoryRange.fromV,
       })
     }
   }
@@ -125,19 +125,19 @@ const historyLabelsListController = function($scope, $element, $attrs) {
     if (version <= ctrl.selectedHistoryRange.toV) {
       ctrl.onRangeSelect({
         selectedToV: ctrl.selectedHistoryRange.toV,
-        selectedFromV: version
+        selectedFromV: version,
       })
     }
   }
   ctrl.buildUserView = label => {
     const user = {
       _id: label.user_id,
-      displayName: label.user_display_name
+      displayName: label.user_display_name,
     }
     return user
   }
   ctrl.displayName = displayNameForUser
-  ctrl.getUserCSSStyle = function(user, versionWithLabel) {
+  ctrl.getUserCSSStyle = function (user, versionWithLabel) {
     const curUserId =
       (user != null ? user._id : undefined) ||
       (user != null ? user.id : undefined)
@@ -168,8 +168,8 @@ export default App.component('historyLabelsList', {
     selectedHistoryRange: '<?',
     onVersionSelect: '&',
     onRangeSelect: '&',
-    onLabelDelete: '&'
+    onLabelDelete: '&',
   },
   controller: historyLabelsListController,
-  templateUrl: 'historyLabelsListTpl'
+  templateUrl: 'historyLabelsListTpl',
 })

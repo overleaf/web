@@ -93,8 +93,7 @@ class TrackChangesManager {
   }
 
   onChangeScroll() {
-    if (this._scrollTimeout != null) {
-    } else {
+    if (this._scrollTimeout == null) {
       return (this._scrollTimeout = setTimeout(() => {
         this.recalculateVisibleEntries()
         this.$scope.$apply()
@@ -161,7 +160,7 @@ class TrackChangesManager {
   }
 
   redrawAnnotations() {
-    for (let change of Array.from(this.rangesTracker.changes)) {
+    for (const change of Array.from(this.rangesTracker.changes)) {
       if (change.op.i != null) {
         this.adapter.onInsertAdded(change)
       } else if (change.op.d != null) {
@@ -169,7 +168,7 @@ class TrackChangesManager {
       }
     }
 
-    Array.from(this.rangesTracker.comments).map(comment => {
+    Array.from(this.rangesTracker.comments).forEach(comment => {
       if (!this.isCommentResolved(comment)) {
         this.adapter.onCommentAdded(comment)
       }
@@ -351,7 +350,7 @@ class TrackChangesManager {
     changes.sort((a, b) => b.op.p - a.op.p)
 
     const session = this.editor.getSession()
-    for (let change of Array.from(changes)) {
+    for (const change of Array.from(changes)) {
       if (change.op.d != null) {
         const content = change.op.d
         const position = this.adapter.shareJsOffsetToRowColumn(change.op.p)
@@ -388,12 +387,12 @@ class TrackChangesManager {
 
   hideCommentsByThreadIds(thread_ids) {
     const resolve_ids = {}
-    let comments = this.rangesTracker.comments || []
-    for (let id of Array.from(thread_ids)) {
+    const comments = this.rangesTracker.comments || []
+    for (const id of Array.from(thread_ids)) {
       resolve_ids[id] = true
     }
 
-    for (let comment of comments) {
+    for (const comment of comments) {
       if (resolve_ids[comment.op.t]) {
         this.adapter.onCommentRemoved(comment)
       }
@@ -402,8 +401,8 @@ class TrackChangesManager {
   }
 
   showCommentByThreadId(thread_id) {
-    let comments = this.rangesTracker.comments || []
-    for (let comment of comments) {
+    const comments = this.rangesTracker.comments || []
+    for (const comment of comments) {
       if (comment.op.t === thread_id && !this.isCommentResolved(comment)) {
         this.adapter.onCommentAdded(comment)
       }
@@ -415,7 +414,7 @@ class TrackChangesManager {
     return (this._cutState = {
       text: null,
       comments: [],
-      docId: null
+      docId: null,
     })
   }
 
@@ -428,7 +427,7 @@ class TrackChangesManager {
     this._cutState.docId = this.$scope.docId
     return (() => {
       const result = []
-      for (let comment of Array.from(this.rangesTracker.comments)) {
+      for (const comment of Array.from(this.rangesTracker.comments)) {
         const comment_start = comment.op.p
         const comment_end = comment_start + comment.op.c.length
         if (selection_start <= comment_start && comment_end <= selection_end) {
@@ -436,7 +435,7 @@ class TrackChangesManager {
             this._cutState.comments.push({
               offset: comment.op.p - selection_start,
               text: comment.op.c,
-              comment
+              comment,
             })
           )
         } else {
@@ -466,7 +465,7 @@ class TrackChangesManager {
           pasted_text === this._cutState.text &&
           this.$scope.docId === this._cutState.docId
         ) {
-          for (let { comment, offset, text } of Array.from(
+          for (const { comment, offset, text } of Array.from(
             this._cutState.comments
           )) {
             const op = { c: text, p: paste_offset + offset, t: comment.id }
@@ -499,7 +498,7 @@ class TrackChangesManager {
         ;({ op } = change)
         ;({
           background_marker_id,
-          callout_marker_id
+          callout_marker_id,
         } = this.adapter.changeIdToMarkerIdMap[change.id])
         start = this.adapter.shareJsOffsetToRowColumn(op.p)
         if (op.i != null) {
@@ -510,21 +509,21 @@ class TrackChangesManager {
         expected_markers.push({
           marker_id: background_marker_id,
           start,
-          end
+          end,
         })
         expected_markers.push({
           marker_id: callout_marker_id,
           start,
-          end: start
+          end: start,
         })
       }
     }
 
-    for (let comment of Array.from(this.rangesTracker.comments)) {
+    for (const comment of Array.from(this.rangesTracker.comments)) {
       if (this.adapter.changeIdToMarkerIdMap[comment.id] != null) {
         ;({
           background_marker_id,
-          callout_marker_id
+          callout_marker_id,
         } = this.adapter.changeIdToMarkerIdMap[comment.id])
         start = this.adapter.shareJsOffsetToRowColumn(comment.op.p)
         end = this.adapter.shareJsOffsetToRowColumn(
@@ -533,12 +532,12 @@ class TrackChangesManager {
         expected_markers.push({
           marker_id: background_marker_id,
           start,
-          end
+          end,
         })
         expected_markers.push({
           marker_id: callout_marker_id,
           start,
-          end: start
+          end: start,
         })
       }
     }
@@ -556,7 +555,7 @@ class TrackChangesManager {
           change,
           marker,
           start,
-          end
+          end,
         })
       }
     }
@@ -584,7 +583,7 @@ class TrackChangesManager {
     const { renderer } = this.editor
     const entries = this._getCurrentDocEntries()
     const object = entries || {}
-    for (let entry_id in object) {
+    for (const entry_id in object) {
       const entry = object[entry_id]
       const doc_position = this.adapter.shareJsOffsetToRowColumn(entry.offset)
       const screen_position = session.documentToScreenPosition(
@@ -613,7 +612,7 @@ class TrackChangesManager {
     const entries = this._getCurrentDocEntries() || {}
     const entriesLength = Object.keys(entries).length
     let changed = false
-    for (let entry_id in entries) {
+    for (const entry_id in entries) {
       const entry = entries[entry_id]
       const old = entry.visible
       entry.visible =
@@ -651,10 +650,7 @@ class TrackChangesManager {
   }
 
   _rangeToShareJs(range) {
-    const lines = this.editor
-      .getSession()
-      .getDocument()
-      .getLines(0, range.row)
+    const lines = this.editor.getSession().getDocument().getLines(0, range.row)
     return EditorShareJsCodec.rangeToShareJs(range, lines)
   }
 

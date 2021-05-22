@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-	.content.content-alt
+	main.content.content-alt
 		.container
 			.row
 				.col-md-8.col-md-offset-2
@@ -10,13 +10,13 @@ block content
 							h2 #{translate("thanks_for_subscribing")}
 
 						.alert.alert-success
-							- if (personalSubscription.recurly.trial_ends_at)
-								p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>"+personalSubscription.recurly.price+"</strong>", collectionDate:"<strong>"+personalSubscription.recurly.nextPaymentDueAt+"</strong>"})}
+							if (personalSubscription.recurly.trial_ends_at)
+								p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
 								include ./_price_exceptions
 							p #{translate("to_modify_your_subscription_go_to")} 
 								a(href="/user/subscription")  #{translate("manage_subscription")}.
 						p
-							- if (personalSubscription.groupPlan == true)
+							if (personalSubscription.groupPlan == true)
 								a.btn.btn-success.btn-large(href=`/manage/groups/${personalSubscription._id}/members`) #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:personalSubscription.plan.name})}
@@ -28,9 +28,3 @@ block content
 								| The #{settings.appName} Team
 						p
 							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}
-
-	script(type="text/javascript").
-		window.ab = [
-			{step:1, bucket:"student_control", testName:"editor_plan"},
-			{step:1, bucket:"collab_test", testName:"editor_plan"},
-		]

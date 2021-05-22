@@ -1,3 +1,4 @@
+// eslint-disable-next-line prefer-regex-literals
 const BLACKLISTED_COMMAND_REGEX = new RegExp(
   `\
 \\\\\
@@ -35,7 +36,7 @@ class SpellCheckManager {
       open: false,
       top: '0px',
       left: '0px',
-      suggestions: []
+      suggestions: [],
     }
     this.inProgressRequest = null
     this.changedLines = []
@@ -52,7 +53,7 @@ class SpellCheckManager {
     this.cache =
       $cacheFactory.get(`spellCheck-cache`) ||
       $cacheFactory(`spellCheck-cache`, {
-        capacity: 15000
+        capacity: 15000,
       })
 
     this.selectedHighlightContents = null
@@ -165,7 +166,7 @@ class SpellCheckManager {
           top: coords.y + 'px',
           left: coords.x + 'px',
           layoutFromBottom: shouldPositionFromBottom,
-          highlight
+          highlight,
         }
       })
     }
@@ -264,7 +265,7 @@ class SpellCheckManager {
           column: positions[i].column,
           row: positions[i].row,
           word,
-          suggestions: cached
+          suggestions: cached,
         })
       }
     }
@@ -297,7 +298,7 @@ class SpellCheckManager {
             return null
           }
           const misspelled = []
-          for (let misspelling of result.misspellings) {
+          for (const misspelling of result.misspellings) {
             word = words[misspelling.index]
             const position = positions[misspelling.index]
             misspelled[misspelling.index] = true
@@ -305,7 +306,7 @@ class SpellCheckManager {
               column: position.column,
               row: position.row,
               word,
-              suggestions: misspelling.suggestions
+              suggestions: misspelling.suggestions,
             })
             key = `${language}:${word}`
             if (!seen[key]) {
@@ -331,7 +332,7 @@ class SpellCheckManager {
 
   apiRequest(endpoint, data, callback) {
     if (callback == null) {
-      callback = function(error, result) {
+      callback = function (error, result) {
         console.error(error)
       }
     }
@@ -359,7 +360,7 @@ class SpellCheckManager {
     const positions = []
     for (let row = 0; row < lines.length; row++) {
       let line = lines[row]
-      let rowIdx = rowNumsToCheck[row]
+      const rowIdx = rowNumsToCheck[row]
       line = this.blankOutBlacklistedCommands(line)
       var result
       WORD_REGEX.lastIndex = 0 // reset global stateful regexp for this usage

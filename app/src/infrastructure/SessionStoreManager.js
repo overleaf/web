@@ -1,4 +1,4 @@
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 
 function computeValidationToken(req) {
@@ -22,7 +22,7 @@ function checkValidationToken(req) {
         logger.error(
           {
             sessionToken: sessionToken,
-            clientToken: clientToken
+            clientToken: clientToken,
           },
           'session token validation failed'
         )
@@ -40,13 +40,13 @@ module.exports = {
   enableValidationToken(sessionStore) {
     // generate an identifier from the sessionID for every new session
     const originalGenerate = sessionStore.generate
-    sessionStore.generate = function(req) {
+    sessionStore.generate = function (req) {
       originalGenerate(req)
       // add the validation token as a property that cannot be overwritten
       Object.defineProperty(req.session, 'validationToken', {
         value: computeValidationToken(req),
         enumerable: true,
-        writable: false
+        writable: false,
       })
       Metrics.inc('security.session', 1, { status: 'new' })
     }
@@ -70,5 +70,5 @@ module.exports = {
     } else {
       return false
     }
-  }
+  },
 }

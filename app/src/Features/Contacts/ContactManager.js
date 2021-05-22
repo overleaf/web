@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -23,7 +23,7 @@ module.exports = ContactManager = {
       options = { limits: 50 }
     }
     if (callback == null) {
-      callback = function(error, contacts) {}
+      callback = function (error, contacts) {}
     }
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.get(
@@ -31,9 +31,9 @@ module.exports = ContactManager = {
         url,
         qs: options,
         json: true,
-        jar: false
+        jar: false,
       },
-      function(error, res, data) {
+      function (error, res, data) {
         if (error != null) {
           return callback(error)
         }
@@ -55,18 +55,18 @@ module.exports = ContactManager = {
 
   addContact(user_id, contact_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.post(
       {
         url,
         json: {
-          contact_id
+          contact_id,
         },
-        jar: false
+        jar: false,
       },
-      function(error, res, data) {
+      function (error, res, data) {
         if (error != null) {
           return callback(error)
         }
@@ -80,12 +80,12 @@ module.exports = ContactManager = {
             `contacts api responded with non-success code: ${res.statusCode}`,
             {
               user_id,
-              contact_id
+              contact_id,
             }
           )
           return callback(error)
         }
       }
     )
-  }
+  },
 }

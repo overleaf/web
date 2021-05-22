@@ -22,8 +22,8 @@ const CACHE_KEY = 'mbEvents'
 let heartbeatsSent = 0
 let nextHeartbeat = new Date()
 
-App.factory('eventTracking', function($http, localStorage) {
-  const _getEventCache = function() {
+App.factory('eventTracking', function ($http, localStorage) {
+  const _getEventCache = function () {
     let eventCache = localStorage(CACHE_KEY)
 
     // Initialize as an empy object if the event cache is still empty.
@@ -35,12 +35,12 @@ App.factory('eventTracking', function($http, localStorage) {
     return eventCache
   }
 
-  const _eventInCache = function(key) {
+  const _eventInCache = function (key) {
     const curCache = _getEventCache()
     return curCache[key] || false
   }
 
-  const _addEventToCache = function(key) {
+  const _addEventToCache = function (key) {
     const curCache = _getEventCache()
     curCache[key] = true
 
@@ -52,8 +52,8 @@ App.factory('eventTracking', function($http, localStorage) {
       url: `/editingSession/${window.project_id}`,
       method: 'PUT',
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
 
   return {
@@ -83,12 +83,10 @@ App.factory('eventTracking', function($http, localStorage) {
         heartbeatsSent <= 2
           ? 30
           : heartbeatsSent <= 6
-            ? (heartbeatsSent - 2) * 60
-            : 300
+          ? (heartbeatsSent - 2) * 60
+          : 300
 
-      return (nextHeartbeat = moment()
-        .add(backoffSecs, 'seconds')
-        .toDate())
+      return (nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate())
     },
 
     sendMB(key, segmentation) {
@@ -100,13 +98,13 @@ App.factory('eventTracking', function($http, localStorage) {
         method: 'POST',
         data: segmentation,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
     },
 
-    sendMBSampled(key, segmentation) {
-      if (Math.random() < 0.01) {
+    sendMBSampled(key, segmentation, rate = 0.01) {
+      if (Math.random() < rate) {
         return this.sendMB(key, segmentation)
       }
     },
@@ -120,11 +118,11 @@ App.factory('eventTracking', function($http, localStorage) {
 
     eventInCache(key) {
       return _eventInCache(key)
-    }
+    },
   }
 })
 
-export default $('.navbar a').on('click', function(e) {
+export default $('.navbar a').on('click', function (e) {
   const href = $(e.target).attr('href')
   if (href != null) {
     return ga('send', 'event', 'navigation', 'top menu bar', href)

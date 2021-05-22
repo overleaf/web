@@ -20,7 +20,7 @@ const defaultArgs = {
   pullRight: false,
   noCaret: false,
   className: '',
-  defaultOpen: true
+  defaultOpen: true,
 }
 
 export const Default = args => {
@@ -43,7 +43,7 @@ Primary.args = { ...defaultArgs, bsStyle: 'primary' }
 
 export const RightAligned = args => {
   return (
-    <div style={{ 'text-align': 'right' }}>
+    <div style={{ textAlign: 'right' }}>
       <DropdownButton {...args}>
         <MenuItems />
       </DropdownButton>
@@ -54,7 +54,7 @@ RightAligned.args = { ...defaultArgs, pullRight: true }
 
 export const SingleIconTransparent = args => {
   return (
-    <div style={{ 'text-align': 'right' }}>
+    <div style={{ textAlign: 'right' }}>
       <DropdownButton {...args}>
         <MenuItems />
       </DropdownButton>
@@ -66,12 +66,16 @@ SingleIconTransparent.args = {
   pullRight: true,
   title: <Icon type="ellipsis-v" />,
   noCaret: true,
-  className: 'dropdown-toggle-no-background'
+  className: 'dropdown-toggle-no-background',
 }
 
 export const Customized = args => {
   return (
-    <Dropdown pullRight={args.pullRight} defaultOpen={args.defaultOpen}>
+    <Dropdown
+      pullRight={args.pullRight}
+      defaultOpen={args.defaultOpen}
+      id="dropdown-story"
+    >
       <Dropdown.Toggle
         noCaret={args.noCaret}
         className={args.className}
@@ -88,10 +92,10 @@ export const Customized = args => {
 Customized.args = {
   ...defaultArgs,
   component: Dropdown,
-  title: 'Toggle & Menu used separately'
+  title: 'Toggle & Menu used separately',
 }
 
 export default {
   title: 'Dropdown',
-  component: DropdownButton
+  component: DropdownButton,
 }

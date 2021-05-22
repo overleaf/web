@@ -70,6 +70,86 @@ function wrapWithLock(methodWithoutLock) {
   }
 }
 
+function getDocContext(projectId, docId, callback) {
+  ProjectGetter.getProject(
+    projectId,
+    { name: true, rootFolder: true },
+    (err, project) => {
+      if (err) {
+        return callback(
+          OError.tag(err, 'error fetching project', {
+            projectId,
+          })
+        )
+      }
+      if (!project) {
+        return callback(new Errors.NotFoundError('project not found'))
+      }
+      ProjectLocator.findElement(
+        { project, element_id: docId, type: 'docs' },
+        (err, doc, path) => {
+          if (err && err instanceof Errors.NotFoundError) {
+            // (Soft-)Deleted docs are removed from the file-tree (rootFolder).
+            // docstore can tell whether it exists and is (soft)-deleted.
+            DocstoreManager.isDocDeleted(
+              projectId,
+              docId,
+              (err, isDeletedDoc) => {
+                if (err && err instanceof Errors.NotFoundError) {
+                  logger.warn(
+                    { projectId, docId },
+                    'doc not found while updating doc lines'
+                  )
+                  callback(err)
+                } else if (err) {
+                  callback(
+                    OError.tag(
+                      err,
+                      'error checking deletion status with docstore',
+                      { projectId, docId }
+                    )
+                  )
+                } else {
+                  if (!isDeletedDoc) {
+                    // NOTE: This can happen while we delete a doc:
+                    //  1. web will update the projects entry
+                    //  2. web triggers flushes to tpds/doc-updater
+                    //  3. web triggers (soft)-delete in docstore
+                    // Specifically when an update comes in after 1
+                    //  and before 3 completes.
+                    logger.info(
+                      { projectId, docId },
+                      'updating doc that is in process of getting soft-deleted'
+                    )
+                  }
+                  callback(null, {
+                    projectName: project.name,
+                    isDeletedDoc: true,
+                    path: null,
+                  })
+                }
+              }
+            )
+          } else if (err) {
+            callback(
+              OError.tag(err, 'error finding doc in rootFolder', {
+                docId,
+                projectId,
+              })
+            )
+          } else {
+            callback(null, {
+              projectName: project.name,
+              isDeletedDoc: false,
+              path: path.fileSystem,
+            })
+          }
+        }
+      )
+    }
+  )
+}
+
 const ProjectEntityUpdateHandler = {
   updateDocLines(
     projectId,
@@ -81,86 +161,57 @@ const ProjectEntityUpdateHandler = {
     lastUpdatedBy,
     callback
   ) {
-    ProjectGetter.getProjectWithoutDocLines(projectId, (err, project) => {
-      if (err != null) {
+    getDocContext(projectId, docId, (err, ctx) => {
+      if (err && err instanceof Errors.NotFoundError) {
+        // Do not allow an update to a doc which has never exist on this project
+        logger.warn(
+          { docId, projectId },
+          'project or doc not found while updating doc lines'
+        )
         return callback(err)
       }
-      if (project == null) {
-        return callback(new Errors.NotFoundError('project not found'))
+      if (err) {
+        return callback(err)
       }
-      logger.log({ projectId, docId }, 'updating doc lines')
-      ProjectLocator.findElement(
-        { project, element_id: docId, type: 'docs' },
-        (err, doc, path) => {
-          let isDeletedDoc = false
+      const { projectName, isDeletedDoc, path } = ctx
+      logger.log({ projectId, docId }, 'telling docstore manager to update doc')
+      DocstoreManager.updateDoc(
+        projectId,
+        docId,
+        lines,
+        version,
+        ranges,
+        (err, modified, rev) => {
           if (err != null) {
-            if (err instanceof Errors.NotFoundError) {
-              // We need to be able to update the doclines of deleted docs. This is
-              // so the doc-updater can flush a doc's content to the doc-store after
-              // the doc is deleted.
-              isDeletedDoc = true
-              doc = _.find(
-                project.deletedDocs,
-                doc => doc._id.toString() === docId.toString()
-              )
-            } else {
-              return callback(err)
-            }
+            OError.tag(err, 'error sending doc to docstore', {
+              docId,
+              projectId,
+            })
+            return callback(err)
           }
-
-          if (doc == null) {
-            // Do not allow an update to a doc which has never exist on this project
-            logger.warn(
-              { docId, projectId },
-              'doc not found while updating doc lines'
-            )
-            return callback(new Errors.NotFoundError('doc not found'))
-          }
-
           logger.log(
-            { projectId, docId },
-            'telling docstore manager to update doc'
+            { projectId, docId, modified },
+            'finished updating doc lines'
           )
-          DocstoreManager.updateDoc(
+          // path will only be present if the doc is not deleted
+          if (!modified || isDeletedDoc) {
+            return callback()
+          }
+          // Don't need to block for marking as updated
+          ProjectUpdateHandler.markAsUpdated(
             projectId,
-            docId,
-            lines,
-            version,
-            ranges,
-            (err, modified, rev) => {
-              if (err != null) {
-                OError.tag(err, 'error sending doc to docstore', {
-                  docId,
-                  projectId
-                })
-                return callback(err)
-              }
-              logger.log(
-                { projectId, docId, modified },
-                'finished updating doc lines'
-              )
-              // path will only be present if the doc is not deleted
-              if (modified && !isDeletedDoc) {
-                // Don't need to block for marking as updated
-                ProjectUpdateHandler.markAsUpdated(
-                  projectId,
-                  lastUpdatedAt,
-                  lastUpdatedBy
-                )
-                TpdsUpdateSender.addDoc(
-                  {
-                    project_id: projectId,
-                    path: path.fileSystem,
-                    doc_id: docId,
-                    project_name: project.name,
-                    rev
-                  },
-                  callback
-                )
-              } else {
-                callback()
-              }
-            }
+            lastUpdatedAt,
+            lastUpdatedBy
+          )
+          TpdsUpdateSender.addDoc(
+            {
+              project_id: projectId,
+              path,
+              doc_id: docId,
+              project_name: projectName,
+              rev,
+            },
+            callback
           )
         }
       )
@@ -182,7 +233,7 @@ const ProjectEntityUpdateHandler = {
           return callback(err)
         }
         if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
-          Project.update(
+          Project.updateOne(
             { _id: projectId },
             { rootDoc_id: newRootDocID },
             {},
@@ -201,7 +252,7 @@ const ProjectEntityUpdateHandler = {
 
   unsetRootDoc(projectId, callback) {
     logger.log({ projectId }, 'removing root doc')
-    Project.update(
+    Project.updateOne(
       { _id: projectId },
       { $unset: { rootDoc_id: true } },
       {},
@@ -220,7 +271,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             doc_name: doc != null ? doc.name : undefined,
-            doc_id: doc != null ? doc._id : undefined
+            doc_id: doc != null ? doc._id : undefined,
           })
           return callback(err)
         }
@@ -230,7 +281,7 @@ const ProjectEntityUpdateHandler = {
             doc_id: doc != null ? doc._id : undefined,
             path: result && result.path && result.path.fileSystem,
             project_name: project.name,
-            rev: 0
+            rev: 0,
           },
           err => {
             if (err != null) {
@@ -257,7 +308,7 @@ const ProjectEntityUpdateHandler = {
 
   addDocWithRanges: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         docName,
@@ -323,8 +374,8 @@ const ProjectEntityUpdateHandler = {
             {
               doc,
               path: docPath,
-              docLines: docLines.join('\n')
-            }
+              docLines: docLines.join('\n'),
+            },
           ]
           DocumentUpdaterHandler.updateProjectStructure(
             projectId,
@@ -340,7 +391,7 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
   _uploadFile(projectId, folderId, fileName, fsPath, linkedFileData, callback) {
@@ -349,7 +400,7 @@ const ProjectEntityUpdateHandler = {
     }
     const fileArgs = {
       name: fileName,
-      linkedFileData
+      linkedFileData,
     }
     FileStoreHandler.uploadFileFromDisk(
       projectId,
@@ -361,7 +412,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             file_name: fileName,
-            fileRef
+            fileRef,
           })
           return callback(err)
         }
@@ -381,7 +432,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             file_name: fileRef.name,
-            fileRef
+            fileRef,
           })
           return callback(err)
         }
@@ -391,7 +442,7 @@ const ProjectEntityUpdateHandler = {
             file_id: fileRef._id,
             path: result && result.path && result.path.fileSystem,
             project_name: project.name,
-            rev: fileRef.rev
+            rev: fileRef.rev,
           },
           err => {
             if (err != null) {
@@ -406,7 +457,7 @@ const ProjectEntityUpdateHandler = {
 
   addFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         fileName,
@@ -470,8 +521,8 @@ const ProjectEntityUpdateHandler = {
             {
               file: fileRef,
               path: result && result.path && result.path.fileSystem,
-              url: fileStoreUrl
-            }
+              url: fileStoreUrl,
+            },
           ]
           DocumentUpdaterHandler.updateProjectStructure(
             projectId,
@@ -482,17 +533,18 @@ const ProjectEntityUpdateHandler = {
               if (error != null) {
                 return callback(error)
               }
+              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
               callback(null, fileRef, folderId)
             }
           )
         }
       )
-    }
+    },
   }),
 
   replaceFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         fileId,
         fsPath,
@@ -503,7 +555,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: 'dummy-upload-filename',
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -548,15 +600,15 @@ const ProjectEntityUpdateHandler = {
           const oldFiles = [
             {
               file: oldFileRef,
-              path: path.fileSystem
-            }
+              path: path.fileSystem,
+            },
           ]
           const newFiles = [
             {
               file: newFileRef,
               path: path.fileSystem,
-              url: fileStoreUrl
-            }
+              url: fileStoreUrl,
+            },
           ]
           const projectHistoryId =
             project.overleaf &&
@@ -574,12 +626,14 @@ const ProjectEntityUpdateHandler = {
               file_id: newFileRef._id,
               path: path.fileSystem,
               rev: oldFileRef.rev + 1,
-              project_name: project.name
+              project_name: project.name,
             },
             err => {
               if (err != null) {
                 return callback(err)
               }
+              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
+
               DocumentUpdaterHandler.updateProjectStructure(
                 projectId,
                 projectHistoryId,
@@ -591,10 +645,10 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
-  upsertDoc: wrapWithLock(function(
+  upsertDoc: wrapWithLock(function (
     projectId,
     folderId,
     docName,
@@ -646,7 +700,7 @@ const ProjectEntityUpdateHandler = {
                       doc_id: doc._id,
                       path: filePath,
                       project_name: project.name,
-                      rev: existingFile.rev + 1
+                      rev: existingFile.rev + 1,
                     },
                     err => {
                       if (err) {
@@ -660,14 +714,14 @@ const ProjectEntityUpdateHandler = {
                         {
                           doc,
                           path: filePath,
-                          docLines: docLines.join('\n')
-                        }
+                          docLines: docLines.join('\n'),
+                        },
                       ]
                       const oldFiles = [
                         {
                           file: existingFile,
-                          path: filePath
-                        }
+                          path: filePath,
+                        },
                       ]
                       DocumentUpdaterHandler.updateProjectStructure(
                         projectId,
@@ -742,7 +796,7 @@ const ProjectEntityUpdateHandler = {
 
   upsertFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         fileName,
@@ -757,7 +811,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: fileName,
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -812,7 +866,7 @@ const ProjectEntityUpdateHandler = {
               {
                 project_id: projectId,
                 element_id: existingDoc._id,
-                type: 'doc'
+                type: 'doc',
               },
               (err, doc, path) => {
                 if (err) {
@@ -836,7 +890,7 @@ const ProjectEntityUpdateHandler = {
                         file_id: newFileRef._id,
                         path: path.fileSystem,
                         rev: newFileRef.rev,
-                        project_name: project.name
+                        project_name: project.name,
                       },
                       err => {
                         if (err) {
@@ -848,17 +902,17 @@ const ProjectEntityUpdateHandler = {
                           userId,
                           {
                             oldDocs: [
-                              { doc: existingDoc, path: path.fileSystem }
+                              { doc: existingDoc, path: path.fileSystem },
                             ],
 
                             newFiles: [
                               {
                                 file: newFileRef,
                                 path: path.fileSystem,
-                                url: fileStoreUrl
-                              }
+                                url: fileStoreUrl,
+                              },
                             ],
-                            newProject: project
+                            newProject: project,
                           },
                           err => {
                             if (err) {
@@ -917,10 +971,10 @@ const ProjectEntityUpdateHandler = {
           }
         }
       )
-    }
+    },
   }),
 
-  upsertDocWithPath: wrapWithLock(function(
+  upsertDocWithPath: wrapWithLock(function (
     projectId,
     elementPath,
     docLines,
@@ -960,7 +1014,7 @@ const ProjectEntityUpdateHandler = {
 
   upsertFileWithPath: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         elementPath,
         fsPath,
@@ -976,7 +1030,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: fileName,
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -1045,10 +1099,10 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
-  deleteEntity: wrapWithLock(function(
+  deleteEntity: wrapWithLock(function (
     projectId,
     entityId,
     entityType,
@@ -1084,7 +1138,7 @@ const ProjectEntityUpdateHandler = {
               {
                 project_id: projectId,
                 path: path.fileSystem,
-                project_name: projectBeforeDeletion.name
+                project_name: projectBeforeDeletion.name,
               },
               error => {
                 if (error != null) {
@@ -1120,8 +1174,8 @@ const ProjectEntityUpdateHandler = {
     )
   ),
 
-  mkdirp: wrapWithLock(function(projectId, path, callback) {
-    for (let folder of path.split('/')) {
+  mkdirp: wrapWithLock(function (projectId, path, callback) {
+    for (const folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
       }
@@ -1134,8 +1188,8 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  mkdirpWithExactCase: wrapWithLock(function(projectId, path, callback) {
-    for (let folder of path.split('/')) {
+  mkdirpWithExactCase: wrapWithLock(function (projectId, path, callback) {
+    for (const folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
       }
@@ -1148,7 +1202,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  addFolder: wrapWithLock(function(
+  addFolder: wrapWithLock(function (
     projectId,
     parentFolderId,
     folderName,
@@ -1165,7 +1219,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  moveEntity: wrapWithLock(function(
+  moveEntity: wrapWithLock(function (
     projectId,
     entityId,
     destFolderId,
@@ -1202,7 +1256,7 @@ const ProjectEntityUpdateHandler = {
             project_name: project.name,
             startPath,
             endPath,
-            rev
+            rev,
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')
@@ -1218,7 +1272,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  renameEntity: wrapWithLock(function(
+  renameEntity: wrapWithLock(function (
     projectId,
     entityId,
     entityType,
@@ -1256,7 +1310,7 @@ const ProjectEntityUpdateHandler = {
             project_name: project.name,
             startPath,
             endPath,
-            rev
+            rev,
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')
@@ -1304,13 +1358,13 @@ const ProjectEntityUpdateHandler = {
 
             docs = _.map(docs, doc => ({
               doc: doc.doc._id,
-              path: doc.path
+              path: doc.path,
             }))
 
             files = _.map(files, file => ({
               file: file.file._id,
               path: file.path,
-              url: FileStoreHandler._buildUrl(projectId, file.file._id)
+              url: FileStoreHandler._buildUrl(projectId, file.file._id),
             }))
 
             DocumentUpdaterHandler.resyncProjectHistory(
@@ -1327,7 +1381,7 @@ const ProjectEntityUpdateHandler = {
   ),
 
   isPathValidForRootDoc(docPath) {
-    let docExtension = Path.extname(docPath)
+    const docExtension = Path.extname(docPath)
     return VALID_ROOT_DOC_REGEXP.test(docExtension)
   },
 
@@ -1404,13 +1458,13 @@ const ProjectEntityUpdateHandler = {
     } else if (entityType.indexOf('folder') !== -1) {
       changes = { oldDocs: [], oldFiles: [] }
       const _recurseFolder = (folder, folderPath) => {
-        for (let doc of folder.docs) {
+        for (const doc of folder.docs) {
           changes.oldDocs.push({ doc, path: Path.join(folderPath, doc.name) })
         }
-        for (let file of folder.fileRefs) {
+        for (const file of folder.fileRefs) {
           changes.oldFiles.push({
             file,
-            path: Path.join(folderPath, file.name)
+            path: Path.join(folderPath, file.name),
           })
         }
         for (const childFolder of folder.folders) {
@@ -1453,21 +1507,14 @@ const ProjectEntityUpdateHandler = {
       if (error != null) {
         return callback(error)
       }
-      ProjectEntityMongoUpdateHandler._insertDeletedDocReference(
-        project._id,
-        doc,
-        error => {
-          if (error != null) {
-            return callback(error)
-          }
-          DocumentUpdaterHandler.deleteDoc(projectId, docId, error => {
-            if (error != null) {
-              return callback(error)
-            }
-            DocstoreManager.deleteDoc(projectId, docId, callback)
-          })
+      const { name } = doc
+      const deletedAt = new Date()
+      DocstoreManager.deleteDoc(projectId, docId, name, deletedAt, error => {
+        if (error) {
+          return callback(error)
         }
-      )
+        DocumentUpdaterHandler.deleteDoc(projectId, docId, callback)
+      })
     })
   },
 
@@ -1525,7 +1572,7 @@ const ProjectEntityUpdateHandler = {
 
   convertDocToFile: wrapWithLock({
     beforeLock(next) {
-      return function(projectId, docId, userId, callback) {
+      return function (projectId, docId, userId, callback) {
         DocumentUpdaterHandler.flushDocToMongo(projectId, docId, err => {
           if (err) {
             return callback(err)
@@ -1615,7 +1662,7 @@ const ProjectEntityUpdateHandler = {
             {
               oldDocs: [{ doc, path }],
               newFiles: [{ file: fileRef, path, url: fileStoreUrl }],
-              newProject: project
+              newProject: project,
             },
             err => {
               if (err) {
@@ -1625,7 +1672,7 @@ const ProjectEntityUpdateHandler = {
                 {
                   project_id: projectId,
                   element_id: fileRef._id,
-                  type: 'file'
+                  type: 'file',
                 },
                 (err, element, path, folder) => {
                   if (err) {
@@ -1643,7 +1690,8 @@ const ProjectEntityUpdateHandler = {
                     folder._id,
                     fileRef,
                     'convertDocToFile',
-                    null
+                    null,
+                    userId
                   )
                   callback(null, fileRef)
                 }
@@ -1652,8 +1700,8 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
-  })
+    },
+  }),
 }
 
 module.exports = ProjectEntityUpdateHandler
@@ -1672,6 +1720,6 @@ module.exports.promises = promisifyAll(ProjectEntityUpdateHandler, {
     upsertFileWithPath: ['fileRef', 'isNew', 'oldFile', 'newFolders', 'folder'],
     mkdirp: ['newFolders', 'folder'],
     mkdirpWithExactCase: ['newFolders', 'folder'],
-    addFolder: ['folder', 'parentFolderId']
-  }
+    addFolder: ['folder', 'parentFolderId'],
+  },
 })

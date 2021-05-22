@@ -10,24 +10,19 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
+const { expect } = require('chai')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsController'
 )
-const { expect } = require('chai')
 
-describe('InstitutionsController', function() {
-  beforeEach(function() {
-    this.logger = { err: sinon.stub(), warn: sinon.stub(), log() {} }
-    this.host = 'mit.edu'
-      .split('')
-      .reverse()
-      .join('')
+describe('InstitutionsController', function () {
+  beforeEach(function () {
+    this.host = 'mit.edu'.split('').reverse().join('')
     this.stubbedUser1 = {
       _id: '3131231',
       name: 'bob',
@@ -35,33 +30,33 @@ describe('InstitutionsController', function() {
       emails: [
         { email: 'stubb1@mit.edu', reversedHostname: this.host },
         { email: 'test@test.com', reversedHostname: 'test.com' },
-        { email: 'another@mit.edu', reversedHostname: this.host }
-      ]
+        { email: 'another@mit.edu', reversedHostname: this.host },
+      ],
     }
     this.stubbedUser1DecoratedEmails = [
       {
         email: 'stubb1@mit.edu',
         reversedHostname: this.host,
-        samlIdentifier: { hasEntitlement: false }
+        samlIdentifier: { hasEntitlement: false },
       },
       { email: 'test@test.com', reversedHostname: 'test.com' },
       {
         email: 'another@mit.edu',
         reversedHostname: this.host,
-        samlIdentifier: { hasEntitlement: true }
-      }
+        samlIdentifier: { hasEntitlement: true },
+      },
     ]
     this.stubbedUser2 = {
       _id: '3131232',
       name: 'test',
       email: 'hello2@world.com',
-      emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }]
+      emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }],
     }
     this.stubbedUser2DecoratedEmails = [
       {
         email: 'subb2@mit.edu',
-        reversedHostname: this.host
-      }
+        reversedHostname: this.host,
+      },
     ]
 
     this.getUsersByHostname = sinon.stub().callsArgWith(
@@ -81,35 +76,31 @@ describe('InstitutionsController', function() {
       .withArgs(this.stubbedUser2._id)
       .yields(null, this.stubbedUser2DecoratedEmails)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         '../User/UserGetter': {
           getUsersByHostname: this.getUsersByHostname,
-          getUserFullEmails: this.getUserFullEmails
+          getUserFullEmails: this.getUserFullEmails,
         },
         '../Institutions/InstitutionsAPI': {
-          addAffiliation: this.addAffiliation
+          addAffiliation: this.addAffiliation,
         },
         '../Subscription/FeaturesUpdater': {
-          refreshFeatures: this.refreshFeatures
-        }
-      }
+          refreshFeatures: this.refreshFeatures,
+        },
+      },
     })
 
     this.req = { body: { hostname: 'mit.edu' } }
 
     this.res = {
       send: sinon.stub(),
-      json: sinon.stub()
+      json: sinon.stub(),
     }
     return (this.next = sinon.stub())
   })
 
-  describe('affiliateUsers', function() {
-    it('should add affiliations for matching users', function(done) {
+  describe('affiliateUsers', function () {
+    it('should add affiliations for matching users', function (done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
         this.getUsersByHostname.calledOnce.should.equal(true)
@@ -151,7 +142,7 @@ describe('InstitutionsController', function() {
       )
     })
 
-    it('should return errors if last affiliation cannot be added', function(done) {
+    it('should return errors if last affiliation cannot be added', function (done) {
       this.addAffiliation.onCall(2).callsArgWith(3, new Error('error'))
       this.next = error => {
         expect(error).to.exist

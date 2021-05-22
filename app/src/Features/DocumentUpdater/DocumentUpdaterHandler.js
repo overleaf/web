@@ -1,10 +1,10 @@
-const request = require('request').defaults()
+const request = require('request').defaults({ timeout: 30 * 100 })
 const OError = require('@overleaf/o-error')
 const settings = require('settings-sharelatex')
 const _ = require('underscore')
 const async = require('async')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 
 module.exports = {
@@ -34,15 +34,15 @@ module.exports = {
     acceptChanges: promisify(acceptChanges),
     deleteThread: promisify(deleteThread),
     resyncProjectHistory: promisify(resyncProjectHistory),
-    updateProjectStructure: promisify(updateProjectStructure)
-  }
+    updateProjectStructure: promisify(updateProjectStructure),
+  },
 }
 
 function flushProjectToMongo(projectId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/flush`,
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'flushing.mongo.project',
@@ -61,7 +61,7 @@ function flushProjectToMongoAndDelete(projectId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     },
     projectId,
     'flushing.mongo.project',
@@ -73,7 +73,7 @@ function flushDocToMongo(projectId, docId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/doc/${docId}/flush`,
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'flushing.mongo.doc',
@@ -85,7 +85,7 @@ function deleteDoc(projectId, docId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/doc/${docId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     },
     projectId,
     'delete.mongo.doc',
@@ -97,11 +97,11 @@ function getDocument(projectId, docId, fromVersion, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}`,
-      json: true
+      json: true,
     },
     projectId,
     'get-document',
-    function(error, doc) {
+    function (error, doc) {
       if (error) {
         return callback(error)
       }
@@ -118,8 +118,8 @@ function setDocument(projectId, docId, userId, docLines, source, callback) {
       json: {
         lines: docLines,
         source,
-        user_id: userId
-      }
+        user_id: userId,
+      },
     },
     projectId,
     'set-document',
@@ -132,15 +132,13 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
   // docs from redis via the docupdater. Otherwise we will need to
   // fall back to getting them from mongo.
   const timer = new metrics.Timer('get-project-docs')
-  const url = `${
-    settings.apis.documentupdater.url
-  }/project/${projectId}/get_and_flush_if_old?state=${projectStateHash}`
-  request.post(url, function(error, res, body) {
+  const url = `${settings.apis.documentupdater.url}/project/${projectId}/get_and_flush_if_old?state=${projectStateHash}`
+  request.post(url, function (error, res, body) {
     timer.done()
     if (error) {
       OError.tag(error, 'error getting project docs from doc updater', {
         url,
-        projectId
+        projectId,
       })
       return callback(error)
     }
@@ -166,7 +164,7 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
           `doc updater returned a non-success status code: ${res.statusCode}`,
           {
             projectId,
-            url
+            url,
           }
         )
       )
@@ -178,7 +176,7 @@ function clearProjectState(projectId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/clearState`,
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'clear-project-state',
@@ -191,7 +189,7 @@ function acceptChanges(projectId, docId, changeIds, callback) {
     {
       path: `/project/${projectId}/doc/${docId}/change/accept`,
       json: { change_ids: changeIds },
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'accept-changes',
@@ -203,7 +201,7 @@ function deleteThread(projectId, docId, threadId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/doc/${docId}/comment/${threadId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     },
     projectId,
     'delete-thread',
@@ -222,7 +220,7 @@ function resyncProjectHistory(
     {
       path: `/project/${projectId}/history/resync`,
       json: { docs, files, projectHistoryId },
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'resync-project-history',
@@ -247,12 +245,12 @@ function updateProjectStructure(
   const {
     deletes: docDeletes,
     adds: docAdds,
-    renames: docRenames
+    renames: docRenames,
   } = _getUpdates('doc', changes.oldDocs, changes.newDocs)
   const {
     deletes: fileDeletes,
     adds: fileAdds,
-    renames: fileRenames
+    renames: fileRenames,
   } = _getUpdates('file', changes.oldFiles, changes.newFiles)
   const updates = [].concat(
     docDeletes,
@@ -284,9 +282,9 @@ function updateProjectStructure(
         updates,
         userId,
         version: projectVersion,
-        projectHistoryId
+        projectHistoryId,
       },
-      method: 'POST'
+      method: 'POST',
     },
     projectId,
     'update-project-structure',
@@ -300,9 +298,9 @@ function _makeRequest(options, projectId, metricsKey, callback) {
     {
       url: `${settings.apis.documentupdater.url}${options.path}`,
       json: options.json,
-      method: options.method || 'GET'
+      method: options.method || 'GET',
     },
-    function(error, res, body) {
+    function (error, res, body) {
       timer.done()
       if (error) {
         logger.warn(
@@ -361,7 +359,7 @@ function _getUpdates(entityType, oldEntities, newEntities) {
         type: `rename-${entityType}`,
         id,
         pathname: oldEntity.path,
-        newPathname: ''
+        newPathname: '',
       })
     }
   }
@@ -378,7 +376,7 @@ function _getUpdates(entityType, oldEntities, newEntities) {
         pathname: newEntity.path,
         docLines: newEntity.docLines,
         url: newEntity.url,
-        hash: newEntity.file != null ? newEntity.file.hash : undefined
+        hash: newEntity.file != null ? newEntity.file.hash : undefined,
       })
     } else if (newEntity.path !== oldEntity.path) {
       // entity renamed
@@ -386,7 +384,7 @@ function _getUpdates(entityType, oldEntities, newEntities) {
         type: `rename-${entityType}`,
         id,
         pathname: oldEntity.path,
-        newPathname: newEntity.path
+        newPathname: newEntity.path,
       })
     }
   }

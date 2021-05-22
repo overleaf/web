@@ -5,8 +5,13 @@ block vars
 	- var suppressFooter = true
 	- metadata.robotsNoindexNofollow = true
 
+block _headLinks
+	link(rel='stylesheet', href=buildStylesheetPath("ide.css"))
+
 block content
 	.editor(ng-controller="IdeController").full-size
+		//- required by react2angular-shared-context, must be rendered as a top level component
+		shared-context-react()
 		.loading-screen(ng-if="state.loading")
 			.loading-screen-brand-container
 				.loading-screen-brand(
@@ -20,10 +25,9 @@ block content
 			p.loading-screen-error(ng-if="state.error").ng-cloak
 				span(ng-bind-html="state.error")
 
-		.global-alerts(ng-cloak)
+		.global-alerts(ng-cloak ng-hide="editor.error_state")
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
 				strong #{translate("disconnected")}
-				|  #{translate("please_refresh")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
 				strong #{translate("lost_connection")}.
@@ -72,7 +76,10 @@ block content
 			ng-cloak
 		)
 			.ui-layout-center
-				include ./editor/header
+				if showNewNavigationUI
+					include ./editor/header-react
+				else
+					include ./editor/header
 
 				include ./editor/share
 				!= moduleIncludes("publish:body", locals)
@@ -92,22 +99,25 @@ block content
 					custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
 				)
 					.ui-layout-west
-						include ./editor/file-tree
+						include ./editor/file-tree-react
+						include ./editor/file-tree-history
 						include ./editor/history/fileTreeV2
 
 					.ui-layout-center
 						include ./editor/editor
-						include ./editor/binary-file
+
+						if showNewBinaryFileUI
+							include ./editor/binary-file-react
+						else
+							include ./editor/binary-file
 						include ./editor/history
 
 			if !isRestrictedTokenMember
 				.ui-layout-east
-					if showNewChatUI
-						include ./editor/chat-react
-					else
-						include ./editor/chat
-
-	include ./editor/hotkeys
+					aside.chat(
+						ng-controller="ReactChatController"
+					)
+						chat()
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header
@@ -142,54 +152,52 @@ block content
 			)
 				| {{showFileContents ? "Hide" : "Show"}} Local File Contents
 			.text-preview(ng-show="showFileContents")
-				.scroll-container
+				textarea.scroll-container(readonly="readonly" rows="{{editorContentRows}}")
 					| {{editorContent}}
 
 		.modal-footer
-			button.btn.btn-info(ng-click="done()") #{translate("ok")}
+			button.btn.btn-info(ng-click="done()") #{translate("reload_editor")}
 
 	script(type="text/ng-template", id="lockEditorModalTemplate")
 		.modal-header
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
-	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
-	//- and doesn't prematurely end the script tag.
-	script#data(type="application/json").
-		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
+block append meta
+	meta(name="ol-useV2History" data-type="boolean" content=useV2History)
+	meta(name="ol-project_id" content=project_id)
+	meta(name="ol-userSettings" data-type="json" content=userSettings)
+	meta(name="ol-user" data-type="json" content=user)
+	meta(name="ol-anonymous" data-type="boolean" content=anonymous)
+	meta(name="ol-brandVariation" data-type="json" content=brandVariation)
+	meta(name="ol-anonymousAccessToken" content=anonymousAccessToken)
+	meta(name="ol-isTokenMember" data-type="boolean" content=isTokenMember)
+	meta(name="ol-isRestrictedTokenMember" data-type="boolean" content=isRestrictedTokenMember)
+	meta(name="ol-maxDocLength" data-type="json" content=maxDocLength)
+	meta(name="ol-wikiEnabled" data-type="boolean" content=!!(settings.apis.wiki && settings.apis.wiki.url))
+	meta(name="ol-gitBridgePublicBaseUrl" content=gitBridgePublicBaseUrl)
+	//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
+	meta(name="ol-aceBasePath" content="/js/" + lib('ace'))
+	//- Set path for PDFjs CMaps
+	meta(name="ol-pdfCMapsPath" content="/js/cmaps/")
+	//- enable doc hash checking for all projects
+	//- used in public/js/libs/sharejs.js
+	meta(name="ol-useShareJsHash" data-type="boolean" content=true)
+	meta(name="ol-wsRetryHandshake" data-type="json" content=settings.wsRetryHandshake)
+	meta(name="ol-showNewLogsUI" data-type="boolean" content=showNewLogsUI)
+	meta(name="ol-logsUISubvariant" content=logsUISubvariant)
+	meta(name="ol-showSymbolPalette" data-type="boolean" content=showSymbolPalette)
+	meta(name="ol-enablePdfCaching" data-type="boolean" content=enablePdfCaching)
+	meta(name="ol-trackPdfDownload" data-type="boolean" content=trackPdfDownload)
 
-	script(type='text/javascript').
-		window.data = JSON.parse(document.querySelector("#data").text);
-		window.project_id = "!{project_id}";
-		window.userSettings = window.data.userSettings;
-		window.user = window.data.user;
-		window.enabledLinkedFiles = window.data.enabledLinkedFiles;
-		window.csrfToken = "!{csrfToken}";
-		window.anonymous = #{anonymous};
-		window.brandVariation = window.data.brandVariation;
-		window.anonymousAccessToken = "#{anonymousAccessToken}";
-		window.isTokenMember = #{!!isTokenMember};
-		window.isRestrictedTokenMember = #{!!isRestrictedTokenMember};
-		window.maxDocLength = #{maxDocLength};
-		window.trackChangesState = window.data.trackChangesState;
-		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
-		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
-		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
-		window.aceBasePath = "/js/#{lib('ace')}"
-		//- Set path for PDFjs CMaps
-		window.pdfCMapsPath = "/js/cmaps/"
-		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
-		//- enable doc hash checking for all projects
-		//- used in public/js/libs/sharejs.js
-		window.useShareJsHash = true
-		window.wsRetryHandshake = #{settings.wsRetryHandshake}
+	- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
+	meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)
 
-	- if (settings.overleaf != null)
-		script(type='text/javascript').
-			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
+	if (settings.overleaf != null)
+		meta(name="ol-overallThemes" data-type="json" content=overallThemes)
 
 block foot-scripts
-	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
-	script(src=mathJaxPath)
-	script(src=buildJsPath('libraries.js'))
-	script(src=buildJsPath('ide.js'))
+	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
+	script(type="text/javascript", nonce=scriptNonce, src=mathJaxPath)
+	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('libraries.js'))
+	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('ide.js'))

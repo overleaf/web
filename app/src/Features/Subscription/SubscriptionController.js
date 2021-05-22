@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -32,45 +32,47 @@ const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const OError = require('@overleaf/o-error')
+const _ = require('lodash')
+
+const SUBSCRIPTION_PAGE_SPLIT_TEST = 'subscription-page'
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
     const plans = SubscriptionViewModelBuilder.buildPlansList()
-    let viewName = 'subscriptions/plans'
-    if (req.query.v != null) {
-      viewName = `${viewName}_${req.query.v}`
-    }
     let currentUser = null
 
     return GeoIpLookup.getCurrencyCode(
       (req.query != null ? req.query.ip : undefined) || req.ip,
-      function(err, recomendedCurrency) {
+      function (err, recomendedCurrency) {
         if (err != null) {
           return next(err)
         }
         const render = () =>
-          res.render(viewName, {
+          res.render('subscriptions/plans', {
             title: 'plans_and_pricing',
             plans,
             gaExperiments: Settings.gaExperiments.plansPage,
             gaOptimize: true,
             recomendedCurrency,
             planFeatures,
-            groupPlans: GroupPlansData
+            groupPlans: GroupPlansData,
           })
         const user_id = AuthenticationController.getLoggedInUserId(req)
         if (user_id != null) {
-          return UserGetter.getUser(user_id, { signUpDate: 1 }, function(
-            err,
-            user
-          ) {
-            if (err != null) {
-              return next(err)
+          return UserGetter.getUser(
+            user_id,
+            { signUpDate: 1 },
+            function (err, user) {
+              if (err != null) {
+                return next(err)
+              }
+              currentUser = user
+              return render()
             }
-            currentUser = user
-            return render()
-          })
+          )
         } else {
           return render()
         }
@@ -85,72 +87,68 @@ module.exports = SubscriptionController = {
     if (!plan) {
       return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
     }
-    return LimitationsManager.userHasV1OrV2Subscription(user, function(
-      err,
-      hasSubscription
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      if (hasSubscription) {
-        return res.redirect('/user/subscription?hasSubscription=true')
-      } else {
-        // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
-        // Recurly as well at this point (we don't do this most places for speed).
-        return SubscriptionHandler.validateNoSubscriptionInRecurly(
-          user._id,
-          function(error, valid) {
-            if (error != null) {
-              return next(error)
-            }
-            if (!valid) {
-              res.redirect('/user/subscription?hasSubscription=true')
-            } else {
-              let currency =
-                req.query.currency != null
-                  ? req.query.currency.toUpperCase()
-                  : undefined
-              return GeoIpLookup.getCurrencyCode(
-                (req.query != null ? req.query.ip : undefined) || req.ip,
-                function(err, recomendedCurrency, countryCode) {
-                  if (err != null) {
-                    return next(err)
-                  }
-                  if (recomendedCurrency != null && currency == null) {
-                    currency = recomendedCurrency
-                  }
-                  return res.render('subscriptions/new', {
-                    title: 'subscribe',
-                    plan_code: req.query.planCode,
-                    currency,
-                    countryCode,
-                    plan,
-                    showStudentPlan: req.query.ssp,
-                    recurlyConfig: JSON.stringify({
+    return LimitationsManager.userHasV1OrV2Subscription(
+      user,
+      function (err, hasSubscription) {
+        if (err != null) {
+          return next(err)
+        }
+        if (hasSubscription) {
+          return res.redirect('/user/subscription?hasSubscription=true')
+        } else {
+          // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
+          // Recurly as well at this point (we don't do this most places for speed).
+          return SubscriptionHandler.validateNoSubscriptionInRecurly(
+            user._id,
+            function (error, valid) {
+              if (error != null) {
+                return next(error)
+              }
+              if (!valid) {
+                res.redirect('/user/subscription?hasSubscription=true')
+              } else {
+                let currency =
+                  req.query.currency != null
+                    ? req.query.currency.toUpperCase()
+                    : undefined
+                return GeoIpLookup.getCurrencyCode(
+                  (req.query != null ? req.query.ip : undefined) || req.ip,
+                  function (err, recomendedCurrency, countryCode) {
+                    if (err != null) {
+                      return next(err)
+                    }
+                    if (recomendedCurrency != null && currency == null) {
+                      currency = recomendedCurrency
+                    }
+                    return res.render('subscriptions/new', {
+                      title: 'subscribe',
                       currency,
-                      subdomain: Settings.apis.recurly.subdomain
-                    }),
-                    showCouponField: req.query.scf,
-                    showVatField: req.query.svf,
-                    couponCode: req.query.cc || '',
-                    gaOptimize: true,
-                    ITMCampaign: req.query.itm_campaign,
-                    ITMContent: req.query.itm_content
-                  })
-                }
-              )
+                      countryCode,
+                      plan,
+                      showStudentPlan: req.query.ssp === 'true',
+                      recurlyConfig: JSON.stringify({
+                        currency,
+                        subdomain: Settings.apis.recurly.subdomain,
+                      }),
+                      showCouponField: !!req.query.scf,
+                      showVatField: !!req.query.svf,
+                      gaOptimize: true,
+                    })
+                  }
+                )
+              }
             }
-          }
-        )
+          )
+        }
       }
-    })
+    )
   },
 
   userSubscriptionPage(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
       user,
-      function(error, results) {
+      function (error, results) {
         if (error != null) {
           return next(error)
         }
@@ -161,33 +159,71 @@ module.exports = SubscriptionController = {
           confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
-          v1SubscriptionStatus
+          v1SubscriptionStatus,
         } = results
-        return LimitationsManager.userHasV1OrV2Subscription(user, function(
-          err,
-          hasSubscription
-        ) {
-          if (error != null) {
-            return next(error)
+        return LimitationsManager.userHasV1OrV2Subscription(
+          user,
+          function (err, hasSubscription) {
+            if (error != null) {
+              return next(error)
+            }
+            const fromPlansPage = req.query.hasSubscription
+            const plans = SubscriptionViewModelBuilder.buildPlansList(
+              personalSubscription ? personalSubscription.plan : undefined
+            )
+
+            let subscriptionCopy = 'default'
+            if (
+              personalSubscription ||
+              hasSubscription ||
+              (memberGroupSubscriptions &&
+                memberGroupSubscriptions.length > 0) ||
+              (confirmedMemberAffiliations &&
+                confirmedMemberAffiliations.length > 0 &&
+                _.find(confirmedMemberAffiliations, affiliation => {
+                  return affiliation.licence && affiliation.licence !== 'free'
+                }))
+            ) {
+              AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+            } else {
+              const testSegmentation = SplitTestHandler.getTestSegmentation(
+                user._id,
+                SUBSCRIPTION_PAGE_SPLIT_TEST
+              )
+              if (testSegmentation.enabled) {
+                subscriptionCopy = testSegmentation.variant
+
+                AnalyticsManager.recordEvent(
+                  user._id,
+                  'subscription-page-view',
+                  {
+                    splitTestId: SUBSCRIPTION_PAGE_SPLIT_TEST,
+                    splitTestVariantId: testSegmentation.variant,
+                  }
+                )
+              } else {
+                AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+              }
+            }
+
+            const data = {
+              title: 'your_subscription',
+              plans,
+              user,
+              hasSubscription,
+              subscriptionCopy,
+              fromPlansPage,
+              personalSubscription,
+              memberGroupSubscriptions,
+              managedGroupSubscriptions,
+              confirmedMemberAffiliations,
+              managedInstitutions,
+              managedPublishers,
+              v1SubscriptionStatus,
+            }
+            return res.render('subscriptions/dashboard', data)
           }
-          const fromPlansPage = req.query.hasSubscription
-          const plans = SubscriptionViewModelBuilder.buildPlansList()
-          const data = {
-            title: 'your_subscription',
-            plans,
-            user,
-            hasSubscription,
-            fromPlansPage,
-            personalSubscription,
-            memberGroupSubscriptions,
-            managedGroupSubscriptions,
-            confirmedMemberAffiliations,
-            managedInstitutions,
-            managedPublishers,
-            v1SubscriptionStatus
-          }
-          return res.render('subscriptions/dashboard', data)
-        })
+        )
       }
     )
   },
@@ -197,58 +233,58 @@ module.exports = SubscriptionController = {
     const recurlyTokenIds = {
       billing: req.body.recurly_token_id,
       threeDSecureActionResult:
-        req.body.recurly_three_d_secure_action_result_token_id
+        req.body.recurly_three_d_secure_action_result_token_id,
     }
     const { subscriptionDetails } = req.body
 
-    return LimitationsManager.userHasV1OrV2Subscription(user, function(
-      err,
-      hasSubscription
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      if (hasSubscription) {
-        logger.warn({ user_id: user._id }, 'user already has subscription')
-        return res.sendStatus(409) // conflict
-      }
-      return SubscriptionHandler.createSubscription(
-        user,
-        subscriptionDetails,
-        recurlyTokenIds,
-        function(err) {
-          if (!err) {
-            return res.sendStatus(201)
-          }
-
-          if (
-            err instanceof SubscriptionErrors.RecurlyTransactionError ||
-            err instanceof Errors.InvalidError
-          ) {
-            logger.warn(err)
-            return HttpErrorHandler.unprocessableEntity(
-              req,
-              res,
-              err.message,
-              OError.getFullInfo(err).public
-            )
-          }
-
-          logger.warn(
-            { err, user_id: user._id },
-            'something went wrong creating subscription'
-          )
-          next(err)
+    return LimitationsManager.userHasV1OrV2Subscription(
+      user,
+      function (err, hasSubscription) {
+        if (err != null) {
+          return next(err)
         }
-      )
-    })
+        if (hasSubscription) {
+          logger.warn({ user_id: user._id }, 'user already has subscription')
+          return res.sendStatus(409) // conflict
+        }
+        return SubscriptionHandler.createSubscription(
+          user,
+          subscriptionDetails,
+          recurlyTokenIds,
+          function (err) {
+            if (!err) {
+              return res.sendStatus(201)
+            }
+
+            if (
+              err instanceof SubscriptionErrors.RecurlyTransactionError ||
+              err instanceof Errors.InvalidError
+            ) {
+              logger.error({ err }, 'recurly transaction error, potential 422')
+              return HttpErrorHandler.unprocessableEntity(
+                req,
+                res,
+                err.message,
+                OError.getFullInfo(err).public
+              )
+            }
+
+            logger.warn(
+              { err, user_id: user._id },
+              'something went wrong creating subscription'
+            )
+            next(err)
+          }
+        )
+      }
+    )
   },
 
   successful_subscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
       user,
-      function(error, { personalSubscription }) {
+      function (error, { personalSubscription }) {
         if (error != null) {
           return next(error)
         }
@@ -257,7 +293,7 @@ module.exports = SubscriptionController = {
         }
         return res.render('subscriptions/successful_subscription', {
           title: 'thank_you',
-          personalSubscription
+          personalSubscription,
         })
       }
     )
@@ -266,10 +302,10 @@ module.exports = SubscriptionController = {
   cancelSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     logger.log({ user_id: user._id }, 'canceling subscription')
-    return SubscriptionHandler.cancelSubscription(user, function(err) {
+    return SubscriptionHandler.cancelSubscription(user, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong canceling subscription', {
-          user_id: user._id
+          user_id: user._id,
         })
         return next(err)
       }
@@ -282,17 +318,17 @@ module.exports = SubscriptionController = {
   canceledSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     return res.render('subscriptions/canceled_subscription', {
-      title: 'subscription_canceled'
+      title: 'subscription_canceled',
     })
   },
 
   cancelV1Subscription(req, res, next) {
     const user_id = AuthenticationController.getLoggedInUserId(req)
     logger.log({ user_id }, 'canceling v1 subscription')
-    return V1SubscriptionManager.cancelV1Subscription(user_id, function(err) {
+    return V1SubscriptionManager.cancelV1Subscription(user_id, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong canceling v1 subscription', {
-          user_id
+          user_id,
         })
         return next(err)
       }
@@ -318,10 +354,10 @@ module.exports = SubscriptionController = {
       user,
       planCode,
       null,
-      function(err) {
+      function (err) {
         if (err != null) {
           OError.tag(err, 'something went wrong updating subscription', {
-            user_id: user._id
+            user_id: user._id,
           })
           return next(err)
         }
@@ -330,29 +366,49 @@ module.exports = SubscriptionController = {
     )
   },
 
+  cancelPendingSubscriptionChange(req, res, next) {
+    const user = AuthenticationController.getSessionUser(req)
+    logger.log({ user_id: user._id }, 'canceling pending subscription change')
+    SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
+      if (err != null) {
+        OError.tag(
+          err,
+          'something went wrong canceling pending subscription change',
+          {
+            user_id: user._id,
+          }
+        )
+        return next(err)
+      }
+      res.redirect('/user/subscription')
+    })
+  },
+
   updateAccountEmailAddress(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
-    RecurlyWrapper.updateAccountEmailAddress(user._id, user.email, function(
-      error
-    ) {
-      if (error) {
-        return next(error)
+    RecurlyWrapper.updateAccountEmailAddress(
+      user._id,
+      user.email,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
       }
-      res.sendStatus(200)
-    })
+    )
   },
 
   reactivateSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     logger.log({ user_id: user._id }, 'reactivating subscription')
-    return SubscriptionHandler.reactivateSubscription(user, function(err) {
+    SubscriptionHandler.reactivateSubscription(user, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong reactivating subscription', {
-          user_id: user._id
+          user_id: user._id,
         })
         return next(err)
       }
-      return res.redirect('/user/subscription')
+      res.redirect('/user/subscription')
     })
   },
 
@@ -364,14 +420,14 @@ module.exports = SubscriptionController = {
       [
         'new_subscription_notification',
         'updated_subscription_notification',
-        'expired_subscription_notification'
+        'expired_subscription_notification',
       ].includes(event)
     ) {
       const recurlySubscription = eventData.subscription
       return SubscriptionHandler.syncSubscription(
         recurlySubscription,
         { ip: req.ip },
-        function(err) {
+        function (err) {
           if (err != null) {
             return next(err)
           }
@@ -382,7 +438,7 @@ module.exports = SubscriptionController = {
       const recurlyAccountCode = eventData.account.account_code
       return SubscriptionHandler.attemptPaypalInvoiceCollection(
         recurlyAccountCode,
-        function(err) {
+        function (err) {
           if (err) {
             return next(err)
           }
@@ -396,36 +452,38 @@ module.exports = SubscriptionController = {
 
   renderUpgradeToAnnualPlanPage(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
-    return LimitationsManager.userHasV2Subscription(user, function(
-      err,
-      hasSubscription,
-      subscription
-    ) {
-      let planName
-      if (err != null) {
-        return next(err)
+    return LimitationsManager.userHasV2Subscription(
+      user,
+      function (err, hasSubscription, subscription) {
+        let planName
+        if (err != null) {
+          return next(err)
+        }
+        const planCode =
+          subscription != null ? subscription.planCode.toLowerCase() : undefined
+        if (
+          (planCode != null ? planCode.indexOf('annual') : undefined) !== -1
+        ) {
+          planName = 'annual'
+        } else if (
+          (planCode != null ? planCode.indexOf('student') : undefined) !== -1
+        ) {
+          planName = 'student'
+        } else if (
+          (planCode != null ? planCode.indexOf('collaborator') : undefined) !==
+          -1
+        ) {
+          planName = 'collaborator'
+        }
+        if (!hasSubscription) {
+          return res.redirect('/user/subscription/plans')
+        }
+        return res.render('subscriptions/upgradeToAnnual', {
+          title: 'Upgrade to annual',
+          planName,
+        })
       }
-      const planCode =
-        subscription != null ? subscription.planCode.toLowerCase() : undefined
-      if ((planCode != null ? planCode.indexOf('annual') : undefined) !== -1) {
-        planName = 'annual'
-      } else if (
-        (planCode != null ? planCode.indexOf('student') : undefined) !== -1
-      ) {
-        planName = 'student'
-      } else if (
-        (planCode != null ? planCode.indexOf('collaborator') : undefined) !== -1
-      ) {
-        planName = 'collaborator'
-      }
-      if (!hasSubscription) {
-        return res.redirect('/user/subscription/plans')
-      }
-      return res.render('subscriptions/upgradeToAnnual', {
-        title: 'Upgrade to annual',
-        planName
-      })
-    })
+    )
   },
 
   processUpgradeToAnnualPlan(req, res, next) {
@@ -441,10 +499,10 @@ module.exports = SubscriptionController = {
       user,
       annualPlanName,
       coupon_code,
-      function(err) {
+      function (err) {
         if (err != null) {
           OError.tag(err, 'error updating subscription', {
-            user_id: user._id
+            user_id: user._id,
           })
           return next(err)
         }
@@ -455,29 +513,32 @@ module.exports = SubscriptionController = {
 
   extendTrial(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
-    return LimitationsManager.userHasV2Subscription(user, function(
-      err,
-      hasSubscription,
-      subscription
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      return SubscriptionHandler.extendTrial(subscription, 14, function(err) {
+    return LimitationsManager.userHasV2Subscription(
+      user,
+      function (err, hasSubscription, subscription) {
         if (err != null) {
-          return res.sendStatus(500)
-        } else {
-          return res.sendStatus(200)
+          return next(err)
         }
-      })
-    })
+        return SubscriptionHandler.extendTrial(
+          subscription,
+          14,
+          function (err) {
+            if (err != null) {
+              return res.sendStatus(500)
+            } else {
+              return res.sendStatus(200)
+            }
+          }
+        )
+      }
+    )
   },
 
   recurlyNotificationParser(req, res, next) {
     let xml = ''
     req.on('data', chunk => (xml += chunk))
     return req.on('end', () =>
-      RecurlyWrapper._parseXml(xml, function(error, body) {
+      RecurlyWrapper._parseXml(xml, function (error, body) {
         if (error != null) {
           return next(error)
         }
@@ -489,13 +550,17 @@ module.exports = SubscriptionController = {
 
   refreshUserFeatures(req, res, next) {
     const { user_id } = req.params
-    return FeaturesUpdater.refreshFeatures(user_id, function(error) {
-      if (error != null) {
-        return next(error)
+    return FeaturesUpdater.refreshFeatures(
+      user_id,
+      'subscription-controller',
+      function (error) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.sendStatus(200)
       }
-      return res.sendStatus(200)
-    })
-  }
+    )
+  },
 }
 
 function __guard__(value, transform) {

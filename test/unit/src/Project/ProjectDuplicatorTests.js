@@ -5,8 +5,8 @@ const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDuplicator.js'
 
-describe('ProjectDuplicator', function() {
-  beforeEach(function() {
+describe('ProjectDuplicator', function () {
+  beforeEach(function () {
     this.doc0 = { _id: 'doc0_id', name: 'rootDocHere' }
     this.doc1 = { _id: 'doc1_id', name: 'level1folderDocName' }
     this.doc2 = { _id: 'doc2_id', name: 'level2folderDocName' }
@@ -19,34 +19,34 @@ describe('ProjectDuplicator', function() {
       name: 'file2',
       _id: 'file2',
       linkedFileData: { provider: 'url' },
-      hash: '123456'
+      hash: '123456',
     }
     this.level2folder = {
       name: 'level2folderName',
       _id: 'level2folderId',
       docs: [this.doc2, undefined],
       folders: [],
-      fileRefs: [this.file2]
+      fileRefs: [this.file2],
     }
     this.level1folder = {
       name: 'level1folder',
       _id: 'level1folderId',
       docs: [this.doc1],
       folders: [this.level2folder],
-      fileRefs: [this.file1, null] // the null is intentional to test null docs/files
+      fileRefs: [this.file1, null], // the null is intentional to test null docs/files
     }
     this.rootFolder = {
       name: 'rootFolder',
       _id: 'rootFolderId',
       docs: [this.doc0],
       folders: [this.level1folder, {}],
-      fileRefs: [this.file0]
+      fileRefs: [this.file0],
     }
     this.project = {
       _id: 'this_is_the_old_project_id',
       rootDoc_id: this.doc0._id,
       rootFolder: [this.rootFolder],
-      compiler: 'this_is_a_Compiler'
+      compiler: 'this_is_a_Compiler',
     }
     this.doc0Path = '/rootDocHere'
     this.doc1Path = '/level1folder/level1folderDocName'
@@ -58,7 +58,7 @@ describe('ProjectDuplicator', function() {
     this.docContents = [
       { _id: this.doc0._id, lines: this.doc0Lines },
       { _id: this.doc1._id, lines: this.doc1Lines },
-      { _id: this.doc2._id, lines: this.doc2Lines }
+      { _id: this.doc2._id, lines: this.doc2Lines },
     ]
 
     this.rootDoc = this.doc0
@@ -69,7 +69,7 @@ describe('ProjectDuplicator', function() {
       overleaf: { history: { id: 339123 } },
       readOnly_refs: [],
       collaberator_refs: [],
-      rootFolder: [{ _id: 'new_root_folder_id' }]
+      rootFolder: [{ _id: 'new_root_folder_id' }],
     }
     this.newFolder = { _id: 'newFolderId' }
     this.filestoreUrl = 'filestore-url'
@@ -88,35 +88,35 @@ describe('ProjectDuplicator', function() {
       {
         path: this.doc0Path,
         doc: this.newDoc0,
-        docLines: this.doc0Lines.join('\n')
+        docLines: this.doc0Lines.join('\n'),
       },
       {
         path: this.doc1Path,
         doc: this.newDoc1,
-        docLines: this.doc1Lines.join('\n')
+        docLines: this.doc1Lines.join('\n'),
       },
       {
         path: this.doc2Path,
         doc: this.newDoc2,
-        docLines: this.doc2Lines.join('\n')
-      }
+        docLines: this.doc2Lines.join('\n'),
+      },
     ]
     this.fileEntries = [
       {
         path: this.file0Path,
         file: this.newFile0,
-        url: this.filestoreUrl
+        url: this.filestoreUrl,
       },
       {
         path: this.file1Path,
         file: this.newFile1,
-        url: this.filestoreUrl
+        url: this.filestoreUrl,
       },
       {
         path: this.file2Path,
         file: this.newFile2,
-        url: this.filestoreUrl
-      }
+        url: this.filestoreUrl,
+      },
     ]
 
     this.Doc = sinon
@@ -129,79 +129,77 @@ describe('ProjectDuplicator', function() {
     this.DocstoreManager = {
       promises: {
         updateDoc: sinon.stub().resolves(),
-        getAllDocs: sinon.stub().resolves(this.docContents)
-      }
+        getAllDocs: sinon.stub().resolves(this.docContents),
+      },
     }
     this.DocumentUpdaterHandler = {
       promises: {
         flushProjectToMongo: sinon.stub().resolves(),
-        updateProjectStructure: sinon.stub().resolves()
-      }
+        updateProjectStructure: sinon.stub().resolves(),
+      },
     }
     this.FileStoreHandler = {
       promises: {
-        copyFile: sinon.stub().resolves(this.filestoreUrl)
-      }
+        copyFile: sinon.stub().resolves(this.filestoreUrl),
+      },
     }
     this.ProjectCreationHandler = {
       promises: {
-        createBlankProject: sinon.stub().resolves(this.newBlankProject)
-      }
+        createBlankProject: sinon.stub().resolves(this.newBlankProject),
+      },
     }
     this.ProjectDeleter = {
       promises: {
-        deleteProject: sinon.stub().resolves()
-      }
+        deleteProject: sinon.stub().resolves(),
+      },
     }
     this.ProjectEntityMongoUpdateHandler = {
       promises: {
-        createNewFolderStructure: sinon.stub().resolves(this.newProjectVersion)
-      }
+        createNewFolderStructure: sinon.stub().resolves(this.newProjectVersion),
+      },
     }
     this.ProjectEntityUpdateHandler = {
+      isPathValidForRootDoc: sinon.stub().returns(true),
       promises: {
-        setRootDoc: sinon.stub().resolves()
-      }
+        setRootDoc: sinon.stub().resolves(),
+      },
     }
     this.ProjectGetter = {
       promises: {
         getProject: sinon
           .stub()
           .withArgs(this.project._id)
-          .resolves(this.project)
-      }
+          .resolves(this.project),
+      },
     }
     this.ProjectLocator = {
       promises: {
         findRootDoc: sinon.stub().resolves({
           element: this.rootDoc,
-          path: { fileSystem: this.rootDocPath }
+          path: { fileSystem: this.rootDocPath },
         }),
         findElementByPath: sinon
           .stub()
           .withArgs({
             project_id: this.newBlankProject._id,
             path: this.rootDocPath,
-            exactCaseMatch: true
+            exactCaseMatch: true,
           })
-          .resolves({ element: this.doc0 })
-      }
+          .resolves({ element: this.doc0 }),
+      },
     }
     this.ProjectOptionsHandler = {
       promises: {
-        setCompiler: sinon.stub().resolves()
-      }
+        setCompiler: sinon.stub().resolves(),
+      },
     }
     this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToTpds: sinon.stub().resolves()
-      }
+        flushProjectToTpds: sinon.stub().resolves(),
+      },
     }
 
     this.ProjectDuplicator = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Doc': { Doc: this.Doc },
         '../../models/File': { File: this.File },
@@ -218,17 +216,12 @@ describe('ProjectDuplicator', function() {
         './ProjectLocator': this.ProjectLocator,
         './ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        }
-      }
+      },
     })
   })
 
-  describe('when the copy succeeds', function() {
-    beforeEach(async function() {
+  describe('when the copy succeeds', function () {
+    beforeEach(async function () {
       this.newProjectName = 'New project name'
       this.newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
@@ -237,13 +230,13 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should flush the original project to mongo', function() {
+    it('should flush the original project to mongo', function () {
       this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
         this.project._id
       )
     })
 
-    it('should copy docs to docstore', function() {
+    it('should copy docs to docstore', function () {
       for (const docLines of [this.doc0Lines, this.doc1Lines, this.doc2Lines]) {
         this.DocstoreManager.promises.updateDoc.should.have.been.calledWith(
           this.newProject._id.toString(),
@@ -255,7 +248,7 @@ describe('ProjectDuplicator', function() {
       }
     })
 
-    it('should copy files to the filestore', function() {
+    it('should copy files to the filestore', function () {
       for (const file of [this.file0, this.file1, this.file2]) {
         this.FileStoreHandler.promises.copyFile.should.have.been.calledWith(
           this.project._id,
@@ -266,7 +259,7 @@ describe('ProjectDuplicator', function() {
       }
     })
 
-    it('should create a blank project', function() {
+    it('should create a blank project', function () {
       this.ProjectCreationHandler.promises.createBlankProject.should.have.been.calledWith(
         this.owner._id,
         this.newProjectName
@@ -274,26 +267,26 @@ describe('ProjectDuplicator', function() {
       this.newProject._id.should.equal(this.newBlankProject._id)
     })
 
-    it('should use the same compiler', function() {
+    it('should use the same compiler', function () {
       this.ProjectOptionsHandler.promises.setCompiler.should.have.been.calledWith(
         this.newProject._id,
         this.project.compiler
       )
     })
 
-    it('should use the same root doc', function() {
+    it('should use the same root doc', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.have.been.calledWith(
         this.newProject._id,
         this.rootFolder.docs[0]._id
       )
     })
 
-    it('should not copy the collaborators or read only refs', function() {
+    it('should not copy the collaborators or read only refs', function () {
       this.newProject.collaberator_refs.length.should.equal(0)
       this.newProject.readOnly_refs.length.should.equal(0)
     })
 
-    it('should copy all documents and files', function() {
+    it('should copy all documents and files', function () {
       this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.should.have.been.calledWith(
         this.newProject._id,
         this.docEntries,
@@ -301,7 +294,7 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should notify document updater of changes', function() {
+    it('should notify document updater of changes', function () {
       this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
         this.newProject._id,
         this.newProject.overleaf.history.id,
@@ -309,23 +302,23 @@ describe('ProjectDuplicator', function() {
         {
           newDocs: this.docEntries,
           newFiles: this.fileEntries,
-          newProject: { version: this.newProjectVersion }
+          newProject: { version: this.newProjectVersion },
         }
       )
     })
 
-    it('should flush the project to TPDS', function() {
+    it('should flush the project to TPDS', function () {
       this.TpdsProjectFlusher.promises.flushProjectToTpds.should.have.been.calledWith(
         this.newProject._id
       )
     })
   })
 
-  describe('without a root doc', function() {
-    beforeEach(async function() {
+  describe('without a root doc', function () {
+    beforeEach(async function () {
       this.ProjectLocator.promises.findRootDoc.resolves({
         element: null,
-        path: null
+        path: null,
       })
       this.newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
@@ -334,14 +327,30 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should not set the root doc on the copy', function() {
+    it('should not set the root doc on the copy', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.not.have.been
         .called
     })
   })
 
-  describe('when there is an error', function() {
-    beforeEach(async function() {
+  describe('with an invalid root doc', function () {
+    beforeEach(async function () {
+      this.ProjectEntityUpdateHandler.isPathValidForRootDoc.returns(false)
+      this.newProject = await this.ProjectDuplicator.promises.duplicate(
+        this.owner,
+        this.project._id,
+        'Copy of project'
+      )
+    })
+
+    it('should not set the root doc on the copy', function () {
+      this.ProjectEntityUpdateHandler.promises.setRootDoc.should.not.have.been
+        .called
+    })
+  })
+
+  describe('when there is an error', function () {
+    beforeEach(async function () {
       this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.rejects()
       await expect(
         this.ProjectDuplicator.promises.duplicate(
@@ -352,13 +361,13 @@ describe('ProjectDuplicator', function() {
       ).to.be.rejected
     })
 
-    it('should delete the broken cloned project', function() {
+    it('should delete the broken cloned project', function () {
       this.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
         this.newBlankProject._id
       )
     })
 
-    it('should not delete the original project', function() {
+    it('should not delete the original project', function () {
       this.ProjectDeleter.promises.deleteProject.should.not.have.been.calledWith(
         this.project._id
       )

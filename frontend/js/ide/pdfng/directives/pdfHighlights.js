@@ -15,7 +15,7 @@
 import App from '../../../base'
 import PDFJS from './pdfJsLoader'
 
-export default App.factory('pdfHighlights', function() {
+export default App.factory('pdfHighlights', function () {
   let pdfHighlights
   return (pdfHighlights = class pdfHighlights {
     constructor(options) {
@@ -28,7 +28,7 @@ export default App.factory('pdfHighlights', function() {
         left,
         top,
         left + width,
-        top + height
+        top + height,
       ])
       rect = PDFJS.Util.normalizeRect(rect)
       const element = document.createElement('div')
@@ -42,7 +42,7 @@ export default App.factory('pdfHighlights', function() {
     }
 
     clearHighlights() {
-      for (let h of Array.from(this.highlightElements)) {
+      for (const h of Array.from(this.highlightElements)) {
         if (h != null) {
           h.parentNode.removeChild(h)
         }

@@ -1,10 +1,7 @@
 const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const path = require('path')
 const sinon = require('sinon')
-
-chai.should()
 
 const modulePath = path.join(
   __dirname,
@@ -23,18 +20,19 @@ const httpPass = 'pass'
 const siteUrl = 'http://www.localhost:3000'
 const httpAuthSiteUrl = `http://${httpUsername}:${httpPass}@www.localhost:3000`
 const filestoreUrl = 'filestore.sharelatex.com'
+const projectArchiverUrl = 'project-archiver.overleaf.com'
 
-describe('TpdsUpdateSender', function() {
-  beforeEach(function() {
+describe('TpdsUpdateSender', function () {
+  beforeEach(function () {
     this.fakeUser = {
-      _id: '12390i'
+      _id: '12390i',
     }
-    this.requestQueuer = function(queue, meth, opts, callback) {}
+    this.requestQueuer = function (queue, meth, opts, callback) {}
     const memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
       promises: {
-        getInvitedMemberIds: sinon.stub().resolves(memberIds)
-      }
+        getInvitedMemberIds: sinon.stub().resolves(memberIds),
+      },
     }
     this.docstoreUrl = 'docstore.sharelatex.env'
     this.request = sinon.stub().resolves()
@@ -44,12 +42,12 @@ describe('TpdsUpdateSender', function() {
       apis: {
         thirdPartyDataStore: { url: thirdPartyDataStoreApiUrl },
         filestore: {
-          url: filestoreUrl
+          url: filestoreUrl,
         },
         docstore: {
-          pubUrl: this.docstoreUrl
-        }
-      }
+          pubUrl: this.docstoreUrl,
+        },
+      },
     }
     const getUsers = sinon.stub().resolves(
       memberIds.slice(1).map(userId => {
@@ -57,33 +55,29 @@ describe('TpdsUpdateSender', function() {
       })
     )
     this.UserGetter = {
-      promises: { getUsers }
+      promises: { getUsers },
     }
     this.updateSender = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': { log() {} },
         'request-promise-native': this.request,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,
-        'metrics-sharelatex': {
-          inc() {}
-        }
-      }
+        '@overleaf/metrics': {
+          inc() {},
+        },
+      },
     })
   })
 
-  describe('enqueue', function() {
-    it('should not call request if there is no tpdsworker url', async function() {
+  describe('enqueue', function () {
+    it('should not call request if there is no tpdsworker url', async function () {
       await this.updateSender.promises.enqueue(null, null, null)
       this.request.should.not.have.been.called
     })
 
-    it('should post the message to the tpdsworker', async function() {
+    it('should post the message to the tpdsworker', async function () {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
       const group0 = 'myproject'
       const method0 = 'somemethod0'
@@ -99,12 +93,12 @@ describe('TpdsUpdateSender', function() {
     })
   })
 
-  describe('sending updates', function() {
-    beforeEach(function() {
+  describe('sending updates', function () {
+    beforeEach(function () {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
     })
 
-    it('queues a post the file with user and file id', async function() {
+    it('queues a post the file with user and file id', async function () {
       const fileId = '4545345'
       const path = '/some/path/here.jpg'
 
@@ -112,13 +106,13 @@ describe('TpdsUpdateSender', function() {
         project_id: projectId,
         file_id: fileId,
         path,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
       group0.should.equal(userId)
       method0.should.equal('pipeStreamFrom')
@@ -148,15 +142,15 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
     })
 
-    it('post doc with stream origin of docstore', async function() {
+    it('post doc with stream origin of docstore', async function () {
       const docId = '4545345'
       const path = '/some/path/here.tex'
       const lines = ['line1', 'line2', 'line3']
@@ -166,13 +160,13 @@ describe('TpdsUpdateSender', function() {
         doc_id: docId,
         path,
         docLines: lines,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -200,27 +194,27 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
     })
 
-    it('deleting entity', async function() {
+    it('deleting entity', async function () {
       const path = '/path/here/t.tex'
 
       await this.updateSender.promises.deleteEntity({
         project_id: projectId,
         path,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -245,15 +239,15 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
     })
 
-    it('moving entity', async function() {
+    it('moving entity', async function () {
       const startPath = 'staring/here/file.tex'
       const endPath = 'ending/here/file.tex'
 
@@ -261,13 +255,13 @@ describe('TpdsUpdateSender', function() {
         project_id: projectId,
         startPath,
         endPath,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -293,28 +287,28 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
     })
 
-    it('should be able to rename a project using the move entity func', async function() {
+    it('should be able to rename a project using the move entity func', async function () {
       const oldProjectName = '/oldProjectName/'
       const newProjectName = '/newProjectName/'
 
       await this.updateSender.promises.moveEntity({
         project_id: projectId,
         project_name: oldProjectName,
-        newProjectName
+        newProjectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -340,21 +334,21 @@ describe('TpdsUpdateSender', function() {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
     })
 
-    it('pollDropboxForUser', async function() {
+    it('pollDropboxForUser', async function () {
       await this.updateSender.promises.pollDropboxForUser(userId)
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(`poll-dropbox:${userId}`)
@@ -363,6 +357,19 @@ describe('TpdsUpdateSender', function() {
       job0.method.should.equal('post')
       job0.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
       job0.json.user_ids[0].should.equal(userId)
+    })
+  })
+  describe('deleteProject', function () {
+    it('should not call request if there is no project archiver url', async function () {
+      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      this.request.should.not.have.been.called
+    })
+    it('should make a delete request to project archiver', async function () {
+      this.settings.apis.project_archiver = { url: projectArchiverUrl }
+      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      const { uri, method } = this.request.firstCall.args[0]
+      method.should.equal('delete')
+      uri.should.equal(`${projectArchiverUrl}/project/${projectId}`)
     })
   })
 })

@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,23 +30,23 @@ const _ = require('lodash')
 // It is tested that these methods DO work when the lock has not been taken in
 // other acceptance tests.
 
-describe('ProjectStructureMongoLock', function() {
-  describe('whilst a project lock is taken', function() {
+describe('ProjectStructureMongoLock', function () {
+  describe('whilst a project lock is taken', function () {
     let oldMaxLockWaitTime
-    before(function() {
+    before(function () {
       oldMaxLockWaitTime = LockManager.MAX_LOCK_WAIT_TIME
     })
-    after(function() {
+    after(function () {
       LockManager.MAX_LOCK_WAIT_TIME = oldMaxLockWaitTime
     })
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       // We want to instantly fail if the lock is taken
       LockManager.MAX_LOCK_WAIT_TIME = 1
       this.lockValue = 'lock-value'
       const userDetails = {
         holdingAccount: false,
-        email: 'test@example.com'
+        email: 'test@example.com',
       }
       UserCreator.createNewUser(userDetails, {}, (err, user) => {
         this.user = user
@@ -76,21 +76,21 @@ describe('ProjectStructureMongoLock', function() {
       })
     })
 
-    after(function(done) {
+    after(function (done) {
       return LockManager._releaseLock(this.lock_key, this.lockValue, done)
     })
 
-    describe('interacting with the locked project', function() {
+    describe('interacting with the locked project', function () {
       const LOCKING_UPDATE_METHODS = [
         'addDoc',
         'addFile',
         'mkdirp',
         'moveEntity',
         'renameEntity',
-        'addFolder'
+        'addFolder',
       ]
       for (var methodName of Array.from(LOCKING_UPDATE_METHODS)) {
-        it(`cannot call ProjectEntityMongoUpdateHandler.${methodName}`, function(done) {
+        it(`cannot call ProjectEntityMongoUpdateHandler.${methodName}`, function (done) {
           const method = ProjectEntityMongoUpdateHandler[methodName]
           const args = _.times(method.length - 2, _.constant(null))
           return method(this.locked_project._id, args, err => {
@@ -101,7 +101,7 @@ describe('ProjectStructureMongoLock', function() {
         })
       }
 
-      it('cannot get the project without a projection', function(done) {
+      it('cannot get the project without a projection', function (done) {
         return ProjectGetter.getProject(this.locked_project._id, err => {
           expect(err).to.be.instanceOf(Error)
           expect(err).to.have.property('message', 'Timeout')
@@ -109,7 +109,7 @@ describe('ProjectStructureMongoLock', function() {
         })
       })
 
-      it('cannot get the project if rootFolder is in the projection', function(done) {
+      it('cannot get the project if rootFolder is in the projection', function (done) {
         return ProjectGetter.getProject(
           this.locked_project._id,
           { rootFolder: true },
@@ -121,7 +121,7 @@ describe('ProjectStructureMongoLock', function() {
         )
       })
 
-      it('can get the project if rootFolder is not in the projection', function(done) {
+      it('can get the project if rootFolder is not in the projection', function (done) {
         return ProjectGetter.getProject(
           this.locked_project._id,
           { _id: true },
@@ -134,8 +134,8 @@ describe('ProjectStructureMongoLock', function() {
       })
     })
 
-    describe('interacting with other projects', function() {
-      beforeEach(function(done) {
+    describe('interacting with other projects', function () {
+      beforeEach(function (done) {
         return ProjectCreationHandler.createBlankProject(
           this.user._id,
           'unlocked-project',
@@ -149,7 +149,7 @@ describe('ProjectStructureMongoLock', function() {
         )
       })
 
-      it('can add folders to other projects', function(done) {
+      it('can add folders to other projects', function (done) {
         return ProjectEntityMongoUpdateHandler.addFolder(
           this.unlocked_project._id,
           this.unlocked_project.rootFolder[0]._id,
@@ -162,7 +162,7 @@ describe('ProjectStructureMongoLock', function() {
         )
       })
 
-      it('can get other projects without a projection', function(done) {
+      it('can get other projects without a projection', function (done) {
         return ProjectGetter.getProject(
           this.unlocked_project._id,
           (err, project) => {

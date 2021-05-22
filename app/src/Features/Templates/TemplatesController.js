@@ -57,7 +57,7 @@ module.exports = TemplatesController = {
       req.body.templateVersionId,
       user_id,
       req.body.imageName,
-      function(err, project) {
+      function (err, project) {
         if (err != null) {
           return next(err)
         }
@@ -65,5 +65,5 @@ module.exports = TemplatesController = {
         return res.redirect(`/project/${project._id}`)
       }
     )
-  }
+  },
 }

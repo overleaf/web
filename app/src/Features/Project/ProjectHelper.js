@@ -7,7 +7,7 @@ const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
   pdflatex: 'pdflatex',
   xelatex: 'xelatex',
-  lualatex: 'lualatex'
+  lualatex: 'lualatex',
 }
 
 module.exports = {
@@ -19,8 +19,8 @@ module.exports = {
   ensureNameIsUnique,
   getAllowedImagesForUser,
   promises: {
-    ensureNameIsUnique: promisify(ensureNameIsUnique)
-  }
+    ensureNameIsUnique: promisify(ensureNameIsUnique),
+  },
 }
 
 function compilerFromV1Engine(engine) {
@@ -126,7 +126,7 @@ function _addSuffixToProjectName(name, suffix, maxLength) {
 
 function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   const NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
-  const suffixedName = function(basename, number) {
+  const suffixedName = function (basename, number) {
     const suffix = ` (${number})`
     return basename.substr(0, maxLength - suffix.length) + suffix
   }
@@ -139,6 +139,16 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   if (match != null) {
     basename = name.replace(NUMERIC_SUFFIX_MATCH, '')
     n = parseInt(match[1])
+  }
+
+  const prefixMatcher = new RegExp(`^${basename} \\(\\d+\\)$`)
+  const projectNamesWithSamePrefix = Array.from(allProjectNames).filter(name =>
+    prefixMatcher.test(name)
+  )
+  const nIsLikelyAYear = n > 1000 && projectNamesWithSamePrefix.length < n / 2
+  if (nIsLikelyAYear) {
+    basename = name
+    n = 1
   }
 
   while (n <= last) {

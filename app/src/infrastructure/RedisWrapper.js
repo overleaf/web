@@ -1,5 +1,5 @@
 const Settings = require('settings-sharelatex')
-const redis = require('redis-sharelatex')
+const redis = require('@overleaf/redis-wrapper')
 
 if (
   typeof global.beforeEach === 'function' &&
@@ -20,5 +20,5 @@ module.exports = {
   client(feature) {
     const redisFeatureSettings = Settings.redis[feature] || Settings.redis.web
     return redis.createClient(redisFeatureSettings)
-  }
+  },
 }

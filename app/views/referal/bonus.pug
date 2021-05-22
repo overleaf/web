@@ -25,15 +25,15 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='https://twitter.com/share?text='+encodeURIComponent(translate("bonus_twitter_share_text"))+'&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl='+settings.social.twitter.counturl, target="_blank").twitter
-											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden="true")
 											|
 											| Tweet
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#', onclick='postToFeed(); return false;').facebook
-											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden)
+										a(href='#').facebook
+											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden="true")
 											|
 											| #{translate("post_on_facebook")}
 
@@ -41,7 +41,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='mailto:?subject='+encodeURIComponent(translate("bonus_email_share_header"))+'&body='+encodeURIComponent(translate("bonus_email_share_body")+' ')+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email
-											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden="true")
 											|
 											| #{translate("email_us_to_your_friends")}
 
@@ -49,7 +49,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link
-											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden="true")
 											|
 											| #{translate("link_to_us")}
 
@@ -64,16 +64,16 @@ block content
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
 									- for (var i = 0; i <= 10; i++) {
-										- if (refered_user_count == i)
+										if (refered_user_count == i)
 											.number(style="left: "+i+"0%").active #{i}
-										- else
+										else
 											.number(style="left: "+i+"0%") #{i}
 									- }
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
 									.progress
-										- if (refered_user_count == 0)
+										if (refered_user_count == 0)
 											div(style="text-align: center; padding: 4px;") #{translate("spread_the_word_and_fill_bar")}
 										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
 
@@ -87,12 +87,12 @@ block content
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner.bonus-status
-									- if (refered_user_count == 0)
+									if (refered_user_count == 0)
 										p.thanks !{translate("you_not_introed_anyone_to_sl")}
-									- else if (refered_user_count == 1)
-										p.thanks !{translate("you_introed_small_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
-									- else
-										p.thanks !{translate("you_introed_high_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
+									else if (refered_user_count == 1)
+										p.thanks !{translate("you_introed_small_number", {numberOfPeople: refered_user_count}, ['strong'])}
+									else
+										p.thanks !{translate("you_introed_high_number", {numberOfPeople: refered_user_count}, ['strong'])}
 
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
@@ -122,7 +122,7 @@ block content
 
 
 block append foot-scripts
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		$(document).ready(function () {
 			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
 				window.fbAsyncInit = function() {
@@ -148,9 +148,9 @@ block append foot-scripts
 			}
 		}
 
-	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
+	script(type="text/javascript", nonce=scriptNonce, src='//platform.twitter.com/widgets.js')
 
-	script(type="text/javascript").
+	script(type="text/javascript", nonce=scriptNonce).
 		$(function() {
 			$(".twitter").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "twitter")
@@ -158,8 +158,10 @@ block append foot-scripts
 			$(".email").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "email")
 			});
-			$(".facebook").click(function() {
+			$(".facebook").click(function(e) {
 				ga('send', 'event', 'referal-button', 'clicked', "facebook")
+				postToFeed()
+				e.preventDefault()
 			});
 			$(".link").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "direct-link")

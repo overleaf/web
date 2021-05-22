@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -15,7 +15,7 @@ const { promisifyAll } = require('../../util/promises')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,
-  Publisher: require('../../models/Publisher').Publisher
+  Publisher: require('../../models/Publisher').Publisher,
 }
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
@@ -23,10 +23,10 @@ const UserMembershipsHandler = {
   removeUserFromAllEntities(userId, callback) {
     // get all writable entity types
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const entityConfigs = []
-    for (let key in UserMembershipEntityConfigs) {
+    for (const key in UserMembershipEntityConfigs) {
       const entityConfig = UserMembershipEntityConfigs[key]
       if (entityConfig.fields && entityConfig.fields.write != null) {
         entityConfigs.push(entityConfig)
@@ -48,10 +48,10 @@ const UserMembershipsHandler = {
 
   removeUserFromEntities(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const removeOperation = { $pull: {} }
-    removeOperation['$pull'][entityConfig.fields.write] = userId
+    removeOperation.$pull[entityConfig.fields.write] = userId
     return EntityModels[entityConfig.modelName].updateMany(
       {},
       removeOperation,
@@ -61,27 +61,27 @@ const UserMembershipsHandler = {
 
   getEntitiesByUser(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function(error, entities) {}
+      callback = function (error, entities) {}
     }
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId
-    return EntityModels[entityConfig.modelName].find(query, function(
-      error,
-      entities
-    ) {
-      if (entities == null) {
-        entities = []
+    return EntityModels[entityConfig.modelName].find(
+      query,
+      function (error, entities) {
+        if (entities == null) {
+          entities = []
+        }
+        if (error != null) {
+          return callback(error)
+        }
+        return async.mapSeries(
+          entities,
+          (entity, cb) => entity.fetchV1Data(cb),
+          callback
+        )
       }
-      if (error != null) {
-        return callback(error)
-      }
-      return async.mapSeries(
-        entities,
-        (entity, cb) => entity.fetchV1Data(cb),
-        callback
-      )
-    })
-  }
+    )
+  },
 }
 
 UserMembershipsHandler.promises = promisifyAll(UserMembershipsHandler)

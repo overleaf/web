@@ -5,8 +5,10 @@ const UserModel = require('../../../../app/src/models/User').User
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const { promisify } = require('util')
+const fs = require('fs')
+const Path = require('path')
 
-let count = 0
+let count = settings.test.counterInit
 
 class User {
   constructor(options) {
@@ -16,15 +18,15 @@ class User {
     this.emails = [
       {
         email: options.email || `acceptance-test-${count}@example.com`,
-        createdAt: new Date()
-      }
+        createdAt: new Date(),
+      },
     ]
     this.email = this.emails[0].email
     this.password = `a-terrible-secret-${count}`
     count++
     this.jar = request.jar()
     this.request = request.defaults({
-      jar: this.jar
+      jar: this.jar,
     })
   }
 
@@ -40,6 +42,20 @@ class User {
 
   get(callback) {
     db.users.findOne({ _id: ObjectId(this._id) }, callback)
+  }
+
+  getAuditLogWithoutNoise(callback) {
+    this.get((error, user) => {
+      if (error) return callback(error)
+      if (!user) return callback(new Error('User not found'))
+
+      callback(
+        null,
+        (user.auditLog || []).filter(entry => {
+          return entry.operation !== 'login'
+        })
+      )
+    })
   }
 
   mongoUpdate(updateOp, callback) {
@@ -61,7 +77,7 @@ class User {
       this.request.post(
         {
           url: `/register${query}`,
-          json: { email: this.email, password: this.password }
+          json: { email: this.email, password: this.password },
         },
         (error, response, body) => {
           if (error != null) {
@@ -95,9 +111,20 @@ class User {
         this.request.post(
           {
             url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
-            json: { email, password: this.password }
+            json: { email, password: this.password },
           },
-          callback
+          (error, response, body) => {
+            if (error != null) {
+              return callback(error)
+            }
+            // get new csrf token, then return result of login
+            this.getCsrfToken(err => {
+              if (err) {
+                return callback(err)
+              }
+              callback(null, response, body)
+            })
+          }
         )
       })
     })
@@ -127,20 +154,24 @@ class User {
 
   setFeatures(features, callback) {
     const update = {}
-    for (let key in features) {
+    for (const key in features) {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    UserModel.update({ _id: this.id }, update, callback)
+    UserModel.updateOne({ _id: this.id }, update, callback)
   }
 
   setFeaturesOverride(featuresOverride, callback) {
     const update = { $push: { featuresOverrides: featuresOverride } }
-    UserModel.update({ _id: this.id }, update, callback)
+    UserModel.updateOne({ _id: this.id }, update, callback)
   }
 
   setOverleafId(overleafId, callback) {
-    UserModel.update({ _id: this.id }, { 'overleaf.id': overleafId }, callback)
+    UserModel.updateOne(
+      { _id: this.id },
+      { 'overleaf.id': overleafId },
+      callback
+    )
   }
 
   logout(callback) {
@@ -153,8 +184,8 @@ class User {
           url: '/logout',
           json: {
             email: this.email,
-            password: this.password
-          }
+            password: this.password,
+          },
         },
         (error, response, body) => {
           if (error != null) {
@@ -217,7 +248,7 @@ class User {
       templates: true,
       references: true,
       trackChanges: true,
-      trackChangesVisible: true
+      trackChangesVisible: true,
     }
     this.mongoUpdate({ $set: { features } }, callback)
   }
@@ -232,7 +263,7 @@ class User {
       templates: false,
       references: false,
       trackChanges: false,
-      trackChangesVisible: false
+      trackChangesVisible: false,
     }
     this.mongoUpdate({ $set: { features } }, callback)
   }
@@ -276,7 +307,7 @@ class User {
       this.request.post(
         {
           url: '/user/delete',
-          json: { password: this.password }
+          json: { password: this.password },
         },
         (err, res) => {
           if (err) {
@@ -311,7 +342,7 @@ class User {
     this.request.post(
       {
         url: '/project/new',
-        json: Object.assign({ projectName: name }, options)
+        json: Object.assign({ projectName: name }, options),
       },
       (error, response, body) => {
         if (error != null) {
@@ -324,8 +355,8 @@ class User {
               name,
               options,
               response.statusCode,
-              response.headers['location'],
-              body
+              response.headers.location,
+              body,
             ])
           )
           callback(error)
@@ -339,11 +370,32 @@ class User {
   deleteProject(projectId, callback) {
     this.request.delete(
       {
-        url: `/project/${projectId}`
+        url: `/project/${projectId}`,
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
+        }
+        callback(null)
+      }
+    )
+  }
+
+  undeleteProject(projectId, callback) {
+    this.request.post(
+      {
+        url: `/admin/project/${projectId}/undelete`,
+      },
+      (error, response) => {
+        if (error) {
+          return callback(error)
+        }
+        if (response.statusCode !== 204) {
+          return callback(
+            new Error(
+              `Non-success response when undeleting project: ${response.statusCode}`
+            )
+          )
         }
         callback(null)
       }
@@ -357,7 +409,7 @@ class User {
   openProject(projectId, callback) {
     this.request.get(
       {
-        url: `/project/${projectId}`
+        url: `/project/${projectId}`,
       },
       (error, response, body) => {
         if (error != null) {
@@ -384,8 +436,8 @@ class User {
           url: `/project/${projectId}/doc`,
           json: {
             name,
-            parentFolderId
-          }
+            parentFolderId,
+          },
         },
         (error, response, body) => {
           if (error != null) {
@@ -395,6 +447,139 @@ class User {
         }
       )
     })
+  }
+
+  uploadFileInProject(projectId, folderId, file, name, contentType, callback) {
+    const imageFile = fs.createReadStream(
+      Path.resolve(Path.join(__dirname, '..', '..', 'files', file))
+    )
+
+    this.request.post(
+      {
+        uri: `project/${projectId}/upload`,
+        qs: {
+          folder_id: String(folderId),
+        },
+        formData: {
+          qqfile: {
+            value: imageFile,
+            options: {
+              filename: name,
+              contentType: contentType,
+            },
+          },
+        },
+      },
+      (error, res, body) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(new Error(`failed to upload file ${res.statusCode}`))
+        }
+
+        callback(null, JSON.parse(body).entity_id)
+      }
+    )
+  }
+
+  uploadExampleFileInProject(projectId, folderId, name, callback) {
+    this.uploadFileInProject(
+      projectId,
+      folderId,
+      '1pixel.png',
+      name,
+      'image/png',
+      callback
+    )
+  }
+
+  moveItemInProject(projectId, type, itemId, folderId, callback) {
+    this.request.post(
+      {
+        uri: `project/${projectId}/${type}/${itemId}/move`,
+        json: {
+          folder_id: folderId,
+        },
+      },
+      (error, res) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(new Error(`failed to move ${type} ${res.statusCode}`))
+        }
+
+        callback()
+      }
+    )
+  }
+
+  renameItemInProject(projectId, type, itemId, name, callback) {
+    this.request.post(
+      {
+        uri: `project/${projectId}/${type}/${itemId}/rename`,
+        json: {
+          name: name,
+        },
+      },
+      (error, res) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(
+            new Error(`failed to rename ${type} ${res.statusCode}`)
+          )
+        }
+
+        callback()
+      }
+    )
+  }
+
+  deleteItemInProject(projectId, type, itemId, callback) {
+    this.request.delete(
+      `project/${projectId}/${type}/${itemId}`,
+      (error, res) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(
+            new Error(`failed to delete ${type} ${res.statusCode}`)
+          )
+        }
+        callback()
+      }
+    )
+  }
+
+  joinProject(projectId, callback) {
+    this.request.post(
+      {
+        url: `/project/${projectId}/join`,
+        qs: { user_id: this._id },
+        auth: {
+          user: settings.apis.web.user,
+          pass: settings.apis.web.pass,
+          sendImmediately: true,
+        },
+        json: true,
+        jar: false,
+      },
+      (error, res, body) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(
+            new Error(`failed to join project ${projectId} ${res.statusCode}`)
+          )
+        }
+        callback(null, body)
+      }
+    )
   }
 
   addUserToProject(projectId, user, privileges, callback) {
@@ -412,8 +597,8 @@ class User {
       {
         url: `/project/${projectId}/settings/admin`,
         json: {
-          publicAccessLevel: level
-        }
+          publicAccessLevel: level,
+        },
       },
       (error, response, body) => {
         if (error != null) {
@@ -429,8 +614,8 @@ class User {
       {
         url: `/project/${projectId}/settings/admin`,
         json: {
-          publicAccessLevel: 'private'
-        }
+          publicAccessLevel: 'private',
+        },
       },
       (error, response, body) => {
         if (error != null) {
@@ -446,8 +631,8 @@ class User {
       {
         url: `/project/${projectId}/settings/admin`,
         json: {
-          publicAccessLevel: 'tokenBased'
-        }
+          publicAccessLevel: 'tokenBased',
+        },
       },
       (error, response, body) => {
         if (error != null) {
@@ -461,7 +646,7 @@ class User {
   getCsrfToken(callback) {
     this.request.get(
       {
-        url: '/dev/csrf'
+        url: '/dev/csrf',
       },
       (err, response, body) => {
         if (err != null) {
@@ -470,8 +655,8 @@ class User {
         this.csrfToken = body
         this.request = this.request.defaults({
           headers: {
-            'x-csrf-token': this.csrfToken
-          }
+            'x-csrf-token': this.csrfToken,
+          },
         })
         callback()
       }
@@ -489,8 +674,8 @@ class User {
           json: {
             currentPassword: this.password,
             newPassword1: this.password,
-            newPassword2: this.password
-          }
+            newPassword2: this.password,
+          },
         },
         callback
       )
@@ -506,8 +691,8 @@ class User {
         {
           url: '/user/reconfirm',
           json: {
-            email: userEmail
-          }
+            email: userEmail,
+          },
         },
         (error, response, body) => {
           callback(error, response)
@@ -523,7 +708,7 @@ class User {
       }
       this.request.get(
         {
-          url: '/user/settings'
+          url: '/user/settings',
         },
         (error, response, body) => {
           if (error != null) {
@@ -543,7 +728,7 @@ class User {
       this.request.post(
         {
           url: '/user/settings',
-          json: newSettings
+          json: newSettings,
         },
         callback
       )
@@ -557,7 +742,7 @@ class User {
       }
       this.request.get(
         {
-          url: '/project'
+          url: '/project',
         },
         (error, response, body) => {
           if (error != null) {
@@ -581,9 +766,7 @@ class User {
       } else {
         callback(
           new Error(
-            `unexpected status code from /user/personal_info: ${
-              response.statusCode
-            }`
+            `unexpected status code from /user/personal_info: ${response.statusCode}`
           )
         )
       }
@@ -599,8 +782,8 @@ class User {
         {
           url: `/project/${projectId.toString()}/transfer-ownership`,
           json: {
-            user_id: userId.toString()
-          }
+            user_id: userId.toString(),
+          },
         },
         (err, response) => {
           if (err != null) {
@@ -618,14 +801,14 @@ class User {
   }
 
   setV1Id(v1Id, callback) {
-    UserModel.update(
+    UserModel.updateOne(
       {
-        _id: this._id
+        _id: this._id,
       },
       {
         overleaf: {
-          id: v1Id
-        }
+          id: v1Id,
+        },
       },
       callback
     )
@@ -639,7 +822,7 @@ class User {
       this.request.put(
         {
           url: `/project/${projectId.toString()}/users/${userId.toString()}`,
-          json: info
+          json: info,
         },
         (err, response) => {
           if (err != null) {

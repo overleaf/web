@@ -1,36 +1,23 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ColorManager from '../../../ide/colors/ColorManager'
+import { getHueForUserId } from '../../../shared/utils/colors'
 import MessageContent from './message-content'
 
 function Message({ message, userId }) {
-  const {
-    chatMessageBorderSaturation,
-    chatMessageBorderLightness,
-    chatMessageBgSaturation,
-    chatMessageBgLightness
-  } = window.uiConfig
-
   function hue(user) {
-    return user ? ColorManager.getHueForUserId(user.id) : 0
+    return user ? getHueForUserId(user.id, userId) : 0
   }
 
   function getMessageStyle(user) {
     return {
-      borderColor: `hsl(${hue(
-        user
-      )}, ${chatMessageBorderSaturation}, ${chatMessageBorderLightness})`,
-      backgroundColor: `hsl(${hue(
-        user
-      )}, ${chatMessageBgSaturation}, ${chatMessageBgLightness})`
+      borderColor: `hsl(${hue(user)}, 85%, 40%)`,
+      backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
     }
   }
 
   function getArrowStyle(user) {
     return {
-      borderColor: `hsl(${hue(
-        user
-      )}, ${chatMessageBorderSaturation}, ${chatMessageBorderLightness})`
+      borderColor: `hsl(${hue(user)}, 85%, 40%)`,
     }
   }
 
@@ -63,10 +50,10 @@ Message.propTypes = {
     user: PropTypes.shape({
       id: PropTypes.string,
       email: PropTypes.string,
-      first_name: PropTypes.string
-    })
+      first_name: PropTypes.string,
+    }),
   }),
-  userId: PropTypes.string.isRequired
+  userId: PropTypes.string.isRequired,
 }
 
 export default Message

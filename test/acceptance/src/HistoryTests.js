@@ -14,17 +14,23 @@
 const { expect } = require('chai')
 
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
-const MockV1HistoryApi = require('./helpers/MockV1HistoryApi')
 const User = require('./helpers/User')
+const MockV1HistoryApiClass = require('./mocks/MockV1HistoryApi')
 
-describe('History', function() {
-  beforeEach(function(done) {
+let MockV1HistoryApi
+
+before(function () {
+  MockV1HistoryApi = MockV1HistoryApiClass.instance()
+})
+
+describe('History', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     return this.owner.login(done)
   })
 
-  describe('zip download of version', function() {
-    it('should stream the zip file of a version', function(done) {
+  describe('zip download of version', function () {
+    it('should stream the zip file of a version', function (done) {
       return this.owner.createProject(
         'example-project',
         (error, project_id) => {
@@ -35,12 +41,12 @@ describe('History', function() {
           this.v1_history_id = 42
           return db.projects.updateOne(
             {
-              _id: ObjectId(this.project_id)
+              _id: ObjectId(this.project_id),
             },
             {
               $set: {
-                'overleaf.history.id': this.v1_history_id
-              }
+                'overleaf.history.id': this.v1_history_id,
+              },
             },
             error => {
               if (error != null) {
@@ -71,7 +77,7 @@ describe('History', function() {
       )
     })
 
-    describe('request abort', function() {
+    describe('request abort', function () {
       // Optional manual verification: add unique logging statements into
       //   HistoryController._pipeHistoryZipToResponse
       // in each of the `req.aborted` branches and confirm that each branch
@@ -87,18 +93,15 @@ describe('History', function() {
             { _id: ObjectId(this.project_id) },
             {
               $set: {
-                'overleaf.history.id': this.v1_history_id
-              }
+                'overleaf.history.id': this.v1_history_id,
+              },
             },
             done
           )
         })
       })
-      beforeEach(function resetCounter() {
-        MockV1HistoryApi.resetCounter()
-      })
 
-      it('should abort the upstream request', function(done) {
+      it('should abort the upstream request', function (done) {
         const request = this.owner.request(
           `/project/${this.project_id}/version/100/zip`
         )
@@ -138,7 +141,7 @@ describe('History', function() {
         })
       })
 
-      it('should skip the v1-history request', function(done) {
+      it('should skip the v1-history request', function (done) {
         const request = this.owner.request(
           `/project/${this.project_id}/version/100/zip`
         )
@@ -156,7 +159,7 @@ describe('History', function() {
         }, 500)
       })
 
-      it('should skip the async-polling', function(done) {
+      it('should skip the async-polling', function (done) {
         const request = this.owner.request(
           `/project/${this.project_id}/version/100/zip`
         )
@@ -170,7 +173,7 @@ describe('History', function() {
         }, 3000) // initial polling delay is 2s
       })
 
-      it('should skip the upstream request', function(done) {
+      it('should skip the upstream request', function (done) {
         const request = this.owner.request(
           `/project/${this.project_id}/version/100/zip`
         )
@@ -187,7 +190,7 @@ describe('History', function() {
       })
     })
 
-    it('should return 402 for non-v2-history project', function(done) {
+    it('should return 402 for non-v2-history project', function (done) {
       return this.owner.createProject('non-v2-project', (error, project_id) => {
         this.project_id = project_id
         if (error != null) {
@@ -195,12 +198,12 @@ describe('History', function() {
         }
         return db.projects.updateOne(
           {
-            _id: ObjectId(this.project_id)
+            _id: ObjectId(this.project_id),
           },
           {
             $unset: {
-              'overleaf.history.id': true
-            }
+              'overleaf.history.id': true,
+            },
           },
           error => {
             if (error != null) {

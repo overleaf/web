@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-dupe-class-members,
     no-return-assign,
@@ -25,9 +25,10 @@ import './controllers/FileTreeController'
 import './controllers/FileTreeEntityController'
 import './controllers/FileTreeFolderController'
 import './controllers/FileTreeRootFolderController'
+import '../../features/file-tree/controllers/file-tree-controller'
 let FileTreeManager
 
-export default (FileTreeManager = class FileTreeManager {
+export default FileTreeManager = class FileTreeManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -35,6 +36,12 @@ export default (FileTreeManager = class FileTreeManager {
       this.loadRootFolder()
       this.loadDeletedDocs()
       return this.$scope.$emit('file-tree:initialized')
+    })
+
+    this.$scope.$on('entities:multiSelected', (_event, data) => {
+      this.$scope.$apply(() => {
+        this.$scope.multiSelectedCount = data.count
+      })
     })
 
     this.$scope.$watch('rootFolder', rootFolder => {
@@ -61,7 +68,7 @@ export default (FileTreeManager = class FileTreeManager {
         parent_folder.children.push({
           name: doc.name,
           id: doc._id,
-          type: 'doc'
+          type: 'doc',
         })
         return this.recalculateDocList()
       })
@@ -78,7 +85,7 @@ export default (FileTreeManager = class FileTreeManager {
             id: file._id,
             type: 'file',
             linkedFileData,
-            created: file.created
+            created: file.created,
           })
           return this.recalculateDocList()
         })
@@ -93,7 +100,7 @@ export default (FileTreeManager = class FileTreeManager {
           name: folder.name,
           id: folder._id,
           type: 'folder',
-          children: []
+          children: [],
         })
         return this.recalculateDocList()
       })
@@ -145,7 +152,7 @@ export default (FileTreeManager = class FileTreeManager {
 
   multiSelectedCount() {
     let count = 0
-    this.forEachEntity(function(entity) {
+    this.forEachEntity(function (entity) {
       if (entity.multiSelected) {
         return count++
       }
@@ -155,7 +162,7 @@ export default (FileTreeManager = class FileTreeManager {
 
   getMultiSelectedEntities() {
     const entities = []
-    this.forEachEntity(function(e) {
+    this.forEachEntity(function (e) {
       if (e.multiSelected) {
         return entities.push(e)
       }
@@ -165,7 +172,7 @@ export default (FileTreeManager = class FileTreeManager {
 
   getFullCount() {
     const entities = []
-    this.forEachEntity(function(e) {
+    this.forEachEntity(function (e) {
       if (!e.deleted) entities.push(e)
     })
     return entities.length
@@ -235,7 +242,7 @@ export default (FileTreeManager = class FileTreeManager {
 
   findSelectedEntity() {
     let selected = null
-    this.forEachEntity(function(entity) {
+    this.forEachEntity(function (entity) {
       if (entity.selected) {
         return (selected = entity)
       }
@@ -268,7 +275,7 @@ export default (FileTreeManager = class FileTreeManager {
   }
 
   _findEntityByIdInFolder(folder, id) {
-    for (let entity of Array.from(folder.children || [])) {
+    for (const entity of Array.from(folder.children || [])) {
       if (entity.id === id) {
         return entity
       } else if (entity.children != null) {
@@ -302,7 +309,7 @@ export default (FileTreeManager = class FileTreeManager {
       return this._findEntityByPathInFolder(folder, rest)
     }
 
-    for (let entity of Array.from(folder.children)) {
+    for (const entity of Array.from(folder.children)) {
       if (entity.name === name) {
         if (rest === '') {
           return entity
@@ -316,13 +323,13 @@ export default (FileTreeManager = class FileTreeManager {
 
   forEachEntity(callback) {
     if (callback == null) {
-      callback = function(entity, parent_folder, path) {}
+      callback = function (entity, parent_folder, path) {}
     }
     this._forEachEntityInFolder(this.$scope.rootFolder, null, callback)
 
     return (() => {
       const result = []
-      for (let entity of Array.from(this.$scope.deletedDocs || [])) {
+      for (const entity of Array.from(this.$scope.deletedDocs || [])) {
         result.push(callback(entity))
       }
       return result
@@ -332,7 +339,7 @@ export default (FileTreeManager = class FileTreeManager {
   _forEachEntityInFolder(folder, path, callback) {
     return (() => {
       const result = []
-      for (let entity of Array.from(folder.children || [])) {
+      for (const entity of Array.from(folder.children || [])) {
         var childPath
         if (path != null) {
           childPath = path + '/' + entity.name
@@ -355,7 +362,7 @@ export default (FileTreeManager = class FileTreeManager {
   }
 
   _getEntityPathInFolder(folder, entity) {
-    for (let child of Array.from(folder.children || [])) {
+    for (const child of Array.from(folder.children || [])) {
       if (child === entity) {
         return entity.name
       } else if (child.type === 'folder') {
@@ -381,10 +388,7 @@ export default (FileTreeManager = class FileTreeManager {
     if (path == null) {
       return
     }
-    return path
-      .split('/')
-      .slice(0, -1)
-      .join('/')
+    return path.split('/').slice(0, -1).join('/')
   }
 
   _findParentFolder(entity) {
@@ -410,30 +414,30 @@ export default (FileTreeManager = class FileTreeManager {
       id: rawFolder._id,
       type: 'folder',
       children: [],
-      selected: rawFolder._id === this.selected_entity_id
+      selected: rawFolder._id === this.selected_entity_id,
     }
 
-    for (let doc of Array.from(rawFolder.docs || [])) {
+    for (const doc of Array.from(rawFolder.docs || [])) {
       folder.children.push({
         name: doc.name,
         id: doc._id,
         type: 'doc',
-        selected: doc._id === this.selected_entity_id
+        selected: doc._id === this.selected_entity_id,
       })
     }
 
-    for (let file of Array.from(rawFolder.fileRefs || [])) {
+    for (const file of Array.from(rawFolder.fileRefs || [])) {
       folder.children.push({
         name: file.name,
         id: file._id,
         type: 'file',
         selected: file._id === this.selected_entity_id,
         linkedFileData: file.linkedFileData,
-        created: file.created
+        created: file.created,
       })
     }
 
-    for (let childFolder of Array.from(rawFolder.folders || [])) {
+    for (const childFolder of Array.from(rawFolder.folders || [])) {
       folder.children.push(this._parseFolder(childFolder))
     }
 
@@ -447,7 +451,7 @@ export default (FileTreeManager = class FileTreeManager {
         name: doc.name,
         id: doc._id,
         type: 'doc',
-        deleted: true
+        deleted: true,
       })
     )
   }
@@ -458,20 +462,22 @@ export default (FileTreeManager = class FileTreeManager {
       if (entity.type === 'doc' && !entity.deleted) {
         return this.$scope.docs.push({
           doc: entity,
-          path
+          path,
         })
       }
     })
     // Keep list ordered by folders, then name
-    return this.$scope.docs.sort(function(a, b) {
+    return this.$scope.docs.sort(function (a, b) {
       const aDepth = (a.path.match(/\//g) || []).length
       const bDepth = (b.path.match(/\//g) || []).length
       if (aDepth - bDepth !== 0) {
         return -(aDepth - bDepth) // Deeper path == folder first
       } else if (a.path < b.path) {
         return -1
-      } else {
+      } else if (a.path > b.path) {
         return 1
+      } else {
+        return 0
       }
     })
   }
@@ -481,7 +487,7 @@ export default (FileTreeManager = class FileTreeManager {
   }
 
   _getEntityPathInFolder(folder, entity) {
-    for (let child of Array.from(folder.children || [])) {
+    for (const child of Array.from(folder.children || [])) {
       if (child === entity) {
         return entity.name
       } else if (child.type === 'folder') {
@@ -505,7 +511,7 @@ export default (FileTreeManager = class FileTreeManager {
     if (startFolder == null) {
       startFolder = this.$scope.rootFolder
     }
-    for (let entity of Array.from(startFolder.children || [])) {
+    for (const entity of Array.from(startFolder.children || [])) {
       // The 'current' folder is either the one selected, or
       // the one containing the selected doc/file
       if (entity.selected) {
@@ -528,7 +534,7 @@ export default (FileTreeManager = class FileTreeManager {
   }
 
   projectContainsFolder() {
-    for (let entity of Array.from(this.$scope.rootFolder.children)) {
+    for (const entity of Array.from(this.$scope.rootFolder.children)) {
       if (entity.type === 'folder') {
         return true
       }
@@ -537,7 +543,7 @@ export default (FileTreeManager = class FileTreeManager {
   }
 
   existsInThisFolder(folder, name) {
-    for (let entity of Array.from(
+    for (const entity of Array.from(
       (folder != null ? folder.children : undefined) || []
     )) {
       if (entity.name === name) {
@@ -569,7 +575,7 @@ export default (FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(`/project/${this.ide.project_id}/doc`, {
       name,
       parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
   }
 
@@ -586,7 +592,7 @@ export default (FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(`/project/${this.ide.project_id}/folder`, {
       name,
       parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
   }
 
@@ -607,10 +613,10 @@ export default (FileTreeManager = class FileTreeManager {
         parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
         provider,
         data,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       },
       {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       }
     )
   }
@@ -626,17 +632,17 @@ export default (FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(
       `/project/${this.ide.project_id}/linked_file/${file.id}/refresh`,
       {
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       },
       {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       }
     )
   }
 
   renameEntity(entity, name, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     if (entity.name === name) {
       return
@@ -655,7 +661,7 @@ export default (FileTreeManager = class FileTreeManager {
         `/project/${this.ide.project_id}/${entity.type}/${entity.id}/rename`,
         {
           name,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         }
       )
       .then(() => (entity.name = name))
@@ -666,14 +672,14 @@ export default (FileTreeManager = class FileTreeManager {
     // We'll wait for the socket.io notification to
     // delete from scope.
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return this.ide.queuedHttp({
       method: 'DELETE',
       url: `/project/${this.ide.project_id}/${entity.type}/${entity.id}`,
       headers: {
-        'X-Csrf-Token': window.csrfToken
-      }
+        'X-Csrf-Token': window.csrfToken,
+      },
     })
   }
 
@@ -693,7 +699,7 @@ export default (FileTreeManager = class FileTreeManager {
         `/project/${this.ide.project_id}/${entity.type}/${entity.id}/move`,
         {
           folder_id: parent_folder.id,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         }
       )
       .then(() => {
@@ -716,7 +722,7 @@ export default (FileTreeManager = class FileTreeManager {
       return
     }
     let parent_folder = null
-    this.forEachEntity(function(possible_entity, folder) {
+    this.forEachEntity(function (possible_entity, folder) {
       if (possible_entity === entity) {
         return (parent_folder = folder)
       }
@@ -746,7 +752,7 @@ export default (FileTreeManager = class FileTreeManager {
     this._deleteEntityFromScope(entity, { moveToDeleted: false })
     return parent_folder.children.push(entity)
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

@@ -10,7 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -21,16 +20,16 @@ const modulePath = path.join(
 )
 const { expect } = require('chai')
 
-describe('UserPagesController', function() {
-  beforeEach(function() {
+describe('UserPagesController', function () {
+  beforeEach(function () {
     this.settings = {
       apis: {
         v1: {
           url: 'some.host',
           user: 'one',
-          pass: 'two'
-        }
-      }
+          pass: 'two',
+        },
+      },
     }
     this.user = {
       _id: (this.user_id = 'kwjewkl'),
@@ -39,57 +38,43 @@ describe('UserPagesController', function() {
       thirdPartyIdentifiers: [
         {
           providerId: 'google',
-          externalUserId: 'testId'
-        }
-      ]
+          externalUserId: 'testId',
+        },
+      ],
     }
 
     this.UserGetter = { getUser: sinon.stub() }
     this.UserSessionsManager = { getAllUserSessions: sinon.stub() }
     this.dropboxStatus = {}
-    this.DropboxHandler = {
-      getUserRegistrationStatus: sinon
-        .stub()
-        .callsArgWith(1, null, this.dropboxStatus)
-    }
     this.ErrorController = { notFound: sinon.stub() }
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
       _getRedirectFromSession: sinon.stub(),
-      setRedirectInSession: sinon.stub()
+      setRedirectInSession: sinon.stub(),
     }
     this.UserPagesController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         './UserGetter': this.UserGetter,
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/ErrorController': this.ErrorController,
-        '../Dropbox/DropboxHandler': this.DropboxHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        request: (this.request = sinon.stub())
-      }
+        request: (this.request = sinon.stub()),
+      },
     })
     this.req = {
       query: {},
       session: {
-        user: this.user
-      }
+        user: this.user,
+      },
     }
     return (this.res = {})
   })
 
-  describe('registerPage', function() {
-    it('should render the register page', function(done) {
+  describe('registerPage', function () {
+    it('should render the register page', function (done) {
       this.res.render = page => {
         page.should.equal('user/register')
         return done()
@@ -97,7 +82,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.registerPage(this.req, this.res)
     })
 
-    it('should set sharedProjectData', function(done) {
+    it('should set sharedProjectData', function (done) {
       this.req.query.project_name = 'myProject'
       this.req.query.user_first_name = 'user_first_name_here'
 
@@ -111,7 +96,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.registerPage(this.req, this.res)
     })
 
-    it('should set newTemplateData', function(done) {
+    it('should set newTemplateData', function (done) {
       this.req.session.templateData = { templateName: 'templateName' }
 
       this.res.render = (page, opts) => {
@@ -121,7 +106,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.registerPage(this.req, this.res)
     })
 
-    it('should not set the newTemplateData if there is nothing in the session', function(done) {
+    it('should not set the newTemplateData if there is nothing in the session', function (done) {
       this.res.render = (page, opts) => {
         assert.equal(opts.newTemplateData.templateName, undefined)
         return done()
@@ -130,8 +115,8 @@ describe('UserPagesController', function() {
     })
   })
 
-  describe('loginForm', function() {
-    it('should render the login page', function(done) {
+  describe('loginForm', function () {
+    it('should render the login page', function (done) {
       this.res.render = page => {
         page.should.equal('user/login')
         return done()
@@ -139,8 +124,8 @@ describe('UserPagesController', function() {
       return this.UserPagesController.loginPage(this.req, this.res)
     })
 
-    describe('when an explicit redirect is set via query string', function() {
-      beforeEach(function() {
+    describe('when an explicit redirect is set via query string', function () {
+      beforeEach(function () {
         this.AuthenticationController._getRedirectFromSession = sinon
           .stub()
           .returns(null)
@@ -148,7 +133,7 @@ describe('UserPagesController', function() {
         return (this.req.query.redir = '/somewhere/in/particular')
       })
 
-      it('should set a redirect', function(done) {
+      it('should set a redirect', function (done) {
         this.res.render = page => {
           this.AuthenticationController.setRedirectInSession.callCount.should.equal(
             1
@@ -163,8 +148,8 @@ describe('UserPagesController', function() {
     })
   })
 
-  describe('sessionsPage', function() {
-    beforeEach(function() {
+  describe('sessionsPage', function () {
+    beforeEach(function () {
       return this.UserSessionsManager.getAllUserSessions.callsArgWith(
         2,
         null,
@@ -172,15 +157,15 @@ describe('UserPagesController', function() {
       )
     })
 
-    it('should render user/sessions', function(done) {
-      this.res.render = function(page) {
+    it('should render user/sessions', function (done) {
+      this.res.render = function (page) {
         page.should.equal('user/sessions')
         return done()
       }
       return this.UserPagesController.sessionsPage(this.req, this.res)
     })
 
-    it('should have called getAllUserSessions', function(done) {
+    it('should have called getAllUserSessions', function (done) {
       this.res.render = page => {
         this.UserSessionsManager.getAllUserSessions.callCount.should.equal(1)
         return done()
@@ -188,15 +173,15 @@ describe('UserPagesController', function() {
       return this.UserPagesController.sessionsPage(this.req, this.res)
     })
 
-    describe('when getAllUserSessions produces an error', function() {
-      beforeEach(function() {
+    describe('when getAllUserSessions produces an error', function () {
+      beforeEach(function () {
         return this.UserSessionsManager.getAllUserSessions.callsArgWith(
           2,
           new Error('woops')
         )
       })
 
-      it('should call next with an error', function(done) {
+      it('should call next with an error', function (done) {
         this.next = err => {
           assert(err !== null)
           assert(err instanceof Error)
@@ -211,8 +196,8 @@ describe('UserPagesController', function() {
     })
   })
 
-  describe('settingsPage', function() {
-    beforeEach(function() {
+  describe('settingsPage', function () {
+    beforeEach(function () {
       this.request.get = sinon
         .stub()
         .callsArgWith(1, null, { statusCode: 200 }, { has_password: true })
@@ -221,15 +206,15 @@ describe('UserPagesController', function() {
         .callsArgWith(1, null, this.user))
     })
 
-    it('should render user/settings', function(done) {
-      this.res.render = function(page) {
+    it('should render user/settings', function (done) {
+      this.res.render = function (page) {
         page.should.equal('user/settings')
         return done()
       }
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
-    it('should send user', function(done) {
+    it('should send user', function (done) {
       this.res.render = (page, opts) => {
         opts.user.should.equal(this.user)
         return done()
@@ -237,7 +222,7 @@ describe('UserPagesController', function() {
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
-    it("should set 'shouldAllowEditingDetails' to true", function(done) {
+    it("should set 'shouldAllowEditingDetails' to true", function (done) {
       this.res.render = (page, opts) => {
         opts.shouldAllowEditingDetails.should.equal(true)
         return done()
@@ -245,9 +230,9 @@ describe('UserPagesController', function() {
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
-    it('should restructure thirdPartyIdentifiers data for template use', function(done) {
+    it('should restructure thirdPartyIdentifiers data for template use', function (done) {
       const expectedResult = {
-        google: 'testId'
+        google: 'testId',
       }
       this.res.render = (page, opts) => {
         expect(opts.thirdPartyIds).to.include(expectedResult)
@@ -256,16 +241,16 @@ describe('UserPagesController', function() {
       return this.UserPagesController.settingsPage(this.req, this.res)
     })
 
-    describe('when ldap.updateUserDetailsOnLogin is true', function() {
-      beforeEach(function() {
+    describe('when ldap.updateUserDetailsOnLogin is true', function () {
+      beforeEach(function () {
         return (this.settings.ldap = { updateUserDetailsOnLogin: true })
       })
 
-      afterEach(function() {
+      afterEach(function () {
         return delete this.settings.ldap
       })
 
-      it('should set "shouldAllowEditingDetails" to false', function(done) {
+      it('should set "shouldAllowEditingDetails" to false', function (done) {
         this.res.render = (page, opts) => {
           opts.shouldAllowEditingDetails.should.equal(false)
           return done()
@@ -274,16 +259,16 @@ describe('UserPagesController', function() {
       })
     })
 
-    describe('when saml.updateUserDetailsOnLogin is true', function() {
-      beforeEach(function() {
+    describe('when saml.updateUserDetailsOnLogin is true', function () {
+      beforeEach(function () {
         return (this.settings.saml = { updateUserDetailsOnLogin: true })
       })
 
-      afterEach(function() {
+      afterEach(function () {
         return delete this.settings.saml
       })
 
-      it('should set "shouldAllowEditingDetails" to false', function(done) {
+      it('should set "shouldAllowEditingDetails" to false', function (done) {
         this.res.render = (page, opts) => {
           opts.shouldAllowEditingDetails.should.equal(false)
           return done()

@@ -1,10 +1,14 @@
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const settings = require('settings-sharelatex')
 const request = require('request')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const { V1ConnectionError } = require('../Errors/Errors')
+const {
+  V1ConnectionError,
+  InvalidInstitutionalEmailError,
+} = require('../Errors/Errors')
 
 const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
@@ -12,9 +16,21 @@ const InstitutionsAPI = {
       {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't get institution affiliations"
+        defaultErrorMessage: "Couldn't get institution affiliations",
       },
       (error, body) => callback(error, body || [])
+    )
+  },
+
+  getLicencesForAnalytics(lag, queryDate, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: `/api/v2/institutions/institutions_licences`,
+        body: { query_date: queryDate, lag },
+        defaultErrorMessage: 'Could not get institutions licences',
+      },
+      callback
     )
   },
 
@@ -24,7 +40,7 @@ const InstitutionsAPI = {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/institution_licences`,
         body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution licences"
+        defaultErrorMessage: "Couldn't get institution licences",
       },
       callback
     )
@@ -36,7 +52,7 @@ const InstitutionsAPI = {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/new_institution_licences`,
         body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution new licences"
+        defaultErrorMessage: "Couldn't get institution new licences",
       },
       callback
     )
@@ -47,7 +63,19 @@ const InstitutionsAPI = {
       {
         method: 'GET',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't get user affiliations"
+        defaultErrorMessage: "Couldn't get user affiliations",
+      },
+      (error, body) => callback(error, body || [])
+    )
+  },
+
+  getUsersNeedingReconfirmationsLapsedProcessed(callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: '/api/v2/institutions/need_reconfirmation_lapsed_processed',
+        defaultErrorMessage:
+          'Could not get users that need reconfirmations lapsed processed',
       },
       (error, body) => callback(error, body || [])
     )
@@ -65,18 +93,32 @@ const InstitutionsAPI = {
       department,
       role,
       confirmedAt,
-      entitlement
+      entitlement,
+      rejectIfBlocklisted,
     } = affiliationOptions
     makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        body: { email, university, department, role, confirmedAt, entitlement },
-        defaultErrorMessage: "Couldn't create affiliation"
+        body: {
+          email,
+          university,
+          department,
+          role,
+          confirmedAt,
+          entitlement,
+          rejectIfBlocklisted,
+        },
+        defaultErrorMessage: "Couldn't create affiliation",
       },
-      function(error, body) {
+      function (error, body) {
         if (error) {
-          return callback(error, body)
+          if (error.info && error.info.statusCode === 422) {
+            return callback(
+              new InvalidInstitutionalEmailError(error.message).withCause(error)
+            )
+          }
+          return callback(error)
         }
         if (!university) {
           return callback(null, body)
@@ -85,7 +127,7 @@ const InstitutionsAPI = {
         // have notifications delete any ip matcher notifications for this university
         NotificationsBuilder.ipMatcherAffiliation(userId).read(
           university.id,
-          function(err) {
+          function (err) {
             if (err) {
               // log and ignore error
               logger.err(
@@ -107,7 +149,7 @@ const InstitutionsAPI = {
         path: `/api/v2/users/${userId.toString()}/affiliations/remove`,
         body: { email },
         extraSuccessStatusCodes: [404], // `Not Found` responses are considered successful
-        defaultErrorMessage: "Couldn't remove affiliation"
+        defaultErrorMessage: "Couldn't remove affiliation",
       },
       callback
     )
@@ -119,7 +161,7 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations/endorse`,
         body: { email, role, department },
-        defaultErrorMessage: "Couldn't endorse affiliation"
+        defaultErrorMessage: "Couldn't endorse affiliation",
       },
       callback
     )
@@ -130,7 +172,7 @@ const InstitutionsAPI = {
       {
         method: 'DELETE',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't delete affiliations"
+        defaultErrorMessage: "Couldn't delete affiliations",
       },
       callback
     )
@@ -142,7 +184,7 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
         body: { email },
-        defaultErrorMessage: "Couldn't add entitlement"
+        defaultErrorMessage: "Couldn't add entitlement",
       },
       callback
     )
@@ -154,14 +196,28 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
         body: { email },
-        defaultErrorMessage: "Couldn't remove entitlement"
+        defaultErrorMessage: "Couldn't remove entitlement",
+        extraSuccessStatusCodes: [404],
       },
       callback
     )
-  }
+  },
+
+  sendUsersWithReconfirmationsLapsedProcessed(users, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'POST',
+        path: '/api/v2/institutions/reconfirmation_lapsed_processed',
+        body: { users },
+        defaultErrorMessage:
+          'Could not update reconfirmation_lapsed_processed_at',
+      },
+      (error, body) => callback(error, body || [])
+    )
+  },
 }
 
-var makeAffiliationRequest = function(requestOptions, callback) {
+var makeAffiliationRequest = function (requestOptions, callback) {
   if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured
@@ -175,9 +231,9 @@ var makeAffiliationRequest = function(requestOptions, callback) {
       body: requestOptions.body,
       auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
       json: true,
-      timeout: 20 * 1000
+      timeout: 20 * 1000,
     },
-    function(error, response, body) {
+    function (error, response, body) {
       if (error) {
         return callback(
           new V1ConnectionError('error getting affiliations from v1').withCause(
@@ -191,8 +247,8 @@ var makeAffiliationRequest = function(requestOptions, callback) {
             message: 'error getting affiliations from v1',
             info: {
               status: response.statusCode,
-              body: body
-            }
+              body: body,
+            },
           })
         )
       }
@@ -207,16 +263,16 @@ var makeAffiliationRequest = function(requestOptions, callback) {
         if (body && body.errors) {
           errorMessage = `${response.statusCode}: ${body.errors}`
         } else {
-          errorMessage = `${requestOptions.defaultErrorMessage}: ${
-            response.statusCode
-          }`
+          errorMessage = `${requestOptions.defaultErrorMessage}: ${response.statusCode}`
         }
 
         logger.warn(
           { path: requestOptions.path, body: requestOptions.body },
           errorMessage
         )
-        return callback(new Error(errorMessage))
+        return callback(
+          new OError(errorMessage, { statusCode: response.statusCode })
+        )
       }
 
       callback(null, body)
@@ -227,7 +283,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
   'getInstitutionAffiliations',
   'getUserAffiliations',
   'addAffiliation',
-  'removeAffiliation'
+  'removeAffiliation',
 ].map(method =>
   metrics.timeAsyncMethod(
     InstitutionsAPI,

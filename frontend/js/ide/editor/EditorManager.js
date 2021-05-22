@@ -1,10 +1,10 @@
 import _ from 'lodash'
 /* eslint-disable
-    camelcase,
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
+   camelcase,
+   node/handle-callback-err,
+   max-len,
+   no-return-assign,
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -19,14 +19,16 @@ import './components/spellMenu'
 import './directives/aceEditor'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
+import '../../features/symbol-palette/controllers/symbol-palette-controller'
 let EditorManager
 
-export default (EditorManager = (function() {
+export default EditorManager = (function () {
   EditorManager = class EditorManager {
     static initClass() {
       this.prototype._syncTimeout = null
     }
-    constructor(ide, $scope, localStorage) {
+
+    constructor(ide, $scope, localStorage, eventTracking) {
       this.ide = ide
       this.editorOpenDocEpoch = 0 // track pending document loads
       this.$scope = $scope
@@ -38,13 +40,32 @@ export default (EditorManager = (function() {
         opening: true,
         trackChanges: false,
         wantTrackChanges: false,
-        showRichText: this.showRichText()
+        showRichText: this.showRichText(),
+        showSymbolPalette: false,
+        toggleSymbolPalette: () => {
+          const newValue = !this.$scope.editor.showSymbolPalette
+          this.$scope.editor.showSymbolPalette = newValue
+          ide.$scope.$emit('symbol-palette-toggled', newValue)
+          eventTracking.sendMB(
+            newValue ? 'symbol-palette-show' : 'symbol-palette-hide'
+          )
+        },
+        insertSymbol: symbol => {
+          ide.$scope.$emit('editor:replace-selection', symbol.command)
+          eventTracking.sendMB('symbol-palette-insert')
+        },
       }
 
       this.$scope.$on('entity:selected', (event, entity) => {
         if (this.$scope.ui.view !== 'history' && entity.type === 'doc') {
           return this.openDoc(entity)
         }
+      })
+
+      this.$scope.$on('entity:no-selection', () => {
+        this.$scope.$apply(() => {
+          this.$scope.ui.view = null
+        })
       })
 
       this.$scope.$on('entity:deleted', (event, entity) => {
@@ -206,38 +227,70 @@ export default (EditorManager = (function() {
     }
 
     _openNewDocument(doc, callback) {
-      if (callback == null) {
-        callback = function(error, sharejs_doc) {}
-      }
-      sl_console.log('[_openNewDocument] Opening...')
+      // Leave the current document
+      //  - when we are opening a different new one, to avoid race conditions
+      //     between leaving and joining the same document
+      //  - when the current one has pending ops that need flushing, to avoid
+      //     race conditions from cleanup
       const current_sharejs_doc = this.$scope.editor.sharejs_doc
-      const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
-      // Leave the current document only when we are opening a different new
-      // one, to avoid race conditions between leaving and joining the same
-      // document.
-      if (
-        current_sharejs_doc != null &&
-        current_sharejs_doc !== new_sharejs_doc
-      ) {
+      const currentDocId = current_sharejs_doc && current_sharejs_doc.doc_id
+      const hasBufferedOps =
+        current_sharejs_doc && current_sharejs_doc.hasBufferedOps()
+      const changingDoc = current_sharejs_doc && currentDocId !== doc.id
+      if (changingDoc || hasBufferedOps) {
         sl_console.log('[_openNewDocument] Leaving existing open doc...')
-        current_sharejs_doc.leaveAndCleanUp()
+
+        // Do not trigger any UI changes from remote operations
         this._unbindFromDocumentEvents(current_sharejs_doc)
+        // Keep listening for out-of-sync and similar errors.
+        this._attachErrorHandlerToDocument(doc, current_sharejs_doc)
+
+        // Teardown the Document -> ShareJsDoc -> sharejs doc
+        // By the time this completes, the Document instance is no longer
+        //  registered in Document.openDocs and _doOpenNewDocument can start
+        //  from scratch -- read: no corrupted internal state.
+        const editorOpenDocEpoch = ++this.editorOpenDocEpoch
+        current_sharejs_doc.leaveAndCleanUp(error => {
+          if (error) {
+            sl_console.log(
+              `[_openNewDocument] error leaving doc ${currentDocId}`,
+              error
+            )
+            return callback(error)
+          }
+          if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
+            sl_console.log(
+              `[openNewDocument] editorOpenDocEpoch mismatch ${this.editorOpenDocEpoch} vs ${editorOpenDocEpoch}`
+            )
+            return callback(new Error('another document was loaded'))
+          }
+          this._doOpenNewDocument(doc, callback)
+        })
+      } else {
+        this._doOpenNewDocument(doc, callback)
       }
+    }
+
+    _doOpenNewDocument(doc, callback) {
+      if (callback == null) {
+        callback = function (error, sharejs_doc) {}
+      }
+      sl_console.log('[_doOpenNewDocument] Opening...')
+      const new_sharejs_doc = Document.getDocument(this.ide, doc.id)
       const editorOpenDocEpoch = ++this.editorOpenDocEpoch
       return new_sharejs_doc.join(error => {
         if (error != null) {
           sl_console.log(
-            `[_openNewDocument] error joining doc ${doc.id}`,
+            `[_doOpenNewDocument] error joining doc ${doc.id}`,
             error
           )
           return callback(error)
         }
         if (this.editorOpenDocEpoch !== editorOpenDocEpoch) {
           sl_console.log(
-            `[openNewDocument] editorOpenDocEpoch mismatch ${
-              this.editorOpenDocEpoch
-            } vs ${editorOpenDocEpoch}`
+            `[openNewDocument] editorOpenDocEpoch mismatch ${this.editorOpenDocEpoch} vs ${editorOpenDocEpoch}`
           )
+          new_sharejs_doc.leaveAndCleanUp()
           return callback(new Error('another document was loaded'))
         }
         this._bindToDocumentEvents(doc, new_sharejs_doc)
@@ -245,8 +298,8 @@ export default (EditorManager = (function() {
       })
     }
 
-    _bindToDocumentEvents(doc, sharejs_doc) {
-      sharejs_doc.on('error', (error, meta) => {
+    _attachErrorHandlerToDocument(doc, sharejs_doc) {
+      sharejs_doc.on('error', (error, meta, editorContent) => {
         let message
         if ((error != null ? error.message : undefined) != null) {
           ;({ message } = error)
@@ -266,19 +319,42 @@ export default (EditorManager = (function() {
             'Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments.'
           )
         } else {
-          this.ide.socket.disconnect()
+          // Do not allow this doc to open another error modal.
+          sharejs_doc.off('error')
+
+          // Preserve the sharejs contents before the teardown.
+          editorContent =
+            typeof editorContent === 'string'
+              ? editorContent
+              : sharejs_doc.doc._doc.snapshot
+
+          // Tear down the ShareJsDoc.
+          if (sharejs_doc.doc) sharejs_doc.doc.clearInflightAndPendingOps()
+
+          // Do not re-join after re-connecting.
+          sharejs_doc.leaveAndCleanUp()
+          this.ide.connectionManager.disconnect({ permanent: true })
           this.ide.reportError(error, meta)
+
+          // Tell the user about the error state.
+          this.$scope.editor.error_state = true
           this.ide.showOutOfSyncModal(
             'Out of sync',
-            "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
-            sharejs_doc.doc._doc.snapshot
+            "Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a target='_blank' rel='noopener noreferrer' href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>",
+            editorContent
           )
+          // Do not forceReopen the document.
+          return
         }
         const removeHandler = this.$scope.$on('project:joined', () => {
           this.openDoc(doc, { forceReopen: true })
           removeHandler()
         })
       })
+    }
+
+    _bindToDocumentEvents(doc, sharejs_doc) {
+      this._attachErrorHandlerToDocument(doc, sharejs_doc)
 
       return sharejs_doc.on('externalUpdate', update => {
         if (this._ignoreExternalUpdates) {
@@ -318,6 +394,7 @@ export default (EditorManager = (function() {
     stopIgnoringExternalUpdates() {
       return (this._ignoreExternalUpdates = false)
     }
+
     _syncTrackChangesState(doc) {
       let tryToggle
       if (doc == null) {
@@ -351,4 +428,4 @@ export default (EditorManager = (function() {
   }
   EditorManager.initClass()
   return EditorManager
-})())
+})()

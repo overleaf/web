@@ -3,7 +3,7 @@ const EditorController = require('./EditorController')
 const ProjectGetter = require('../Project/ProjectGetter')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
@@ -13,6 +13,8 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
+const DocstoreManager = require('../Docstore/DocstoreManager')
+const logger = require('logger-sharelatex')
 const { expressify } = require('../../util/promises')
 
 module.exports = {
@@ -26,7 +28,7 @@ module.exports = {
   deleteFolder: expressify(deleteFolder),
   deleteEntity: expressify(deleteEntity),
   convertDocToFile: expressify(convertDocToFile),
-  _nameIsAcceptableLength
+  _nameIsAcceptableLength,
 }
 
 const unsupportedSpellcheckLanguages = [
@@ -48,7 +50,7 @@ const unsupportedSpellcheckLanguages = [
   'uk',
   'uz',
   'zu',
-  'fi'
+  'fi',
 ]
 
 async function joinProject(req, res, next) {
@@ -61,7 +63,7 @@ async function joinProject(req, res, next) {
   const {
     project,
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   } = await _buildJoinProjectView(req, projectId, userId)
   if (!project) {
     return res.sendStatus(403)
@@ -88,7 +90,7 @@ async function joinProject(req, res, next) {
   res.json({
     project,
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   })
 }
 
@@ -98,6 +100,21 @@ async function _buildJoinProjectView(req, projectId, userId) {
   )
   if (project == null) {
     throw new Errors.NotFoundError('project not found')
+  }
+  let deletedDocsFromDocstore = []
+  try {
+    deletedDocsFromDocstore = await DocstoreManager.promises.getAllDeletedDocs(
+      projectId
+    )
+  } catch (err) {
+    // The query in docstore is not optimized at this time and fails for
+    // projects with many very large, deleted documents.
+    // Not serving the user with deletedDocs from docstore may cause a minor
+    //  UI issue with deleted files that are no longer available for restore.
+    logger.warn(
+      { err, projectId },
+      'soft-failure when fetching deletedDocs from docstore'
+    )
   }
   const members = await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
     projectId
@@ -127,10 +144,11 @@ async function _buildJoinProjectView(req, projectId, userId) {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
       members,
-      invites
+      invites,
+      deletedDocsFromDocstore
     ),
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   }
 }
 
@@ -170,6 +188,7 @@ async function addFolder(req, res, next) {
   const projectId = req.params.Project_id
   const { name } = req.body
   const parentFolderId = req.body.parent_folder_id
+  const userId = AuthenticationController.getLoggedInUserId(req)
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
@@ -178,7 +197,8 @@ async function addFolder(req, res, next) {
       projectId,
       parentFolderId,
       name,
-      'editor'
+      'editor',
+      userId
     )
     res.json(doc)
   } catch (err) {

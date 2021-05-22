@@ -14,7 +14,7 @@ import '../pdfng/directives/pdfJs'
 
 let PdfManager
 
-export default (PdfManager = class PdfManager {
+export default PdfManager = class PdfManager {
   constructor(ide, $scope) {
     this.ide = ide
     this.$scope = $scope
@@ -28,10 +28,12 @@ export default (PdfManager = class PdfManager {
       logEntries: {},
       logEntryAnnotations: {},
       rawLog: '',
+      validation: {},
       view: null, // 'pdf' 'logs'
       showRawLog: false,
       highlights: [],
-      position: null
+      position: null,
+      lastCompileTimestamp: null,
     }
   }
-})
+}

@@ -5,8 +5,6 @@ const { promisify } = require('util')
 
 const Settings = require('settings-sharelatex')
 const User = require('./helpers/User').promises
-require('./helpers/MockFileStoreApi')
-require('./helpers/MockClsiApi')
 
 const express = require('express')
 const LinkedUrlProxy = express()
@@ -20,32 +18,32 @@ LinkedUrlProxy.get('/', (req, res, next) => {
   }
 })
 
-describe('LinkedFiles', function() {
+describe('LinkedFiles', function () {
   let projectOne, projectOneId, projectOneRootFolderId
   let projectTwo, projectTwoId, projectTwoRootFolderId
-  let sourceDocName = 'test.txt'
+  const sourceDocName = 'test.txt'
   let owner
 
-  before(function(done) {
+  before(function (done) {
     LinkedUrlProxy.listen(6543, done)
   })
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     owner = new User()
     await owner.login()
     await promisify(mkdirp)(Settings.path.dumpFolder)
   })
 
-  describe('creating a project linked file', function() {
-    beforeEach(async function() {
+  describe('creating a project linked file', function () {
+    beforeEach(async function () {
       projectOneId = await owner.createProject('plf-test-one', {
-        template: 'blank'
+        template: 'blank',
       })
       projectOne = await owner.getProject(projectOneId)
       projectOneRootFolderId = projectOne.rootFolder[0]._id.toString()
 
       projectTwoId = await owner.createProject('plf-test-two', {
-        template: 'blank'
+        template: 'blank',
       })
       projectTwo = await owner.getProject(projectTwoId)
       projectTwoRootFolderId = projectTwo.rootFolder[0]._id.toString()
@@ -62,10 +60,10 @@ describe('LinkedFiles', function() {
       )
     })
 
-    it('should produce a list of the users projects and their entities', async function() {
+    it('should produce a list of the users projects and their entities', async function () {
       let { body } = await owner.doRequest('get', {
         url: '/user/projects',
-        json: true
+        json: true,
       })
 
       expect(body).to.deep.equal({
@@ -73,30 +71,30 @@ describe('LinkedFiles', function() {
           {
             _id: projectOneId,
             name: 'plf-test-one',
-            accessLevel: 'owner'
+            accessLevel: 'owner',
           },
           {
             _id: projectTwoId,
             name: 'plf-test-two',
-            accessLevel: 'owner'
-          }
-        ]
+            accessLevel: 'owner',
+          },
+        ],
       })
       ;({ body } = await owner.doRequest('get', {
         url: `/project/${projectTwoId}/entities`,
-        json: true
+        json: true,
       }))
       expect(body).to.deep.equal({
         project_id: projectTwoId,
         entities: [
           { path: '/main.tex', type: 'doc' },
           { path: '/some-harmless-doc.txt', type: 'doc' },
-          { path: '/test.txt', type: 'doc' }
-        ]
+          { path: '/test.txt', type: 'doc' },
+        ],
       })
     })
 
-    it('should import a file and refresh it if there is no v1 id', async function() {
+    it('should import a file and refresh it if there is no v1 id', async function () {
       // import the file from the source project
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
@@ -106,9 +104,9 @@ describe('LinkedFiles', function() {
           provider: 'project_file',
           data: {
             source_project_id: projectTwoId,
-            source_entity_path: `/${sourceDocName}`
-          }
-        }
+            source_entity_path: `/${sourceDocName}`,
+          },
+        },
       })
       expect(response.statusCode).to.equal(200)
       const existingFileId = body.new_file_id
@@ -121,14 +119,14 @@ describe('LinkedFiles', function() {
       expect(firstFile.linkedFileData).to.deep.equal({
         provider: 'project_file',
         source_project_id: projectTwoId,
-        source_entity_path: `/${sourceDocName}`
+        source_entity_path: `/${sourceDocName}`,
       })
       expect(firstFile.name).to.equal('test-link.txt')
 
       // refresh the file
       ;({ response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file/${existingFileId}/refresh`,
-        json: true
+        json: true,
       }))
       expect(response.statusCode).to.equal(200)
       const newFileId = body.new_file_id
@@ -149,19 +147,19 @@ describe('LinkedFiles', function() {
           provider: 'project_file',
           data: {
             v1_source_doc_id: 1234,
-            source_entity_path: `/${sourceDocName}`
-          }
-        }
+            source_entity_path: `/${sourceDocName}`,
+          },
+        },
       }))
       expect(response.statusCode).to.equal(403)
       expect(body).to.equal('You do not have access to this project')
     })
   })
 
-  describe('with a linked project_file from a v1 project that has not been imported', function() {
-    beforeEach(async function() {
+  describe('with a linked project_file from a v1 project that has not been imported', function () {
+    beforeEach(async function () {
       projectOneId = await owner.createProject('plf-v1-test-one', {
-        template: 'blank'
+        template: 'blank',
       })
       projectOne = await owner.getProject(projectOneId)
       projectOneRootFolderId = projectOne.rootFolder[0]._id.toString()
@@ -169,20 +167,20 @@ describe('LinkedFiles', function() {
         linkedFileData: {
           provider: 'project_file',
           v1_source_doc_id: 9999999, // We won't find this id in the database
-          source_entity_path: 'example.jpeg'
+          source_entity_path: 'example.jpeg',
         },
         _id: 'abcd',
         rev: 0,
         created: new Date(),
-        name: 'example.jpeg'
+        name: 'example.jpeg',
       })
       await owner.saveProject(projectOne)
     })
 
-    it('should refuse to refresh', async function() {
+    it('should refuse to refresh', async function () {
       const { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file/abcd/refresh`,
-        json: true
+        json: true,
       })
       expect(response.statusCode).to.equal(409)
       expect(body).to.equal(
@@ -191,27 +189,27 @@ describe('LinkedFiles', function() {
     })
   })
 
-  describe('creating a URL based linked file', function() {
-    beforeEach(async function() {
+  describe('creating a URL based linked file', function () {
+    beforeEach(async function () {
       projectOneId = await owner.createProject('url-linked-files-project', {
-        template: 'blank'
+        template: 'blank',
       })
       projectOne = await owner.getProject(projectOneId)
       projectOneRootFolderId = projectOne.rootFolder[0]._id.toString()
     })
 
-    it('should download, create and replace a file', async function() {
+    it('should download, create and replace a file', async function () {
       // downloading the initial file
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
         json: {
           provider: 'url',
           data: {
-            url: 'http://example.com/foo'
+            url: 'http://example.com/foo',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-1'
-        }
+          name: 'url-test-file-1',
+        },
       })
       expect(response.statusCode).to.equal(200)
 
@@ -219,7 +217,7 @@ describe('LinkedFiles', function() {
       let file = updatedProject.rootFolder[0].fileRefs[0]
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
-        url: 'http://example.com/foo'
+        url: 'http://example.com/foo',
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -234,11 +232,11 @@ describe('LinkedFiles', function() {
         json: {
           provider: 'url',
           data: {
-            url: 'http://example.com/foo'
+            url: 'http://example.com/foo',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-2'
-        }
+          name: 'url-test-file-2',
+        },
       }))
       expect(response.statusCode).to.equal(200)
       ;({ response, body } = await owner.doRequest('post', {
@@ -246,11 +244,11 @@ describe('LinkedFiles', function() {
         json: {
           provider: 'url',
           data: {
-            url: 'http://example.com/bar'
+            url: 'http://example.com/bar',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-2'
-        }
+          name: 'url-test-file-2',
+        },
       }))
       expect(response.statusCode).to.equal(200)
 
@@ -258,7 +256,7 @@ describe('LinkedFiles', function() {
       file = updatedProject.rootFolder[0].fileRefs[1]
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
-        url: 'http://example.com/bar'
+        url: 'http://example.com/bar',
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -268,18 +266,18 @@ describe('LinkedFiles', function() {
       expect(body).to.equal('bar bar bar')
     })
 
-    it("should return an error if the file can't be downloaded", async function() {
+    it("should return an error if the file can't be downloaded", async function () {
       // download does not succeed
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
         json: {
           provider: 'url',
           data: {
-            url: 'http://example.com/does-not-exist'
+            url: 'http://example.com/does-not-exist',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-3'
-        }
+          name: 'url-test-file-3',
+        },
       })
       expect(response.statusCode).to.equal(422) // unprocessable
       expect(body).to.equal(
@@ -292,11 +290,11 @@ describe('LinkedFiles', function() {
         json: {
           provider: 'url',
           data: {
-            url: '!^$%'
+            url: '!^$%',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-4'
-        }
+          name: 'url-test-file-4',
+        },
       }))
       expect(response.statusCode).to.equal(422) // unprocessable
       expect(body).to.equal(
@@ -309,11 +307,11 @@ describe('LinkedFiles', function() {
         json: {
           provider: 'url',
           data: {
-            url: 'ftp://localhost'
+            url: 'ftp://localhost',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-5'
-        }
+          name: 'url-test-file-5',
+        },
       }))
       expect(response.statusCode).to.equal(422) // unprocessable
       expect(body).to.equal(
@@ -321,17 +319,17 @@ describe('LinkedFiles', function() {
       )
     })
 
-    it('should accept a URL withuot a leading http://, and add it', async function() {
+    it('should accept a URL withuot a leading http://, and add it', async function () {
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
         json: {
           provider: 'url',
           data: {
-            url: 'example.com/foo'
+            url: 'example.com/foo',
           },
           parent_folder_id: projectOneRootFolderId,
-          name: 'url-test-file-6'
-        }
+          name: 'url-test-file-6',
+        },
       })
       expect(response.statusCode).to.equal(200)
 
@@ -343,7 +341,7 @@ describe('LinkedFiles', function() {
       )
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
-        url: 'http://example.com/foo'
+        url: 'http://example.com/foo',
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -357,22 +355,22 @@ describe('LinkedFiles', function() {
   // TODO: Add test for asking for host that return ENOTFOUND
   // (This will probably end up handled by the proxy)
 
-  describe('creating a linked output file', function() {
-    beforeEach(async function() {
+  describe('creating a linked output file', function () {
+    beforeEach(async function () {
       projectOneId = await owner.createProject('output-test-one', {
-        template: 'blank'
+        template: 'blank',
       })
       projectOne = await owner.getProject(projectOneId)
 
       projectOneRootFolderId = projectOne.rootFolder[0]._id.toString()
       projectTwoId = await owner.createProject('output-test-two', {
-        template: 'blank'
+        template: 'blank',
       })
       projectTwo = await owner.getProject(projectTwoId)
       projectTwoRootFolderId = projectTwo.rootFolder[0]._id.toString()
     })
 
-    it('should import the project.pdf file from the source project and refresh it', async function() {
+    it('should import the project.pdf file from the source project and refresh it', async function () {
       // import the file
       let { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file`,
@@ -383,9 +381,9 @@ describe('LinkedFiles', function() {
           data: {
             source_project_id: projectTwoId,
             source_output_file_path: 'project.pdf',
-            build_id: '1234-abcd'
-          }
-        }
+            build_id: '1234-abcd',
+          },
+        },
       })
       expect(response.statusCode).to.equal(200)
       const existingFileId = body.new_file_id
@@ -398,14 +396,14 @@ describe('LinkedFiles', function() {
         provider: 'project_output_file',
         source_project_id: projectTwoId,
         source_output_file_path: 'project.pdf',
-        build_id: '1234-abcd'
+        build_id: '1234-abcd',
       })
       expect(firstFile.name).to.equal('test.pdf')
 
       // refresh the file
       ;({ response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file/${existingFileId}/refresh`,
-        json: true
+        json: true,
       }))
       expect(response.statusCode).to.equal(200)
       const refreshedFileId = body.new_file_id
@@ -419,10 +417,10 @@ describe('LinkedFiles', function() {
     })
   })
 
-  describe('with a linked project_output_file from a v1 project that has not been imported', function() {
-    beforeEach(async function() {
+  describe('with a linked project_output_file from a v1 project that has not been imported', function () {
+    beforeEach(async function () {
       projectOneId = await owner.createProject('output-v1-test-one', {
-        template: 'blank'
+        template: 'blank',
       })
 
       projectOne = await owner.getProject(projectOneId)
@@ -431,20 +429,20 @@ describe('LinkedFiles', function() {
         linkedFileData: {
           provider: 'project_output_file',
           v1_source_doc_id: 9999999, // We won't find this id in the database
-          source_output_file_path: 'project.pdf'
+          source_output_file_path: 'project.pdf',
         },
         _id: 'abcdef',
         rev: 0,
         created: new Date(),
-        name: 'whatever.pdf'
+        name: 'whatever.pdf',
       })
       await owner.saveProject(projectOne)
     })
 
-    it('should refuse to refresh', async function() {
+    it('should refuse to refresh', async function () {
       const { response, body } = await owner.doRequest('post', {
         url: `/project/${projectOneId}/linked_file/abcdef/refresh`,
-        json: true
+        json: true,
       })
       expect(response.statusCode).to.equal(409)
       expect(body).to.equal(

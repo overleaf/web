@@ -1,7 +1,10 @@
 extends ../../../../../app/views/layout
 
+block append meta
+	meta(name="ol-passwordStrengthOptions" data-type="json" content=settings.passwordStrengthOptions)
+
 block content
-	.content.content-alt
+	main.content.content-alt
 		.container
 			.row
 				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
@@ -23,10 +26,11 @@ block content
 								type="hidden",
 								name="passwordResetToken",
 								value=token
+								ng-non-bindable
 							)
 							.alert.alert-danger(ng-show="activationForm.response.error")
 								| #{translate("activation_token_expired")}
-							
+
 							.form-group
 								label(for='email') #{translate("email")}
 								input.form-control(
@@ -35,7 +39,6 @@ block content
 									placeholder="email@example.com"
 									required,
 									ng-model="email",
-									ng-init="email = "+JSON.stringify(email),
 									ng-model-options="{ updateOn: 'blur' }",
 									disabled
 								)
@@ -58,6 +61,3 @@ block content
 								)
 									span(ng-show="!activationForm.inflight") #{translate("activate")}
 									span(ng-show="activationForm.inflight") #{translate("activating")}…
-
-	script(type='text/javascript').
-		window.passwordStrengthOptions = !{StringHelper.stringifyJsonForScript(settings.passwordStrengthOptions || {})}

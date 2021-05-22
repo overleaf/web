@@ -13,12 +13,14 @@
  */
 // This file is shared between the frontend and server code of web, so that
 // filename validation is the same in both implementations.
-// Both copies must be kept in sync:
-//   app/coffee/Features/Project/SafePath.coffee
-//   public/coffee/ide/directives/SafePath.coffee
+// The logic in all copies must be kept in sync:
+//   app/src/Features/Project/SafePath.js
+//   frontend/js/ide/directives/SafePath.js
+//   frontend/js/features/file-tree/util/safe-path.js
 
-const load = function() {
+const load = function () {
   let SafePath
+  // eslint-disable-next-line prefer-regex-literals
   const BADCHAR_RX = new RegExp(
     `\
 [\
@@ -34,6 +36,7 @@ const load = function() {
     'g'
   )
 
+  // eslint-disable-next-line prefer-regex-literals
   const BADFILE_RX = new RegExp(
     `\
 (^\\.$)\
@@ -51,6 +54,7 @@ const load = function() {
   //
   // The list of property names is taken from
   //   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+  // eslint-disable-next-line prefer-regex-literals
   const BLOCKEDFILE_RX = new RegExp(`\
 ^(\
 prototype\
@@ -108,7 +112,7 @@ prototype\
         return false
       }
 
-      for (let element of Array.from(elements)) {
+      for (const element of Array.from(elements)) {
         if (element.length > 0 && !SafePath.isCleanFilename(element)) {
           return false
         }
@@ -124,7 +128,7 @@ prototype\
 
     isAllowedLength(pathname) {
       return pathname.length > 0 && pathname.length <= MAX_PATH
-    }
+    },
   })
 }
 

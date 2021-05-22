@@ -12,17 +12,15 @@
 import App from '../../../base'
 import iconTypeFromName from '../../file-tree/util/iconTypeFromName'
 import fileOperationI18nNames from '../../file-tree/util/fileOperationI18nNames'
-const historyFileEntityController = function($scope, $element, $attrs) {
+const historyFileEntityController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.hasOperation = false
   ctrl.getRenameTooltip = i18nRenamedStr => {
-    let [simplifiedOldPathname, simplifiedPathname] = _getSimplifiedPaths(
+    const [simplifiedOldPathname, simplifiedPathname] = _getSimplifiedPaths(
       ctrl.fileEntity.oldPathname,
       ctrl.fileEntity.pathname
     )
-    return `${
-      fileOperationI18nNames.renamed
-    } <strong>${simplifiedOldPathname}</strong> &rarr; <strong>${simplifiedPathname}</strong>`
+    return `${fileOperationI18nNames.renamed} <strong>${simplifiedOldPathname}</strong> &rarr; <strong>${simplifiedPathname}</strong>`
   }
   ctrl.getFileOperationName = () => {
     if (ctrl.fileEntity.operation === 'edited') {
@@ -39,9 +37,9 @@ const historyFileEntityController = function($scope, $element, $attrs) {
   }
 
   const _getSimplifiedPaths = (path1, path2) => {
-    let path1Parts = path1.split('/')
-    let path2Parts = path2.split('/')
-    let maxIterations = Math.min(path1Parts.length, path2Parts.length) - 1
+    const path1Parts = path1.split('/')
+    const path2Parts = path2.split('/')
+    const maxIterations = Math.min(path1Parts.length, path2Parts.length) - 1
     for (
       var commonPartIndex = 0;
       commonPartIndex < maxIterations;
@@ -56,21 +54,21 @@ const historyFileEntityController = function($scope, $element, $attrs) {
     return [path1Parts.join('/'), path2Parts.join('/')]
   }
 
-  const _handleFolderClick = function() {
+  const _handleFolderClick = function () {
     ctrl.isOpen = !ctrl.isOpen
     ctrl.entityTypeIconClass = _getFolderIcon()
   }
 
   const _handleFileClick = () =>
     ctrl.historyFileTreeController.handleEntityClick(ctrl.fileEntity)
-  var _getFolderIcon = function() {
+  var _getFolderIcon = function () {
     if (ctrl.isOpen) {
       return 'fa-folder-open'
     } else {
       return 'fa-folder'
     }
   }
-  ctrl.$onInit = function() {
+  ctrl.$onInit = function () {
     if (ctrl.fileEntity.type === 'folder') {
       ctrl.isOpen = true
       ctrl.entityTypeIconClass = _getFolderIcon()
@@ -95,11 +93,11 @@ const historyFileEntityController = function($scope, $element, $attrs) {
 
 export default App.component('historyFileEntity', {
   require: {
-    historyFileTreeController: '^historyFileTree'
+    historyFileTreeController: '^historyFileTree',
   },
   bindings: {
-    fileEntity: '<'
+    fileEntity: '<',
   },
   controller: historyFileEntityController,
-  templateUrl: 'historyFileEntityTpl'
+  templateUrl: 'historyFileEntityTpl',
 })

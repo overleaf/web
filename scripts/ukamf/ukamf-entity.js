@@ -8,8 +8,28 @@ class UKAMFEntity {
   }
 
   getSamlConfig() {
+    let hiddenIdP = false
     const idp = this.data.IDPSSODescriptor[0]
+    const idpMetaData =
+      _.get(this.data, [
+        'Extensions',
+        0,
+        'mdattr:EntityAttributes',
+        0,
+        'saml:Attribute',
+      ]) || []
+    idpMetaData.forEach(data => {
+      const value = _.get(data, ['saml:AttributeValue', 0])
+      if (
+        value === 'http://refeds.org/category/hide-from-discovery' ||
+        value === 'https://refeds.org/category/hide-from-discovery'
+      ) {
+        hiddenIdP = true
+      }
+    })
+
     const keys = idp.KeyDescriptor
+
     const signingKey =
       keys.length === 1
         ? keys[0]
@@ -22,7 +42,7 @@ class UKAMFEntity {
       'ds:X509Data',
       0,
       'ds:X509Certificate',
-      0
+      0,
     ])
     if (!cert) {
       throw new Error('no cert')
@@ -42,7 +62,8 @@ class UKAMFEntity {
     return {
       cert,
       entityId,
-      entryPoint
+      entryPoint,
+      hiddenIdP,
     }
   }
 }

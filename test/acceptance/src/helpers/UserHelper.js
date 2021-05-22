@@ -4,10 +4,12 @@ const Settings = require('settings-sharelatex')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
+const moment = require('moment')
 const request = require('request-promise-native')
+const { db } = require('../../../../app/src/infrastructure/mongodb')
 const { ObjectId } = require('mongodb')
 
-let globalUserNum = 1
+let globalUserNum = Settings.test.counterInit
 
 class UserHelper {
   /**
@@ -24,6 +26,16 @@ class UserHelper {
   }
 
   /* sync functions */
+
+  /**
+   * Get auditLog, ignore the login
+   * @return {object[]}
+   */
+  getAuditLogWithoutNoise() {
+    return (this.user.auditLog || []).filter(entry => {
+      return entry.operation !== 'login'
+    })
+  }
 
   /**
    * Generate default email from unique (per instantiation) user number
@@ -45,7 +57,7 @@ class UserHelper {
     return {
       email: this.getDefaultEmail(),
       password: this.getDefaultPassword(),
-      ...userData
+      ...userData,
     }
   }
 
@@ -74,7 +86,7 @@ class UserHelper {
       baseUrl: UserHelper.baseUrl(),
       followRedirect: false,
       jar: this.jar,
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
     })
   }
 
@@ -111,15 +123,12 @@ class UserHelper {
    * Requests csrf token unless already cached in internal state
    */
   async getCsrfToken() {
-    if (this._csrfToken) {
-      return
-    }
     // get csrf token from api and store
     const response = await this.request.get('/dev/csrf')
     this._csrfToken = response.body
     // use csrf token for requests
     this.setRequestDefaults({
-      headers: { 'x-csrf-token': this._csrfToken }
+      headers: { 'x-csrf-token': this._csrfToken },
     })
   }
 
@@ -152,7 +161,7 @@ class UserHelper {
    * @returns {string} baseUrl
    */
   static baseUrl() {
-    return `http://${process.env['HTTP_TEST_HOST'] || 'localhost'}:3000`
+    return `http://${process.env.HTTP_TEST_HOST || 'localhost'}:3000`
   }
 
   /* static async instantiation methods */
@@ -230,7 +239,7 @@ class UserHelper {
     const loginPath = Settings.enableLegacyLogin ? '/login/legacy' : '/login'
     await userHelper.getCsrfToken()
     const response = await userHelper.request.post(loginPath, {
-      json: userData
+      json: userData,
     })
     if (response.statusCode !== 200 || response.body.redir !== '/project') {
       const error = new Error('login failed')
@@ -238,11 +247,12 @@ class UserHelper {
       throw error
     }
     userHelper.user = await UserGetter.promises.getUser({
-      email: userData.email
+      email: userData.email,
     })
     if (!userHelper.user) {
       throw new Error(`user not found for email: ${userData.email}`)
     }
+    await userHelper.getCsrfToken()
 
     return userHelper
   }
@@ -253,7 +263,7 @@ class UserHelper {
    */
   async isLoggedIn() {
     const response = await this.request.get('/user/sessions', {
-      followRedirect: true
+      followRedirect: true,
     })
     return response.request.path === '/user/sessions'
   }
@@ -281,13 +291,119 @@ class UserHelper {
       )
     }
     userHelper.user = await UserGetter.promises.getUser({
-      email: userData.email
+      email: userData.email,
     })
     if (!userHelper.user) {
       throw new Error(`user not found for email: ${userData.email}`)
     }
+    await userHelper.getCsrfToken()
 
     return userHelper
+  }
+
+  async refreshMongoUser() {
+    this.user = await UserGetter.promises.getUser({
+      _id: this.user._id,
+    })
+    return this.user
+  }
+
+  async addEmail(email) {
+    const response = await this.request.post({
+      form: {
+        email,
+      },
+      simple: false,
+      uri: '/user/emails',
+    })
+    expect(response.statusCode).to.equal(204)
+  }
+
+  async addEmailAndConfirm(userId, email) {
+    await this.addEmail(email)
+    await this.confirmEmail(userId, email)
+  }
+
+  async changeConfirmationDate(userId, email, date) {
+    const query = {
+      _id: userId,
+      'emails.email': email,
+    }
+    const update = {
+      $set: {
+        'emails.$.confirmedAt': date,
+        'emails.$.reconfirmedAt': date,
+      },
+    }
+    await UserUpdater.promises.updateUser(query, update)
+  }
+
+  async changeConfirmedToNotificationPeriod(
+    userId,
+    email,
+    maxConfirmationMonths
+  ) {
+    // set a user's confirmation date so that
+    // it is within the notification period to reconfirm
+    // but not older than the last day to reconfirm
+    const notificationDays = Settings.reconfirmNotificationDays
+    if (!notificationDays) return
+
+    const middleOfNotificationPeriod = Math.ceil(notificationDays / 2)
+    // use the middle of the notification rather than the start or end due to
+    // variations in days in months.
+
+    const lastDayToReconfirm = moment().subtract(
+      maxConfirmationMonths,
+      'months'
+    )
+    const notificationsStart = lastDayToReconfirm
+      .add(middleOfNotificationPeriod, 'days')
+      .toDate()
+    await this.changeConfirmationDate(userId, email, notificationsStart)
+  }
+
+  async changeConfirmedToPastReconfirmation(
+    userId,
+    email,
+    maxConfirmationMonths
+  ) {
+    // set a user's confirmation date so that they are past the reconfirmation window
+    const date = moment()
+      .subtract(maxConfirmationMonths, 'months')
+      .subtract(1, 'week')
+      .toDate()
+
+    await this.changeConfirmationDate(userId, email, date)
+  }
+
+  async confirmEmail(userId, email) {
+    let response
+    // UserHelper.createUser does not create a confirmation token
+    response = await this.request.post({
+      form: {
+        email,
+      },
+      simple: false,
+      uri: '/user/emails/resend_confirmation',
+    })
+    expect(response.statusCode).to.equal(200)
+    const tokenData = await db.tokens
+      .find({
+        use: 'email_confirmation',
+        'data.user_id': userId.toString(),
+        'data.email': email,
+        usedAt: { $exists: false },
+      })
+      .next()
+    response = await this.request.post({
+      form: {
+        token: tokenData.token,
+      },
+      simple: false,
+      uri: '/user/emails/confirm',
+    })
+    expect(response.statusCode).to.equal(200)
   }
 }
 

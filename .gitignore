@@ -58,6 +58,11 @@ Gemfile.lock
 docker-shared.yml
 
 config/*.coffee
+!config/settings.defaults.coffee
+!config/settings.webpack.coffee
+config/*.js
+!config/settings.defaults.js
+!config/settings.webpack.js
 
 modules/**/Makefile
 
@@ -66,3 +71,6 @@ modules/**/Makefile
 
 # via dev-environment
 .npmrc
+
+# Intellij
+.idea

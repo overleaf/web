@@ -12,8 +12,8 @@
  */
 import HistoryV2Manager from '../../../../frontend/js/ide/history/HistoryV2Manager'
 
-export default describe('HistoryV2Manager', function() {
-  beforeEach(function(done) {
+export default describe('HistoryV2Manager', function () {
+  beforeEach(function (done) {
     this.defaultHistoryScope = {
       isV2: true,
       updates: [],
@@ -28,20 +28,20 @@ export default describe('HistoryV2Manager', function() {
         pathname: null,
         range: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         hoveredRange: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         diff: null,
         files: [],
-        file: null
+        file: null,
       },
       error: null,
       showOnlyLabels: false,
       labels: null,
-      loadingFileTree: true
+      loadingFileTree: true,
     }
 
     this.sampleUpdates = [
@@ -55,11 +55,11 @@ export default describe('HistoryV2Manager', function() {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021278346,
-          end_ts: 1544021278346
+          end_ts: 1544021278346,
         },
         labels: [
           {
@@ -67,18 +67,18 @@ export default describe('HistoryV2Manager', function() {
             comment: 'My first label',
             version: 5,
             user_id: '5b57299087712202fb599ab4',
-            created_at: '2018-12-05T15:00:50.688Z'
-          }
+            created_at: '2018-12-05T15:00:50.688Z',
+          },
         ],
         pathnames: [],
         project_ops: [
           {
             add: {
-              pathname: 'chapters/chapter1.tex'
+              pathname: 'chapters/chapter1.tex',
             },
-            atV: 4
-          }
-        ]
+            atV: 4,
+          },
+        ],
       },
       {
         fromV: 3,
@@ -90,15 +90,15 @@ export default describe('HistoryV2Manager', function() {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021262622,
-          end_ts: 1544021262622
+          end_ts: 1544021262622,
         },
         labels: [],
         pathnames: ['main.tex'],
-        project_ops: []
+        project_ops: [],
       },
       {
         fromV: 0,
@@ -110,51 +110,52 @@ export default describe('HistoryV2Manager', function() {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021213540,
-          end_ts: 1544021213618
+          end_ts: 1544021213618,
         },
         labels: [],
         pathnames: [],
         project_ops: [
           {
             add: {
-              pathname: 'universe.jpg'
+              pathname: 'universe.jpg',
             },
-            atV: 2
+            atV: 2,
           },
           {
             add: {
-              pathname: 'references.bib'
+              pathname: 'references.bib',
             },
-            atV: 1
+            atV: 1,
           },
           {
             add: {
-              pathname: 'main.tex'
+              pathname: 'main.tex',
             },
-            atV: 0
-          }
-        ]
-      }
+            atV: 0,
+          },
+        ],
+      },
     ]
 
     inject(($q, $http, $filter, $rootScope) => {
       this.$scope = $rootScope.$new()
       this.$scope.project = {
         features: {
-          versioning: true
-        }
+          versioning: true,
+        },
       }
       this.$scope.user = {
-        isAdmin: false
+        isAdmin: false,
       }
       this.ide = {
+        globalEditorWatchdogManager: { attachToEditor() {} },
         $q: $q,
         $http: $http,
-        $filter: $filter
+        $filter: $filter,
       }
       this.localStorage = sinon.stub().returns(null)
       this.historyManager = new HistoryV2Manager(
@@ -166,31 +167,35 @@ export default describe('HistoryV2Manager', function() {
     })
   })
 
-  it('should setup the history scope on initialization', function() {
+  it('should setup the history scope on initialization', function () {
     expect(this.$scope.history).to.deep.equal(this.defaultHistoryScope)
   })
 
-  it('should keep history updates after performing a soft reset', function() {
-    let historyScopeWithUpdates = Object.assign({}, this.defaultHistoryScope, {
-      updates: this.sampleUpdates
-    })
+  it('should keep history updates after performing a soft reset', function () {
+    const historyScopeWithUpdates = Object.assign(
+      {},
+      this.defaultHistoryScope,
+      {
+        updates: this.sampleUpdates,
+      }
+    )
     this.$scope.history.updates = this.sampleUpdates
     this.historyManager.softReset()
     expect(this.$scope.history).to.deep.equal(historyScopeWithUpdates)
   })
 
-  it('should discard history updates after performing a hard reset', function() {
+  it('should discard history updates after performing a hard reset', function () {
     this.$scope.history.updates = this.sampleUpdates
     this.historyManager.hardReset()
     expect(this.$scope.history).to.deep.equal(this.defaultHistoryScope)
   })
 
-  it('should setup history with full access to the feature if the project has versioning', function() {
+  it('should setup history with full access to the feature if the project has versioning', function () {
     this.$scope.$digest()
     expect(this.$scope.history.userHasFullFeature).to.equal(true)
   })
 
-  it('should setup history without full access to the feature if the project does not have versioning', function() {
+  it('should setup history without full access to the feature if the project does not have versioning', function () {
     this.$scope.project.features.versioning = false
     this.historyManager = new HistoryV2Manager(
       this.ide,
@@ -201,7 +206,7 @@ export default describe('HistoryV2Manager', function() {
     expect(this.$scope.history.userHasFullFeature).to.equal(false)
   })
 
-  it('should setup history with full access to the feature for admin users even if the project does not have versioning', function() {
+  it('should setup history with full access to the feature for admin users even if the project does not have versioning', function () {
     this.$scope.project.features.versioning = false
     this.$scope.user.isAdmin = true
     this.historyManager = new HistoryV2Manager(
@@ -213,40 +218,40 @@ export default describe('HistoryV2Manager', function() {
     expect(this.$scope.history.userHasFullFeature).to.equal(true)
   })
 
-  describe('autoSelectFile', function() {
-    describe('for compare mode', function() {
-      beforeEach(function() {
+  describe('autoSelectFile', function () {
+    describe('for compare mode', function () {
+      beforeEach(function () {
         this.mockedFilesList = [
           {
-            pathname: 'main.tex'
+            pathname: 'main.tex',
           },
           {
-            pathname: 'references.bib'
+            pathname: 'references.bib',
           },
           {
-            pathname: 'universe.jpg'
+            pathname: 'universe.jpg',
           },
           {
-            pathname: 'chapters/chapter2.tex'
+            pathname: 'chapters/chapter2.tex',
           },
           {
             pathname: 'chapters/draft.tex',
             operation: 'removed',
-            deletedAtV: 47
+            deletedAtV: 47,
           },
           {
             pathname: 'chapters/chapter3.tex',
-            operation: 'added'
+            operation: 'added',
           },
           {
             pathname: 'chapters/chapter1.tex',
-            operation: 'edited'
+            operation: 'edited',
           },
           {
             pathname: 'chapters/foo.tex',
             oldPathname: 'chapters/bar.tex',
-            operation: 'renamed'
-          }
+            operation: 'renamed',
+          },
         ]
         this.mockedMainTex = this.mockedFilesList[0]
         this.mockedReferencesFile = this.mockedFilesList[1]
@@ -259,8 +264,8 @@ export default describe('HistoryV2Manager', function() {
         this.$scope.history.selection.files = this.mockedFilesList
       })
 
-      describe('with a previously selected file', function() {
-        it('should prefer the previously selected file if it is available and has operations', function() {
+      describe('with a previously selected file', function () {
+        it('should prefer the previously selected file if it is available and has operations', function () {
           this.historyManager._previouslySelectedPathname = this.mockedAddedFile.pathname
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
@@ -268,13 +273,13 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should prefer a file with ops if the previously selected file is available but has no operations', function() {
+        it('should prefer a file with ops if the previously selected file is available but has no operations', function () {
           this.historyManager._previouslySelectedPathname = this.mockedReferencesFile.pathname
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.operation).to.exist
         })
 
-        it('should ignore the previously selected file if it is not available', function() {
+        it('should ignore the previously selected file if it is not available', function () {
           this.historyManager._previouslySelectedPathname = 'non/existent.file'
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.not.equal(
@@ -283,15 +288,15 @@ export default describe('HistoryV2Manager', function() {
         })
       })
 
-      describe('without a previously selected file, with a list of files containing operations', function() {
-        it('should prefer edited files', function() {
+      describe('without a previously selected file, with a list of files containing operations', function () {
+        it('should prefer edited files', function () {
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
             this.mockedEditedFile
           )
         })
 
-        it('should prefer added files if no edited files are present', function() {
+        it('should prefer added files if no edited files are present', function () {
           const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
             this.mockedEditedFile
           )
@@ -302,7 +307,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should prefer renamed files if no edited or added files are present', function() {
+        it('should prefer renamed files if no edited or added files are present', function () {
           const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
             this.mockedEditedFile
           )
@@ -317,7 +322,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should prefer removed files if no edited, added or renamed files are present', function() {
+        it('should prefer removed files if no edited, added or renamed files are present', function () {
           const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
             this.mockedEditedFile
           )
@@ -337,21 +342,21 @@ export default describe('HistoryV2Manager', function() {
         })
       })
 
-      describe('without a previously selected file, with a list of files without operations', function() {
-        beforeEach(function() {
+      describe('without a previously selected file, with a list of files without operations', function () {
+        beforeEach(function () {
           this.mockedFilesListWithNoOps = [
             {
-              pathname: 'main.tex'
+              pathname: 'main.tex',
             },
             {
-              pathname: 'references.bib'
+              pathname: 'references.bib',
             },
             {
-              pathname: 'other.tex'
+              pathname: 'other.tex',
             },
             {
-              pathname: 'universe.jpg'
-            }
+              pathname: 'universe.jpg',
+            },
           ]
           this.mockedMainTex = this.mockedFilesListWithNoOps[0]
           this.mockedReferencesFile = this.mockedFilesListWithNoOps[1]
@@ -360,14 +365,14 @@ export default describe('HistoryV2Manager', function() {
           this.$scope.history.selection.files = this.mockedFilesListWithNoOps
         })
 
-        it('should prefer main.tex if it exists', function() {
+        it('should prefer main.tex if it exists', function () {
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
             this.mockedMainTex
           )
         })
 
-        it('should prefer another tex file if main.tex does not exist', function() {
+        it('should prefer another tex file if main.tex does not exist', function () {
           const indexOfMainTex = this.$scope.history.selection.files.indexOf(
             this.mockedMainTex
           )
@@ -378,7 +383,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should pick the first available file if no tex files are available', function() {
+        it('should pick the first available file if no tex files are available', function () {
           const indexOfMainTex = this.$scope.history.selection.files.indexOf(
             this.mockedMainTex
           )
@@ -395,8 +400,8 @@ export default describe('HistoryV2Manager', function() {
       })
     })
 
-    describe('for point-in-time mode', function() {
-      beforeEach(function() {
+    describe('for point-in-time mode', function () {
+      beforeEach(function () {
         this.$scope.history.viewMode = 'point_in_time'
         this.sampleUpdates[0] = {
           fromV: 4,
@@ -408,27 +413,27 @@ export default describe('HistoryV2Manager', function() {
                 last_name: '',
                 email: 'john.doe@domain.tld',
                 id: '5b57299087712202fb599ab4',
-                hue: 200
-              }
+                hue: 200,
+              },
             ],
             start_ts: 1544021278346,
-            end_ts: 1544021278346
+            end_ts: 1544021278346,
           },
           pathnames: ['main.tex'],
           project_ops: [
             {
               add: {
-                pathname: 'chapters/chapter1.tex'
+                pathname: 'chapters/chapter1.tex',
               },
-              atV: 4
+              atV: 4,
             },
             {
               rename: {
                 pathname: 'foo.tex',
-                newPathname: 'bar.tex'
-              }
-            }
-          ]
+                newPathname: 'bar.tex',
+              },
+            },
+          ],
         }
         this.sampleUpdateEditedFile = this.sampleUpdates[0].pathnames[0]
         this.sampleUpdateAddedFile = this.sampleUpdates[0].project_ops[0].add.pathname
@@ -436,39 +441,39 @@ export default describe('HistoryV2Manager', function() {
         this.$scope.history.updates = this.sampleUpdates
         this.$scope.history.selection.range = {
           fromV: this.sampleUpdates[0].toV,
-          toV: this.sampleUpdates[0].toV
+          toV: this.sampleUpdates[0].toV,
         }
         this.mockedFilesList = [
           {
-            pathname: 'main.tex'
+            pathname: 'main.tex',
           },
           {
-            pathname: 'references.bib'
+            pathname: 'references.bib',
           },
           {
-            pathname: 'universe.jpg'
+            pathname: 'universe.jpg',
           },
           {
-            pathname: 'chapters/chapter2.tex'
+            pathname: 'chapters/chapter2.tex',
           },
           {
-            pathname: 'chapters/draft.tex'
+            pathname: 'chapters/draft.tex',
           },
           {
-            pathname: 'chapters/chapter3.tex'
+            pathname: 'chapters/chapter3.tex',
           },
           {
-            pathname: 'chapters/chapter1.tex'
+            pathname: 'chapters/chapter1.tex',
           },
           {
-            pathname: 'bar.tex'
-          }
+            pathname: 'bar.tex',
+          },
         ]
         this.$scope.history.selection.files = this.mockedFilesList
       })
 
-      describe('with a previously selected file', function() {
-        it('should prefer the previously selected file if it is available and has operations', function() {
+      describe('with a previously selected file', function () {
+        it('should prefer the previously selected file if it is available and has operations', function () {
           this.historyManager._previouslySelectedPathname = 'main.tex'
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.equal(
@@ -476,7 +481,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should prefer a file with ops if the previously selected file is available but has no operations', function() {
+        it('should prefer a file with ops if the previously selected file is available but has no operations', function () {
           this.historyManager._previouslySelectedPathname = 'main.tex'
           this.sampleUpdates[0].pathnames = []
           this.historyManager.autoSelectFile()
@@ -485,7 +490,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should ignore the previously selected file if it is not available', function() {
+        it('should ignore the previously selected file if it is not available', function () {
           this.historyManager._previouslySelectedPathname = 'non/existent.file'
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.not.equal(
@@ -494,15 +499,15 @@ export default describe('HistoryV2Manager', function() {
         })
       })
 
-      describe('without a previously selected file, with a list of files containing operations', function() {
-        it('should prefer edited files', function() {
+      describe('without a previously selected file, with a list of files containing operations', function () {
+        it('should prefer edited files', function () {
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.equal(
             this.sampleUpdateEditedFile
           )
         })
 
-        it('should prefer added files if no edited files are present', function() {
+        it('should prefer added files if no edited files are present', function () {
           this.sampleUpdates[0].pathnames = []
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.equal(
@@ -510,7 +515,7 @@ export default describe('HistoryV2Manager', function() {
           )
         })
 
-        it('should prefer renamed files if no edited or added files are present', function() {
+        it('should prefer renamed files if no edited or added files are present', function () {
           this.sampleUpdates[0].pathnames = []
           this.sampleUpdates[0].project_ops.shift()
           this.historyManager.autoSelectFile()
@@ -520,22 +525,22 @@ export default describe('HistoryV2Manager', function() {
         })
       })
 
-      describe('without a previously selected file, with a list of files without operations', function() {
-        beforeEach(function() {
+      describe('without a previously selected file, with a list of files without operations', function () {
+        beforeEach(function () {
           this.sampleUpdates[0].pathnames = []
           this.sampleUpdates[0].project_ops = []
           this.mockedMainTex = this.mockedFilesList[0]
           this.mockedReferencesFile = this.mockedFilesList[1]
         })
 
-        it('should prefer main.tex if it exists', function() {
+        it('should prefer main.tex if it exists', function () {
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.pathname).to.equal(
             this.mockedMainTex.pathname
           )
         })
 
-        it('should prefer another tex file if main.tex does not exist', function() {
+        it('should prefer another tex file if main.tex does not exist', function () {
           const indexOfMainTex = this.$scope.history.selection.files.indexOf(
             this.mockedMainTex
           )
@@ -546,27 +551,27 @@ export default describe('HistoryV2Manager', function() {
       })
     })
 
-    describe('_loadLabels', function() {
-      it('should return labels list as is if there is a label for the last version', function() {
+    describe('_loadLabels', function () {
+      it('should return labels list as is if there is a label for the last version', function () {
         const labels = [
           {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '2',
             version: 2,
             comment: 'bar',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '3',
             version: 3,
             comment: 'baz',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 3
 
@@ -575,26 +580,26 @@ export default describe('HistoryV2Manager', function() {
         expect(labelsResult).to.have.members(labels)
       })
 
-      it('should return a labels list with a pseudo current state label if there is no label for the last version', function() {
+      it('should return a labels list with a pseudo current state label if there is no label for the last version', function () {
         const labels = [
           {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '2',
             version: 2,
             comment: 'bar',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '3',
             version: 3,
             comment: 'baz',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 5
 
@@ -605,14 +610,14 @@ export default describe('HistoryV2Manager', function() {
         expect(labelsResult[0].version).to.equal(5)
       })
 
-      it('should keep pseudo label when deleting label', function() {
+      it('should keep pseudo label when deleting label', function () {
         this.historyManager.$scope.history.labels = [
           {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 5
 

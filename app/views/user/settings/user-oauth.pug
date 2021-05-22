@@ -1,8 +1,3 @@
-block head-scripts
-	script(type='text/javascript').
-		window.oauthProviders = !{StringHelper.stringifyJsonForScript(oauthProviders)}
-		window.thirdPartyIds = !{StringHelper.stringifyJsonForScript(thirdPartyIds)}
-
 mixin providerList()
 	ul.list-like-table
 		li(ng-repeat="(key, provider) in providers" ng-if="!provider.hideWhenNotLinked || (provider.hideWhenNotLinked && thirdPartyIds[key])")
@@ -21,7 +16,7 @@ mixin providerList()
 						span(ng-if="providers[key].ui.isProcessing") #{translate("processing")}
 					//- Link
 					a.btn.btn-primary.text-capitalize(
-						href="{{provider.linkPath}}?intent=link"
+						ng-href="{{provider.linkPath}}?intent=link"
 						ng-if="!thirdPartyIds[key] && !provider.hideWhenNotLinked"
 					) #{translate("link")}
 			//- unlink error

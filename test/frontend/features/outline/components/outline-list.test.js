@@ -3,21 +3,21 @@ import { screen, render } from '@testing-library/react'
 
 import OutlineList from '../../../../../frontend/js/features/outline/components/outline-list'
 
-describe('<OutlineList />', function() {
+describe('<OutlineList />', function () {
   const jumpToLine = () => {}
 
-  it('renders items', function() {
+  it('renders items', function () {
     const outline = [
       {
         title: 'Section 1',
         line: 1,
-        level: 10
+        level: 10,
       },
       {
         title: 'Section 2',
         line: 2,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} isRoot jumpToLine={jumpToLine} />)
 
@@ -25,26 +25,26 @@ describe('<OutlineList />', function() {
     screen.getByRole('treeitem', { name: 'Section 2' })
   })
 
-  it('renders as root', function() {
+  it('renders as root', function () {
     const outline = [
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} isRoot jumpToLine={jumpToLine} />)
 
     screen.getByRole('tree')
   })
 
-  it('renders as non-root', function() {
+  it('renders as non-root', function () {
     const outline = [
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} jumpToLine={jumpToLine} />)
 

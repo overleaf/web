@@ -13,7 +13,7 @@
  */
 let EditorRealTimeController
 const Settings = require('settings-sharelatex')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('pubsub')
 const os = require('os')
@@ -37,15 +37,15 @@ module.exports = EditorRealTimeController = {
       room_id,
       message,
       payload,
-      _id: message_id
+      _id: message_id,
     })
     Metrics.summary('redis.publish.editor-events', blob.length, {
-      status: message
+      status: message,
     })
     return rclient.publish(channel, blob)
   },
 
   emitToAll(message, ...payload) {
     return this.emitToRoom('all', message, ...Array.from(payload))
-  }
+  },
 }

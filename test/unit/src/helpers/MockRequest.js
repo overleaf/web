@@ -9,6 +9,7 @@ class MockRequest {
   static initClass() {
     this.prototype.session = { destroy() {} }
 
+    this.prototype.ip = '42.42.42.42'
     this.prototype.headers = {}
     this.prototype.params = {}
     this.prototype.query = {}
@@ -17,12 +18,13 @@ class MockRequest {
     this.prototype.i18n = {
       translate(str) {
         return str
-      }
+      },
     }
     this.prototype.route = { path: '' }
     this.prototype.accepts = () => {}
     this.prototype.setHeader = () => {}
   }
+
   param(param) {
     return this.params[param]
   }

@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -11,8 +11,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
@@ -24,8 +22,8 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const EntityConfigs = require('../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs')
 
-describe('UserMembershipHandler', function() {
-  beforeEach(function() {
+describe('UserMembershipHandler', function () {
+  beforeEach(function () {
     this.user = { _id: ObjectId() }
     this.newUser = { _id: ObjectId(), email: 'new-user-email@foo.bar' }
     this.fakeEntityId = ObjectId()
@@ -37,69 +35,61 @@ describe('UserMembershipHandler', function() {
       manager_ids: [ObjectId()],
       invited_emails: ['mock-email-1@foo.com'],
       teamInvites: [{ email: 'mock-email-1@bar.com' }],
-      update: sinon.stub().yields(null)
+      update: sinon.stub().yields(null),
     }
     this.institution = {
       _id: 'mock-institution-id',
       v1Id: 123,
       managerIds: [ObjectId(), ObjectId(), ObjectId()],
-      update: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null),
     }
     this.publisher = {
       _id: 'mock-publisher-id',
       slug: 'slug',
       managerIds: [ObjectId(), ObjectId()],
-      update: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null),
     }
 
     this.UserMembershipViewModel = {
       buildAsync: sinon.stub().yields(null, { _id: 'mock-member-id' }),
-      build: sinon.stub().returns(this.newUser)
+      build: sinon.stub().returns(this.newUser),
     }
     this.UserGetter = {
-      getUserByAnyEmail: sinon.stub().yields(null, this.newUser)
+      getUserByAnyEmail: sinon.stub().yields(null, this.newUser),
     }
     this.Institution = { findOne: sinon.stub().yields(null, this.institution) }
     this.Subscription = {
-      findOne: sinon.stub().yields(null, this.subscription)
+      findOne: sinon.stub().yields(null, this.subscription),
     }
     this.Publisher = {
       findOne: sinon.stub().yields(null, this.publisher),
-      create: sinon.stub().yields(null, this.publisher)
+      create: sinon.stub().yields(null, this.publisher),
     }
     return (this.UserMembershipHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,
-        '../Errors/Errors': Errors,
         '../../models/Institution': {
-          Institution: this.Institution
+          Institution: this.Institution,
         },
         '../../models/Subscription': {
-          Subscription: this.Subscription
+          Subscription: this.Subscription,
         },
         '../../models/Publisher': {
-          Publisher: this.Publisher
+          Publisher: this.Publisher,
         },
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
+      },
     }))
   })
 
-  describe('getEntityWithoutAuthorizationCheck', function() {
-    it('get publisher', function(done) {
+  describe('getEntityWithoutAuthorizationCheck', function () {
+    it('get publisher', function (done) {
       return this.UserMembershipHandler.getEntityWithoutAuthorizationCheck(
         this.fakeEntityId,
         EntityConfigs.publisher,
         (error, subscription) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           const expectedQuery = { slug: this.fakeEntityId }
           assertCalledWith(this.Publisher.findOne, expectedQuery)
           expect(subscription).to.equal(this.publisher)
@@ -109,9 +99,9 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  describe('getUsers', function() {
-    describe('group', function() {
-      it('build view model for all users', function(done) {
+  describe('getUsers', function () {
+    describe('group', function () {
+      it('build view model for all users', function (done) {
         return this.UserMembershipHandler.getUsers(
           this.subscription,
           EntityConfigs.group,
@@ -129,8 +119,8 @@ describe('UserMembershipHandler', function() {
       })
     })
 
-    describe('group mamagers', function() {
-      it('build view model for all managers', function(done) {
+    describe('group mamagers', function () {
+      it('build view model for all managers', function (done) {
         return this.UserMembershipHandler.getUsers(
           this.subscription,
           EntityConfigs.groupManagers,
@@ -145,8 +135,8 @@ describe('UserMembershipHandler', function() {
       })
     })
 
-    describe('institution', function() {
-      it('build view model for all managers', function(done) {
+    describe('institution', function () {
+      it('build view model for all managers', function (done) {
         return this.UserMembershipHandler.getUsers(
           this.institution,
           EntityConfigs.institution,
@@ -162,13 +152,13 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  describe('createEntity', function() {
-    it('creates publisher', function(done) {
+  describe('createEntity', function () {
+    it('creates publisher', function (done) {
       return this.UserMembershipHandler.createEntity(
         this.fakeEntityId,
         EntityConfigs.publisher,
         (error, publisher) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           assertCalledWith(this.Publisher.create, { slug: this.fakeEntityId })
           return done()
         }
@@ -176,13 +166,13 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  describe('addUser', function() {
-    beforeEach(function() {
+  describe('addUser', function () {
+    beforeEach(function () {
       return (this.email = this.newUser.email)
     })
 
-    describe('institution', function() {
-      it('get user', function(done) {
+    describe('institution', function () {
+      it('get user', function (done) {
         return this.UserMembershipHandler.addUser(
           this.institution,
           EntityConfigs.institution,
@@ -194,7 +184,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      it('handle user not found', function(done) {
+      it('handle user not found', function (done) {
         this.UserGetter.getUserByAnyEmail.yields(null, null)
         return this.UserMembershipHandler.addUser(
           this.institution,
@@ -208,7 +198,7 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      it('handle user already added', function(done) {
+      it('handle user already added', function (done) {
         this.institution.managerIds.push(this.newUser._id)
         return this.UserMembershipHandler.addUser(
           this.institution,
@@ -222,21 +212,21 @@ describe('UserMembershipHandler', function() {
         )
       })
 
-      it('add user to institution', function(done) {
+      it('add user to institution', function (done) {
         return this.UserMembershipHandler.addUser(
           this.institution,
           EntityConfigs.institution,
           this.email,
           (error, user) => {
-            assertCalledWith(this.institution.update, {
-              $addToSet: { managerIds: this.newUser._id }
+            assertCalledWith(this.institution.updateOne, {
+              $addToSet: { managerIds: this.newUser._id },
             })
             return done()
           }
         )
       })
 
-      it('return user view', function(done) {
+      it('return user view', function (done) {
         return this.UserMembershipHandler.addUser(
           this.institution,
           EntityConfigs.institution,
@@ -250,24 +240,24 @@ describe('UserMembershipHandler', function() {
     })
   })
 
-  describe('removeUser', function() {
-    describe('institution', function() {
-      it('remove user from institution', function(done) {
+  describe('removeUser', function () {
+    describe('institution', function () {
+      it('remove user from institution', function (done) {
         return this.UserMembershipHandler.removeUser(
           this.institution,
           EntityConfigs.institution,
           this.newUser._id,
           (error, user) => {
-            const { lastCall } = this.institution.update
-            assertCalledWith(this.institution.update, {
-              $pull: { managerIds: this.newUser._id }
+            const { lastCall } = this.institution.updateOne
+            assertCalledWith(this.institution.updateOne, {
+              $pull: { managerIds: this.newUser._id },
             })
             return done()
           }
         )
       })
 
-      it('handle admin', function(done) {
+      it('handle admin', function (done) {
         this.subscription.admin_id = this.newUser._id
         return this.UserMembershipHandler.removeUser(
           this.subscription,

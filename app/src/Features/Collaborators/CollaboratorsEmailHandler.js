@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -18,12 +18,10 @@ const Settings = require('settings-sharelatex')
 module.exports = CollaboratorsEmailHandler = {
   _buildInviteUrl(project, invite) {
     return (
-      `${Settings.siteUrl}/project/${project._id}/invite/token/${
-        invite.token
-      }?` +
+      `${Settings.siteUrl}/project/${project._id}/invite/token/${invite.token}?` +
       [
         `project_name=${encodeURIComponent(project.name)}`,
-        `user_first_name=${encodeURIComponent(project.owner_ref.first_name)}`
+        `user_first_name=${encodeURIComponent(project.owner_ref.first_name)}`,
       ].join('&')
     )
   },
@@ -32,18 +30,18 @@ module.exports = CollaboratorsEmailHandler = {
     return Project.findOne({ _id: project_id })
       .select('name owner_ref')
       .populate('owner_ref')
-      .exec(function(err, project) {
+      .exec(function (err, project) {
         const emailOptions = {
           to: email,
           replyTo: project.owner_ref.email,
           project: {
-            name: project.name
+            name: project.name,
           },
           inviteUrl: CollaboratorsEmailHandler._buildInviteUrl(project, invite),
           owner: project.owner_ref,
-          sendingUser_id: sendingUser._id
+          sendingUser_id: sendingUser._id,
         }
         return EmailHandler.sendEmail('projectInvite', emailOptions, callback)
       })
-  }
+  },
 }

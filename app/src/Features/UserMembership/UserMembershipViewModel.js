@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -25,7 +25,7 @@ module.exports = UserMembershipViewModel = {
 
   buildAsync(userOrIdOrEmail, callback) {
     if (callback == null) {
-      callback = function(error, viewModel) {}
+      callback = function (error, viewModel) {}
     }
     if (!isObjectIdInstance(userOrIdOrEmail)) {
       // userOrIdOrEmail is a user or an email and can be parsed by #build
@@ -37,18 +37,18 @@ module.exports = UserMembershipViewModel = {
       email: 1,
       first_name: 1,
       last_name: 1,
-      lastLoggedIn: 1
+      lastLoggedIn: 1,
     }
-    return UserGetter.getUser(userId, projection, function(error, user) {
+    return UserGetter.getUser(userId, projection, function (error, user) {
       if (error != null || user == null) {
         return callback(null, buildUserViewModelWithId(userId.toString()))
       }
       return callback(null, buildUserViewModel(user))
     })
-  }
+  },
 }
 
-var buildUserViewModel = function(user, isInvite) {
+var buildUserViewModel = function (user, isInvite) {
   if (isInvite == null) {
     isInvite = false
   }
@@ -58,7 +58,7 @@ var buildUserViewModel = function(user, isInvite) {
     first_name: user.first_name || null,
     last_name: user.last_name || null,
     last_logged_in_at: user.lastLoggedIn || null,
-    invite: isInvite
+    invite: isInvite,
   }
 }
 

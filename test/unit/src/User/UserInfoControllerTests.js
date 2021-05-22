@@ -11,10 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const { assert } = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserInfoController.js'
 const SandboxedModule = require('sandboxed-module')
 const events = require('events')
@@ -22,35 +19,29 @@ const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const { ObjectId } = require('mongodb')
 
-describe('UserInfoController', function() {
-  beforeEach(function() {
+describe('UserInfoController', function () {
+  beforeEach(function () {
     this.UserDeleter = { deleteUser: sinon.stub().callsArgWith(1) }
     this.UserUpdater = { updatePersonalInfo: sinon.stub() }
     this.sanitizer = {
       escape(v) {
         return v
-      }
+      },
     }
     sinon.spy(this.sanitizer, 'escape')
     this.UserGetter = {}
 
     this.UserInfoController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
         './UserDeleter': this.UserDeleter,
-        'logger-sharelatex': {
-          log() {}
-        },
         sanitizer: this.sanitizer,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub()
-        })
-      }
+          getLoggedInUserId: sinon.stub(),
+        }),
+      },
     })
 
     this.req = new MockRequest()
@@ -58,8 +49,8 @@ describe('UserInfoController', function() {
     return (this.next = sinon.stub())
   })
 
-  describe('getLoggedInUsersPersonalInfo', function() {
-    beforeEach(function() {
+  describe('getLoggedInUsersPersonalInfo', function () {
+    beforeEach(function () {
       this.user = { _id: ObjectId() }
       this.req.user = this.user
       this.req.session.user = this.user
@@ -75,16 +66,16 @@ describe('UserInfoController', function() {
       )
     })
 
-    it('should call sendFormattedPersonalInfo', function() {
+    it('should call sendFormattedPersonalInfo', function () {
       return this.UserInfoController.sendFormattedPersonalInfo
         .calledWith(this.user, this.res, this.next)
         .should.equal(true)
     })
   })
 
-  describe('getPersonalInfo', function() {
-    describe('when the user exists with sharelatex id', function() {
-      beforeEach(function() {
+  describe('getPersonalInfo', function () {
+    describe('when the user exists with sharelatex id', function () {
+      beforeEach(function () {
         this.user_id = ObjectId().toString()
         this.user = { _id: ObjectId(this.user_id) }
         this.req.params = { user_id: this.user_id }
@@ -97,7 +88,7 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should look up the user in the database', function() {
+      it('should look up the user in the database', function () {
         return this.UserGetter.getUser
           .calledWith(
             { _id: ObjectId(this.user_id) },
@@ -106,21 +97,21 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function () {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
 
-    describe('when the user exists with overleaf id', function() {
-      beforeEach(function() {
+    describe('when the user exists with overleaf id', function () {
+      beforeEach(function () {
         this.user_id = 12345
         this.user = {
           _id: ObjectId(),
           overleaf: {
-            id: this.user_id
-          }
+            id: this.user_id,
+          },
         }
         this.req.params = { user_id: this.user_id.toString() }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
@@ -132,7 +123,7 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should look up the user in the database', function() {
+      it('should look up the user in the database', function () {
         return this.UserGetter.getUser
           .calledWith(
             { 'overleaf.id': this.user_id },
@@ -141,15 +132,15 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function () {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
 
-    describe('when the user does not exist', function() {
-      beforeEach(function() {
+    describe('when the user does not exist', function () {
+      beforeEach(function () {
         this.user_id = ObjectId().toString()
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
@@ -160,13 +151,13 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should return 404 to the client', function() {
+      it('should return 404 to the client', function () {
         return this.res.statusCode.should.equal(404)
       })
     })
 
-    describe('when the user id is invalid', function() {
-      beforeEach(function() {
+    describe('when the user id is invalid', function () {
+      beforeEach(function () {
         this.user_id = 'invalid'
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
@@ -177,25 +168,25 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should return 400 to the client', function() {
+      it('should return 400 to the client', function () {
         return this.res.statusCode.should.equal(400)
       })
     })
   })
 
-  describe('sendFormattedPersonalInfo', function() {
-    beforeEach(function() {
+  describe('sendFormattedPersonalInfo', function () {
+    beforeEach(function () {
       this.user = {
         _id: ObjectId(),
         first_name: 'Douglas',
         last_name: 'Adams',
-        email: 'doug@sharelatex.com'
+        email: 'doug@sharelatex.com',
       }
       this.formattedInfo = {
         id: this.user._id.toString(),
         first_name: this.user.first_name,
         last_name: this.user.last_name,
-        email: this.user.email
+        email: this.user.email,
       }
       this.UserInfoController.formatPersonalInfo = sinon
         .stub()
@@ -206,19 +197,19 @@ describe('UserInfoController', function() {
       )
     })
 
-    it('should format the user details for the response', function() {
+    it('should format the user details for the response', function () {
       return this.UserInfoController.formatPersonalInfo
         .calledWith(this.user)
         .should.equal(true)
     })
 
-    it('should send the formatted details back to the client', function() {
+    it('should send the formatted details back to the client', function () {
       return this.res.body.should.equal(JSON.stringify(this.formattedInfo))
     })
   })
 
-  describe('formatPersonalInfo', function() {
-    it('should return the correctly formatted data', function() {
+  describe('formatPersonalInfo', function () {
+    it('should return the correctly formatted data', function () {
       this.user = {
         _id: ObjectId(),
         first_name: 'Douglas',
@@ -227,7 +218,7 @@ describe('UserInfoController', function() {
         password: 'should-not-get-included',
         signUpDate: new Date(),
         role: 'student',
-        institution: 'sheffield'
+        institution: 'sheffield',
       }
       return expect(
         this.UserInfoController.formatPersonalInfo(this.user)
@@ -238,7 +229,7 @@ describe('UserInfoController', function() {
         email: this.user.email,
         signUpDate: this.user.signUpDate,
         role: this.user.role,
-        institution: this.user.institution
+        institution: this.user.institution,
       })
     })
   })

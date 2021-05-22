@@ -1,7 +1,6 @@
-import _ from 'lodash'
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -22,11 +21,12 @@ import ShareJsDoc from './ShareJsDoc'
 import RangesTracker from '../review-panel/RangesTracker'
 let Document
 
-export default (Document = (function() {
+export default Document = (function () {
   Document = class Document extends EventEmitter {
     static initClass() {
       this.prototype.MAX_PENDING_OP_SIZE = 64
     }
+
     static getDocument(ide, doc_id) {
       if (!this.openDocs) {
         this.openDocs = {}
@@ -57,7 +57,7 @@ export default (Document = (function() {
 
     static hasUnsavedChanges() {
       const object = this.openDocs || {}
-      for (let doc_id in object) {
+      for (const doc_id in object) {
         const doc = object[doc_id]
         if (doc.hasBufferedOps()) {
           return true
@@ -69,7 +69,7 @@ export default (Document = (function() {
     static flushAll() {
       return (() => {
         const result = []
-        for (let doc_id in this.openDocs) {
+        for (const doc_id in this.openDocs) {
           const doc = this.openDocs[doc_id]
           result.push(doc.flush())
         }
@@ -84,8 +84,8 @@ export default (Document = (function() {
       this.connected = this.ide.socket.socket.connected
       this.joined = false
       this.wantToBeJoined = false
-      this._checkAceConsistency = _.bind(this._checkConsistency, this, this.ace)
-      this._checkCMConsistency = _.bind(this._checkConsistency, this, this.cm)
+      this._checkAceConsistency = () => this._checkConsistency(this.ace)
+      this._checkCMConsistency = () => this._checkConsistency(this.cm)
       this._bindToEditorEvents()
       this._bindToSocketEvents()
     }
@@ -140,21 +140,21 @@ export default (Document = (function() {
     }
 
     _checkConsistency(editor) {
-      return () => {
-        // We've been seeing a lot of errors when I think there shouldn't be
-        // any, which may be related to this check happening before the change is
-        // applied. If we use a timeout, hopefully we can reduce this.
-        return setTimeout(() => {
-          const editorValue = editor != null ? editor.getValue() : undefined
-          const sharejsValue =
-            this.doc != null ? this.doc.getSnapshot() : undefined
-          if (editorValue !== sharejsValue) {
-            return this._onError(
-              new Error('Editor text does not match server text')
-            )
-          }
-        }, 0)
-      }
+      // We've been seeing a lot of errors when I think there shouldn't be
+      // any, which may be related to this check happening before the change is
+      // applied. If we use a timeout, hopefully we can reduce this.
+      return setTimeout(() => {
+        const editorValue = editor != null ? editor.getValue() : undefined
+        const sharejsValue =
+          this.doc != null ? this.doc.getSnapshot() : undefined
+        if (editorValue !== sharejsValue) {
+          return this._onError(
+            new Error('Editor text does not match server text'),
+            {},
+            editorValue
+          )
+        }
+      }, 0)
     }
 
     getSnapshot() {
@@ -200,7 +200,16 @@ export default (Document = (function() {
     _bindToSocketEvents() {
       this._onUpdateAppliedHandler = update => this._onUpdateApplied(update)
       this.ide.socket.on('otUpdateApplied', this._onUpdateAppliedHandler)
-      this._onErrorHandler = (error, update) => this._onError(error, update)
+      this._onErrorHandler = (error, message) => {
+        // 'otUpdateError' are emitted per doc socket.io room, hence we can be
+        //  sure that message.doc_id exists.
+        if (message.doc_id !== this.doc_id) {
+          // This error is for another doc. Do not action it. We could open
+          //  a modal that has the wrong context on it.
+          return
+        }
+        this._onError(error, message)
+      }
       this.ide.socket.on('otUpdateError', this._onErrorHandler)
       this._onDisconnectHandler = error => this._onDisconnect(error)
       return this.ide.socket.on('disconnect', this._onDisconnectHandler)
@@ -232,15 +241,16 @@ export default (Document = (function() {
       )
     }
 
-    leaveAndCleanUp() {
+    leaveAndCleanUp(cb) {
       return this.leave(error => {
-        return this._cleanUp()
+        this._cleanUp()
+        if (cb) cb(error)
       })
     }
 
     join(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.wantToBeJoined = true
       this._cancelLeave()
@@ -256,7 +266,7 @@ export default (Document = (function() {
 
     leave(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.flush() // force an immediate flush when leaving document
       this.wantToBeJoined = false
@@ -329,7 +339,7 @@ export default (Document = (function() {
       if (inflightOp == null && pendingOp == null) {
         // there's nothing going on, this is ok.
         saved = true
-        sl_console.logOnce('[pollSavedStatus] no inflight or pending ops')
+        sl_console.log('[pollSavedStatus] no inflight or pending ops')
       } else if (inflightOp != null && inflightOp === this.oldInflightOp) {
         // The same inflight op has been sitting unacked since we
         // last checked, this is bad.
@@ -352,8 +362,9 @@ export default (Document = (function() {
         // In any other situation, assume the document is unsaved.
         saved = false
         sl_console.log(
-          `[pollSavedStatus] assuming not saved (inflightOp?: ${inflightOp !=
-            null}, pendingOp?: ${pendingOp != null})`
+          `[pollSavedStatus] assuming not saved (inflightOp?: ${
+            inflightOp != null
+          }, pendingOp?: ${pendingOp != null})`
         )
       }
 
@@ -379,7 +390,7 @@ export default (Document = (function() {
         remote_doc_id: update != null ? update.doc : undefined,
         wantToBeJoined: this.wantToBeJoined,
         update,
-        hasDoc: this.doc != null
+        hasDoc: this.doc != null,
       })
 
       if (
@@ -405,7 +416,7 @@ export default (Document = (function() {
         this.doc != null
       ) {
         this.ide.pushEvent('received-update:processing', {
-          update
+          update,
         })
         // FIXME: change this back to processUpdateFromServer when redis fixed
         this.doc.processUpdateFromServerInOrder(update)
@@ -453,7 +464,7 @@ export default (Document = (function() {
     }
 
     _callJoinCallbacks() {
-      for (let callback of Array.from(this._joinCallbacks || [])) {
+      for (const callback of Array.from(this._joinCallbacks || [])) {
         callback()
       }
       return delete this._joinCallbacks
@@ -461,12 +472,12 @@ export default (Document = (function() {
 
     _joinDoc(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       if (this.doc != null) {
         this.ide.pushEvent('joinDoc:existing', {
           doc_id: this.doc_id,
-          version: this.doc.getVersion()
+          version: this.doc.getVersion(),
         })
         return this.ide.socket.emit(
           'joinDoc',
@@ -489,7 +500,7 @@ export default (Document = (function() {
         )
       } else {
         this.ide.pushEvent('joinDoc:new', {
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         })
         return this.ide.socket.emit(
           'joinDoc',
@@ -502,13 +513,14 @@ export default (Document = (function() {
             this.joined = true
             this.ide.pushEvent('joinDoc:inited', {
               doc_id: this.doc_id,
-              version
+              version,
             })
             this.doc = new ShareJsDoc(
               this.doc_id,
               docLines,
               version,
-              this.ide.socket
+              this.ide.socket,
+              this.ide.globalEditorWatchdogManager
             )
             this._decodeRanges(ranges)
             this.ranges = new RangesTracker(
@@ -525,7 +537,7 @@ export default (Document = (function() {
     _decodeRanges(ranges) {
       const decodeFromWebsockets = text => decodeURIComponent(escape(text))
       try {
-        for (let change of Array.from(ranges.changes || [])) {
+        for (const change of Array.from(ranges.changes || [])) {
           if (change.op.i != null) {
             change.op.i = decodeFromWebsockets(change.op.i)
           }
@@ -535,7 +547,7 @@ export default (Document = (function() {
         }
         return (() => {
           const result = []
-          for (let comment of Array.from(ranges.comments || [])) {
+          for (const comment of Array.from(ranges.comments || [])) {
             if (comment.op.c != null) {
               result.push((comment.op.c = decodeFromWebsockets(comment.op.c)))
             } else {
@@ -551,10 +563,10 @@ export default (Document = (function() {
 
     _leaveDoc(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.ide.pushEvent('leaveDoc', {
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
       sl_console.log('[_leaveDoc] Sending leaveDoc request')
       return this.ide.socket.emit('leaveDoc', this.doc_id, error => {
@@ -575,9 +587,7 @@ export default (Document = (function() {
       // if we arrive here from _onError the pending and inflight ops will have been cleared
       if (this.hasBufferedOps()) {
         sl_console.log(
-          `[_cleanUp] Document (${
-            this.doc_id
-          }) has buffered ops, refusing to remove from openDocs`
+          `[_cleanUp] Document (${this.doc_id}) has buffered ops, refusing to remove from openDocs`
         )
         return // return immediately, do not unbind from events
       } else if (Document.openDocs[this.doc_id] === this) {
@@ -610,25 +620,25 @@ export default (Document = (function() {
       this.doc.on('op:sent', op => {
         this.ide.pushEvent('op:sent', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         return this.trigger('op:sent')
       })
       this.doc.on('op:acknowledged', op => {
         this.ide.pushEvent('op:acknowledged', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         this.ide.$scope.$emit('ide:opAcknowledged', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         return this.trigger('op:acknowledged')
       })
       this.doc.on('op:timeout', op => {
         this.ide.pushEvent('op:timeout', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         this.trigger('op:timeout')
         return this._onError(new Error('op timed out'), { op })
@@ -638,7 +648,7 @@ export default (Document = (function() {
           doc_id: this.doc_id,
           inflightOp,
           pendingOp,
-          v: version
+          v: version,
         })
       })
       this.doc.on('change', (ops, oldSnapshot, msg) => {
@@ -653,7 +663,7 @@ export default (Document = (function() {
       })
     }
 
-    _onError(error, meta) {
+    _onError(error, meta, editorContent) {
       if (meta == null) {
         meta = {}
       }
@@ -682,7 +692,7 @@ export default (Document = (function() {
       if (this.doc != null) {
         this.doc.clearInflightAndPendingOps()
       }
-      this.trigger('error', error, meta)
+      this.trigger('error', error, meta, editorContent)
       // The clean up should run after the error is triggered because the error triggers a
       // disconnect. If we run the clean up first, we remove our event handlers and miss
       // the disconnect event, which means we try to leaveDoc when the connection comes back.
@@ -707,7 +717,7 @@ export default (Document = (function() {
         ;({ track_changes_as } = this)
       }
       this.ranges.track_changes = track_changes_as != null
-      for (let op of Array.from(ops)) {
+      for (const op of Array.from(ops)) {
         this.ranges.applyOp(op, { user_id: track_changes_as })
       }
       if (old_id_seed != null) {
@@ -748,7 +758,7 @@ export default (Document = (function() {
   }
   Document.initClass()
   return Document
-})())
+})()
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

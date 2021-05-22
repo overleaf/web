@@ -1,5 +1,3 @@
-/* eslint-disable
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 const envs = [
@@ -15,7 +13,7 @@ const envs = [
   'split',
   'verbatim',
   'quote',
-  'center'
+  'center',
 ]
 
 const envsWithSnippets = [
@@ -27,10 +25,10 @@ const envsWithSnippets = [
   'enumerate',
   'itemize',
   'frame',
-  'thebibliography'
+  'thebibliography',
 ]
 
 export default {
   all: envs.concat(envsWithSnippets),
-  withoutSnippets: envs
+  withoutSnippets: envs,
 }

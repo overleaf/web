@@ -1,12 +1,15 @@
 const COMMAND_LEVELS = {
   book: 10,
   part: 20,
+  addpart: 20,
   chapter: 30,
+  addchap: 30,
   section: 40,
+  addsect: 40,
   subsection: 50,
   subsubsection: 60,
   paragraph: 70,
-  subparagraph: 80
+  subparagraph: 80,
 }
 
 /*
@@ -40,13 +43,14 @@ function matchOutline(content) {
     flatOutline.push({
       line: lineId + 1,
       title: matchDisplayTitle(shortTitle || title),
-      level: COMMAND_LEVELS[command]
+      level: COMMAND_LEVELS[command],
     })
   })
   return flatOutline
 }
 
-const DISPLAY_TITLE_REGEX = new RegExp('([^\\\\]*)\\\\([^{]+){([^}]+)}(.*)')
+const DISPLAY_TITLE_REGEX = /([^\\]*)\\([^{]+){([^}]+)}(.*)/
+const END_OF_TITLE_REGEX = /^([^{}]*?({[^{}]*?}[^{}]*?)*)}/
 /*
  * Attempt to improve the display of the outline title for titles with commands.
  * Either skip the command (for labels) or display the command's content instead
@@ -58,9 +62,17 @@ const DISPLAY_TITLE_REGEX = new RegExp('([^\\\\]*)\\\\([^{]+){([^}]+)}(.*)')
  */
 function matchDisplayTitle(title) {
   const closingBracketPosition = title.indexOf('}')
+
   if (closingBracketPosition < 0) {
     // simple title (no commands)
     return title
+  }
+
+  // if there is anything outside the title def on the line, remove it
+  // before proceeding
+  const titleOnlyMatch = title.match(END_OF_TITLE_REGEX)
+  if (titleOnlyMatch) {
+    title = titleOnlyMatch[1]
   }
 
   const titleMatch = title.match(DISPLAY_TITLE_REGEX)
@@ -82,8 +94,8 @@ function matchDisplayTitle(title) {
 }
 
 function nestOutline(flatOutline) {
-  let parentOutlines = {}
-  let nestedOutlines = []
+  const parentOutlines = {}
+  const nestedOutlines = []
   flatOutline.forEach(outline => {
     const parentOutlineLevels = Object.keys(parentOutlines)
 

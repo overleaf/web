@@ -1,4 +1,4 @@
-include ../../_mixins/saml
+include ../../_mixins/reconfirm_affiliation
 
 mixin aboutInstitutionLink()
 	a(href="/learn/how-to/Institutional_Login") #{translate("find_out_more_about_institution_login")}.
@@ -7,12 +7,31 @@ mixin btnMakePrimaryDisabled(tooltip)
 	div(
 		tooltip=tooltip
 		tooltip-enable="!ui.isMakingRequest"
-		ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail)"
 	)
 		button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 			disabled
 			type="button"
 		) #{translate("make_primary")}
+
+mixin btnRemoveEmail()
+	.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.default")
+		div(
+			tooltip=translate("please_change_primary_to_remove")
+			tooltip-enable="!ui.isMakingRequest"
+			tooltip-placement="left"
+		)
+			button.btn.btn-sm.btn-danger(disabled)
+				i.fa.fa-fw.fa-trash(aria-hidden="true")
+				span.sr-only #{translate("please_change_primary_to_remove")}
+	button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
+		ng-if="!userEmail.default"
+		ng-click="removeUserEmail(userEmail)"
+		ng-disabled="ui.isMakingRequest"
+		tooltip=translate("remove")
+		type="button"
+	)
+		i.fa.fa-fw.fa-trash(aria-hidden="true")
+		span.sr-only #{translate("remove")}
 
 form.row(
 	ng-controller="UserAffiliationsController"
@@ -86,27 +105,22 @@ form.row(
 					td.affiliations-table-inline-actions
 						// Disabled buttons don't work with tooltips, due to pointer-events: none,
 						// so create a wrapper for the tooltip
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
-							+btnMakePrimaryDisabled("Please confirm your email by linking to your institutional account before making it the primary email.")
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
-							+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
+						span(ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail) && !inReconfirmNotificationPeriod(userEmail)")
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_link_before_making_primary"))
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="inReconfirmNotificationPeriod(userEmail)")
+							+btnMakePrimaryDisabled(translate("please_reconfirm_your_affiliation_before_making_this_primary"))
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 							tooltip=translate("make_email_primary_description")
-							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest)"
+							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest) && !inReconfirmNotificationPeriod(userEmail)"
 							ng-click="setDefaultUserEmail(userEmail)"
 							type="button"
 						) #{translate("make_primary")}
 						| &nbsp;
-						button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
-							ng-if="!userEmail.default"
-							ng-click="removeUserEmail(userEmail)"
-							ng-disabled="ui.isMakingRequest"
-							tooltip=translate("remove")
-							type="button"
-						)
-							i.fa.fa-fw.fa-trash(aria-hidden="true")
-							span.sr-only #{translate("remove")}
-				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
+						+btnRemoveEmail()
+				tr.affiliations-table-saml-row(ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
 					td
 					td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
 						p.small(ng-if="userEmail.samlProviderId")
@@ -127,6 +141,23 @@ form.row(
 							type="button"
 						)
 							| #{translate("link_accounts")}
+				tr(
+					class="reconfirm-row"
+					ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
+				)
+					td(colspan="3")
+						+reconfirmedAffiliationNotification()
+				tr(
+					class="reconfirm-row"
+					ng-repeat-end
+				)
+					td(
+						colspan="3"
+						ng-if="userEmail.affiliation && userEmail.affiliation.inReconfirmNotificationPeriod"
+					)
+						div(ng-class="{'alert alert-info': reconfirmationRemoveEmail === userEmail.email}")
+							+reconfirmAffiliationNotification('/user/settings')
+
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)
@@ -238,7 +269,7 @@ form.row(
 								aria-label=translate("close")
 							)
 								span(aria-hidden="true") &times;
-							.small !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
+							.small(ng-non-bindable) !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
 							if institutionLinked.hasEntitlement
 								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
 					if institutionEmailNonCanonical
@@ -255,21 +286,8 @@ form.row(
 									i.fa.fa-exclamation-triangle(aria-hidden="true")
 									| &nbsp;
 									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
-				if institutionLinkedToAnother
-					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
-						td.text-center(aria-live="assertive" colspan="3")
-							button.close(
-								type="button"
-								data-dismiss="modal"
-								ng-click="closeInstitutionNotification('error')"
-								aria-label=translate("close")
-							)
-								span(aria-hidden="true") &times;
-							.small
-								i.fa.fa-exclamation-triangle(aria-hidden="true")
-								| &nbsp;
-								| !{translate("institution_account_tried_to_add_already_registered")}
-				if institutionLinkingError
+
+				if samlError
 					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.linkError")
 						td.text-center(aria-live="assertive" colspan="3")
 							button.close(
@@ -280,8 +298,16 @@ form.row(
 							)
 								span(aria-hidden="true") &times;
 							.small
-								+samlErrorLoggedIn(institutionLinkingError)
-		hr
+								i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+								| &nbsp;#{translate("generic_something_went_wrong")}.
+								br
+								if samlError.translatedMessage
+									span(ng-non-bindable) !{samlError.translatedMessage}
+								else if samlError.message
+									span(ng-non-bindable) #{samlError.message}
+								if samlError.tryAgain
+									br
+									| &nbsp;#{translate("try_again")}.
 
 script(type="text/ng-template", id="affiliationFormTpl")
 	.affiliations-form-group(

@@ -10,12 +10,12 @@ const InstitutionSchema = new Schema({
   managerIds: [{ type: ObjectId, ref: 'User' }],
   metricsEmail: {
     optedOutUserIds: [{ type: ObjectId, ref: 'User' }],
-    lastSent: { type: Date }
-  }
+    lastSent: { type: Date },
+  },
 })
 
 // fetch institution's data from v1 API. Errors are ignored
-InstitutionSchema.method('fetchV1Data', function(callback) {
+InstitutionSchema.method('fetchV1Data', function (callback) {
   const url = `${settings.apis.v1.url}/universities/list/${this.v1Id}`
   request.get(url, (error, response, body) => {
     let parsedBody

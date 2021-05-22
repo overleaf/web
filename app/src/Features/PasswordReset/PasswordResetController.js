@@ -5,6 +5,7 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const UserSessionsManager = require('../User/UserSessionsManager')
 const OError = require('@overleaf/o-error')
+const EmailsHelper = require('../Helpers/EmailHelper')
 const { expressify } = require('../../util/promises')
 
 async function setNewUserPassword(req, res, next) {
@@ -20,7 +21,7 @@ async function setNewUserPassword(req, res, next) {
   // password reset via tokens can be done while logged in, or not
   const auditLog = {
     initiatorId,
-    ip: req.ip
+    ip: req.ip,
   }
 
   try {
@@ -29,7 +30,7 @@ async function setNewUserPassword(req, res, next) {
       password,
       auditLog
     )
-    let { found, reset, userId } = result
+    const { found, reset, userId } = result
     if (!found) return res.sendStatus(404)
     if (!reset) return res.sendStatus(500)
     await UserSessionsManager.promises.revokeAllUserSessions(
@@ -65,7 +66,7 @@ module.exports = {
       endpointName: 'password_reset_rate_limit',
       timeInterval: 60,
       subjectName: req.ip,
-      throttle: 6
+      throttle: 6,
     }
     RateLimiter.addCount(opts, (err, canContinue) => {
       if (err != null) {
@@ -75,26 +76,26 @@ module.exports = {
       }
       if (!canContinue) {
         return res.status(429).send({
-          message: req.i18n.translate('rate_limit_hit_wait')
+          message: req.i18n.translate('rate_limit_hit_wait'),
         })
       }
       PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
         if (err != null) {
           OError.tag(err, 'failed to generate and email password reset token', {
-            email
+            email,
           })
           next(err)
         } else if (status === 'primary') {
           res.status(200).send({
-            message: { text: req.i18n.translate('password_reset_email_sent') }
+            message: { text: req.i18n.translate('password_reset_email_sent') },
           })
         } else if (status === 'secondary') {
           res.status(404).send({
-            message: req.i18n.translate('secondary_email_password_reset')
+            message: req.i18n.translate('secondary_email_password_reset'),
           })
         } else {
           res.status(404).send({
-            message: req.i18n.translate('cant_find_email')
+            message: req.i18n.translate('cant_find_email'),
           })
         }
       })
@@ -104,16 +105,23 @@ module.exports = {
   renderSetPasswordForm(req, res) {
     if (req.query.passwordResetToken != null) {
       req.session.resetToken = req.query.passwordResetToken
-      return res.redirect('/user/password/set')
+      let emailQuery = ''
+      if (typeof req.query.email === 'string') {
+        const email = EmailsHelper.parseEmail(req.query.email)
+        if (email) {
+          emailQuery = `?email=${encodeURIComponent(email)}`
+        }
+      }
+      return res.redirect('/user/password/set' + emailQuery)
     }
     if (req.session.resetToken == null) {
       return res.redirect('/user/password/reset')
     }
     res.render('user/setPassword', {
       title: 'set_password',
-      passwordResetToken: req.session.resetToken
+      passwordResetToken: req.session.resetToken,
     })
   },
 
-  setNewUserPassword: expressify(setNewUserPassword)
+  setNewUserPassword: expressify(setNewUserPassword),
 }

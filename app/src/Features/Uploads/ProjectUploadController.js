@@ -13,7 +13,7 @@
  */
 let ProjectUploadController
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const fs = require('fs')
 const Path = require('path')
 const FileSystemImportManager = require('./FileSystemImportManager')
@@ -26,8 +26,8 @@ const multer = require('multer')
 const upload = multer({
   dest: Settings.path.uploadFolder,
   limits: {
-    fileSize: Settings.maxUploadSize
-  }
+    fileSize: Settings.maxUploadSize,
+  },
 })
 
 module.exports = ProjectUploadController = {
@@ -40,8 +40,8 @@ module.exports = ProjectUploadController = {
       user_id,
       name,
       path,
-      function(error, project) {
-        fs.unlink(path, function() {})
+      function (error, project) {
+        fs.unlink(path, function () {})
         timer.done()
         if (error != null) {
           logger.error(
@@ -51,12 +51,12 @@ module.exports = ProjectUploadController = {
           if (error instanceof InvalidZipFileError) {
             return res.status(422).json({
               success: false,
-              error: req.i18n.translate(error.message)
+              error: req.i18n.translate(error.message),
             })
           } else {
             return res.status(500).json({
               success: false,
-              error: req.i18n.translate('upload_failed')
+              error: req.i18n.translate('upload_failed'),
             })
           }
         } else {
@@ -88,8 +88,8 @@ module.exports = ProjectUploadController = {
       name,
       path,
       true,
-      function(error, entity) {
-        fs.unlink(path, function() {})
+      function (error, entity) {
+        fs.unlink(path, function () {})
         timer.done()
         if (error != null) {
           logger.error(
@@ -98,19 +98,19 @@ module.exports = ProjectUploadController = {
               projectId: project_id,
               filePath: path,
               fileName: name,
-              folderId: folder_id
+              folderId: folder_id,
             },
             'error uploading file'
           )
           if (error.name === 'InvalidNameError') {
             return res.send({
               success: false,
-              error: req.i18n.translate('invalid_filename')
+              error: req.i18n.translate('invalid_filename'),
             })
           } else if (error.message === 'project_has_too_many_files') {
             return res.send({
               success: false,
-              error: req.i18n.translate('project_has_too_many_files')
+              error: req.i18n.translate('project_has_too_many_files'),
             })
           } else {
             return res.send({ success: false })
@@ -119,7 +119,7 @@ module.exports = ProjectUploadController = {
           return res.send({
             success: true,
             entity_id: entity != null ? entity._id : undefined,
-            entity_type: entity != null ? entity.type : undefined
+            entity_type: entity != null ? entity.type : undefined,
           })
         }
       }
@@ -132,7 +132,7 @@ module.exports = ProjectUploadController = {
         .status(500)
         .json({ success: false, error: req.i18n.translate('upload_failed') })
     }
-    return upload.single('qqfile')(req, res, function(err) {
+    return upload.single('qqfile')(req, res, function (err) {
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
         return res
           .status(422)
@@ -141,5 +141,5 @@ module.exports = ProjectUploadController = {
 
       return next(err)
     })
-  }
+  },
 }

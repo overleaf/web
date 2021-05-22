@@ -16,7 +16,7 @@ const settings = require('settings-sharelatex')
   Unique clients are identified by user_id if logged in, and IP address if not.
 */
 function rateLimit(opts) {
-  return function(req, res, next) {
+  return function (req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req) || req.ip
     if (
       settings.smokeTest &&
@@ -39,9 +39,9 @@ function rateLimit(opts) {
       endpointName: opts.endpointName,
       timeInterval: opts.timeInterval || 60,
       subjectName,
-      throttle: opts.maxRequests || 6
+      throttle: opts.maxRequests || 6,
     }
-    return RateLimiter.addCount(options, function(error, canContinue) {
+    return RateLimiter.addCount(options, function (error, canContinue) {
       if (error != null) {
         return next(error)
       }
@@ -62,7 +62,7 @@ function loginRateLimit(req, res, next) {
   if (!email) {
     return next()
   }
-  LoginRateLimiter.processLoginRequest(email, function(err, isAllowed) {
+  LoginRateLimiter.processLoginRequest(email, function (err, isAllowed) {
     if (err) {
       return next(err)
     }
@@ -79,7 +79,7 @@ function loginRateLimit(req, res, next) {
 
 const RateLimiterMiddleware = {
   rateLimit,
-  loginRateLimit
+  loginRateLimit,
 }
 
 module.exports = RateLimiterMiddleware

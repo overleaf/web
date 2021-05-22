@@ -5,6 +5,7 @@ const _ = require('lodash')
 const Url = require('url')
 const Path = require('path')
 const moment = require('moment')
+const pug = require('pug-runtime')
 
 const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
 
@@ -23,14 +24,16 @@ if (!IS_DEV_ENV) {
   webpackManifest = require(`../../../public/manifest.json`)
 }
 
-module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
-  webRouter.use(function(req, res, next) {
+const I18N_HTML_INJECTIONS = new Set()
+
+module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+  webRouter.use(function (req, res, next) {
     res.locals.session = req.session
     next()
   })
 
   function addSetContentDisposition(req, res, next) {
-    res.setContentDisposition = function(type, opts) {
+    res.setContentDisposition = function (type, opts) {
       const directives = _.map(
         opts,
         (v, k) => `${k}="${encodeURIComponent(v)}"`
@@ -44,7 +47,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   privateApiRouter.use(addSetContentDisposition)
   publicApiRouter.use(addSetContentDisposition)
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     req.externalAuthenticationSystemUsed =
       Features.externalAuthenticationSystemUsed
     res.locals.externalAuthenticationSystemUsed =
@@ -53,7 +56,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     let staticFilesBase
 
     const cdnAvailable =
@@ -75,13 +78,13 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       staticFilesBase = ''
     }
 
-    res.locals.buildBaseAssetPath = function() {
+    res.locals.buildBaseAssetPath = function () {
       // Return the base asset path (including the CDN url) so that webpack can
       // use this to dynamically fetch scripts (e.g. PDFjs worker)
       return Url.resolve(staticFilesBase, '/')
     }
 
-    res.locals.buildJsPath = function(jsFile) {
+    res.locals.buildJsPath = function (jsFile) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path within JS asset directory
@@ -100,7 +103,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
 
     // Temporary hack while jQuery/Angular dependencies are *not* bundled,
     // instead copied into output directory
-    res.locals.buildCopiedJsAssetPath = function(jsFile) {
+    res.locals.buildCopiedJsAssetPath = function (jsFile) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path to root directory
@@ -119,7 +122,8 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
       {
-        config: 'TeX-AMS_HTML,Safe'
+        config: 'TeX-AMS_HTML,Safe',
+        v: require('mathjax/package.json').version,
       }
     )}`
 
@@ -132,7 +136,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       (brandVariation != null ? brandVariation.brand_id : undefined) ===
       IEEE_BRAND_ID
 
-    res.locals.getCssThemeModifier = function(userSettings, brandVariation) {
+    res.locals.getCssThemeModifier = function (userSettings, brandVariation) {
       // Themes only exist in OL v2
       if (Settings.overleaf != null) {
         // The IEEE theme takes precedence over the user personal setting, i.e. a user with
@@ -145,13 +149,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
     }
 
-    function _buildCssFileName(themeModifier) {
-      return `${Settings.brandPrefix}${themeModifier || ''}style.css`
-    }
-
-    res.locals.buildCssPath = function(themeModifier) {
-      const cssFileName = _buildCssFileName(themeModifier)
-
+    res.locals.buildStylesheetPath = function (cssFileName) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path within CSS asset directory
@@ -168,7 +166,11 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       return Url.resolve(staticFilesBase, path)
     }
 
-    res.locals.buildImgPath = function(imgFile) {
+    res.locals.buildCssPath = function (themeModifier = '') {
+      return res.locals.buildStylesheetPath(`${themeModifier}style.css`)
+    }
+
+    res.locals.buildImgPath = function (imgFile) {
       const path = Path.join('/img/', imgFile)
       return Url.resolve(staticFilesBase, path)
     }
@@ -176,9 +178,26 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
-    res.locals.translate = function(key, vars, components) {
+  webRouter.use(function (req, res, next) {
+    res.locals.translate = function (key, vars, components) {
       vars = vars || {}
+
+      if (Settings.i18n.checkForHTMLInVars) {
+        Object.entries(vars).forEach(([field, value]) => {
+          if (pug.escape(value) !== value) {
+            const violationsKey = key + field
+            // do not flood the logs, log one sample per pod + key + field
+            if (!I18N_HTML_INJECTIONS.has(violationsKey)) {
+              logger.warn(
+                { key, field, value },
+                'html content in translations context vars'
+              )
+              I18N_HTML_INJECTIONS.add(violationsKey)
+            }
+          }
+        })
+      }
+
       vars.appName = Settings.appName
       const locale = req.i18n.translate(key, vars)
       if (components) {
@@ -192,7 +211,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     const parsedOriginalUrl = Url.parse(req.originalUrl)
     res.locals.currentUrl = parsedOriginalUrl.pathname
     res.locals.currentUrlWithQueryParams = parsedOriginalUrl.path
-    res.locals.capitalize = function(string) {
+    res.locals.capitalize = function (string) {
       if (string.length === 0) {
         return ''
       }
@@ -201,8 +220,8 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
-    res.locals.getUserEmail = function() {
+  webRouter.use(function (req, res, next) {
+    res.locals.getUserEmail = function () {
       const user = AuthenticationController.getSessionUser(req)
       const email = (user != null ? user.email : undefined) || ''
       return email
@@ -210,13 +229,13 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.StringHelper = require('../Features/Helpers/StringHelper')
     next()
   })
 
-  webRouter.use(function(req, res, next) {
-    res.locals.buildReferalUrl = function(referalMedium) {
+  webRouter.use(function (req, res, next) {
+    res.locals.buildReferalUrl = function (referalMedium) {
       let url = Settings.siteUrl
       const currentUser = AuthenticationController.getSessionUser(req)
       if (
@@ -227,7 +246,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
       return url
     }
-    res.locals.getReferalId = function() {
+    res.locals.getReferalId = function () {
       const currentUser = AuthenticationController.getSessionUser(req)
       if (
         currentUser != null &&
@@ -239,36 +258,37 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.csrfToken = req != null ? req.csrfToken() : undefined
     next()
   })
 
-  webRouter.use(function(req, res, next) {
-    res.locals.gaToken = Settings.analytics && Settings.analytics.ga.token
+  webRouter.use(function (req, res, next) {
+    res.locals.gaToken =
+      Settings.analytics && Settings.analytics.ga && Settings.analytics.ga.token
     res.locals.gaOptimizeId = _.get(Settings, ['analytics', 'gaOptimize', 'id'])
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.getReqQueryParam = field =>
       req.query != null ? req.query[field] : undefined
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     const currentUser = AuthenticationController.getSessionUser(req)
     if (currentUser != null) {
       res.locals.user = {
         email: currentUser.email,
         first_name: currentUser.first_name,
-        last_name: currentUser.last_name
+        last_name: currentUser.last_name,
       }
     }
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.getLoggedInUserId = () =>
       AuthenticationController.getLoggedInUserId(req)
     res.locals.getSessionUser = () =>
@@ -276,17 +296,17 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     // Clone the nav settings so they can be modified for each request
     res.locals.nav = {}
-    for (let key in Settings.nav) {
+    for (const key in Settings.nav) {
       res.locals.nav[key] = _.clone(Settings.nav[key])
     }
     res.locals.templates = Settings.templateLinks
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     if (Settings.reloadModuleViewsOnEachRequest) {
       Modules.loadViewIncludes()
     }
@@ -295,64 +315,53 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function(req, res, next) {
-    res.locals.uiConfig = {
-      defaultResizerSizeOpen: 7,
-      defaultResizerSizeClosed: 7,
-      eastResizerCursor: 'ew-resize',
-      westResizerCursor: 'ew-resize',
-      chatResizerSizeOpen: 7,
-      chatResizerSizeClosed: 0,
-      chatMessageBorderSaturation: '85%',
-      chatMessageBorderLightness: '40%',
-      chatMessageBgSaturation: '85%',
-      chatMessageBgLightness: '40%'
-    }
-    next()
-  })
-
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     // TODO
     if (Settings.overleaf != null) {
       res.locals.overallThemes = [
         {
           name: 'Default',
           val: '',
-          path: res.locals.buildCssPath(null, { hashedPath: true })
+          path: res.locals.buildCssPath(),
         },
         {
           name: 'Light',
           val: 'light-',
-          path: res.locals.buildCssPath('light-', { hashedPath: true })
-        }
+          path: res.locals.buildCssPath('light-'),
+        },
       ]
     }
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.settings = Settings
     next()
   })
 
-  webRouter.use(function(req, res, next) {
+  webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
       hasSamlBeta: req.session.samlBeta,
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
+      hasLinkUrlFeature: Features.hasFeature('link-url'),
       siteUrl: Settings.siteUrl,
       emailConfirmationDisabled: Settings.emailConfirmationDisabled,
+      maxEntitiesPerProject: Settings.maxEntitiesPerProject,
+      maxUploadSize: Settings.maxUploadSize,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:
         Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
+      textExtensions: Settings.textExtensions,
       validRootDocExtensions: Settings.validRootDocExtensions,
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,
       sentryDsn: Settings.sentry.publicDSN,
       sentryEnvironment: Settings.sentry.environment,
-      sentryRelease: Settings.sentry.release
+      sentryRelease: Settings.sentry.release,
+      enableSubscriptions: Settings.enableSubscriptions,
     }
     next()
   })

@@ -33,7 +33,7 @@ function handleGeneric400Error(req, res, statusCode, message, info = {}) {
     case 'html':
       return res.render('general/400', {
         title: 'Client Error',
-        message: message
+        message: message,
       })
     case 'json':
       return renderJSONError(res, message, info)
@@ -85,7 +85,7 @@ module.exports = HttpErrorHandler = {
       case 'html':
         return res.render('general/400', {
           title: 'Client Error',
-          message: message
+          message: message,
         })
       case 'json':
         return renderJSONError(res, message, info)
@@ -124,7 +124,7 @@ module.exports = HttpErrorHandler = {
       case 'html':
         return res.render('general/400', {
           title: 'Client Error',
-          message: message
+          message: message,
         })
       case 'json':
         return renderJSONError(res, message, info)
@@ -139,7 +139,12 @@ module.exports = HttpErrorHandler = {
   },
 
   maintenance(req, res) {
-    res.status(503)
+    // load balancer health checks require a success response for /
+    if (req.url === '/') {
+      res.status(200)
+    } else {
+      res.status(503)
+    }
     let message = `${Settings.appName} is currently down for maintenance.`
     if (Settings.statusPageUrl) {
       message += ` Please check https://${Settings.statusPageUrl} for updates.`
@@ -152,5 +157,5 @@ module.exports = HttpErrorHandler = {
       default:
         return res.send(message)
     }
-  }
+  },
 }

@@ -19,13 +19,14 @@ services:
     user: node
 
   test_acceptance:
-    image: node:10.22.1
+    image: node:12.21.0
     volumes:
       - .:/app
     working_dir: /app
     environment:
       BCRYPT_ROUNDS: 1
       REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
       PROJECT_HISTORY_ENABLED: 'true'
@@ -35,9 +36,16 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
-      MONGO_SOCKET_TIMEOUT: 60000
+      MONGO_SERVER_SELECTION_TIMEOUT: 600000
+      MONGO_SOCKET_TIMEOUT: 300000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
       SHARELATEX_CONFIG:
+      COOKIE_DOMAIN: .overleaf.test
+      PUBLIC_URL: 'http://www.overleaf.test:3000'
+      HTTP_TEST_HOST: www.overleaf.test
+      OT_JWT_AUTH_KEY: "very secret key"
+    extra_hosts:
+      - 'www.overleaf.test:127.0.0.1'
     depends_on:
       - redis
       - mongo

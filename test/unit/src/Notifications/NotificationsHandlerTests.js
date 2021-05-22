@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -14,7 +14,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const { assert } = require('chai')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -22,32 +21,25 @@ const modulePath = require('path').join(
 )
 const _ = require('underscore')
 
-describe('NotificationsHandler', function() {
+describe('NotificationsHandler', function () {
   const user_id = '123nd3ijdks'
   const notification_id = '123njdskj9jlk'
   const notificationUrl = 'notification.sharelatex.testing'
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.request = sinon.stub().callsArgWith(1)
     return (this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': {
-          apis: { notifications: { url: notificationUrl } }
+          apis: { notifications: { url: notificationUrl } },
         },
         request: this.request,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
+      },
     }))
   })
 
-  describe('getUserNotifications', function() {
-    it('should get unread notifications', function(done) {
+  describe('getUserNotifications', function () {
+    it('should get unread notifications', function (done) {
       const stubbedNotifications = [{ _id: notification_id, user_id }]
       this.request.callsArgWith(
         1,
@@ -63,7 +55,7 @@ describe('NotificationsHandler', function() {
             uri: `${notificationUrl}/user/${user_id}`,
             json: true,
             timeout: 1000,
-            method: 'GET'
+            method: 'GET',
           }
           this.request.calledWith(getOpts).should.equal(true)
           return done()
@@ -71,7 +63,7 @@ describe('NotificationsHandler', function() {
       )
     })
 
-    it('should return empty arrays if there are no notifications', function() {
+    it('should return empty arrays if there are no notifications', function () {
       this.request.callsArgWith(1, null, { statusCode: 200 }, null)
       return this.handler.getUserNotifications(
         user_id,
@@ -82,20 +74,20 @@ describe('NotificationsHandler', function() {
     })
   })
 
-  describe('markAsRead', function() {
-    beforeEach(function() {
+  describe('markAsRead', function () {
+    beforeEach(function () {
       return (this.key = 'some key here')
     })
 
-    it('should send a delete request when a delete has been received to mark a notification', function(done) {
+    it('should send a delete request when a delete has been received to mark a notification', function (done) {
       return this.handler.markAsReadWithKey(user_id, this.key, () => {
         const opts = {
           uri: `${notificationUrl}/user/${user_id}`,
           json: {
-            key: this.key
+            key: this.key,
           },
           timeout: 1000,
-          method: 'DELETE'
+          method: 'DELETE',
         }
         this.request.calledWith(opts).should.equal(true)
         return done()
@@ -103,15 +95,15 @@ describe('NotificationsHandler', function() {
     })
   })
 
-  describe('createNotification', function() {
-    beforeEach(function() {
+  describe('createNotification', function () {
+    beforeEach(function () {
       this.key = 'some key here'
       this.messageOpts = { value: 12344 }
       this.templateKey = 'renderThisHtml'
       return (this.expiry = null)
     })
 
-    it('should post the message over', function(done) {
+    it('should post the message over', function (done) {
       return this.handler.createNotification(
         user_id,
         this.key,
@@ -126,7 +118,7 @@ describe('NotificationsHandler', function() {
             key: this.key,
             templateKey: this.templateKey,
             messageOpts: this.messageOpts,
-            forceCreate: true
+            forceCreate: true,
           }
           assert.deepEqual(args.json, expectedJson)
           return done()
@@ -134,15 +126,15 @@ describe('NotificationsHandler', function() {
       )
     })
 
-    describe('when expiry date is supplied', function() {
-      beforeEach(function() {
+    describe('when expiry date is supplied', function () {
+      beforeEach(function () {
         this.key = 'some key here'
         this.messageOpts = { value: 12344 }
         this.templateKey = 'renderThisHtml'
         return (this.expiry = new Date())
       })
 
-      it('should post the message over with expiry field', function(done) {
+      it('should post the message over with expiry field', function (done) {
         return this.handler.createNotification(
           user_id,
           this.key,
@@ -158,7 +150,7 @@ describe('NotificationsHandler', function() {
               templateKey: this.templateKey,
               messageOpts: this.messageOpts,
               expires: this.expiry,
-              forceCreate: true
+              forceCreate: true,
             }
             assert.deepEqual(args.json, expectedJson)
             return done()
@@ -168,17 +160,17 @@ describe('NotificationsHandler', function() {
     })
   })
 
-  describe('markAsReadByKeyOnly', function() {
-    beforeEach(function() {
+  describe('markAsReadByKeyOnly', function () {
+    beforeEach(function () {
       return (this.key = 'some key here')
     })
 
-    it('should send a delete request when a delete has been received to mark a notification', function(done) {
+    it('should send a delete request when a delete has been received to mark a notification', function (done) {
       return this.handler.markAsReadByKeyOnly(this.key, () => {
         const opts = {
           uri: `${notificationUrl}/key/${this.key}`,
           timeout: 1000,
-          method: 'DELETE'
+          method: 'DELETE',
         }
         this.request.calledWith(opts).should.equal(true)
         return done()

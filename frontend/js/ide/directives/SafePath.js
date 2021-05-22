@@ -12,11 +12,13 @@
  */
 // This file is shared between the frontend and server code of web, so that
 // filename validation is the same in both implementations.
-// Both copies must be kept in sync:
-//   app/coffee/Features/Project/SafePath.coffee
-//   public/coffee/ide/directives/SafePath.coffee
+// The logic in all copies must be kept in sync:
+//   app/src/Features/Project/SafePath.js
+//   frontend/js/ide/directives/SafePath.js
+//   frontend/js/features/file-tree/util/safe-path.js
 
 let SafePath
+// eslint-disable-next-line prefer-regex-literals
 const BADCHAR_RX = new RegExp(
   `\
 [\
@@ -32,6 +34,7 @@ const BADCHAR_RX = new RegExp(
   'g'
 )
 
+// eslint-disable-next-line prefer-regex-literals
 const BADFILE_RX = new RegExp(
   `\
 (^\\.$)\
@@ -49,6 +52,7 @@ const BADFILE_RX = new RegExp(
 //
 // The list of property names is taken from
 //   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+// eslint-disable-next-line prefer-regex-literals
 const BLOCKEDFILE_RX = new RegExp(`\
 ^(\
 prototype\
@@ -69,7 +73,7 @@ prototype\
 
 const MAX_PATH = 1024 // Maximum path length, in characters. This is fairly arbitrary.
 
-export default (SafePath = {
+export default SafePath = {
   clean(filename) {
     filename = filename.replace(BADCHAR_RX, '_')
     // for BADFILE_RX replace any matches with an equal number of underscores
@@ -91,5 +95,5 @@ export default (SafePath = {
 
   isAllowedLength(pathname) {
     return pathname.length > 0 && pathname.length <= MAX_PATH
-  }
-})
+  },
+}

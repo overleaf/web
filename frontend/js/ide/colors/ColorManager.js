@@ -13,10 +13,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// NOTE: this file is being refactored over to frontend/js/shared/utils/colors.js
+
 import CryptoJS from 'crypto-js/md5'
 let ColorManager
 
-export default (ColorManager = {
+export default ColorManager = {
   getColorScheme(hue, element) {
     if (this.isDarkTheme(element)) {
       return {
@@ -24,7 +27,7 @@ export default (ColorManager = {
         labelBackgroundColor: `hsl(${hue}, 70%, 50%)`,
         highlightBackgroundColor: `hsl(${hue}, 100%, 28%);`,
         strikeThroughBackgroundColor: `hsl(${hue}, 100%, 20%);`,
-        strikeThroughForegroundColor: `hsl(${hue}, 100%, 60%);`
+        strikeThroughForegroundColor: `hsl(${hue}, 100%, 60%);`,
       }
     } else {
       return {
@@ -32,7 +35,7 @@ export default (ColorManager = {
         labelBackgroundColor: `hsl(${hue}, 70%, 50%)`,
         highlightBackgroundColor: `hsl(${hue}, 70%, 85%);`,
         strikeThroughBackgroundColor: `hsl(${hue}, 70%, 95%);`,
-        strikeThroughForegroundColor: `hsl(${hue}, 70%, 40%);`
+        strikeThroughForegroundColor: `hsl(${hue}, 70%, 40%);`,
       }
     }
   },
@@ -82,9 +85,9 @@ export default (ColorManager = {
 
   getHueForId(id) {
     const hash = CryptoJS(id)
-    let hue =
+    const hue =
       parseInt(hash.toString().slice(0, 8), 16) %
       (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)
     return hue
-  }
-})
+  },
+}

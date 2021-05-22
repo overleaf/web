@@ -33,7 +33,7 @@ export default App.directive(
       const annotationsElement = $(element).find('.annotations-layer')
       const highlightsElement = $(element).find('.highlights-layer')
 
-      const updatePageSize = function(size) {
+      const updatePageSize = function (size) {
         const h = Math.floor(size[0])
         const w = Math.floor(size[1])
         element.height(h)
@@ -52,7 +52,7 @@ export default App.directive(
         text: textElement,
         annotations: annotationsElement,
         highlights: highlightsElement,
-        container: element
+        container: element,
       }
 
       if (!scope.page.sized) {
@@ -61,15 +61,16 @@ export default App.directive(
         } else {
           // shouldn't get here - the default page size should now
           // always be set before redraw is called
-          var handler = scope.$watch('defaultPageSize', function(
-            defaultPageSize
-          ) {
-            if (defaultPageSize == null) {
-              return
+          var handler = scope.$watch(
+            'defaultPageSize',
+            function (defaultPageSize) {
+              if (defaultPageSize == null) {
+                return
+              }
+              updatePageSize(defaultPageSize)
+              return handler()
             }
-            updatePageSize(defaultPageSize)
-            return handler()
-          })
+          )
         }
       }
 
@@ -81,30 +82,28 @@ export default App.directive(
         ctrl.setPdfPosition(scope.page, scope.page.position)
       }
 
-      element.on('dblclick', function(e) {
-        const offset = $(element)
-          .find('.pdf-canvas')
-          .offset()
+      element.on('dblclick', function (e) {
+        const offset = $(element).find('.pdf-canvas').offset()
         const dx = e.pageX - offset.left
         const dy = e.pageY - offset.top
         return scope.document
           .getPdfViewport(scope.page.pageNum)
-          .then(function(viewport) {
+          .then(function (viewport) {
             const pdfPoint = viewport.convertToPdfPoint(dx, dy)
             const event = {
               page: scope.page.pageNum,
               x: pdfPoint[0],
-              y: viewport.viewBox[3] - pdfPoint[1]
+              y: viewport.viewBox[3] - pdfPoint[1],
             }
             return scope.$emit('pdfDoubleClick', event)
           })
       })
 
       const highlightsLayer = new pdfHighlights({
-        highlights: highlightsElement
+        highlights: highlightsElement,
       })
 
-      scope.$on('pdf:highlights', function(event, highlights) {
+      scope.$on('pdf:highlights', function (event, highlights) {
         let h
         if (highlights == null) {
           return
@@ -134,7 +133,7 @@ export default App.directive(
         scope.document.getPdfViewport(scope.page.pageNum).then(viewport =>
           (() => {
             const result1 = []
-            for (let hl of Array.from(pageHighlights)) {
+            for (const hl of Array.from(pageHighlights)) {
               // console.log 'adding highlight', h, viewport
               const top = viewport.viewBox[3] - hl.v
               result1.push(
@@ -150,18 +149,18 @@ export default App.directive(
             return result1
           })()
         )
-        return (scope.timeoutHandler = $timeout(function() {
+        return (scope.timeoutHandler = $timeout(function () {
           highlightsLayer.clearHighlights()
           return (scope.timeoutHandler = null)
         }, 1000))
       })
 
-      return scope.$on('$destroy', function() {
+      return scope.$on('$destroy', function () {
         if (scope.timeoutHandler != null) {
           $timeout.cancel(scope.timeoutHandler)
           return highlightsLayer.clearHighlights()
         }
       })
-    }
+    },
   })
 )

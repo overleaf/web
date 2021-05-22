@@ -5,14 +5,14 @@ const bcrypt = require('bcrypt')
 const EmailHelper = require('../Helpers/EmailHelper')
 const {
   InvalidEmailError,
-  InvalidPasswordError
+  InvalidPasswordError,
 } = require('./AuthenticationErrors')
 const util = require('util')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
 
-const _checkWriteResult = function(result, callback) {
+const _checkWriteResult = function (result, callback) {
   // for MongoDB
   if (result && result.modifiedCount === 1) {
     callback(null, true)
@@ -33,7 +33,7 @@ const AuthenticationManager = {
       if (!user || !user.hashedPassword) {
         return callback(null, null)
       }
-      bcrypt.compare(password, user.hashedPassword, function(error, match) {
+      bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
         }
@@ -44,7 +44,7 @@ const AuthenticationManager = {
           user,
           user.hashedPassword,
           password,
-          function(err) {
+          function (err) {
             if (err) {
               return callback(err)
             }
@@ -70,7 +70,7 @@ const AuthenticationManager = {
     if (password == null) {
       return new InvalidPasswordError({
         message: 'password not set',
-        info: { code: 'not_set' }
+        info: { code: 'not_set' },
       })
     }
 
@@ -94,13 +94,13 @@ const AuthenticationManager = {
     if (password.length < min) {
       return new InvalidPasswordError({
         message: 'password is too short',
-        info: { code: 'too_short' }
+        info: { code: 'too_short' },
       })
     }
     if (password.length > max) {
       return new InvalidPasswordError({
         message: 'password is too long',
-        info: { code: 'too_long' }
+        info: { code: 'too_long' },
       })
     }
     if (
@@ -109,7 +109,7 @@ const AuthenticationManager = {
     ) {
       return new InvalidPasswordError({
         message: 'password contains an invalid character',
-        info: { code: 'invalid_character' }
+        info: { code: 'invalid_character' },
       })
     }
     if (typeof email === 'string' && email !== '') {
@@ -120,7 +120,7 @@ const AuthenticationManager = {
       ) {
         return new InvalidPasswordError({
           message: 'password contains part of email address',
-          info: { code: 'contains_email' }
+          info: { code: 'contains_email' },
         })
       }
     }
@@ -146,7 +146,7 @@ const AuthenticationManager = {
   },
 
   hashPassword(password, callback) {
-    bcrypt.genSalt(BCRYPT_ROUNDS, BCRYPT_MINOR_VERSION, function(error, salt) {
+    bcrypt.genSalt(BCRYPT_ROUNDS, BCRYPT_MINOR_VERSION, function (error, salt) {
       if (error) {
         return callback(error)
       }
@@ -162,23 +162,23 @@ const AuthenticationManager = {
     if (validationError) {
       return callback(validationError)
     }
-    this.hashPassword(password, function(error, hash) {
+    this.hashPassword(password, function (error, hash) {
       if (error) {
         return callback(error)
       }
       db.users.updateOne(
         {
-          _id: ObjectId(user._id.toString())
+          _id: ObjectId(user._id.toString()),
         },
         {
           $set: {
-            hashedPassword: hash
+            hashedPassword: hash,
           },
           $unset: {
-            password: true
-          }
+            password: true,
+          },
         },
-        function(updateError, result) {
+        function (updateError, result) {
           if (updateError) {
             return callback(updateError)
           }
@@ -215,13 +215,13 @@ const AuthenticationManager = {
       }
     }
     return true
-  }
+  },
 }
 
 AuthenticationManager.promises = {
   authenticate: util.promisify(AuthenticationManager.authenticate),
   hashPassword: util.promisify(AuthenticationManager.hashPassword),
-  setUserPassword: util.promisify(AuthenticationManager.setUserPassword)
+  setUserPassword: util.promisify(AuthenticationManager.setUserPassword),
 }
 
 module.exports = AuthenticationManager

@@ -15,21 +15,19 @@ import App from '../../../base'
 export default App.controller(
   'HistoryV2ToolbarController',
   ($scope, $modal, ide, eventTracking, waitFor) => {
-    let openEntity
-
     $scope.currentUpdate = null
     $scope.currentLabel = null
 
     $scope.restoreState = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $scope.toolbarUIConfig = {
-      showOnlyLabels: false
+      showOnlyLabels: false,
     }
 
-    let _deregistershowOnlyLabelsWatcher = $scope.$watch(
+    const _deregistershowOnlyLabelsWatcher = $scope.$watch(
       'history.showOnlyLabels',
       showOnlyLabels => {
         if (showOnlyLabels != null) {
@@ -69,7 +67,7 @@ export default App.controller(
       ide.historyManager.toggleHistoryViewMode()
     }
 
-    $scope.restoreDeletedFile = function() {
+    $scope.restoreDeletedFile = function () {
       const { pathname, deletedAtV } = $scope.history.selection.file
       if (pathname == null || deletedAtV == null) {
         return
@@ -79,7 +77,7 @@ export default App.controller(
       $scope.restoreState.inflight = true
       return ide.historyManager
         .restoreFile(deletedAtV, pathname)
-        .then(function(response) {
+        .then(function (response) {
           const { data } = response
           return openEntity(data)
         })
@@ -98,24 +96,24 @@ export default App.controller(
         resolve: {
           update() {
             return $scope.history.selection.update
-          }
-        }
+          },
+        },
       })
     }
 
-    openEntity = function(data) {
+    function openEntity(data) {
       const { id, type } = data
       return waitFor(() => ide.fileTreeManager.findEntityById(id), 3000)
-        .then(function(entity) {
+        .then(function (entity) {
           if (type === 'doc') {
             ide.editorManager.openDoc(entity)
-            this.ide.$timeout(() => {
-              this.$scope.$broadcast('history:toggle')
+            ide.$timeout(() => {
+              $scope.$broadcast('history:toggle')
             }, 0)
           } else if (type === 'file') {
             ide.binaryFilesManager.openFile(entity)
-            this.ide.$timeout(() => {
-              this.$scope.$broadcast('history:toggle')
+            ide.$timeout(() => {
+              $scope.$broadcast('history:toggle')
             }, 0)
           }
         })

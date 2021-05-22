@@ -19,7 +19,7 @@ const ClsiStateManager = require('./ClsiStateManager')
 const _ = require('underscore')
 const ClsiFormatChecker = require('./ClsiFormatChecker')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
@@ -66,13 +66,13 @@ const ClsiManager = {
       if (err != null) {
         if (err.message === 'no main file specified') {
           return callback(null, 'validation-problems', null, null, {
-            mainFile: err.message
+            mainFile: err.message,
           })
         } else {
           return callback(
             OError.tag(err, 'Could not build request to CLSI', {
               projectId,
-              options
+              options,
             })
           )
         }
@@ -109,8 +109,7 @@ const ClsiManager = {
           return callback(
             OError.tag(err, 'CLSI compile failed', {
               submissionId,
-              clsiRequest,
-              options
+              options,
             })
           )
         }
@@ -131,12 +130,12 @@ const ClsiManager = {
     )
     const opts = {
       url: compilerUrl,
-      method: 'POST'
+      method: 'POST',
     }
     ClsiManager._makeRequest(projectId, opts, callback)
   },
 
-  deleteAuxFiles(projectId, userId, options, callback) {
+  deleteAuxFiles(projectId, userId, options, clsiserverid, callback) {
     if (options == null) {
       options = {}
     }
@@ -147,29 +146,46 @@ const ClsiManager = {
     )
     const opts = {
       url: compilerUrl,
-      method: 'DELETE'
+      method: 'DELETE',
     }
-    ClsiManager._makeRequest(projectId, opts, clsiErr => {
-      // always clear the project state from the docupdater, even if there
-      // was a problem with the request to the clsi
-      DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
-        if (clsiErr != null) {
-          return callback(
-            OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
-          )
-        }
-        if (docUpdaterErr != null) {
-          return callback(
-            OError.tag(
-              docUpdaterErr,
-              'Failed to clear project state in doc updater',
-              { projectId }
-            )
-          )
-        }
-        callback()
-      })
-    })
+    ClsiManager._makeRequestWithClsiServerId(
+      projectId,
+      opts,
+      clsiserverid,
+      clsiErr => {
+        // always clear the project state from the docupdater, even if there
+        // was a problem with the request to the clsi
+        DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
+          ClsiCookieManager.clearServerId(projectId, redisError => {
+            if (clsiErr) {
+              return callback(
+                OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
+              )
+            }
+            if (docUpdaterErr) {
+              return callback(
+                OError.tag(
+                  docUpdaterErr,
+                  'Failed to clear project state in doc updater',
+                  { projectId }
+                )
+              )
+            }
+            if (redisError) {
+              // redis errors need wrapping as the instance may be shared
+              return callback(
+                OError(
+                  'Failed to clear clsi persistence',
+                  { projectId },
+                  redisError
+                )
+              )
+            }
+            callback()
+          })
+        })
+      }
+    )
   },
 
   _sendBuiltRequest(projectId, userId, req, options, callback) {
@@ -226,7 +242,7 @@ const ClsiManager = {
               return callback(
                 OError.tag(err, 'error sending request to clsi', {
                   projectId,
-                  userId
+                  userId,
                 })
               )
             }
@@ -240,17 +256,42 @@ const ClsiManager = {
                 projectId,
                 response && response.compile && response.compile.outputFiles
               )
+              const compile = (response && response.compile) || {}
+              const status = compile.status
+              const stats = compile.stats
+              const timings = compile.timings
+              const validationProblems = undefined
               callback(
                 null,
-                response && response.compile && response.compile.status,
+                status,
                 outputFiles,
-                clsiServerId
+                clsiServerId,
+                validationProblems,
+                stats,
+                timings
               )
             })
           }
         )
       }
     )
+  },
+
+  _makeRequestWithClsiServerId(projectId, opts, clsiserverid, callback) {
+    if (clsiserverid) {
+      // ignore cookies and newBackend, go straight to the clsi node
+      opts.qs = Object.assign({ clsiserverid }, opts.qs)
+      request(opts, (err, response, body) => {
+        if (err) {
+          return callback(
+            OError.tag(err, 'error making request to CLSI', { projectId })
+          )
+        }
+        callback(null, response, body)
+      })
+    } else {
+      ClsiManager._makeRequest(projectId, opts, callback)
+    }
   },
 
   _makeRequest(projectId, opts, callback) {
@@ -262,7 +303,7 @@ const ClsiManager = {
             if (err != null) {
               return callback(
                 OError.tag(err, 'error getting cookie jar for CLSI request', {
-                  projectId
+                  projectId,
                 })
               )
             }
@@ -290,7 +331,7 @@ const ClsiManager = {
                 cb(err, {
                   response,
                   body,
-                  finishTime: new Date() - startTime
+                  finishTime: new Date() - startTime,
                 })
               })
             })
@@ -313,11 +354,11 @@ const ClsiManager = {
               cb(err, {
                 response,
                 body,
-                finishTime: new Date() - startTime
+                finishTime: new Date() - startTime,
               })
             }
           )
-        }
+        },
       },
       (err, results) => {
         if (err != null) {
@@ -337,7 +378,7 @@ const ClsiManager = {
               timeDifference,
               currentCompileTime,
               newBackendCompileTime,
-              projectId
+              projectId,
             },
             'both clsi requests returned'
           )
@@ -355,13 +396,13 @@ const ClsiManager = {
       url: baseOpts.url.replace(
         Settings.apis.clsi.url,
         Settings.apis.clsi_new.url
-      )
+      ),
     }
     NewBackendCloudClsiCookieManager.getCookieJar(projectId, (err, jar) => {
       if (err != null) {
         return callback(
           OError.tag(err, 'error getting cookie jar for CLSI request', {
-            projectId
+            projectId,
           })
         )
       }
@@ -373,7 +414,7 @@ const ClsiManager = {
           return callback(
             OError.tag(err, 'error making request to new CLSI', {
               projectId,
-              opts
+              opts,
             })
           )
         }
@@ -384,7 +425,7 @@ const ClsiManager = {
             if (err != null) {
               return callback(
                 OError.tag(err, 'error setting server id on new backend', {
-                  projectId
+                  projectId,
                 })
               )
             }
@@ -417,7 +458,7 @@ const ClsiManager = {
     const opts = {
       url: compileUrl,
       json: req,
-      method: 'POST'
+      method: 'POST',
     }
     ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
       if (err != null) {
@@ -426,7 +467,7 @@ const ClsiManager = {
             projectId,
             userId,
             compileOptions: req.compile.options,
-            rootResourcePath: req.compile.rootResourcePath
+            rootResourcePath: req.compile.rootResourcePath,
           })
         )
       }
@@ -448,7 +489,7 @@ const ClsiManager = {
             compileOptions: req.compile.options,
             rootResourcePath: req.compile.rootResourcePath,
             clsiResponse: body,
-            statusCode: response.statusCode
+            statusCode: response.statusCode,
           })
         )
       }
@@ -462,7 +503,10 @@ const ClsiManager = {
         path: file.path, // the clsi is now sending this to web
         url: Url.parse(file.url).path, // the location of the file on the clsi, excluding the host part
         type: file.type,
-        build: file.build
+        build: file.build,
+        contentId: file.contentId,
+        ranges: file.ranges,
+        size: file.size,
       })
     }
     return outputFiles
@@ -540,7 +584,7 @@ const ClsiManager = {
             if (err != null) {
               return callback(
                 OError.tag(err, 'failed to get contents from Mongo', {
-                  projectId
+                  projectId,
                 })
               )
             }
@@ -573,7 +617,7 @@ const ClsiManager = {
             return callback(
               OError.tag(err, 'Failed to get project documents', {
                 projectId,
-                projectStateHash
+                projectStateHash,
               })
             )
           }
@@ -584,9 +628,7 @@ const ClsiManager = {
   },
 
   getOutputFileStream(projectId, userId, buildId, outputFilePath, callback) {
-    const url = `${
-      Settings.apis.clsi.url
-    }/project/${projectId}/user/${userId}/build/${buildId}/output/${outputFilePath}`
+    const url = `${Settings.apis.clsi.url}/project/${projectId}/user/${userId}/build/${buildId}/output/${outputFilePath}`
     ClsiCookieManager.getCookieJar(projectId, (err, jar) => {
       if (err != null) {
         return callback(
@@ -594,7 +636,7 @@ const ClsiManager = {
             projectId,
             userId,
             buildId,
-            outputFilePath
+            outputFilePath,
           })
         )
       }
@@ -619,7 +661,7 @@ const ClsiManager = {
         )
       }
       const docs = {}
-      for (let doc of docUpdaterDocs || []) {
+      for (const doc of docUpdaterDocs || []) {
         const path = docPath[doc._id]
         docs[path] = doc
       }
@@ -661,14 +703,14 @@ const ClsiManager = {
       if (err != null) {
         return callback(
           OError.tag(err, 'failed to get project contents from Mongo', {
-            projectId
+            projectId,
           })
         )
       }
       options = {
         ...options,
         syncType: 'full',
-        syncState: projectStateHash
+        syncState: projectStateHash,
       }
       ClsiManager._finaliseRequest(
         projectId,
@@ -724,7 +766,7 @@ const ClsiManager = {
         // add doc to resources unless it is just a stub entry
         resources.push({
           path,
-          content: doc.lines.join('\n')
+          content: doc.lines.join('\n'),
         })
       }
       if (
@@ -766,10 +808,8 @@ const ClsiManager = {
       path = path.replace(/^\//, '') // Remove leading /
       resources.push({
         path,
-        url: `${Settings.apis.filestore.url}/project/${project._id}/file/${
-          file._id
-        }`,
-        modified: file.created != null ? file.created.getTime() : undefined
+        url: `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`,
+        modified: file.created != null ? file.created.getTime() : undefined,
       })
     }
 
@@ -783,21 +823,23 @@ const ClsiManager = {
           check: options.check,
           syncType: options.syncType,
           syncState: options.syncState,
-          compileGroup: options.compileGroup
+          compileGroup: options.compileGroup,
+          enablePdfCaching:
+            (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         },
         rootResourcePath,
-        resources
-      }
+        resources,
+      },
     })
   },
 
-  wordCount(projectId, userId, file, options, callback) {
+  wordCount(projectId, userId, file, options, clsiserverid, callback) {
     ClsiManager._buildRequest(projectId, options, (err, req) => {
       if (err != null) {
         return callback(
           OError.tag(err, 'Failed to build CLSI request', {
             projectId,
-            options
+            options,
           })
         )
       }
@@ -812,31 +854,38 @@ const ClsiManager = {
         url: wordCountUrl,
         qs: {
           file: filename,
-          image: req.compile.options.imageName
+          image: req.compile.options.imageName,
         },
-        method: 'GET'
+        method: 'GET',
       }
-      ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
-        if (err != null) {
-          return callback(OError.tag(err, 'CLSI request failed', { projectId }))
-        }
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          callback(null, body)
-        } else {
-          callback(
-            new OError(
-              `CLSI returned non-success code: ${response.statusCode}`,
-              {
-                projectId,
-                clsiResponse: body,
-                statusCode: response.statusCode
-              }
+      ClsiManager._makeRequestWithClsiServerId(
+        projectId,
+        opts,
+        clsiserverid,
+        (err, response, body) => {
+          if (err != null) {
+            return callback(
+              OError.tag(err, 'CLSI request failed', { projectId })
             )
-          )
+          }
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            callback(null, body)
+          } else {
+            callback(
+              new OError(
+                `CLSI returned non-success code: ${response.statusCode}`,
+                {
+                  projectId,
+                  clsiResponse: body,
+                  statusCode: response.statusCode,
+                }
+              )
+            )
+          }
         }
-      })
+      )
     })
-  }
+  },
 }
 
 module.exports = ClsiManager

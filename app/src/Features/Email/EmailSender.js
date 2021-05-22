@@ -1,6 +1,6 @@
 const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const Settings = require('settings-sharelatex')
 const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
@@ -14,8 +14,8 @@ const EMAIL_SETTINGS = Settings.email || {}
 module.exports = {
   sendEmail: callbackify(sendEmail),
   promises: {
-    sendEmail
-  }
+    sendEmail,
+  },
 }
 
 const client = getClient()
@@ -36,8 +36,8 @@ function getClient() {
       client = nodemailer.createTransport(
         mandrillTransport({
           auth: {
-            apiKey: emailParameters.MandrillApiKey
-          }
+            apiKey: emailParameters.MandrillApiKey,
+          },
         })
       )
     } else {
@@ -48,7 +48,9 @@ function getClient() {
         'port',
         'secure',
         'auth',
-        'ignoreTLS'
+        'ignoreTLS',
+        'logger',
+        'name'
       )
       client = nodemailer.createTransport(smtp)
     }
@@ -59,7 +61,7 @@ function getClient() {
     client = {
       async sendMail(options) {
         logger.log({ options }, 'Would send email if enabled.')
-      }
+      },
     }
   }
   return client
@@ -74,21 +76,21 @@ async function sendEmail(options) {
           sendingUser_id: options.sendingUser_id,
           to: options.to,
           subject: options.subject,
-          canContinue
+          canContinue,
         },
         'rate limit hit for sending email, not sending'
       )
       throw new OError('rate limit hit sending email')
     }
     metrics.inc('email')
-    let sendMailOptions = {
+    const sendMailOptions = {
       to: options.to,
       from: EMAIL_SETTINGS.fromAddress || '',
       subject: options.subject,
       html: options.html,
       text: options.text,
       replyTo: options.replyTo || EMAIL_SETTINGS.replyToAddress,
-      socketTimeout: 30 * 1000
+      socketTimeout: 30 * 1000,
     }
     if (EMAIL_SETTINGS.textEncoding != null) {
       sendMailOptions.textEncoding = EMAIL_SETTINGS.textEncoding
@@ -108,7 +110,7 @@ async function checkCanSendEmail(options) {
     endpointName: 'send_email',
     timeInterval: 60 * 60 * 3,
     subjectName: options.sendingUser_id,
-    throttle: 100
+    throttle: 100,
   }
   const allowed = await RateLimiter.promises.addCount(opts)
   return allowed

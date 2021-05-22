@@ -14,7 +14,7 @@
 import App from '../../base'
 const _cobrandingData = window.brandVariation
 
-export default App.factory('CobrandingDataService', function() {
+export default App.factory('CobrandingDataService', function () {
   const isProjectCobranded = () => _cobrandingData != null
 
   const getLogoImgUrl = () =>
@@ -54,6 +54,6 @@ export default App.factory('CobrandingDataService', function() {
     getPartner,
     hasBrandedMenu,
     getBrandId,
-    getBrandVariationId
+    getBrandVariationId,
   }
 })

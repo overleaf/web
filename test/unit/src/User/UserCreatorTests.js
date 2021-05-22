@@ -1,12 +1,11 @@
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const sinon = require('sinon')
+const { assert } = require('chai')
 
-const assert = chai.assert
 const modulePath = '../../../../app/src/Features/User/UserCreator.js'
 
-describe('UserCreator', function() {
-  beforeEach(function() {
+describe('UserCreator', function () {
+  beforeEach(function () {
     const self = this
     this.user = { _id: '12390i', ace: {} }
     this.user.save = sinon.stub().resolves(self.user)
@@ -16,92 +15,93 @@ describe('UserCreator', function() {
       }
     }
     this.UserCreator = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
-          User: this.UserModel
+          User: this.UserModel,
         },
-        'logger-sharelatex': (this.Logger = {
-          error: sinon.stub()
-        }),
-        'metrics-sharelatex': { timeAsyncMethod() {} },
+        '@overleaf/metrics': { timeAsyncMethod() {} },
         '../../infrastructure/Features': (this.Features = {
-          hasFeature: sinon.stub().returns(false)
+          hasFeature: sinon.stub().returns(false),
         }),
         './UserDeleter': (this.UserDeleter = {
           promises: {
-            deleteNewUser: sinon.stub().resolves()
-          }
+            deleteNewUser: sinon.stub().resolves(),
+          },
         }),
         './UserGetter': (this.UserGetter = {
           promises: {
-            getUser: sinon.stub().resolves(this.user)
-          }
+            getUser: sinon.stub().resolves(this.user),
+          },
         }),
         './UserUpdater': (this.UserUpdater = {
           promises: {
             addAffiliationForNewUser: sinon
               .stub()
               .resolves({ n: 1, nModified: 1, ok: 1 }),
-            updateUser: sinon.stub().resolves()
-          }
-        })
-      }
+            updateUser: sinon.stub().resolves(),
+          },
+        }),
+        '../Analytics/AnalyticsManager': (this.Analytics = {
+          recordEvent: sinon.stub(),
+          setUserProperty: sinon.stub(),
+        }),
+        './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
+          scheduleOnboardingEmail: sinon.stub(),
+        }),
+      },
     })
 
     this.email = 'bob.oswald@gmail.com'
   })
 
-  describe('createNewUser', function() {
-    describe('with callbacks', function() {
-      it('should take the opts and put them in the model', async function() {
+  describe('createNewUser', function () {
+    describe('with callbacks', function () {
+      it('should take the opts and put them in the model', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
-          holdingAccount: true
+          holdingAccount: true,
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
         assert.equal(user.first_name, 'bob.oswald')
       })
 
-      it('should use the start of the email if the first name is empty string', async function() {
+      it('should use the start of the email if the first name is empty string', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          first_name: ''
+          first_name: '',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
         assert.equal(user.first_name, 'bob.oswald')
       })
 
-      it('should use the first name if passed', async function() {
+      it('should use the first name if passed', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          first_name: 'fiiirstname'
+          first_name: 'fiiirstname',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
         assert.equal(user.first_name, 'fiiirstname')
       })
 
-      it('should use the last name if passed', async function() {
+      it('should use the last name if passed', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          last_name: 'lastNammmmeee'
+          last_name: 'lastNammmmeee',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
         assert.equal(user.last_name, 'lastNammmmeee')
       })
 
-      it('should set emails attribute', async function() {
+      it('should set emails attribute', async function () {
         const user = await this.UserCreator.promises.createNewUser({
-          email: this.email
+          email: this.email,
         })
         user.email.should.equal(this.email)
         user.emails.length.should.equal(1)
@@ -110,9 +110,9 @@ describe('UserCreator', function() {
         user.emails[0].reversedHostname.should.equal('moc.liamg')
       })
 
-      describe('with affiliations feature', function() {
+      describe('with affiliations feature', function () {
         let attributes, user
-        beforeEach(function() {
+        beforeEach(function () {
           attributes = { email: this.email }
           this.Features.hasFeature = sinon
             .stub()
@@ -120,16 +120,16 @@ describe('UserCreator', function() {
             .returns(true)
         })
 
-        describe('when v1 affiliations API does not return an error', function() {
-          beforeEach(async function() {
+        describe('when v1 affiliations API does not return an error', function () {
+          beforeEach(async function () {
             user = await this.UserCreator.promises.createNewUser(attributes)
           })
 
-          it('should flag that affiliation is unchecked', function() {
+          it('should flag that affiliation is unchecked', function () {
             user.emails[0].affiliationUnchecked.should.equal(true)
           })
 
-          it('should try to add affiliation to v1', function() {
+          it('should try to add affiliation to v1', function () {
             sinon.assert.calledOnce(
               this.UserUpdater.promises.addAffiliationForNewUser
             )
@@ -140,22 +140,22 @@ describe('UserCreator', function() {
             )
           })
 
-          it('should query for updated user data', function() {
+          it('should query for updated user data', function () {
             sinon.assert.calledOnce(this.UserGetter.promises.getUser)
           })
         })
 
-        describe('when v1 affiliations API does return an error', function() {
-          beforeEach(async function() {
+        describe('when v1 affiliations API does return an error', function () {
+          beforeEach(async function () {
             this.UserUpdater.promises.addAffiliationForNewUser.rejects()
             user = await this.UserCreator.promises.createNewUser(attributes)
           })
 
-          it('should flag that affiliation is unchecked', function() {
+          it('should flag that affiliation is unchecked', function () {
             user.emails[0].affiliationUnchecked.should.equal(true)
           })
 
-          it('should try to add affiliation to v1', function() {
+          it('should try to add affiliation to v1', function () {
             sinon.assert.calledOnce(
               this.UserUpdater.promises.addAffiliationForNewUser
             )
@@ -166,26 +166,26 @@ describe('UserCreator', function() {
             )
           })
 
-          it('should not query for updated user data', function() {
+          it('should not query for updated user data', function () {
             sinon.assert.notCalled(this.UserGetter.promises.getUser)
           })
 
-          it('should log error', function() {
-            sinon.assert.calledOnce(this.Logger.error)
+          it('should log error', function () {
+            sinon.assert.calledOnce(this.logger.error)
           })
         })
 
-        describe('when v1 affiliations API returns an error and requireAffiliation=true', function() {
-          beforeEach(async function() {
+        describe('when v1 affiliations API returns an error and requireAffiliation=true', function () {
+          beforeEach(async function () {
             this.UserUpdater.promises.addAffiliationForNewUser.rejects()
             user = await this.UserCreator.promises.createNewUser(attributes)
           })
 
-          it('should flag that affiliation is unchecked', function() {
+          it('should flag that affiliation is unchecked', function () {
             user.emails[0].affiliationUnchecked.should.equal(true)
           })
 
-          it('should try to add affiliation to v1', function() {
+          it('should try to add affiliation to v1', function () {
             sinon.assert.calledOnce(
               this.UserUpdater.promises.addAffiliationForNewUser
             )
@@ -196,17 +196,17 @@ describe('UserCreator', function() {
             )
           })
 
-          it('should not query for updated user data', function() {
+          it('should not query for updated user data', function () {
             sinon.assert.notCalled(this.UserGetter.promises.getUser)
           })
 
-          it('should log error', function() {
-            sinon.assert.calledOnce(this.Logger.error)
+          it('should log error', function () {
+            sinon.assert.calledOnce(this.logger.error)
           })
         })
       })
 
-      it('should not add affiliation when without affiliation feature', async function() {
+      it('should not add affiliation when without affiliation feature', async function () {
         const attributes = { email: this.email }
         await this.UserCreator.promises.createNewUser(attributes)
         sinon.assert.notCalled(
@@ -215,11 +215,11 @@ describe('UserCreator', function() {
       })
     })
 
-    describe('with promises', function() {
-      it('should take the opts and put them in the model', async function() {
+    describe('with promises', function () {
+      it('should take the opts and put them in the model', async function () {
         const opts = {
           email: this.email,
-          holdingAccount: true
+          holdingAccount: true,
         }
         const user = await this.UserCreator.promises.createNewUser(opts)
         assert.equal(user.email, this.email)
@@ -227,7 +227,7 @@ describe('UserCreator', function() {
         assert.equal(user.first_name, 'bob.oswald')
       })
 
-      it('should add affiliation when with affiliation feature', async function() {
+      it('should add affiliation when with affiliation feature', async function () {
         this.Features.hasFeature = sinon
           .stub()
           .withArgs('affiliations')
@@ -244,7 +244,7 @@ describe('UserCreator', function() {
         )
       })
 
-      it('should not add affiliation when without affiliation feature', async function() {
+      it('should not add affiliation when without affiliation feature', async function () {
         this.Features.hasFeature = sinon.stub().returns(false)
         const attributes = { email: this.email }
         await this.UserCreator.promises.createNewUser(attributes)
@@ -253,13 +253,41 @@ describe('UserCreator', function() {
         )
       })
 
-      it('should include SAML provider ID with email', async function() {
+      it('should include SAML provider ID with email', async function () {
         const attributes = {
           email: this.email,
-          samlIdentifiers: [{ email: this.email, providerId: '1' }]
+          samlIdentifiers: [{ email: this.email, providerId: '1' }],
         }
         const user = await this.UserCreator.promises.createNewUser(attributes)
         assert.equal(user.emails[0].samlProviderId, '1')
+      })
+
+      it('should fire an analytics event and user property on registration', async function () {
+        const user = await this.UserCreator.promises.createNewUser({
+          email: this.email,
+        })
+        assert.equal(user.email, this.email)
+        sinon.assert.calledWith(
+          this.Analytics.recordEvent,
+          user._id,
+          'user-registered'
+        )
+        sinon.assert.calledWith(
+          this.Analytics.setUserProperty,
+          user._id,
+          'created-at'
+        )
+      })
+
+      it('should schedule an onboarding email on registration', async function () {
+        const user = await this.UserCreator.promises.createNewUser({
+          email: this.email,
+        })
+        assert.equal(user.email, this.email)
+        sinon.assert.calledWith(
+          this.UserOnboardingEmailManager.scheduleOnboardingEmail,
+          user
+        )
       })
     })
   })

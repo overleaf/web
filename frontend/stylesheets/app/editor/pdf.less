@@ -13,6 +13,7 @@
   .toolbar-alt-mixin;
   padding-right: 5px;
   &.changes-to-autocompile {
+    // prettier-ignore
     #gradient > .striped(@color: rgba(255, 255, 255, 0.1), @angle: -45deg);
     background-size: @stripe-width @stripe-width;
     .animation(pdf-toolbar-stripes 2s linear infinite);
@@ -83,24 +84,39 @@
 .btn-recompile-group {
   align-self: stretch;
   margin-right: 6px;
-  .btn-recompile {
-    height: 100%;
-    .btn-primary;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    &:first-child {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    &[disabled] {
-      background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
-      .opacity(1);
-    }
+  border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+  background-color: @btn-primary-bg;
+  &.btn-recompile-group-has-changes {
+    // prettier-ignore
+    #gradient > .striped(@color: rgba(255, 255, 255, 0.2), @angle: -45deg);
+    background-size: @stripe-width @stripe-width;
+    .animation(pdf-toolbar-stripes 2s linear infinite);
+  }
+}
+
+.btn-recompile {
+  height: 100%;
+  // .btn-primary;
+  color: #fff;
+  background-color: transparent;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  &:first-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  &[disabled] {
+    background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
+    .opacity(1);
   }
 }
 
 .btn-recompile-label {
   margin-left: @line-height-computed / 4;
+}
+
+.toolbar-text {
+  padding-left: @padding-xs;
 }
 
 .pdf-viewer {
@@ -461,9 +477,43 @@
   }
 }
 
+@editor-and-logs-pane-toolbars-height: @toolbar-small-height + @toolbar-height;
+@btn-small-height: (@padding-small-vertical * 2)+ (@font-size-small *
+      @line-height-small);
+
+#download-dropdown-list,
+#dropdown-files-logs-pane-list {
+  overflow-y: auto;
+  .dropdown-header {
+    white-space: nowrap;
+  }
+}
 #download-dropdown-list {
   max-height: calc(
-    ~'100vh - ' @toolbar-small-height ~' - ' @toolbar-height ~' - ' @margin-md
+    ~'100vh - ' @editor-and-logs-pane-toolbars-height ~' - ' @margin-md
   );
-  overflow-y: auto;
+}
+#dropdown-files-logs-pane-list {
+  max-height: calc(
+    ~'100vh - ' @editor-and-logs-pane-toolbars-height ~' - ' @btn-small-height ~' - '
+      @margin-md
+  );
+}
+
+.toolbar-pdf-expand-btn {
+  .btn-inline-link;
+  margin-left: @margin-xs;
+  color: @toolbar-icon-btn-color;
+  border-radius: @border-radius-small;
+  &:hover {
+    color: @toolbar-icon-btn-hover-color;
+  }
+  &:active {
+    background-color: @link-color;
+    color: #fff;
+  }
+  &:focus {
+    outline: 0;
+    color: #fff;
+  }
 }

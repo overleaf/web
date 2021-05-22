@@ -49,7 +49,7 @@ class AutoCompleteManager {
     this.editor.setOptions({
       enableBasicAutocompletion: true,
       enableSnippets: true,
-      enableLiveAutocompletion: false
+      enableLiveAutocompletion: false,
     })
 
     const CommandCompleter = new CommandManager(this.metadataManager)
@@ -69,12 +69,12 @@ class AutoCompleteManager {
           )
           if (match) {
             // eslint-disable-next-line no-unused-vars
-            let commandName = match[1]
+            const commandName = match[1]
             const graphicsPaths = Preamble.getGraphicsPaths()
             const result = []
-            for (let graphic of Graphics.getGraphicsFiles()) {
+            for (const graphic of Graphics.getGraphicsFiles()) {
               let { path } = graphic
-              for (let graphicsPath of graphicsPaths) {
+              for (const graphicsPath of graphicsPaths) {
                 if (path.indexOf(graphicsPath) === 0) {
                   path = path.slice(graphicsPath.length)
                   break
@@ -84,13 +84,13 @@ class AutoCompleteManager {
                 caption: `\\${commandName}{${path}}`,
                 value: `\\${commandName}{${path}}`,
                 meta: 'graphic',
-                score: 50
+                score: 50,
               })
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const { metadataManager } = this
@@ -103,22 +103,22 @@ class AutoCompleteManager {
             // eslint-disable-next-line no-unused-vars
             const commandName = match[1]
             const result = []
-            for (let file of Files.getTeXFiles()) {
+            for (const file of Files.getTeXFiles()) {
               if (file.id !== this.$scope.docId && !file.deleted && file.path) {
                 const { path } = file
-                let cleanPath = path.replace(/(.+)\.tex$/i, '$1')
+                const cleanPath = path.replace(/(.+)\.tex$/i, '$1')
                 result.push({
                   caption: `\\${commandName}{${path}}`,
                   value: `\\${commandName}{${cleanPath}}`,
                   meta: 'file',
-                  score: 50
+                  score: 50,
                 })
               }
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const LabelsCompleter = {
@@ -138,21 +138,21 @@ class AutoCompleteManager {
                 caption: `\\${commandName}{}`,
                 snippet: `\\${commandName}{}`,
                 meta: 'cross-reference',
-                score: 60
+                score: 60,
               })
             }
-            for (let label of metadataManager.getAllLabels()) {
+            for (const label of metadataManager.getAllLabels()) {
               result.push({
                 caption: `\\${commandName}{${label}}`,
                 value: `\\${commandName}{${label}}`,
                 meta: 'cross-reference',
-                score: 50
+                score: 50,
               })
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const references = this.$scope.$root._references
@@ -176,16 +176,16 @@ class AutoCompleteManager {
               caption: `\\${commandName}{}`,
               snippet: `\\${commandName}{}`,
               meta: 'reference',
-              score: 60
+              score: 60,
             })
             if (references.keys && references.keys.length > 0) {
-              references.keys.forEach(function(key) {
+              references.keys.forEach(function (key) {
                 if (key != null) {
                   result.push({
                     caption: `\\${commandName}{${previousArgsCaption}${key}}`,
                     value: `\\${commandName}{${previousArgs}${key}}`,
                     meta: 'reference',
-                    score: 50
+                    score: 50,
                   })
                 }
               })
@@ -195,7 +195,7 @@ class AutoCompleteManager {
             }
           }
         }
-      }
+      },
     }
 
     this.editor.completers = [
@@ -205,14 +205,14 @@ class AutoCompleteManager {
       ReferencesCompleter,
       LabelsCompleter,
       GraphicsCompleter,
-      FilesCompleter
+      FilesCompleter,
     ]
   }
 
   disable() {
     return this.editor.setOptions({
       enableBasicAutocompletion: false,
-      enableSnippets: false
+      enableSnippets: false,
     })
   }
 
@@ -244,7 +244,7 @@ class AutoCompleteManager {
     // NOTE: this is also the case when a user backspaces over a highlighted
     // region
     if (
-      !change.remote &&
+      change.origin !== 'remote' &&
       change.action === 'insert' &&
       end.row === cursorPosition.row &&
       end.column === cursorPosition.column + 1
@@ -261,7 +261,8 @@ class AutoCompleteManager {
     const match = change.lines[0].match(/\\(\w+){}/)
     if (
       change.action === 'insert' &&
-      (match && match[1]) &&
+      match &&
+      match[1] &&
       // eslint-disable-next-line max-len
       /(begin|end|[a-zA-Z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/.test(
         match[1]
@@ -281,7 +282,7 @@ class AutoCompleteManager {
       // Only override this once since it's global but we may create multiple
       // autocomplete handlers
       Autocomplete.prototype._insertMatch = Autocomplete.prototype.insertMatch
-      Autocomplete.prototype.insertMatch = function(data) {
+      Autocomplete.prototype.insertMatch = function (data) {
         const { editor } = this
 
         const pos = editor.getCursorPosition()
@@ -402,7 +403,7 @@ class AutoCompleteManager {
               } else {
                 editor.execCommand('insertstring', matchData.value || matchData)
               }
-            }
+            },
           }
         }
 
@@ -413,7 +414,6 @@ class AutoCompleteManager {
       Autocomplete.startCommand = {
         name: 'startAutocomplete',
         exec: editor => {
-          let filtered
           if (!editor.completer) {
             editor.completer = new Autocomplete()
           }
@@ -428,7 +428,7 @@ class AutoCompleteManager {
           )
           container.css({ 'font-size': this.$scope.fontSize + 'px' })
           // Dynamically set width of autocomplete popup
-          filtered =
+          const filtered =
             editor.completer.completions &&
             editor.completer.completions.filtered
           if (filtered) {
@@ -453,11 +453,11 @@ class AutoCompleteManager {
             editor.completer.detach()
           }
         },
-        bindKey: 'Ctrl-Space|Ctrl-Shift-Space|Alt-Space'
+        bindKey: 'Ctrl-Space|Ctrl-Shift-Space|Alt-Space',
       }
     }
 
-    Util.retrievePrecedingIdentifier = function(text, pos, regex) {
+    Util.retrievePrecedingIdentifier = function (text, pos, regex) {
       let currentLineOffset = 0
       for (let i = pos - 1; i <= 0; i++) {
         if (text[i] === '\n') {

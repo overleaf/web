@@ -1,15 +1,3 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import LogParser from 'libs/latex-log-parser'
 import ruleset from './HumanReadableLogsRules'
 
@@ -22,8 +10,8 @@ export default {
       parsedLogEntries = rawLog
     }
 
-    const _getRule = function(logMessage) {
-      for (let rule of Array.from(ruleset)) {
+    const _getRule = function (logMessage) {
+      for (const rule of ruleset) {
         if (rule.regexToMatch.test(logMessage)) {
           return rule
         }
@@ -32,7 +20,7 @@ export default {
 
     const seenErrorTypes = {} // keep track of types of errors seen
 
-    for (let entry of Array.from(parsedLogEntries.all)) {
+    for (const entry of parsedLogEntries.all) {
       const ruleDetails = _getRule(entry.message)
 
       if (ruleDetails != null) {
@@ -53,7 +41,7 @@ export default {
         }
         // suppress any entries that are known to cascade from previous error types
         if (ruleDetails.cascadesFrom != null) {
-          for (type of Array.from(ruleDetails.cascadesFrom)) {
+          for (type of ruleDetails.cascadesFrom) {
             if (seenErrorTypes[type]) {
               entry.suppressed = true
             }
@@ -61,7 +49,7 @@ export default {
         }
         // record the types of errors seen
         if (ruleDetails.types != null) {
-          for (type of Array.from(ruleDetails.types)) {
+          for (type of ruleDetails.types) {
             seenErrorTypes[type] = true
           }
         }
@@ -69,6 +57,12 @@ export default {
         if (ruleDetails.humanReadableHint != null) {
           entry.humanReadableHint = ruleDetails.humanReadableHint
         }
+
+        if (ruleDetails.humanReadableHintComponent != null) {
+          entry.humanReadableHintComponent =
+            ruleDetails.humanReadableHintComponent
+        }
+
         if (ruleDetails.extraInfoURL != null) {
           entry.extraInfoURL = ruleDetails.extraInfoURL
         }
@@ -76,7 +70,7 @@ export default {
     }
 
     // filter out the suppressed errors (from the array entries in parsedLogEntries)
-    for (let key in parsedLogEntries) {
+    for (const key in parsedLogEntries) {
       const errors = parsedLogEntries[key]
       if (typeof errors === 'object' && errors.length > 0) {
         parsedLogEntries[key] = Array.from(errors).filter(
@@ -86,5 +80,5 @@ export default {
     }
 
     return parsedLogEntries
-  }
+  },
 }

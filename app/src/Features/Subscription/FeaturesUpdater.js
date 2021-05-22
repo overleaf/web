@@ -12,13 +12,40 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
 
 const FeaturesUpdater = {
-  refreshFeatures(userId, callback = () => {}) {
-    FeaturesUpdater._computeFeatures(userId, (error, features) => {
-      if (error) {
-        return callback(error)
+  refreshFeatures(userId, reason, callback = () => {}) {
+    UserGetter.getUser(userId, { _id: 1, features: 1 }, (err, user) => {
+      if (err) {
+        return callback(err)
       }
-      logger.log({ userId, features }, 'updating user features')
-      UserFeaturesUpdater.updateFeatures(userId, features, callback)
+      const oldFeatures = _.clone(user.features)
+      FeaturesUpdater._computeFeatures(userId, (error, features) => {
+        if (error) {
+          return callback(error)
+        }
+        logger.log({ userId, features }, 'updating user features')
+        UserFeaturesUpdater.updateFeatures(
+          userId,
+          features,
+          (err, newFeatures, featuresChanged) => {
+            if (err) {
+              return callback(err)
+            }
+            if (oldFeatures.dropbox === true && features.dropbox === false) {
+              logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
+              const Modules = require('../../infrastructure/Modules')
+              Modules.hooks.fire('removeDropbox', userId, reason, err => {
+                if (err) {
+                  logger.error(err)
+                }
+
+                return callback(null, newFeatures, featuresChanged)
+              })
+            } else {
+              return callback(null, newFeatures, featuresChanged)
+            }
+          }
+        )
+      })
     })
   },
 
@@ -39,20 +66,17 @@ const FeaturesUpdater = {
       bonusFeatures(cb) {
         ReferalFeatures.getBonusFeatures(userId, cb)
       },
-      samlFeatures(cb) {
-        FeaturesUpdater._getSamlFeatures(userId, cb)
-      },
       featuresOverrides(cb) {
         FeaturesUpdater._getFeaturesOverrides(userId, cb)
-      }
+      },
     }
-    async.series(jobs, function(err, results) {
+    async.series(jobs, function (err, results) {
       if (err) {
         OError.tag(
           err,
           'error getting subscription or group for refreshFeatures',
           {
-            userId
+            userId,
           }
         )
         return callback(err)
@@ -64,8 +88,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        samlFeatures,
-        featuresOverrides
+        featuresOverrides,
       } = results
       logger.log(
         {
@@ -75,8 +98,7 @@ const FeaturesUpdater = {
           institutionFeatures,
           v1Features,
           bonusFeatures,
-          samlFeatures,
-          featuresOverrides
+          featuresOverrides,
         },
         'merging user features'
       )
@@ -85,8 +107,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        samlFeatures,
-        featuresOverrides
+        featuresOverrides,
       ])
       const features = _.reduce(
         featureSets,
@@ -109,30 +130,6 @@ const FeaturesUpdater = {
     )
   },
 
-  _getSamlFeatures(userId, callback) {
-    UserGetter.getUser(userId, (err, user) => {
-      if (err) {
-        return callback(err)
-      }
-      if (
-        !user ||
-        !Array.isArray(user.samlIdentifiers) ||
-        !user.samlIdentifiers.length
-      ) {
-        return callback(null, {})
-      }
-      for (const samlIdentifier of user.samlIdentifiers) {
-        if (samlIdentifier && samlIdentifier.hasEntitlement) {
-          return callback(
-            null,
-            FeaturesUpdater._planCodeToFeatures('professional')
-          )
-        }
-      }
-      callback(null, {})
-    })
-  },
-
   _getFeaturesOverrides(userId, callback) {
     UserGetter.getUser(userId, { featuresOverrides: 1 }, (error, user) => {
       if (error) {
@@ -145,8 +142,8 @@ const FeaturesUpdater = {
       ) {
         return callback(null, {})
       }
-      let activeFeaturesOverrides = []
-      for (let featuresOverride of user.featuresOverrides) {
+      const activeFeaturesOverrides = []
+      for (const featuresOverride of user.featuresOverrides) {
         if (
           !featuresOverride.expiresAt ||
           featuresOverride.expiresAt > new Date()
@@ -164,57 +161,53 @@ const FeaturesUpdater = {
   },
 
   _getV1Features(userId, callback) {
-    V1SubscriptionManager.getPlanCodeFromV1(userId, function(
-      err,
-      planCode,
-      v1Id
-    ) {
-      if (err) {
-        if ((err ? err.name : undefined) === 'NotFoundError') {
-          return callback(null, [])
+    V1SubscriptionManager.getPlanCodeFromV1(
+      userId,
+      function (err, planCode, v1Id) {
+        if (err) {
+          if ((err ? err.name : undefined) === 'NotFoundError') {
+            return callback(null, [])
+          }
+          return callback(err)
         }
-        return callback(err)
-      }
 
-      callback(
-        err,
-        FeaturesUpdater._mergeFeatures(
-          V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
-          FeaturesUpdater._planCodeToFeatures(planCode)
+        callback(
+          err,
+          FeaturesUpdater._mergeFeatures(
+            V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
+            FeaturesUpdater._planCodeToFeatures(planCode)
+          )
         )
-      )
-    })
+      }
+    )
   },
 
   _mergeFeatures(featuresA, featuresB) {
     const features = Object.assign({}, featuresA)
-    for (let key in featuresB) {
+    for (const key in featuresB) {
       // Special merging logic for non-boolean features
       if (key === 'compileGroup') {
         if (
-          features['compileGroup'] === 'priority' ||
-          featuresB['compileGroup'] === 'priority'
+          features.compileGroup === 'priority' ||
+          featuresB.compileGroup === 'priority'
         ) {
-          features['compileGroup'] = 'priority'
+          features.compileGroup = 'priority'
         } else {
-          features['compileGroup'] = 'standard'
+          features.compileGroup = 'standard'
         }
       } else if (key === 'collaborators') {
-        if (
-          features['collaborators'] === -1 ||
-          featuresB['collaborators'] === -1
-        ) {
-          features['collaborators'] = -1
+        if (features.collaborators === -1 || featuresB.collaborators === -1) {
+          features.collaborators = -1
         } else {
-          features['collaborators'] = Math.max(
-            features['collaborators'] || 0,
-            featuresB['collaborators'] || 0
+          features.collaborators = Math.max(
+            features.collaborators || 0,
+            featuresB.collaborators || 0
           )
         }
       } else if (key === 'compileTimeout') {
-        features['compileTimeout'] = Math.max(
-          features['compileTimeout'] || 0,
-          featuresB['compileTimeout'] || 0
+        features.compileTimeout = Math.max(
+          features.compileTimeout || 0,
+          featuresB.compileTimeout || 0
         )
       } else {
         // Boolean keys, true is better
@@ -249,12 +242,12 @@ const FeaturesUpdater = {
       return {}
     }
 
-    let mismatchReasons = {}
+    const mismatchReasons = {}
     const featureKeys = [
       ...new Set([
         ...Object.keys(currentFeatures),
-        ...Object.keys(expectedFeatures)
-      ])
+        ...Object.keys(expectedFeatures),
+      ]),
     ]
     featureKeys.sort().forEach(key => {
       if (expectedFeatures[key] !== currentFeatures[key]) {
@@ -286,33 +279,35 @@ const FeaturesUpdater = {
 
   doSyncFromV1(v1UserId, callback) {
     logger.log({ v1UserId }, '[AccountSync] starting account sync')
-    return UserGetter.getUser({ 'overleaf.id': v1UserId }, { _id: 1 }, function(
-      err,
-      user
-    ) {
-      if (err != null) {
-        OError.tag(err, '[AccountSync] error getting user', {
-          v1UserId
-        })
-        return callback(err)
+    return UserGetter.getUser(
+      { 'overleaf.id': v1UserId },
+      { _id: 1 },
+      function (err, user) {
+        if (err != null) {
+          OError.tag(err, '[AccountSync] error getting user', {
+            v1UserId,
+          })
+          return callback(err)
+        }
+        if ((user != null ? user._id : undefined) == null) {
+          logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
+          return callback(null)
+        }
+        logger.log(
+          { v1UserId, userId: user._id },
+          '[AccountSync] updating user subscription and features'
+        )
+        return FeaturesUpdater.refreshFeatures(user._id, 'sync-v1', callback)
       }
-      if ((user != null ? user._id : undefined) == null) {
-        logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
-        return callback(null)
-      }
-      logger.log(
-        { v1UserId, userId: user._id },
-        '[AccountSync] updating user subscription and features'
-      )
-      return FeaturesUpdater.refreshFeatures(user._id, callback)
-    })
-  }
+    )
+  },
 }
 
-const refreshFeaturesPromise = userId =>
-  new Promise(function(resolve, reject) {
+const refreshFeaturesPromise = (userId, reason) =>
+  new Promise(function (resolve, reject) {
     FeaturesUpdater.refreshFeatures(
       userId,
+      reason,
       (error, features, featuresChanged) => {
         if (error) {
           reject(error)
@@ -324,7 +319,7 @@ const refreshFeaturesPromise = userId =>
   })
 
 FeaturesUpdater.promises = {
-  refreshFeatures: refreshFeaturesPromise
+  refreshFeatures: refreshFeaturesPromise,
 }
 
 module.exports = FeaturesUpdater

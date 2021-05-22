@@ -25,8 +25,8 @@ module.exports = {
     deleteMongoUser: deleteMongoUser,
     expireDeletedUser: expireDeletedUser,
     ensureCanDeleteUser: ensureCanDeleteUser,
-    expireDeletedUsersAfterDuration: expireDeletedUsersAfterDuration
-  }
+    expireDeletedUsersAfterDuration: expireDeletedUsersAfterDuration,
+  },
 }
 
 async function deleteUser(userId, options = {}) {
@@ -36,7 +36,7 @@ async function deleteUser(userId, options = {}) {
   }
 
   try {
-    let user = await User.findById(userId).exec()
+    const user = await User.findById(userId).exec()
     logger.log({ user }, 'deleting user')
 
     await ensureCanDeleteUser(user)
@@ -62,8 +62,8 @@ async function deleteMongoUser(userId) {
 }
 
 async function expireDeletedUser(userId) {
-  let deletedUser = await DeletedUser.findOne({
-    'deleterData.deletedUserId': userId
+  const deletedUser = await DeletedUser.findOne({
+    'deleterData.deletedUserId': userId,
   }).exec()
 
   deletedUser.user = undefined
@@ -73,13 +73,13 @@ async function expireDeletedUser(userId) {
 
 async function expireDeletedUsersAfterDuration() {
   const DURATION = 90
-  let deletedUsers = await DeletedUser.find({
+  const deletedUsers = await DeletedUser.find({
     'deleterData.deletedAt': {
-      $lt: new Date(moment().subtract(DURATION, 'days'))
+      $lt: new Date(moment().subtract(DURATION, 'days')),
     },
     user: {
-      $ne: null
-    }
+      $ne: null,
+    },
   }).exec()
 
   if (deletedUsers.length === 0) {
@@ -101,7 +101,7 @@ async function ensureCanDeleteUser(user) {
 }
 
 async function _createDeletedUser(user, options) {
-  await DeletedUser.update(
+  await DeletedUser.updateOne(
     { 'deleterData.deletedUserId': user._id },
     {
       user: user,
@@ -116,8 +116,8 @@ async function _createDeletedUser(user, options) {
         deletedUserReferralId: user.referal_id,
         deletedUserReferredUsers: user.refered_users,
         deletedUserReferredUserCount: user.refered_user_count,
-        deletedUserOverleafId: user.overleaf ? user.overleaf.id : undefined
-      }
+        deletedUserOverleafId: user.overleaf ? user.overleaf.id : undefined,
+      },
     },
     { upsert: true }
   )

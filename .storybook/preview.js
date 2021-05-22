@@ -1,8 +1,6 @@
 import React from 'react'
 
-const DefaultTheme = React.lazy(() => import('./default-theme'))
-const LightTheme = React.lazy(() => import('./light-theme'))
-const IEEETheme = React.lazy(() => import('./ieee-theme'))
+import './preview.css'
 
 // Storybook does not (currently) support async loading of "stories". Therefore
 // the strategy in frontend/js/i18n.js does not work (because we cannot wait on
@@ -16,50 +14,115 @@ i18n.use(initReactI18next).init({
   lng: 'en',
 
   resources: {
-    en: { translation: en }
+    en: { translation: en },
   },
 
   react: {
-    useSuspense: false
+    useSuspense: false,
   },
 
   interpolation: {
     prefix: '__',
     suffix: '__',
     unescapeSuffix: 'HTML',
-    skipOnVariables: true
-  }
+    skipOnVariables: true,
+    defaultVariables: {
+      appName: 'Overleaf',
+    },
+  },
 })
 
 export const parameters = {
   // Automatically mark prop-types like onClick, onToggle, etc as Storybook
   // "actions", so that they are logged in the Actions pane at the bottom of the
   // viewer
-  actions: { argTypesRegex: '^on.*' }
+  actions: { argTypesRegex: '^on.*' },
+  docs: {
+    // render stories in iframes, to isolate modals
+    inlineStories: false,
+  },
 }
 
 export const globalTypes = {
   theme: {
     name: 'Theme',
     description: 'Editor theme',
-    defaultValue: 'default',
+    defaultValue: 'default-',
     toolbar: {
       icon: 'circlehollow',
-      items: ['default', 'light', 'IEEE']
-    }
-  }
+      items: [
+        { value: 'default-', title: 'Default' },
+        { value: 'light-', title: 'Light' },
+        { value: 'ieee-', title: 'IEEE' },
+      ],
+    },
+  },
 }
 
+export const loaders = [
+  async ({ globals }) => {
+    const { theme } = globals
+
+    return {
+      // NOTE: this uses `${theme}style.less` rather than `${theme}.less`
+      // so that webpack only bundles files ending with "style.less"
+      activeStyle: await import(
+        `../frontend/stylesheets/${theme === 'default-' ? '' : theme}style.less`
+      ),
+    }
+  },
+]
+
 const withTheme = (Story, context) => {
+  const { activeStyle } = context.loaded
+
   return (
     <>
-      <React.Suspense fallback={<></>}>
-        {context.globals.theme === 'default' && <DefaultTheme />}
-        {context.globals.theme === 'light' && <LightTheme />}
-        {context.globals.theme === 'IEEE' && <IEEETheme />}
-      </React.Suspense>
+      {activeStyle && <style>{activeStyle.default}</style>}
       <Story {...context} />
     </>
   )
 }
+
 export const decorators = [withTheme]
+
+window.ExposedSettings = {
+  maxEntitiesPerProject: 10,
+  maxUploadSize: 5 * 1024 * 1024,
+  enableSubscriptions: true,
+  textExtensions: [
+    'tex',
+    'latex',
+    'sty',
+    'cls',
+    'bst',
+    'bib',
+    'bibtex',
+    'txt',
+    'tikz',
+    'mtx',
+    'rtex',
+    'md',
+    'asy',
+    'latexmkrc',
+    'lbx',
+    'bbx',
+    'cbx',
+    'm',
+    'lco',
+    'dtx',
+    'ins',
+    'ist',
+    'def',
+    'clo',
+    'ldf',
+    'rmd',
+    'lua',
+    'gv',
+    'mf',
+  ],
+}
+
+window.user = {
+  id: 'storybook',
+}

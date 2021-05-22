@@ -10,11 +10,15 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../base'
+import getMeta from '../../utils/meta'
 
-export default App.controller('TeamInviteController', function($scope, $http) {
+export default App.controller('TeamInviteController', function ($scope, $http) {
   $scope.inflight = false
+  const hasIndividualRecurlySubscription = getMeta(
+    'ol-hasIndividualRecurlySubscription'
+  )
 
-  if (window.hasIndividualRecurlySubscription) {
+  if (hasIndividualRecurlySubscription) {
     $scope.view = 'hasIndividualRecurlySubscription'
   } else {
     $scope.view = 'teamInvite'
@@ -22,12 +26,12 @@ export default App.controller('TeamInviteController', function($scope, $http) {
 
   $scope.keepPersonalSubscription = () => ($scope.view = 'teamInvite')
 
-  $scope.cancelPersonalSubscription = function() {
+  $scope.cancelPersonalSubscription = function () {
     $scope.inflight = true
     const request = $http.post('/user/subscription/cancel', {
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
-    request.then(function() {
+    request.then(function () {
       $scope.inflight = false
       return ($scope.view = 'teamInvite')
     })
@@ -38,12 +42,13 @@ export default App.controller('TeamInviteController', function($scope, $http) {
     })
   }
 
-  return ($scope.joinTeam = function() {
+  return ($scope.joinTeam = function () {
     $scope.inflight = true
-    const request = $http.put(`/subscription/invites/${window.inviteToken}/`, {
-      _csrf: window.csrfToken
+    const inviteToken = getMeta('ol-inviteToken')
+    const request = $http.put(`/subscription/invites/${inviteToken}/`, {
+      _csrf: window.csrfToken,
     })
-    request.then(function(response) {
+    request.then(function (response) {
       const { status } = response
       $scope.inflight = false
       $scope.view = 'inviteAccepted'

@@ -1,10 +1,9 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
     node/no-deprecated-api,
-    standard/no-callback-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -30,7 +29,7 @@ const { promisify } = require('util')
 
 function updateAccountEmailAddress(accountId, newEmail, callback) {
   const data = {
-    email: newEmail
+    email: newEmail,
   }
   const requestBody = RecurlyWrapper._buildXml('account', data)
 
@@ -38,7 +37,7 @@ function updateAccountEmailAddress(accountId, newEmail, callback) {
     {
       url: `accounts/${accountId}`,
       method: 'PUT',
-      body: requestBody
+      body: requestBody,
     },
     (error, response, body) => {
       if (error != null) {
@@ -64,15 +63,15 @@ const RecurlyWrapper = {
         {
           url: `accounts/${user._id}`,
           method: 'GET',
-          expect404: true
+          expect404: true,
         },
-        function(error, response, responseBody) {
+        function (error, response, responseBody) {
           if (error) {
             OError.tag(
               error,
               'error response from recurly while checking account',
               {
-                user_id: user._id
+                user_id: user._id,
               }
             )
             return next(error)
@@ -87,20 +86,20 @@ const RecurlyWrapper = {
             return next(null, cache)
           }
           logger.log({ user_id: user._id }, 'user appears to exist in recurly')
-          return RecurlyWrapper._parseAccountXml(responseBody, function(
-            err,
-            account
-          ) {
-            if (err) {
-              OError.tag(err, 'error parsing account', {
-                user_id: user._id
-              })
-              return next(err)
+          return RecurlyWrapper._parseAccountXml(
+            responseBody,
+            function (err, account) {
+              if (err) {
+                OError.tag(err, 'error parsing account', {
+                  user_id: user._id,
+                })
+                return next(err)
+              }
+              cache.userExists = true
+              cache.account = account
+              return next(null, cache)
             }
-            cache.userExists = true
-            cache.account = account
-            return next(null, cache)
-          })
+          )
         }
       )
     },
@@ -122,7 +121,7 @@ const RecurlyWrapper = {
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
-        address
+        address,
       }
       const requestBody = RecurlyWrapper._buildXml('account', data)
 
@@ -130,7 +129,7 @@ const RecurlyWrapper = {
         {
           url: 'accounts',
           method: 'POST',
-          body: requestBody
+          body: requestBody,
         },
         (error, response, responseBody) => {
           if (error) {
@@ -138,24 +137,24 @@ const RecurlyWrapper = {
               error,
               'error response from recurly while creating account',
               {
-                user_id: user._id
+                user_id: user._id,
               }
             )
             return next(error)
           }
-          return RecurlyWrapper._parseAccountXml(responseBody, function(
-            err,
-            account
-          ) {
-            if (err) {
-              OError.tag(err, 'error creating account', {
-                user_id: user._id
-              })
-              return next(err)
+          return RecurlyWrapper._parseAccountXml(
+            responseBody,
+            function (err, account) {
+              if (err) {
+                OError.tag(err, 'error creating account', {
+                  user_id: user._id,
+                })
+                return next(err)
+              }
+              cache.account = account
+              return next(null, cache)
             }
-            cache.account = account
-            return next(null, cache)
-          })
+          )
         }
       )
     },
@@ -177,7 +176,7 @@ const RecurlyWrapper = {
         {
           url: `accounts/${accountCode}/billing_info`,
           method: 'POST',
-          body: requestBody
+          body: requestBody,
         },
         (error, response, responseBody) => {
           if (error) {
@@ -185,25 +184,25 @@ const RecurlyWrapper = {
               error,
               'error response from recurly while creating billing info',
               {
-                user_id: user._id
+                user_id: user._id,
               }
             )
             return next(error)
           }
-          return RecurlyWrapper._parseBillingInfoXml(responseBody, function(
-            err,
-            billingInfo
-          ) {
-            if (err) {
-              OError.tag(err, 'error creating billing info', {
-                user_id: user._id,
-                accountCode
-              })
-              return next(err)
+          return RecurlyWrapper._parseBillingInfoXml(
+            responseBody,
+            function (err, billingInfo) {
+              if (err) {
+                OError.tag(err, 'error creating billing info', {
+                  user_id: user._id,
+                  accountCode,
+                })
+                return next(err)
+              }
+              cache.billingInfo = billingInfo
+              return next(null, cache)
             }
-            cache.billingInfo = billingInfo
-            return next(null, cache)
-          })
+          )
         }
       )
     },
@@ -243,7 +242,7 @@ const RecurlyWrapper = {
         {
           url: `accounts/${accountCode}/billing_info`,
           method: 'PUT',
-          body: requestBody
+          body: requestBody,
         },
         (error, response, responseBody) => {
           if (error) {
@@ -251,24 +250,24 @@ const RecurlyWrapper = {
               error,
               'error response from recurly while setting address',
               {
-                user_id: user._id
+                user_id: user._id,
               }
             )
             return next(error)
           }
-          return RecurlyWrapper._parseBillingInfoXml(responseBody, function(
-            err,
-            billingInfo
-          ) {
-            if (err) {
-              OError.tag(err, 'error updating billing info', {
-                user_id: user._id
-              })
-              return next(err)
+          return RecurlyWrapper._parseBillingInfoXml(
+            responseBody,
+            function (err, billingInfo) {
+              if (err) {
+                OError.tag(err, 'error updating billing info', {
+                  user_id: user._id,
+                })
+                return next(err)
+              }
+              cache.billingInfo = billingInfo
+              return next(null, cache)
             }
-            cache.billingInfo = billingInfo
-            return next(null, cache)
-          })
+          )
         }
       )
     },
@@ -281,8 +280,8 @@ const RecurlyWrapper = {
         currency: subscriptionDetails.currencyCode,
         coupon_code: subscriptionDetails.coupon_code,
         account: {
-          account_code: user._id
-        }
+          account_code: user._id,
+        },
       }
       const customFields = getCustomFieldsFromSubscriptionDetails(
         subscriptionDetails
@@ -296,7 +295,7 @@ const RecurlyWrapper = {
         {
           url: 'subscriptions',
           method: 'POST',
-          body: requestBody
+          body: requestBody,
         },
         (error, response, responseBody) => {
           if (error) {
@@ -304,27 +303,27 @@ const RecurlyWrapper = {
               error,
               'error response from recurly while creating subscription',
               {
-                user_id: user._id
+                user_id: user._id,
               }
             )
             return next(error)
           }
-          return RecurlyWrapper._parseSubscriptionXml(responseBody, function(
-            err,
-            subscription
-          ) {
-            if (err) {
-              OError.tag(err, 'error creating subscription', {
-                user_id: user._id
-              })
-              return next(err)
+          return RecurlyWrapper._parseSubscriptionXml(
+            responseBody,
+            function (err, subscription) {
+              if (err) {
+                OError.tag(err, 'error creating subscription', {
+                  user_id: user._id,
+                })
+                return next(err)
+              }
+              cache.subscription = subscription
+              return next(null, cache)
             }
-            cache.subscription = subscription
-            return next(null, cache)
-          })
+          )
         }
       )
-    }
+    },
   },
 
   _createPaypalSubscription(
@@ -347,19 +346,19 @@ const RecurlyWrapper = {
         RecurlyWrapper._paypal.createAccount,
         RecurlyWrapper._paypal.createBillingInfo,
         RecurlyWrapper._paypal.setAddressAndCompanyBillingInfo,
-        RecurlyWrapper._paypal.createSubscription
+        RecurlyWrapper._paypal.createSubscription,
       ],
-      function(err, result) {
+      function (err, result) {
         if (err) {
           OError.tag(err, 'error in paypal subscription creation process', {
-            user_id: user._id
+            user_id: user._id,
           })
           return callback(err)
         }
         if (!result.subscription) {
           err = new Error('no subscription object in result')
           OError.tag(err, 'error in paypal subscription creation process', {
-            user_id: user._id
+            user_id: user._id,
           })
           return callback(err)
         }
@@ -388,9 +387,9 @@ const RecurlyWrapper = {
         first_name: subscriptionDetails.first_name || user.first_name,
         last_name: subscriptionDetails.last_name || user.last_name,
         billing_info: {
-          token_id: recurlyTokenIds.billing
-        }
-      }
+          token_id: recurlyTokenIds.billing,
+        },
+      },
     }
     if (recurlyTokenIds.threeDSecureActionResult) {
       data.account.billing_info.three_d_secure_action_result_token_id =
@@ -409,7 +408,7 @@ const RecurlyWrapper = {
         url: 'subscriptions',
         method: 'POST',
         body: requestBody,
-        expect422: true
+        expect422: true,
       },
       (error, response, responseBody) => {
         if (error != null) {
@@ -445,12 +444,12 @@ const RecurlyWrapper = {
       )}`,
       Accept: 'application/xml',
       'Content-Type': 'application/xml; charset=utf-8',
-      'X-Api-Version': Settings.apis.recurly.apiVersion
+      'X-Api-Version': Settings.apis.recurly.apiVersion,
     }
     const { expect404, expect422 } = options
     delete options.expect404
     delete options.expect422
-    return request(options, function(error, response, body) {
+    return request(options, function (error, response, body) {
       if (
         error == null &&
         response.statusCode !== 200 &&
@@ -464,7 +463,7 @@ const RecurlyWrapper = {
             err: error,
             body,
             options,
-            statusCode: response != null ? response.statusCode : undefined
+            statusCode: response != null ? response.statusCode : undefined,
           },
           'error returned from recurly'
         )
@@ -478,7 +477,7 @@ const RecurlyWrapper = {
   getSubscriptions(accountId, callback) {
     return RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${accountId}/subscriptions`
+        url: `accounts/${accountId}/subscriptions`,
       },
       (error, response, body) => {
         if (error != null) {
@@ -506,7 +505,7 @@ const RecurlyWrapper = {
 
     return RecurlyWrapper.apiRequest(
       {
-        url
+        url,
       },
       (error, response, body) => {
         if (error != null) {
@@ -533,16 +532,16 @@ const RecurlyWrapper = {
                 )
               }
 
-              return RecurlyWrapper.getAccount(accountId, function(
-                error,
-                account
-              ) {
-                if (error != null) {
-                  return callback(error)
+              return RecurlyWrapper.getAccount(
+                accountId,
+                function (error, account) {
+                  if (error != null) {
+                    return callback(error)
+                  }
+                  recurlySubscription.account = account
+                  return callback(null, recurlySubscription)
                 }
-                recurlySubscription.account = account
-                return callback(null, recurlySubscription)
-              })
+              )
             } else {
               return callback(null, recurlySubscription)
             }
@@ -558,7 +557,7 @@ const RecurlyWrapper = {
     var getPage = (cursor = null) => {
       const opts = {
         url: resource,
-        qs: queryParams
+        qs: queryParams,
       }
       if (cursor != null) {
         opts.qs.cursor = cursor
@@ -567,7 +566,7 @@ const RecurlyWrapper = {
         if (error != null) {
           return callback(error)
         }
-        return RecurlyWrapper._parseXml(body, function(err, data) {
+        return RecurlyWrapper._parseXml(body, function (err, data) {
           if (err != null) {
             logger.warn({ err }, 'could not get accoutns')
             callback(err)
@@ -599,7 +598,7 @@ const RecurlyWrapper = {
   getAccount(accountId, callback) {
     return RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${accountId}`
+        url: `accounts/${accountId}`,
       },
       (error, response, body) => {
         if (error != null) {
@@ -615,35 +614,36 @@ const RecurlyWrapper = {
   getAccountActiveCoupons(accountId, callback) {
     return RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${accountId}/redemptions`
+        url: `accounts/${accountId}/redemptions`,
       },
       (error, response, body) => {
         if (error != null) {
           return callback(error)
         }
-        return RecurlyWrapper._parseRedemptionsXml(body, function(
-          error,
-          redemptions
-        ) {
-          if (error != null) {
-            return callback(error)
-          }
-          const activeRedemptions = redemptions.filter(
-            redemption => redemption.state === 'active'
-          )
-          const couponCodes = activeRedemptions.map(
-            redemption => redemption.coupon_code
-          )
-          return Async.map(couponCodes, RecurlyWrapper.getCoupon, function(
-            error,
-            coupons
-          ) {
+        return RecurlyWrapper._parseRedemptionsXml(
+          body,
+          function (error, redemptions) {
             if (error != null) {
               return callback(error)
             }
-            return callback(null, coupons)
-          })
-        })
+            const activeRedemptions = redemptions.filter(
+              redemption => redemption.state === 'active'
+            )
+            const couponCodes = activeRedemptions.map(
+              redemption => redemption.coupon_code
+            )
+            return Async.map(
+              couponCodes,
+              RecurlyWrapper.getCoupon,
+              function (error, coupons) {
+                if (error != null) {
+                  return callback(error)
+                }
+                return callback(null, coupons)
+              }
+            )
+          }
+        )
       }
     )
   },
@@ -658,7 +658,7 @@ const RecurlyWrapper = {
   getBillingInfo(accountId, callback) {
     return RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${accountId}/billing_info`
+        url: `accounts/${accountId}/billing_info`,
       },
       (error, response, body) => {
         if (error != null) {
@@ -672,7 +672,7 @@ const RecurlyWrapper = {
   getAccountPastDueInvoices(accountId, callback) {
     RecurlyWrapper.apiRequest(
       {
-        url: `accounts/${accountId}/invoices?state=past_due`
+        url: `accounts/${accountId}/invoices?state=past_due`,
       },
       (error, response, body) => {
         if (error) {
@@ -687,7 +687,7 @@ const RecurlyWrapper = {
     RecurlyWrapper.apiRequest(
       {
         url: `invoices/${invoiceId}/collect`,
-        method: 'put'
+        method: 'put',
       },
       callback
     )
@@ -700,7 +700,7 @@ const RecurlyWrapper = {
     )
     const data = {
       plan_code: options.plan_code,
-      timeframe: options.timeframe
+      timeframe: options.timeframe,
     }
     const requestBody = RecurlyWrapper._buildXml('subscription', data)
 
@@ -708,7 +708,7 @@ const RecurlyWrapper = {
       {
         url: `subscriptions/${subscriptionId}`,
         method: 'put',
-        body: requestBody
+        body: requestBody,
       },
       (error, response, responseBody) => {
         if (error != null) {
@@ -733,9 +733,9 @@ const RecurlyWrapper = {
       discount_type: 'dollars',
       discount_in_cents: {},
       plan_codes: {
-        plan_code
+        plan_code,
       },
-      applies_to_all_plans: false
+      applies_to_all_plans: false,
     }
     data.discount_in_cents[currencyCode] = discount_in_cents
     const requestBody = RecurlyWrapper._buildXml('coupon', data)
@@ -745,7 +745,7 @@ const RecurlyWrapper = {
       {
         url: 'coupons',
         method: 'post',
-        body: requestBody
+        body: requestBody,
       },
       (error, response, responseBody) => {
         if (error != null) {
@@ -759,7 +759,7 @@ const RecurlyWrapper = {
   lookupCoupon(coupon_code, callback) {
     return RecurlyWrapper.apiRequest(
       {
-        url: `coupons/${coupon_code}`
+        url: `coupons/${coupon_code}`,
       },
       (error, response, body) => {
         if (error != null) {
@@ -770,53 +770,10 @@ const RecurlyWrapper = {
     )
   },
 
-  cancelSubscription(subscriptionId, callback) {
-    logger.log({ subscriptionId }, 'telling recurly to cancel subscription')
-    return RecurlyWrapper.apiRequest(
-      {
-        url: `subscriptions/${subscriptionId}/cancel`,
-        method: 'put'
-      },
-      function(error, response, body) {
-        if (error != null) {
-          return RecurlyWrapper._parseXml(body, function(_err, parsed) {
-            if (
-              __guard__(
-                parsed != null ? parsed.error : undefined,
-                x1 => x1.description
-              ) === "A canceled subscription can't transition to canceled"
-            ) {
-              // subscription already cancelled, not really an error, proceeding
-              return callback(null)
-            } else {
-              return callback(error)
-            }
-          })
-        } else {
-          return callback(null)
-        }
-      }
-    )
-  },
-
-  reactivateSubscription(subscriptionId, callback) {
-    logger.log(
-      { subscriptionId },
-      'telling recurly to reactivating subscription'
-    )
-    return RecurlyWrapper.apiRequest(
-      {
-        url: `subscriptions/${subscriptionId}/reactivate`,
-        method: 'put'
-      },
-      (error, response, body) => callback(error)
-    )
-  },
-
   redeemCoupon(account_code, coupon_code, callback) {
     const data = {
       account_code,
-      currency: 'USD'
+      currency: 'USD',
     }
     const requestBody = RecurlyWrapper._buildXml('redemption', data)
 
@@ -828,7 +785,7 @@ const RecurlyWrapper = {
       {
         url: `coupons/${coupon_code}/redeem`,
         method: 'post',
-        body: requestBody
+        body: requestBody,
       },
       (error, response, responseBody) => {
         if (error != null) {
@@ -855,7 +812,7 @@ const RecurlyWrapper = {
     return RecurlyWrapper.apiRequest(
       {
         url: `/subscriptions/${subscriptionId}/postpone?next_renewal_date=${next_renewal_date}&bulk=false`,
-        method: 'put'
+        method: 'put',
       },
       (error, response, responseBody) => {
         if (error != null) {
@@ -871,17 +828,17 @@ const RecurlyWrapper = {
 
   listAccountActiveSubscriptions(account_id, callback) {
     if (callback == null) {
-      callback = function(error, subscriptions) {}
+      callback = function (error, subscriptions) {}
     }
     return RecurlyWrapper.apiRequest(
       {
         url: `accounts/${account_id}/subscriptions`,
         qs: {
-          state: 'active'
+          state: 'active',
         },
-        expect404: true
+        expect404: true,
       },
-      function(error, response, body) {
+      function (error, response, body) {
         if (error != null) {
           return callback(error)
         }
@@ -909,9 +866,9 @@ const RecurlyWrapper = {
             gatewayCode: data.transaction_error.gateway_error_code,
             public: {
               code: data.transaction_error.error_code,
-              message: data.transaction_error.customer_message
-            }
-          }
+              message: data.transaction_error.customer_message,
+            },
+          },
         }
         if (data.transaction_error.three_d_secure_action_token_id) {
           errorData.info.public.threeDSecureActionTokenId =
@@ -923,9 +880,9 @@ const RecurlyWrapper = {
         errorData = {
           info: {
             public: {
-              message: data.error._
-            }
-          }
+              message: data.error._,
+            },
+          },
         }
       }
       callback(new SubscriptionErrors.RecurlyTransactionError(errorData))
@@ -976,7 +933,7 @@ const RecurlyWrapper = {
   },
 
   _parseXmlAndGetAttribute(xml, attribute, callback) {
-    return RecurlyWrapper._parseXml(xml, function(error, data) {
+    return RecurlyWrapper._parseXml(xml, function (error, data) {
       if (error != null) {
         return callback(error)
       }
@@ -991,20 +948,20 @@ const RecurlyWrapper = {
   },
 
   _parseXml(xml, callback) {
-    var convertDataTypes = function(data) {
+    var convertDataTypes = function (data) {
       let key, value
-      if (data != null && data['$'] != null) {
-        if (data['$']['nil'] === 'nil') {
+      if (data != null && data.$ != null) {
+        if (data.$.nil === 'nil') {
           data = null
-        } else if (data['$'].href != null) {
-          data.url = data['$'].href
-          delete data['$']
-        } else if (data['$']['type'] === 'integer') {
-          data = parseInt(data['_'], 10)
-        } else if (data['$']['type'] === 'datetime') {
-          data = new Date(data['_'])
-        } else if (data['$']['type'] === 'array') {
-          delete data['$']
+        } else if (data.$.href != null) {
+          data.url = data.$.href
+          delete data.$
+        } else if (data.$.type === 'integer') {
+          data = parseInt(data._, 10)
+        } else if (data.$.type === 'datetime') {
+          data = new Date(data._)
+        } else if (data.$.type === 'array') {
+          delete data.$
           let array = []
           for (key in data) {
             value = data[key]
@@ -1032,9 +989,9 @@ const RecurlyWrapper = {
     const parser = new xml2js.Parser({
       explicitRoot: true,
       explicitArray: false,
-      emptyTag: ''
+      emptyTag: '',
     })
-    return parser.parseString(xml, function(error, data) {
+    return parser.parseString(xml, function (error, data) {
       if (error != null) {
         return callback(error)
       }
@@ -1048,17 +1005,17 @@ const RecurlyWrapper = {
       headless: true,
       renderOpts: {
         pretty: true,
-        indent: '\t'
+        indent: '\t',
       },
-      rootName
+      rootName,
     }
     const builder = new xml2js.Builder(options)
     return builder.buildObject(data)
-  }
+  },
 }
 
 RecurlyWrapper.promises = {
-  updateAccountEmailAddress: promisify(updateAccountEmailAddress)
+  updateAccountEmailAddress: promisify(updateAccountEmailAddress),
 }
 
 module.exports = RecurlyWrapper
@@ -1071,13 +1028,13 @@ function getCustomFieldsFromSubscriptionDetails(subscriptionDetails) {
   const customFields = [
     {
       name: 'itm_campaign',
-      value: subscriptionDetails.ITMCampaign
-    }
+      value: subscriptionDetails.ITMCampaign,
+    },
   ]
   if (subscriptionDetails.ITMContent) {
     customFields.push({
       name: 'itm_content',
-      value: subscriptionDetails.ITMContent
+      value: subscriptionDetails.ITMContent,
     })
   }
   return { custom_field: customFields }
@@ -1094,9 +1051,9 @@ function getAddressFromSubscriptionDetails(
       message: 'Invalid country',
       info: {
         public: {
-          message: 'Invalid country'
-        }
-      }
+          message: 'Invalid country',
+        },
+      },
     })
   }
 
@@ -1106,7 +1063,7 @@ function getAddressFromSubscriptionDetails(
     city: address.city || '',
     state: address.state || '',
     zip: address.zip || '',
-    country: address.country
+    country: address.country,
   }
 
   if (

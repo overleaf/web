@@ -1,47 +1,57 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 
 import OutlinePane from '../../../../../frontend/js/features/outline/components/outline-pane'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
-describe('<OutlinePane />', function() {
+describe('<OutlinePane />', function () {
   const jumpToLine = () => {}
-  const projectId = '123abc'
   const onToggle = sinon.stub()
   const eventTracking = { sendMB: sinon.stub() }
 
-  before(function() {
-    global.localStorage = {
-      getItem: sinon.stub().returns(null),
-      setItem: sinon.stub()
-    }
+  function render(children) {
+    renderWithEditorContext(children, { projectId: '123abc' })
+  }
+
+  let originalLocalStorage
+  before(function () {
+    originalLocalStorage = global.localStorage
+
+    Object.defineProperty(global, 'localStorage', {
+      value: {
+        getItem: sinon.stub().returns(null),
+        setItem: sinon.stub(),
+      },
+    })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     onToggle.reset()
     eventTracking.sendMB.reset()
     global.localStorage.getItem.resetHistory()
     global.localStorage.setItem.resetHistory()
   })
 
-  after(function() {
-    delete global.localStorage
+  after(function () {
+    Object.defineProperty(global, 'localStorage', {
+      value: originalLocalStorage,
+    })
   })
 
-  it('renders expanded outline', function() {
+  it('renders expanded outline', function () {
     const outline = [
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(
       <OutlinePane
         isTexFile
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
@@ -49,16 +59,14 @@ describe('<OutlinePane />', function() {
     )
 
     screen.getByRole('tree')
-    screen.getByRole('link', { textMatch: 'The File outline is a new feature' })
   })
 
-  it('renders disabled outline', function() {
+  it('renders disabled outline', function () {
     const outline = []
     render(
       <OutlinePane
         isTexFile={false}
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
@@ -68,20 +76,19 @@ describe('<OutlinePane />', function() {
     expect(screen.queryByRole('tree')).to.be.null
   })
 
-  it('expand outline and use local storage', function() {
+  it('expand outline and use local storage', function () {
     global.localStorage.getItem.returns(false)
     const outline = [
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(
       <OutlinePane
         isTexFile
         outline={outline}
-        projectId={projectId}
         jumpToLine={jumpToLine}
         onToggle={onToggle}
         eventTracking={eventTracking}
@@ -90,7 +97,7 @@ describe('<OutlinePane />', function() {
 
     expect(screen.queryByRole('tree')).to.be.null
     const collapseButton = screen.getByRole('button', {
-      name: 'Show File outline'
+      name: 'Show File outline',
     })
     fireEvent.click(collapseButton)
 

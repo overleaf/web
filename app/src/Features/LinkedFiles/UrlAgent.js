@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -30,40 +30,42 @@ module.exports = UrlAgent = {
     callback
   ) {
     linkedFileData = this._sanitizeData(linkedFileData)
-    return this._getUrlStream(project_id, linkedFileData, user_id, function(
-      err,
-      readStream
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      readStream.on('error', callback)
-      return readStream.on('response', function(response) {
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          readStream.resume()
-          return LinkedFilesHandler.importFromStream(
-            project_id,
-            readStream,
-            linkedFileData,
-            name,
-            parent_folder_id,
-            user_id,
-            function(err, file) {
-              if (err != null) {
-                return callback(err)
-              }
-              return callback(null, file._id)
-            }
-          ) // Created
-        } else {
-          const error = new UrlFetchFailedError(
-            `url fetch failed: ${linkedFileData.url}`
-          )
-          error.statusCode = response.statusCode
-          return callback(error)
+    return this._getUrlStream(
+      project_id,
+      linkedFileData,
+      user_id,
+      function (err, readStream) {
+        if (err != null) {
+          return callback(err)
         }
-      })
-    })
+        readStream.on('error', callback)
+        return readStream.on('response', function (response) {
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            readStream.resume()
+            return LinkedFilesHandler.importFromStream(
+              project_id,
+              readStream,
+              linkedFileData,
+              name,
+              parent_folder_id,
+              user_id,
+              function (err, file) {
+                if (err != null) {
+                  return callback(err)
+                }
+                return callback(null, file._id)
+              }
+            ) // Created
+          } else {
+            const error = new UrlFetchFailedError(
+              `url fetch failed: ${linkedFileData.url}`
+            )
+            error.statusCode = response.statusCode
+            return callback(error)
+          }
+        })
+      }
+    )
   },
 
   refreshLinkedFile(
@@ -87,13 +89,13 @@ module.exports = UrlAgent = {
   _sanitizeData(data) {
     return {
       provider: data.provider,
-      url: UrlHelper.prependHttpIfNeeded(data.url)
+      url: UrlHelper.prependHttpIfNeeded(data.url),
     }
   },
 
   _getUrlStream(project_id, data, current_user_id, callback) {
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     callback = _.once(callback)
     let { url } = data
@@ -104,5 +106,5 @@ module.exports = UrlAgent = {
     const readStream = request.get(url)
     readStream.pause()
     return callback(null, readStream)
-  }
+  },
 }

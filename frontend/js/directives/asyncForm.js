@@ -3,19 +3,27 @@ import 'libs/passfield'
 App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
   controller: [
     '$scope',
-    function($scope) {
+    '$location',
+    function ($scope, $location) {
       this.getEmail = () => $scope.email
+      this.getEmailFromQuery = () =>
+        $location.search().email || $location.search().new_email
       return this
-    }
+    },
   ],
-  link(scope, element, attrs) {
+  link(scope, element, attrs, ctrl) {
     let response
     const formName = attrs.asyncForm
 
     scope[attrs.name].response = response = {}
     scope[attrs.name].inflight = false
+    scope.email =
+      scope.email ||
+      scope.usersEmail ||
+      ctrl.getEmailFromQuery() ||
+      attrs.newEmail
 
-    const validateCaptchaIfEnabled = function(callback) {
+    const validateCaptchaIfEnabled = function (callback) {
       if (attrs.captchaActionName) {
         validateCaptchaV3(attrs.captchaActionName)
       }
@@ -26,9 +34,9 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       }
     }
 
-    const submitRequest = function(grecaptchaResponse) {
+    const submitRequest = function (grecaptchaResponse) {
       const formData = {}
-      for (let data of Array.from(element.serializeArray())) {
+      for (const data of Array.from(element.serializeArray())) {
         formData[data.name] = data.value
       }
 
@@ -44,9 +52,9 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       // authentication fails, we will handle it ourselves
       const httpRequestFn = _httpRequestFn(element.attr('method'))
       return httpRequestFn(element.attr('action'), formData, {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       })
-        .then(function(httpResponse) {
+        .then(function (httpResponse) {
           const { data, headers } = httpResponse
           scope[attrs.name].inflight = false
           response.success = true
@@ -73,12 +81,12 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
             }
           } else if (scope.$eval(attrs.asyncFormDownloadResponse)) {
             const blob = new Blob([data], {
-              type: headers('Content-Type')
+              type: headers('Content-Type'),
             })
             location.href = URL.createObjectURL(blob) // Trigger file save
           }
         })
-        .catch(function(httpResponse) {
+        .catch(function (httpResponse) {
           const { data, status } = httpResponse
           scope[attrs.name].inflight = false
           response.success = false
@@ -105,7 +113,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
               text:
                 responseMessage ||
                 'Invalid Request. Please correct the data and try again.',
-              type: 'error'
+              type: 'error',
             }
           } else if (status === 403) {
             // Forbidden
@@ -113,21 +121,21 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
               text:
                 responseMessage ||
                 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.',
-              type: 'error'
+              type: 'error',
             }
           } else if (status === 429) {
             response.message = {
               text:
                 responseMessage ||
                 'Too many attempts. Please wait for a while and try again.',
-              type: 'error'
+              type: 'error',
             }
           } else {
             response.message = {
               text:
                 responseMessage ||
                 'Something went wrong talking to the server :(. Please try again.',
-              type: 'error'
+              type: 'error',
             }
           }
           ga('send', 'event', formName, 'failure', data.message)
@@ -140,12 +148,12 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     const _httpRequestFn = (method = 'post') => {
       const $HTTP_FNS = {
         post: $http.post,
-        get: $http.get
+        get: $http.get,
       }
       return $HTTP_FNS[method.toLowerCase()]
     }
 
-    element.on('submit', function(e) {
+    element.on('submit', function (e) {
       e.preventDefault()
       submit()
     })
@@ -153,7 +161,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     if (attrs.autoSubmit) {
       submit()
     }
-  }
+  },
 }))
 
 App.directive('formMessages', () => ({
@@ -168,6 +176,6 @@ App.directive('formMessages', () => ({
 `,
   transclude: true,
   scope: {
-    form: '=for'
-  }
+    form: '=for',
+  },
 }))

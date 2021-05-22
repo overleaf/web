@@ -22,6 +22,7 @@ class Parser {
     // Ignore single letter commands since auto complete is moot then.
     this.prototype.commandRegex = /\\([a-zA-Z]{2,})/
   }
+
   constructor(doc, prefix) {
     this.doc = doc
     this.prefix = prefix
@@ -86,7 +87,7 @@ class Parser {
     // check incidentals, see if we should pluck out a match
     if (incidentalCommands.length > 1) {
       const bestMatch = incidentalCommands.sort(
-        (a, b) => a[1] + a[2] < b[1] + b[2]
+        (a, b) => b[1] + b[2] - (a[1] + a[2])
       )[0]
       realCommands.push(bestMatch)
     }
@@ -138,7 +139,7 @@ class Parser {
 }
 Parser.initClass()
 
-export default (CommandManager = class CommandManager {
+export default CommandManager = class CommandManager {
   constructor(metadataManager) {
     this.metadataManager = metadataManager
   }
@@ -151,7 +152,7 @@ export default (CommandManager = class CommandManager {
 
     const packages = this.metadataManager.getAllPackages()
     const packageCommands = []
-    for (let pkg in packages) {
+    for (const pkg in packages) {
       const snippets = packages[pkg]
       for (snippet of Array.from(snippets)) {
         packageCommands.push(snippet)
@@ -163,18 +164,18 @@ export default (CommandManager = class CommandManager {
     const parser = new Parser(doc, prefix)
     const commands = parser.parse()
     let completions = []
-    for (let command of Array.from(commands)) {
+    for (const command of Array.from(commands)) {
       if (!commandNames[command[0]]) {
         let caption = `\\${command[0]}`
         const score = caption === prefix ? 99 : 50
         snippet = caption
         var i = 1
-        _.times(command[1], function() {
+        _.times(command[1], function () {
           snippet += `[\${${i}}]`
           caption += '[]'
           return i++
         })
-        _.times(command[2], function() {
+        _.times(command[2], function () {
           snippet += `{\${${i}}}`
           caption += '{}'
           return i++
@@ -183,7 +184,7 @@ export default (CommandManager = class CommandManager {
           caption,
           snippet,
           meta: 'cmd',
-          score
+          score,
         })
       }
     }
@@ -203,7 +204,7 @@ export default (CommandManager = class CommandManager {
       command => command[0].slice(0, commandFragment.length) === commandFragment
     )
 
-    return _.map(matchingCommands, function(command) {
+    return _.map(matchingCommands, function (command) {
       let completionAfterCursor, completionBeforeCursor
       const base = `\\${commandFragment}`
 
@@ -227,11 +228,11 @@ export default (CommandManager = class CommandManager {
         base,
         completion: completionBase + args,
         completionBeforeCursor,
-        completionAfterCursor
+        completionAfterCursor,
       }
     })
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

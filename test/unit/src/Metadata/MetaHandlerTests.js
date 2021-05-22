@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
 */
@@ -10,23 +10,21 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Metadata/MetaHandler'
 const SandboxedModule = require('sandboxed-module')
 
-describe('MetaHandler', function() {
-  beforeEach(function() {
+describe('MetaHandler', function () {
+  beforeEach(function () {
     this.projectId = 'someprojectid'
     this.docId = 'somedocid'
     this.ProjectEntityHandler = {
       getAllDocs: sinon.stub(),
-      getDoc: sinon.stub()
+      getDoc: sinon.stub(),
     }
     this.DocumentUpdaterHandler = {
-      flushDocToMongo: sinon.stub()
+      flushDocToMongo: sinon.stub(),
     }
     this.packageMapping = {
       foo: [
@@ -34,40 +32,37 @@ describe('MetaHandler', function() {
           caption: '\\bar',
           snippet: '\\bar',
           meta: 'foo-cmd',
-          score: 12
+          score: 12,
         },
         {
           caption: '\\bat[]{}',
           snippet: '\\bar[$1]{$2}',
           meta: 'foo-cmd',
-          score: 10
-        }
+          score: 10,
+        },
       ],
       baz: [
         {
           caption: '\\longercommandtest{}',
           snippet: '\\longercommandtest{$1}',
           meta: 'baz-cmd',
-          score: 50
-        }
-      ]
+          score: 50,
+        },
+      ],
     }
 
     return (this.MetaHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
-        './packageMapping': this.packageMapping
-      }
+        './packageMapping': this.packageMapping,
+      },
     }))
   })
 
-  describe('extractMetaFromDoc', function() {
-    beforeEach(function() {
+  describe('extractMetaFromDoc', function () {
+    beforeEach(function () {
       return (this.lines = [
         '\\usepackage{foo}',
         '\\usepackage{amsmath, booktabs}',
@@ -76,11 +71,11 @@ describe('MetaHandler', function() {
         'three \\label{aaa}',
         'four five',
         '\\label{bbb}',
-        'six seven'
+        'six seven',
       ])
     })
 
-    it('should extract all the labels and packages', function() {
+    it('should extract all the labels and packages', function () {
       const docMeta = this.MetaHandler.extractMetaFromDoc(this.lines)
       return expect(docMeta).to.deep.equal({
         labels: ['aaa', 'bbb'],
@@ -90,41 +85,41 @@ describe('MetaHandler', function() {
               caption: '\\bar',
               snippet: '\\bar',
               meta: 'foo-cmd',
-              score: 12
+              score: 12,
             },
             {
               caption: '\\bat[]{}',
               snippet: '\\bar[$1]{$2}',
               meta: 'foo-cmd',
-              score: 10
-            }
-          ]
-        }
+              score: 10,
+            },
+          ],
+        },
       })
     })
   })
 
-  describe('extractMetaFromProjectDocs', function() {
-    beforeEach(function() {
+  describe('extractMetaFromProjectDocs', function () {
+    beforeEach(function () {
       return (this.docs = {
         doc_one: {
           _id: 'id_one',
-          lines: ['one', '\\label{aaa} two', 'three']
+          lines: ['one', '\\label{aaa} two', 'three'],
         },
         doc_two: {
           _id: 'id_two',
-          lines: ['four']
+          lines: ['four'],
         },
         doc_three: {
           _id: 'id_three',
-          lines: ['\\label{bbb}', 'five six', 'seven eight \\label{ccc} nine']
+          lines: ['\\label{bbb}', 'five six', 'seven eight \\label{ccc} nine'],
         },
         doc_four: {
           _id: 'id_four',
           lines: [
             '\\usepackage[width=\\textwidth]{baz}',
-            '\\usepackage{amsmath}'
-          ]
+            '\\usepackage{amsmath}',
+          ],
         },
         doc_five: {
           _id: 'id_five',
@@ -134,13 +129,13 @@ describe('MetaHandler', function() {
             'some text',
             '\\section{this}\\label{sec:intro}',
             'In Section \\ref{sec:intro} we saw',
-            'nothing'
-          ]
-        }
+            'nothing',
+          ],
+        },
       })
     })
 
-    it('should extract all metadata', function() {
+    it('should extract all metadata', function () {
       const projectMeta = this.MetaHandler.extractMetaFromProjectDocs(this.docs)
       return expect(projectMeta).to.deep.equal({
         id_one: { labels: ['aaa'], packages: {} },
@@ -154,10 +149,10 @@ describe('MetaHandler', function() {
                 caption: '\\longercommandtest{}',
                 snippet: '\\longercommandtest{$1}',
                 meta: 'baz-cmd',
-                score: 50
-              }
-            ]
-          }
+                score: 50,
+              },
+            ],
+          },
         },
         id_five: {
           labels: ['sec:intro'],
@@ -167,31 +162,31 @@ describe('MetaHandler', function() {
                 caption: '\\bar',
                 snippet: '\\bar',
                 meta: 'foo-cmd',
-                score: 12
+                score: 12,
               },
               {
                 caption: '\\bat[]{}',
                 snippet: '\\bar[$1]{$2}',
                 meta: 'foo-cmd',
-                score: 10
-              }
+                score: 10,
+              },
             ],
             baz: [
               {
                 caption: '\\longercommandtest{}',
                 snippet: '\\longercommandtest{$1}',
                 meta: 'baz-cmd',
-                score: 50
-              }
-            ]
-          }
-        }
+                score: 50,
+              },
+            ],
+          },
+        },
       })
     })
   })
 
-  describe('getMetaForDoc', function() {
-    beforeEach(function() {
+  describe('getMetaForDoc', function () {
+    beforeEach(function () {
       this.fakeLines = ['\\usepackage{abc}', 'one', '\\label{aaa}', 'two']
       this.fakeMeta = { labels: ['aaa'], packages: ['abc'] }
       this.DocumentUpdaterHandler.flushDocToMongo = sinon
@@ -210,21 +205,21 @@ describe('MetaHandler', function() {
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       return this.call((err, docMeta) => {
         expect(err).to.equal(null)
         return done()
       })
     })
 
-    it('should produce docMeta', function(done) {
+    it('should produce docMeta', function (done) {
       return this.call((err, docMeta) => {
         expect(docMeta).to.equal(this.fakeMeta)
         return done()
       })
     })
 
-    it('should call flushDocToMongo', function(done) {
+    it('should call flushDocToMongo', function (done) {
       return this.call((err, docMeta) => {
         this.DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal(1)
         this.DocumentUpdaterHandler.flushDocToMongo
@@ -234,7 +229,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    it('should call getDoc', function(done) {
+    it('should call getDoc', function (done) {
       return this.call((err, docMeta) => {
         this.ProjectEntityHandler.getDoc.callCount.should.equal(1)
         this.ProjectEntityHandler.getDoc
@@ -244,7 +239,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    it('should call extractMetaFromDoc', function(done) {
+    it('should call extractMetaFromDoc', function (done) {
       return this.call((err, docMeta) => {
         this.MetaHandler.extractMetaFromDoc.callCount.should.equal(1)
         this.MetaHandler.extractMetaFromDoc
@@ -255,12 +250,12 @@ describe('MetaHandler', function() {
     })
   })
 
-  describe('getAllMetaForProject', function() {
-    beforeEach(function() {
+  describe('getAllMetaForProject', function () {
+    beforeEach(function () {
       this.fakeDocs = {
         doc_one: {
-          lines: ['\\usepackage[some-options,more=foo]{foo}', '\\label{aaa}']
-        }
+          lines: ['\\usepackage[some-options,more=foo]{foo}', '\\label{aaa}'],
+        },
       }
 
       this.fakeMeta = {
@@ -271,16 +266,16 @@ describe('MetaHandler', function() {
               caption: '\\bar',
               snippet: '\\bar',
               meta: 'foo-cmd',
-              score: 12
+              score: 12,
             },
             {
               caption: '\\bat[]{}',
               snippet: '\\bar[$1]{$2}',
               meta: 'foo-cmd',
-              score: 10
-            }
-          ]
-        }
+              score: 10,
+            },
+          ],
+        },
       }
       this.DocumentUpdaterHandler.flushProjectToMongo = sinon
         .stub()
@@ -296,21 +291,21 @@ describe('MetaHandler', function() {
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       return this.call((err, projectMeta) => {
         expect(err).to.equal(null)
         return done()
       })
     })
 
-    it('should produce projectMeta', function(done) {
+    it('should produce projectMeta', function (done) {
       return this.call((err, projectMeta) => {
         expect(projectMeta).to.equal(this.fakeMeta)
         return done()
       })
     })
 
-    it('should call getAllDocs', function(done) {
+    it('should call getAllDocs', function (done) {
       return this.call((err, projectMeta) => {
         this.ProjectEntityHandler.getAllDocs.callCount.should.equal(1)
         this.ProjectEntityHandler.getAllDocs
@@ -320,7 +315,7 @@ describe('MetaHandler', function() {
       })
     })
 
-    it('should call extractMetaFromDoc', function(done) {
+    it('should call extractMetaFromDoc', function (done) {
       return this.call((err, docMeta) => {
         this.MetaHandler.extractMetaFromProjectDocs.callCount.should.equal(1)
         this.MetaHandler.extractMetaFromProjectDocs

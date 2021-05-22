@@ -1,74 +1,53 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsController.js'
 )
 
-describe('TpdsController', function() {
-  beforeEach(function() {
+describe('TpdsController', function () {
+  beforeEach(function () {
     this.TpdsUpdateHandler = {}
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns('user-id')
+      getLoggedInUserId: sinon.stub().returns('user-id'),
     }
     this.TpdsQueueManager = {
       promises: {
-        getQueues: sinon.stub().returns('queues')
-      }
+        getQueues: sinon.stub().returns('queues'),
+      },
     }
     this.TpdsController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
         './UpdateMerger': (this.UpdateMerger = {}),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
-          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() })
+          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
         }),
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './TpdsQueueManager': this.TpdsQueueManager,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          info() {},
-          err() {}
+        '@overleaf/metrics': {
+          inc() {},
         },
-        'metrics-sharelatex': {
-          inc() {}
-        }
-      }
+      },
     })
 
     this.user_id = 'dsad29jlkjas'
   })
 
-  describe('getting an update', function() {
-    it('should process the update with the update receiver', function(done) {
+  describe('getting an update', function () {
+    it('should process the update with the update receiver', function (done) {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
       const res = {
@@ -83,72 +62,50 @@ describe('TpdsController', function() {
             )
             .should.equal(true)
           done()
-        }
+        },
       }
       this.TpdsController.mergeUpdate(req, res)
     })
 
-    it('should return a 500 error when the update receiver fails', function() {
+    it('should return a 500 error when the update receiver fails', function () {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, 'update-receiver-error')
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(500).should.equal(true)
     })
 
-    it('should return a 409 error when the project is archived', function() {
-      const path = '/projectName/here.txt'
-      const req = {
-        pause() {},
-        params: { 0: path, user_id: this.user_id },
-        session: {
-          destroy() {}
-        },
-        headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
-      }
-      this.TpdsUpdateHandler.newUpdate = sinon
-        .stub()
-        .callsArgWith(5, new Errors.ProjectIsArchivedOrTrashedError())
-      const res = {
-        sendStatus: sinon.stub()
-      }
-      this.TpdsController.mergeUpdate(req, res)
-      res.sendStatus.calledWith(409).should.equal(true)
-    })
-
-    it('should return a 400 error when the project is too big', function() {
+    it('should return a 400 error when the project is too big', function () {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
         params: { 0: path, user_id: this.user_id, projectName: 'projectName' },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, { message: 'project_has_too_many_files' })
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(400).should.equal(true)
@@ -157,40 +114,40 @@ describe('TpdsController', function() {
         .should.equal(true)
     })
 
-    it('should return a 429 error when the update receiver fails due to too many requests error', function() {
+    it('should return a 429 error when the update receiver fails due to too many requests error', function () {
       const path = '/projectName/here.txt'
       const req = {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, new Errors.TooManyRequestsError('project on cooldown'))
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(429).should.equal(true)
     })
   })
 
-  describe('getting a delete update', function() {
-    it('should process the delete with the update reciver', function(done) {
+  describe('getting a delete update', function () {
+    it('should process the delete with the update receiver', function (done) {
       const path = '/projectName/here.txt'
       const req = {
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
       const res = {
@@ -199,32 +156,32 @@ describe('TpdsController', function() {
             .calledWith(this.user_id, 'projectName', '/here.txt', this.source)
             .should.equal(true)
           done()
-        }
+        },
       }
       this.TpdsController.deleteUpdate(req, res)
     })
   })
 
-  describe('parseParams', function() {
-    it('should take the project name off the start and replace with slash', function() {
+  describe('parseParams', function () {
+    it('should take the project name off the start and replace with slash', function () {
       const path = 'noSlashHere'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)
-      result.user_id.should.equal(this.user_id)
+      result.userId.should.equal(this.user_id)
       result.filePath.should.equal('/')
       result.projectName.should.equal(path)
     })
 
-    it('should take the project name off the start and it with no slashes in', function() {
+    it('should take the project name off the start and it with no slashes in', function () {
       const path = '/project/file.tex'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)
-      result.user_id.should.equal(this.user_id)
+      result.userId.should.equal(this.user_id)
       result.filePath.should.equal('/file.tex')
       result.projectName.should.equal('project')
     })
 
-    it('should take the project name of and return a slash for the file path', function() {
+    it('should take the project name of and return a slash for the file path', function () {
       const path = '/project_name'
       const req = { params: { 0: path, user_id: this.user_id } }
       const result = this.TpdsController.parseParams(req)
@@ -233,27 +190,27 @@ describe('TpdsController', function() {
     })
   })
 
-  describe('updateProjectContents', function() {
-    beforeEach(function() {
+  describe('updateProjectContents', function () {
+    beforeEach(function () {
       this.UpdateMerger.mergeUpdate = sinon.stub().callsArg(5)
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
-          project_id: (this.project_id = 'project-id-123')
+          project_id: (this.project_id = 'project-id-123'),
         },
         session: {
-          destroy: sinon.stub()
+          destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github')
-        }
+          'x-sl-update-source': (this.source = 'github'),
+        },
       }
       this.res = { sendStatus: sinon.stub() }
 
-      this.TpdsController.updateProjectContents(this.req, this.res)
+      this.TpdsController.updateProjectContents(this.req, this.res, this.next)
     })
 
-    it('should merge the update', function() {
+    it('should merge the update', function () {
       this.UpdateMerger.mergeUpdate
         .calledWith(
           null,
@@ -265,55 +222,55 @@ describe('TpdsController', function() {
         .should.equal(true)
     })
 
-    it('should return a success', function() {
+    it('should return a success', function () {
       this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
 
-  describe('deleteProjectContents', function() {
-    beforeEach(function() {
+  describe('deleteProjectContents', function () {
+    beforeEach(function () {
       this.UpdateMerger.deleteUpdate = sinon.stub().callsArg(4)
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
-          project_id: (this.project_id = 'project-id-123')
+          project_id: (this.project_id = 'project-id-123'),
         },
         session: {
-          destroy: sinon.stub()
+          destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github')
-        }
+          'x-sl-update-source': (this.source = 'github'),
+        },
       }
       this.res = { sendStatus: sinon.stub() }
 
-      this.TpdsController.deleteProjectContents(this.req, this.res)
+      this.TpdsController.deleteProjectContents(this.req, this.res, this.next)
     })
 
-    it('should delete the file', function() {
+    it('should delete the file', function () {
       this.UpdateMerger.deleteUpdate
         .calledWith(null, this.project_id, `/${this.path}`, this.source)
         .should.equal(true)
     })
 
-    it('should return a success', function() {
+    it('should return a success', function () {
       this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
 
-  describe('getQueues', function() {
-    beforeEach(function() {
+  describe('getQueues', function () {
+    beforeEach(function () {
       this.req = {}
       this.res = { json: sinon.stub() }
       this.next = sinon.stub()
     })
 
-    describe('success', function() {
-      beforeEach(async function() {
+    describe('success', function () {
+      beforeEach(async function () {
         await this.TpdsController.getQueues(this.req, this.res, this.next)
       })
 
-      it('should use userId from session', function() {
+      it('should use userId from session', function () {
         this.AuthenticationController.getLoggedInUserId.should.have.been
           .calledOnce
         this.TpdsQueueManager.promises.getQueues.should.have.been.calledWith(
@@ -321,14 +278,14 @@ describe('TpdsController', function() {
         )
       })
 
-      it('should call json with response', function() {
+      it('should call json with response', function () {
         this.res.json.should.have.been.calledWith('queues')
         this.next.should.not.have.been.called
       })
     })
 
-    describe('error', function() {
-      beforeEach(async function() {
+    describe('error', function () {
+      beforeEach(async function () {
         this.err = new Error()
         this.TpdsQueueManager.promises.getQueues = sinon
           .stub()
@@ -336,7 +293,7 @@ describe('TpdsController', function() {
         await this.TpdsController.getQueues(this.req, this.res, this.next)
       })
 
-      it('should call next with error', function() {
+      it('should call next with error', function () {
         this.res.json.should.not.have.been.called
         this.next.should.have.been.calledWith(this.err)
       })

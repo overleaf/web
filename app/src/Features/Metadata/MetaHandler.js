@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-cond-assign,
 */
@@ -33,43 +33,49 @@ module.exports = MetaHandler = {
 
   getAllMetaForProject(projectId, callback) {
     if (callback == null) {
-      callback = function(err, projectMeta) {}
+      callback = function (err, projectMeta) {}
     }
-    return DocumentUpdaterHandler.flushProjectToMongo(projectId, function(err) {
-      if (err != null) {
-        return callback(err)
-      }
-      return ProjectEntityHandler.getAllDocs(projectId, function(err, docs) {
+    return DocumentUpdaterHandler.flushProjectToMongo(
+      projectId,
+      function (err) {
         if (err != null) {
           return callback(err)
         }
-        const projectMeta = MetaHandler.extractMetaFromProjectDocs(docs)
-        return callback(null, projectMeta)
-      })
-    })
+        return ProjectEntityHandler.getAllDocs(projectId, function (err, docs) {
+          if (err != null) {
+            return callback(err)
+          }
+          const projectMeta = MetaHandler.extractMetaFromProjectDocs(docs)
+          return callback(null, projectMeta)
+        })
+      }
+    )
   },
 
   getMetaForDoc(projectId, docId, callback) {
     if (callback == null) {
-      callback = function(err, docMeta) {}
+      callback = function (err, docMeta) {}
     }
-    return DocumentUpdaterHandler.flushDocToMongo(projectId, docId, function(
-      err
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      return ProjectEntityHandler.getDoc(projectId, docId, function(
-        err,
-        lines
-      ) {
+    return DocumentUpdaterHandler.flushDocToMongo(
+      projectId,
+      docId,
+      function (err) {
         if (err != null) {
           return callback(err)
         }
-        const docMeta = MetaHandler.extractMetaFromDoc(lines)
-        return callback(null, docMeta)
-      })
-    })
+        return ProjectEntityHandler.getDoc(
+          projectId,
+          docId,
+          function (err, lines) {
+            if (err != null) {
+              return callback(err)
+            }
+            const docMeta = MetaHandler.extractMetaFromDoc(lines)
+            return callback(null, docMeta)
+          }
+        )
+      }
+    )
   },
 
   extractMetaFromDoc(lines) {
@@ -79,7 +85,7 @@ module.exports = MetaHandler = {
     const label_re = MetaHandler.labelRegex()
     const package_re = MetaHandler.usepackageRegex()
     const req_package_re = MetaHandler.ReqPackageRegex()
-    for (let line of Array.from(lines)) {
+    for (const line of Array.from(lines)) {
       var labelMatch
       var clean, messy, packageMatch
       while ((labelMatch = label_re.exec(line))) {
@@ -117,10 +123,10 @@ module.exports = MetaHandler = {
 
   extractMetaFromProjectDocs(projectDocs) {
     const projectMeta = {}
-    for (let _path in projectDocs) {
+    for (const _path in projectDocs) {
       const doc = projectDocs[_path]
       projectMeta[doc._id] = MetaHandler.extractMetaFromDoc(doc.lines)
     }
     return projectMeta
-  }
+  },
 }

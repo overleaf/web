@@ -13,7 +13,7 @@
  */
 let SafariScrollPatcher
 
-export default (SafariScrollPatcher = class SafariScrollPatcher {
+export default SafariScrollPatcher = class SafariScrollPatcher {
   constructor($scope) {
     this.isOverAce = false // Flag to control if the pointer is over Ace.
     this.pdfDiv = null
@@ -50,13 +50,25 @@ export default (SafariScrollPatcher = class SafariScrollPatcher {
 
       // If elements aren't null, remove existing listeners.
       if (this.pdfDiv != null) {
-        this.pdfDiv.removeEventListener(this.handlePdfDivMouseLeave)
-        this.pdfDiv.removeEventListener(this.handlePdfDivMouseEnter)
+        this.pdfDiv.removeEventListener(
+          'mouseleave',
+          this.handlePdfDivMouseLeave
+        )
+        this.pdfDiv.removeEventListener(
+          'mouseenter',
+          this.handlePdfDivMouseEnter
+        )
       }
 
       if (this.aceDiv != null) {
-        this.aceDiv.removeEventListener(this.handleAceDivMouseLeave)
-        this.aceDiv.removeEventListener(this.handleAceDivMouseEnter)
+        this.aceDiv.removeEventListener(
+          'mouseleave',
+          this.handleAceDivMouseLeave
+        )
+        this.aceDiv.removeEventListener(
+          'mouseenter',
+          this.handleAceDivMouseEnter
+        )
       }
 
       // Grab elements.
@@ -64,13 +76,14 @@ export default (SafariScrollPatcher = class SafariScrollPatcher {
       this.aceDiv = document.querySelector('.ace_content') // Also the editor.
 
       // Set hover-related listeners.
-      this.pdfDiv.addEventListener('mouseleave', this.handlePdfDivMouseLeave)
-      this.pdfDiv.addEventListener('mouseenter', this.handlePdfDivMouseEnter)
-      this.aceDiv.addEventListener('mouseleave', this.handleAceDivMouseLeave)
-      return this.aceDiv.addEventListener(
-        'mouseenter',
-        this.handleAceDivMouseEnter
-      )
+      if (this.pdfDiv != null) {
+        this.pdfDiv.addEventListener('mouseleave', this.handlePdfDivMouseLeave)
+        this.pdfDiv.addEventListener('mouseenter', this.handlePdfDivMouseEnter)
+      }
+      if (this.aceDiv != null) {
+        this.aceDiv.addEventListener('mouseleave', this.handleAceDivMouseLeave)
+        this.aceDiv.addEventListener('mouseenter', this.handleAceDivMouseEnter)
+      }
     }
 
     // Handler for wheel events on the PDF.
@@ -101,4 +114,4 @@ export default (SafariScrollPatcher = class SafariScrollPatcher {
       return this.setListeners()
     })
   }
-})
+}

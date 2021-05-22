@@ -13,7 +13,7 @@
 import App from '../base'
 import AlgoliaSearch from 'algoliasearch'
 
-export default App.factory('algoliaSearch', function() {
+export default App.factory('algoliaSearch', function () {
   let kbIdx, wikiIdx
   if (
     (window.sharelatex != null ? window.sharelatex.algolia : undefined) !=
@@ -54,7 +54,7 @@ export default App.factory('algoliaSearch', function() {
   // searchKB is deprecated
   const service = {
     searchWiki: wikiIdx ? wikiIdx.search.bind(wikiIdx) : null,
-    searchKB: kbIdx ? kbIdx.search.bind(kbIdx) : null
+    searchKB: kbIdx ? kbIdx.search.bind(kbIdx) : null,
   }
 
   return service

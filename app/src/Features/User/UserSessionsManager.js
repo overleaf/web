@@ -1,4 +1,3 @@
-let UserSessionsManager
 const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -8,7 +7,7 @@ const { promisify } = require('util')
 const UserSessionsRedis = require('./UserSessionsRedis')
 const rclient = UserSessionsRedis.client()
 
-UserSessionsManager = {
+const UserSessionsManager = {
   // mimic the key used by the express sessions
   _sessionKey(sessionId) {
     return `sess:${sessionId}`
@@ -27,26 +26,26 @@ UserSessionsManager = {
       .multi()
       .sadd(sessionSetKey, value)
       .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
-      .exec(function(err, response) {
+      .exec(function (err, response) {
         if (err) {
           OError.tag(
             err,
             'error while adding session key to UserSessions set',
             {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             }
           )
           return callback(err)
         }
-        UserSessionsManager._checkSessions(user, function() {})
+        UserSessionsManager._checkSessions(user, function () {})
         callback()
       })
   },
 
   untrackSession(user, sessionId, callback) {
     if (!callback) {
-      callback = function() {}
+      callback = function () {}
     }
     if (!user) {
       return callback(null)
@@ -60,19 +59,19 @@ UserSessionsManager = {
       .multi()
       .srem(sessionSetKey, value)
       .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
-      .exec(function(err, response) {
+      .exec(function (err, response) {
         if (err) {
           OError.tag(
             err,
             'error while removing session key from UserSessions set',
             {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             }
           )
           return callback(err)
         }
-        UserSessionsManager._checkSessions(user, function() {})
+        UserSessionsManager._checkSessions(user, function () {})
         callback()
       })
   },
@@ -80,10 +79,10 @@ UserSessionsManager = {
   getAllUserSessions(user, exclude, callback) {
     exclude = _.map(exclude, UserSessionsManager._sessionKey)
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting all session keys for user from redis', {
-          user_id: user._id
+          user_id: user._id,
         })
         return callback(err)
       }
@@ -93,36 +92,37 @@ UserSessionsManager = {
         return callback(null, [])
       }
 
-      Async.mapSeries(sessionKeys, (k, cb) => rclient.get(k, cb), function(
-        err,
-        sessions
-      ) {
-        if (err) {
-          OError.tag(err, 'error getting all sessions for user from redis', {
-            user_id: user._id
-          })
-          return callback(err)
-        }
-
-        const result = []
-        for (let session of Array.from(sessions)) {
-          if (!session) {
-            continue
-          }
-          session = JSON.parse(session)
-          let sessionUser = session.passport && session.passport.user
-          if (!sessionUser) {
-            sessionUser = session.user
+      Async.mapSeries(
+        sessionKeys,
+        (k, cb) => rclient.get(k, cb),
+        function (err, sessions) {
+          if (err) {
+            OError.tag(err, 'error getting all sessions for user from redis', {
+              user_id: user._id,
+            })
+            return callback(err)
           }
 
-          result.push({
-            ip_address: sessionUser.ip_address,
-            session_created: sessionUser.session_created
-          })
-        }
+          const result = []
+          for (let session of Array.from(sessions)) {
+            if (!session) {
+              continue
+            }
+            session = JSON.parse(session)
+            let sessionUser = session.passport && session.passport.user
+            if (!sessionUser) {
+              sessionUser = session.user
+            }
 
-        callback(null, result)
-      })
+            result.push({
+              ip_address: sessionUser.ip_address,
+              session_created: sessionUser.session_created,
+            })
+          }
+
+          callback(null, result)
+        }
+      )
     })
   },
 
@@ -135,11 +135,11 @@ UserSessionsManager = {
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
-          sessionSetKey
+          sessionSetKey,
         })
         return callback(err)
       }
@@ -161,19 +161,19 @@ UserSessionsManager = {
 
       const deletions = keysToDelete.map(k => cb => rclient.del(k, cb))
 
-      Async.series(deletions, function(err, _result) {
+      Async.series(deletions, function (err, _result) {
         if (err) {
           OError.tag(err, 'error revoking all sessions for user', {
             user_id: user._id,
-            sessionSetKey
+            sessionSetKey,
           })
           return callback(err)
         }
-        rclient.srem(sessionSetKey, keysToDelete, function(err) {
+        rclient.srem(sessionSetKey, keysToDelete, function (err) {
           if (err) {
             OError.tag(err, 'error removing session set for user', {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             })
             return callback(err)
           }
@@ -191,10 +191,10 @@ UserSessionsManager = {
     rclient.pexpire(
       sessionSetKey,
       `${Settings.cookieSessionLength}`, // in milliseconds
-      function(err, response) {
+      function (err, response) {
         if (err) {
           OError.tag(err, 'error while updating ttl on UserSessions set', {
-            user_id: user._id
+            user_id: user._id,
           })
           return callback(err)
         }
@@ -208,22 +208,22 @@ UserSessionsManager = {
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
-          sessionSetKey
+          sessionSetKey,
         })
         return callback(err)
       }
       Async.series(
         sessionKeys.map(key => next =>
-          rclient.get(key, function(err, val) {
+          rclient.get(key, function (err, val) {
             if (err) {
               return next(err)
             }
             if (!val) {
-              rclient.srem(sessionSetKey, key, function(err, result) {
+              rclient.srem(sessionSetKey, key, function (err, result) {
                 return next(err)
               })
             } else {
@@ -231,17 +231,17 @@ UserSessionsManager = {
             }
           })
         ),
-        function(err, results) {
+        function (err, results) {
           callback(err)
         }
       )
     })
-  }
+  },
 }
 
 UserSessionsManager.promises = {
   getAllUserSessions: promisify(UserSessionsManager.getAllUserSessions),
-  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions)
+  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions),
 }
 
 module.exports = UserSessionsManager

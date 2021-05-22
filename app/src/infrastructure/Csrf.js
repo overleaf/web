@@ -2,7 +2,6 @@
     max-len,
     no-return-assign,
     no-unused-vars,
-    standard/no-callback-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -70,7 +69,7 @@ class Csrf {
   static validateRequest(req, cb) {
     // run a dummy csrf check to see if it returns an error
     if (cb == null) {
-      cb = function(valid) {}
+      cb = function (valid) {}
     }
     return csrf(req, null, err => cb(err))
   }
@@ -83,18 +82,18 @@ class Csrf {
     // use this to simulate a csrf check regardless of req method, headers &c.
     const req = {
       body: {
-        _csrf: token
+        _csrf: token,
       },
       headers: {},
       method: 'POST',
-      session
+      session,
     }
     return Csrf.validateRequest(req, cb)
   }
 }
 
 Csrf.promises = {
-  validateRequest: promisify(Csrf.validateRequest)
+  validateRequest: promisify(Csrf.validateRequest),
 }
 
 module.exports = Csrf

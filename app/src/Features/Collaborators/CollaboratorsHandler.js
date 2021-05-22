@@ -22,8 +22,8 @@ module.exports = {
     removeUserFromAllProjects,
     addUserIdToProject,
     transferProjects,
-    setCollaboratorPrivilegeLevel
-  }
+    setCollaboratorPrivilegeLevel,
+  },
 }
 
 async function removeUserFromProject(projectId, userId) {
@@ -41,7 +41,7 @@ async function removeUserFromProject(projectId, userId) {
 
       archived = archived.filter(id => id.toString() !== userId.toString())
 
-      await Project.update(
+      await Project.updateOne(
         { _id: projectId },
         {
           $set: { archived: archived },
@@ -50,12 +50,12 @@ async function removeUserFromProject(projectId, userId) {
             readOnly_refs: userId,
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
-            trashed: userId
-          }
+            trashed: userId,
+          },
         }
       )
     } else {
-      await Project.update(
+      await Project.updateOne(
         { _id: projectId },
         {
           $pull: {
@@ -64,15 +64,15 @@ async function removeUserFromProject(projectId, userId) {
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
             archived: userId,
-            trashed: userId
-          }
+            trashed: userId,
+          },
         }
       )
     }
   } catch (err) {
     throw OError.tag(err, 'problem removing user from project collaborators', {
       projectId,
-      userId
+      userId,
     })
   }
 }
@@ -82,9 +82,9 @@ async function removeUserFromAllProjects(userId) {
     readAndWrite,
     readOnly,
     tokenReadAndWrite,
-    tokenReadOnly
+    tokenReadOnly,
   } = await CollaboratorsGetter.promises.getProjectsUserIsMemberOf(userId, {
-    _id: 1
+    _id: 1,
   })
   const allProjects = readAndWrite
     .concat(readOnly)
@@ -103,7 +103,7 @@ async function addUserIdToProject(
 ) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     collaberator_refs: 1,
-    readOnly_refs: 1
+    readOnly_refs: 1,
   })
   let level
   let existingUsers = project.collaberator_refs || []
@@ -126,7 +126,7 @@ async function addUserIdToProject(
     ContactManager.addContact(addingUserId, userId)
   }
 
-  await Project.update({ _id: projectId }, { $addToSet: level }).exec()
+  await Project.updateOne({ _id: projectId }, { $addToSet: level }).exec()
 
   // Flush to TPDS in background to add files to collaborator's Dropbox
   TpdsProjectFlusher.promises.flushProjectToTpds(projectId).catch(err => {
@@ -144,48 +144,43 @@ async function transferProjects(fromUserId, toUserId) {
       $or: [
         { owner_ref: fromUserId },
         { collaberator_refs: fromUserId },
-        { readOnly_refs: fromUserId }
-      ]
+        { readOnly_refs: fromUserId },
+      ],
     },
     { _id: 1 }
   ).exec()
   const projectIds = projects.map(p => p._id)
   logger.log({ projectIds, fromUserId, toUserId }, 'transferring projects')
 
-  await Project.update(
+  await Project.updateMany(
     { owner_ref: fromUserId },
-    { $set: { owner_ref: toUserId } },
-    { multi: true }
+    { $set: { owner_ref: toUserId } }
   ).exec()
 
-  await Project.update(
+  await Project.updateMany(
     { collaberator_refs: fromUserId },
     {
-      $addToSet: { collaberator_refs: toUserId }
-    },
-    { multi: true }
+      $addToSet: { collaberator_refs: toUserId },
+    }
   ).exec()
-  await Project.update(
+  await Project.updateMany(
     { collaberator_refs: fromUserId },
     {
-      $pull: { collaberator_refs: fromUserId }
-    },
-    { multi: true }
+      $pull: { collaberator_refs: fromUserId },
+    }
   ).exec()
 
-  await Project.update(
+  await Project.updateMany(
     { readOnly_refs: fromUserId },
     {
-      $addToSet: { readOnly_refs: toUserId }
-    },
-    { multi: true }
+      $addToSet: { readOnly_refs: toUserId },
+    }
   ).exec()
-  await Project.update(
+  await Project.updateMany(
     { readOnly_refs: fromUserId },
     {
-      $pull: { readOnly_refs: fromUserId }
-    },
-    { multi: true }
+      $pull: { readOnly_refs: fromUserId },
+    }
   ).exec()
 
   // Flush in background, no need to block on this
@@ -206,21 +201,21 @@ async function setCollaboratorPrivilegeLevel(
   // collaborator
   const query = {
     _id: projectId,
-    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }]
+    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }],
   }
   let update
   switch (privilegeLevel) {
     case PrivilegeLevels.READ_AND_WRITE: {
       update = {
         $pull: { readOnly_refs: userId },
-        $addToSet: { collaberator_refs: userId }
+        $addToSet: { collaberator_refs: userId },
       }
       break
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
         $pull: { collaberator_refs: userId },
-        $addToSet: { readOnly_refs: userId }
+        $addToSet: { readOnly_refs: userId },
       }
       break
     }
@@ -244,18 +239,18 @@ async function userIsTokenMember(userId, projectId) {
         _id: projectId,
         $or: [
           { tokenAccessReadOnly_refs: userId },
-          { tokenAccessReadAndWrite_refs: userId }
-        ]
+          { tokenAccessReadAndWrite_refs: userId },
+        ],
       },
       {
-        _id: 1
+        _id: 1,
       }
     )
     return project != null
   } catch (err) {
     throw OError.tag(err, 'problem while checking if user is token member', {
       userId,
-      projectId
+      projectId,
     })
   }
 }

@@ -2,14 +2,14 @@ const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const { db } = require('../../infrastructure/mongodb')
 const { normalizeQuery } = require('../Helpers/Mongo')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const async = require('async')
 const { callbackify, promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
   removeAffiliation,
-  promises: InstitutionsAPIPromises
+  promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const Features = require('../../infrastructure/Features')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -24,7 +24,7 @@ async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   // send email to both old and new primary email
   const emailOptions = {
     actionDescribed: `the primary email address on your account was changed to ${email}`,
-    action: 'change of primary email address'
+    action: 'change of primary email address',
   }
   const toOld = Object.assign({}, emailOptions, { to: oldEmail })
   const toNew = Object.assign({}, emailOptions, { to: email })
@@ -54,7 +54,7 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      newSecondaryEmail: newEmail
+      newSecondaryEmail: newEmail,
     }
   )
 
@@ -69,19 +69,51 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
   }
 
   try {
-    const reversedHostname = newEmail
-      .split('@')[1]
-      .split('')
-      .reverse()
-      .join('')
+    const reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
     const update = {
       $push: {
-        emails: { email: newEmail, createdAt: new Date(), reversedHostname }
-      }
+        emails: { email: newEmail, createdAt: new Date(), reversedHostname },
+      },
     }
     await UserUpdater.promises.updateUser(userId, update)
   } catch (error) {
     throw OError.tag(error, 'problem updating users emails')
+  }
+}
+
+async function clearSAMLData(userId, auditLog, sendEmail) {
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    emails: 1,
+  })
+
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'clear-institution-sso-data',
+    auditLog.initiatorId,
+    auditLog.ipAddress,
+    {}
+  )
+
+  const update = {
+    $unset: {
+      samlIdentifiers: 1,
+      'emails.$[].samlProviderId': 1,
+    },
+  }
+  await UserUpdater.promises.updateUser(userId, update)
+
+  for (const emailData of user.emails) {
+    await InstitutionsAPIPromises.removeEntitlement(userId, emailData.email)
+  }
+
+  await FeaturesUpdater.promises.refreshFeatures(
+    userId,
+    'clear-institution-sso-data'
+  )
+
+  if (sendEmail) {
+    await EmailHandler.promises.sendEmail('SAMLDataCleared', { to: user.email })
   }
 }
 
@@ -99,7 +131,7 @@ async function setDefaultEmailAddress(
 
   const user = await UserGetter.promises.getUser(userId, {
     email: 1,
-    emails: 1
+    emails: 1,
   })
   if (!user) {
     throw new Error('invalid userId')
@@ -121,7 +153,7 @@ async function setDefaultEmailAddress(
     auditLog.ipAddress,
     {
       newPrimaryEmail: email,
-      oldPrimaryEmail: oldEmail
+      oldPrimaryEmail: oldEmail,
     }
   )
 
@@ -155,6 +187,51 @@ async function setDefaultEmailAddress(
   }
 }
 
+async function confirmEmail(userId, email) {
+  // used for initial email confirmation (non-SSO and SSO)
+  // also used for reconfirmation of non-SSO emails
+  const confirmedAt = new Date()
+  email = EmailHelper.parseEmail(email)
+  if (email == null) {
+    throw new Error('invalid email')
+  }
+  logger.log({ userId, email }, 'confirming user email')
+
+  try {
+    await InstitutionsAPIPromises.addAffiliation(userId, email, { confirmedAt })
+  } catch (error) {
+    throw OError.tag(error, 'problem adding affiliation while confirming email')
+  }
+
+  const query = {
+    _id: userId,
+    'emails.email': email,
+  }
+
+  // only update confirmedAt if it was not previously set
+  const update = {
+    $set: {
+      'emails.$.reconfirmedAt': confirmedAt,
+    },
+    $min: {
+      'emails.$.confirmedAt': confirmedAt,
+    },
+  }
+
+  if (Features.hasFeature('affiliations')) {
+    update.$unset = {
+      'emails.$.affiliationUnchecked': 1,
+    }
+  }
+
+  const res = await UserUpdater.promises.updateUser(query, update)
+
+  if (res.n === 0) {
+    throw new Errors.NotFoundError('user id and email do no match')
+  }
+  await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
+}
+
 const UserUpdater = {
   addAffiliationForNewUser(userId, email, affiliationOptions, callback) {
     if (callback == null) {
@@ -177,7 +254,7 @@ const UserUpdater = {
                 'could not remove affiliationUnchecked flag for user on create',
                 {
                   userId,
-                  email
+                  email,
                 }
               )
             )
@@ -234,7 +311,7 @@ const UserUpdater = {
             true,
             cb
           ),
-        cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb)
+        cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb),
       ],
       callback
     )
@@ -267,68 +344,28 @@ const UserUpdater = {
         if (res.n === 0) {
           return callback(new Error('Cannot remove email'))
         }
-        FeaturesUpdater.refreshFeatures(userId, callback)
+        FeaturesUpdater.refreshFeatures(userId, 'remove-email', callback)
       })
     })
   },
+
+  clearSAMLData: callbackify(clearSAMLData),
 
   // set the default email address by setting the `email` attribute. The email
   // must be one of the user's multiple emails (`emails` attribute)
   setDefaultEmailAddress: callbackify(setDefaultEmailAddress),
 
-  confirmEmail(userId, email, confirmedAt, callback) {
-    if (arguments.length === 3) {
-      callback = confirmedAt
-      confirmedAt = new Date()
-    }
-    email = EmailHelper.parseEmail(email)
-    if (email == null) {
-      return callback(new Error('invalid email'))
-    }
-    logger.log({ userId, email }, 'confirming user email')
-    addAffiliation(userId, email, { confirmedAt }, error => {
-      if (error != null) {
-        OError.tag(error, 'problem adding affiliation while confirming email')
-        return callback(error)
-      }
-
-      const query = {
-        _id: userId,
-        'emails.email': email
-      }
-      const update = {
-        $set: {
-          'emails.$.confirmedAt': confirmedAt
-        }
-      }
-      if (Features.hasFeature('affiliations')) {
-        update['$unset'] = {
-          'emails.$.affiliationUnchecked': 1
-        }
-      }
-      UserUpdater.updateUser(query, update, (error, res) => {
-        if (error != null) {
-          return callback(error)
-        }
-        if (res.n === 0) {
-          return callback(
-            new Errors.NotFoundError('user id and email do no match')
-          )
-        }
-        FeaturesUpdater.refreshFeatures(userId, callback)
-      })
-    })
-  },
+  confirmEmail: callbackify(confirmEmail),
 
   removeReconfirmFlag(userId, callback) {
     UserUpdater.updateUser(
       userId.toString(),
       {
-        $set: { must_reconfirm: false }
+        $set: { must_reconfirm: false },
       },
       error => callback(error)
     )
-  }
+  },
 }
 ;[
   'updateUser',
@@ -336,7 +373,7 @@ const UserUpdater = {
   'setDefaultEmailAddress',
   'addEmailAddress',
   'removeEmailAddress',
-  'removeReconfirmFlag'
+  'removeReconfirmFlag',
 ].map(method =>
   metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)
 )
@@ -344,10 +381,10 @@ const UserUpdater = {
 const promises = {
   addAffiliationForNewUser: promisify(UserUpdater.addAffiliationForNewUser),
   addEmailAddress,
-  confirmEmail: promisify(UserUpdater.confirmEmail),
+  confirmEmail,
   setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser),
-  removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag)
+  removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag),
 }
 
 UserUpdater.promises = promises

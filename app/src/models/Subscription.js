@@ -8,9 +8,17 @@ const SubscriptionSchema = new Schema({
   admin_id: {
     type: ObjectId,
     ref: 'User',
-    index: { unique: true, dropDups: true }
+    index: { unique: true, dropDups: true },
   },
-  manager_ids: { type: [ObjectId], ref: 'User', required: true },
+  manager_ids: {
+    type: [ObjectId],
+    ref: 'User',
+    required: true,
+    validate: function (managers) {
+      // require at least one manager
+      return !!managers.length
+    },
+  },
   member_ids: [{ type: ObjectId, ref: 'User' }],
   invited_emails: [String],
   teamInvites: [TeamInviteSchema],
@@ -26,19 +34,14 @@ const SubscriptionSchema = new Schema({
       type: Number,
       index: {
         unique: true,
-        partialFilterExpression: { 'overleaf.id': { $exists: true } }
-      }
-    }
-  }
+        partialFilterExpression: { 'overleaf.id': { $exists: true } },
+      },
+    },
+  },
 })
 
-SubscriptionSchema.statics.findAndModify = function(query, update, callback) {
-  const self = this
-  return this.update(query, update, () => self.findOne(query, callback))
-}
-
 // Subscriptions have no v1 data to fetch
-SubscriptionSchema.method('fetchV1Data', function(callback) {
+SubscriptionSchema.method('fetchV1Data', function (callback) {
   callback(null, this)
 })
 

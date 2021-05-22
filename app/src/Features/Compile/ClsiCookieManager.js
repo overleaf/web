@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -14,7 +14,7 @@
 let rclient_secondary
 const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
-const request = require('request')
+const request = require('request').defaults({ timeout: 30 * 1000 })
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('clsi_cookie')
 if (Settings.redis.clsi_cookie_secondary != null) {
@@ -27,7 +27,7 @@ const clsiCookiesEnabled =
   (Settings.clsiCookie != null ? Settings.clsiCookie.key : undefined) != null &&
   Settings.clsiCookie.key.length !== 0
 
-module.exports = function(backendGroup) {
+module.exports = function (backendGroup) {
   return {
     buildKey(project_id) {
       if (backendGroup != null) {
@@ -39,7 +39,7 @@ module.exports = function(backendGroup) {
 
     _getServerId(project_id, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       return rclient.get(this.buildKey(project_id), (err, serverId) => {
         if (err != null) {
@@ -55,17 +55,17 @@ module.exports = function(backendGroup) {
 
     _populateServerIdViaRequest(project_id, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
-      return request.get(url, (err, res, body) => {
+      return request.post(url, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
-            project_id
+            project_id,
           })
           return callback(err)
         }
-        return this.setServerId(project_id, res, function(err, serverId) {
+        return this.setServerId(project_id, res, function (err, serverId) {
           if (err != null) {
             logger.warn(
               { err, project_id },
@@ -88,7 +88,7 @@ module.exports = function(backendGroup) {
 
     setServerId(project_id, response, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -112,17 +112,19 @@ module.exports = function(backendGroup) {
 
     _setServerIdInRedis(rclient, project_id, serverId, callback) {
       if (callback == null) {
-        callback = function(err) {}
+        callback = function (err) {}
       }
-      const multi = rclient.multi()
-      multi.set(this.buildKey(project_id), serverId)
-      multi.expire(this.buildKey(project_id), Settings.clsiCookie.ttl)
-      return multi.exec(callback)
+      rclient.setex(
+        this.buildKey(project_id),
+        Settings.clsiCookie.ttl,
+        serverId,
+        callback
+      )
     },
 
     clearServerId(project_id, callback) {
       if (callback == null) {
-        callback = function(err) {}
+        callback = function (err) {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -132,7 +134,7 @@ module.exports = function(backendGroup) {
 
     getCookieJar(project_id, callback) {
       if (callback == null) {
-        callback = function(err, jar) {}
+        callback = function (err, jar) {}
       }
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar())
@@ -140,7 +142,7 @@ module.exports = function(backendGroup) {
       return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
           OError.tag(err, 'error getting server id', {
-            project_id
+            project_id,
           })
           return callback(err)
         }
@@ -151,6 +153,6 @@ module.exports = function(backendGroup) {
         jar.setCookie(serverCookie, Settings.apis.clsi.url)
         return callback(null, jar)
       })
-    }
+    },
   }
 }

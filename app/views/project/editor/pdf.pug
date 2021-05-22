@@ -2,15 +2,23 @@ div.full-size.pdf(ng-controller="PdfController")
 	if showNewLogsUI
 		preview-pane(
 			compiler-state=`{
+				autoCompileHasChanges: changesToAutoCompile,
+				autoCompileHasLintingError: autoCompileLintingError,
 				isAutoCompileOn: autocompile_enabled,
 				isClearingCache: pdf.clearingCache,
 				isCompiling: pdf.compiling,
 				isDraftModeOn: draft,
 				isSyntaxCheckOn: stop_on_validation_error,
-				logEntries: pdf.logEntries ? pdf.logEntries : {}
+				lastCompileTimestamp: pdf.lastCompileTimestamp,
+				logEntries: pdf.logEntries,
+				validationIssues: pdf.validation,
+				errors: clsiErrors,
+				rawLog: pdf.rawLog,
+				compileFailed: pdf.compileFailed
 			}`
 			on-clear-cache="clearCache"
 			on-recompile="recompile"
+			on-recompile-from-scratch="recompileFromScratch"
 			on-run-syntax-check-now="runSyntaxCheckNow"
 			on-set-auto-compile="setAutoCompile"
 			on-set-draft-mode="setDraftMode"
@@ -18,7 +26,13 @@ div.full-size.pdf(ng-controller="PdfController")
 			on-toggle-logs="toggleLogs"
 			output-files="pdf.outputFiles"
 			pdf-download-url="pdf.downloadUrl"
+			split-layout="ui.pdfLayout === 'sideBySide'"
+			on-set-split-layout="setPdfSplitLayout"
+			on-set-full-layout="setPdfFullLayout"
+			on-stop-compilation="stop"
+			variant-with-first-error-popup="logsUISubvariant === 'new-logs-ui-with-popup'"
 			show-logs="shouldShowLogs"
+			on-log-entry-location-click="openInEditor"
 		)
 	else
 		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")
@@ -105,6 +119,14 @@ div.full-size.pdf(ng-controller="PdfController")
 				) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 				
 			a(
+				ng-if="!pdf.downloadUrl"
+				disabled
+				href="#"
+				tooltip=translate('please_compile_pdf_before_download')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-download
+			a(
 				ng-href="{{pdf.downloadUrl || pdf.url}}"
 				target="_blank"
 				ng-if="pdf.url"
@@ -172,7 +194,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					) #{translate("failed_compile_check_ignore")}
 					| .
 
-			div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
+			div(ng-repeat="entry in pdf.logEntries.all")
 				.alert(
 					ng-class="{\
 						'alert-danger':  entry.level == 'error',\
@@ -196,9 +218,9 @@ div.full-size.pdf(ng-controller="PdfController")
 							i.fa.fa-lightbulb-o(aria-hidden="true")
 						p.card-hint-text(
 							ng-show="entry.humanReadableHint",
-							ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
+							ng-bind-html="entry.humanReadableHint")
 						.card-hint-footer.clearfix
-							.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
+							.card-hint-ext-link(ng-if="entry.extraInfoURL")
 								a(
 									ng-href="{{ entry.extraInfoURL }}",
 									ng-click="trackLogHintsLearnMore()"
@@ -228,12 +250,12 @@ div.full-size.pdf(ng-controller="PdfController")
 							href
 							dropdown-toggle
 						)
-							| !{translate("other_logs_and_files")}
+							| #{translate("other_logs_and_files")}
 							span.caret
 						ul.dropdown-menu.dropdown-menu-right
 							li(ng-repeat="file in pdf.outputFiles")
 								a(
-									href="{{file.url}}"
+									ng-href="{{file.url}}"
 									target="_blank"
 								) {{ file.name }}
 				a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
@@ -259,6 +281,8 @@ div.full-size.pdf(ng-controller="PdfController")
 				resize-on="layout:main:resize,layout:pdf:resize"
 				highlights="pdf.highlights"
 				position="pdf.position"
+				first-render-done="pdf.firstRenderDone"
+				update-consumed-bandwidth="pdf.updateConsumedBandwidth"
 				dbl-click-callback="syncToCode"
 			)
 			iframe(
@@ -266,115 +290,111 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-if="settings.pdfViewer == 'native'"
 			)
 
-		.pdf-validation-problems(ng-switch-when="validation-problems")
+		if !showNewLogsUI
+			.pdf-validation-problems(ng-switch-when="validation-problems")
 
-			.alert.alert-danger(ng-show="pdf.validation.duplicatePaths")
-				strong #{translate("latex_error")}
-				span #{translate("duplicate_paths_found")}
-
-
-			.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
-				strong #{translate("project_too_large")} 
-				div #{translate("project_too_large_please_reduce")}
-				div
-					li(ng-repeat="entry in pdf.validation.sizeCheck.resources") {{ '/'+entry['path'] }} - {{entry['kbSize']}}kb
-	
-			.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
-				div
-					strong #{translate("conflicting_paths_found")}
-				div !{translate("following_paths_conflict")}
-				div
-					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
-
-			.alert.alert-danger(ng-show="pdf.validation.mainFile")
-				strong #{translate("main_file_not_found")} 
-				span #{translate("please_set_main_file")}
-
-		.pdf-errors(ng-switch-when="errors")
-	
-			.alert.alert-danger(ng-show="pdf.error")
-				strong #{translate("server_error")} 
-				span #{translate("somthing_went_wrong_compiling")}
-
-			.alert.alert-danger(ng-show="pdf.renderingError")
-				strong #{translate("pdf_rendering_error")} 
-				span #{translate("something_went_wrong_rendering_pdf")}
-	
-			.alert.alert-danger(ng-show="pdf.clsiMaintenance")
-				strong #{translate("server_error")} 
-				span #{translate("clsi_maintenance")}
-
-			.alert.alert-danger(ng-show="pdf.clsiUnavailable")
-				strong #{translate("server_error")} 
-				span #{translate("clsi_unavailable")}
-
-			.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
-				strong #{translate("server_error")} 
-				span #{translate("too_recently_compiled")}
-
-			.alert.alert-danger(ng-show="pdf.compileTerminated")
-				strong #{translate("terminated")}. 
-				span #{translate("compile_terminated_by_user")}
-			
-			.alert.alert-danger(ng-show="pdf.rateLimited")
-				strong #{translate("pdf_compile_rate_limit_hit")} 
-				span #{translate("project_flagged_too_many_compiles")}
-
-			.alert.alert-danger(ng-show="pdf.compileInProgress")
-				strong #{translate("pdf_compile_in_progress_error")}. 
-				span #{translate("pdf_compile_try_again")}
-
-			.alert.alert-danger(ng-show="pdf.timedout")
-				p
-					strong #{translate("timedout")}. 
-					span #{translate("proj_timed_out_reason")}
-				p
-					a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
-						| #{translate("learn_how_to_make_documents_compile_quickly")}
-
-			if settings.enableSubscriptions
-				.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
-					p(ng-if="project.owner._id == user.id")
-						strong #{translate("upgrade_for_longer_compiles")}
-					p(ng-if="project.owner._id != user.id")
-						strong #{translate("ask_proj_owner_to_upgrade_for_longer_compiles")}
-					p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
-					p #{translate("plus_upgraded_accounts_receive")}:
+				.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
+					strong #{translate("project_too_large")} 
+					div #{translate("project_too_large_please_reduce")}
 					div
-						ul.list-unstyled
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("unlimited_projects")}
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("full_doc_history")}
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("sync_to_dropbox")}
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("sync_to_github")}
-							li
-								i.fa.fa-check &nbsp;
-								|#{translate("compile_larger_projects")}
-					p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
-						a.btn.btn-success.row-spaced-small(
-							href
-							ng-class="buttonClass"
-							ng-click="startFreeTrial('compile-timeout')"
-						) #{translate("start_free_trial")}
+						li(ng-repeat="entry in pdf.validation.sizeCheck.resources") {{ '/'+entry['path'] }} - {{entry['kbSize']}}kb
+		
+				.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
+					div
+						strong #{translate("conflicting_paths_found")}
+					div !{translate("following_paths_conflict")}
+					div
+						li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
 
-			.alert.alert-danger(ng-show="pdf.autoCompileDisabled")
-				p
-					strong #{translate("autocompile_disabled")}. 
-					span #{translate("autocompile_disabled_reason")}
+				.alert.alert-danger(ng-show="pdf.validation.mainFile")
+					strong #{translate("main_file_not_found")} 
+					span #{translate("please_set_main_file")}
 
-			.alert.alert-danger(ng-show="pdf.projectTooLarge")
-				strong #{translate("project_too_large")} 
-				span #{translate("project_too_large_please_reduce")}
+			.pdf-errors(ng-switch-when="errors")
+		
+				.alert.alert-danger(ng-show="pdf.error")
+					strong #{translate("server_error")} 
+					span #{translate("somthing_went_wrong_compiling")}
+
+				.alert.alert-danger(ng-show="pdf.renderingError")
+					strong #{translate("pdf_rendering_error")} 
+					span #{translate("something_went_wrong_rendering_pdf")}
+		
+				.alert.alert-danger(ng-show="pdf.clsiMaintenance")
+					strong #{translate("server_error")} 
+					span #{translate("clsi_maintenance")}
+
+				.alert.alert-danger(ng-show="pdf.clsiUnavailable")
+					strong #{translate("server_error")} 
+					span #{translate("clsi_unavailable")}
+
+				.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
+					strong #{translate("server_error")} 
+					span #{translate("too_recently_compiled")}
+
+				.alert.alert-danger(ng-show="pdf.compileTerminated")
+					strong #{translate("terminated")}. 
+					span #{translate("compile_terminated_by_user")}
+				
+				.alert.alert-danger(ng-show="pdf.rateLimited")
+					strong #{translate("pdf_compile_rate_limit_hit")} 
+					span #{translate("project_flagged_too_many_compiles")}
+
+				.alert.alert-danger(ng-show="pdf.compileInProgress")
+					strong #{translate("pdf_compile_in_progress_error")}. 
+					span #{translate("pdf_compile_try_again")}
+
+				.alert.alert-danger(ng-show="pdf.timedout")
+					p
+						strong #{translate("timedout")}. 
+						span #{translate("proj_timed_out_reason")}
+					p
+						a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
+							| #{translate("learn_how_to_make_documents_compile_quickly")}
+
+				if settings.enableSubscriptions
+					.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
+						p(ng-if="project.owner._id == user.id")
+							strong #{translate("upgrade_for_longer_compiles")}
+						p(ng-if="project.owner._id != user.id")
+							strong #{translate("ask_proj_owner_to_upgrade_for_longer_compiles")}
+						p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+						p #{translate("plus_upgraded_accounts_receive")}:
+						div
+							ul.list-unstyled
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("unlimited_projects")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("full_doc_history")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_dropbox")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_github")}
+								li
+									i.fa.fa-check &nbsp;
+									|#{translate("compile_larger_projects")}
+						p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
+							a.btn.btn-success.row-spaced-small(
+								href
+								ng-class="buttonClass"
+								ng-click="startFreeTrial('compile-timeout')"
+							) #{translate("start_free_trial")}
+
+				.alert.alert-danger(ng-show="pdf.autoCompileDisabled")
+					p
+						strong #{translate("autocompile_disabled")}. 
+						span #{translate("autocompile_disabled_reason")}
+
+				.alert.alert-danger(ng-show="pdf.projectTooLarge")
+					strong #{translate("project_too_large")} 
+					span #{translate("project_too_large_please_reduce")}
 
 
 script(type='text/ng-template', id='clearCacheModalTemplate')

@@ -20,7 +20,7 @@ import ColorManager from '../../../../colors/ColorManager'
 let HighlightsManager
 const { Range } = ace.require('ace/range')
 
-export default (HighlightsManager = class HighlightsManager {
+export default HighlightsManager = class HighlightsManager {
   constructor($scope, editor, element) {
     this.$scope = $scope
     this.editor = editor
@@ -35,12 +35,12 @@ export default (HighlightsManager = class HighlightsManager {
       top: 'auto',
       bottom: 'auto',
       backgroundColor: 'black',
-      text: ''
+      text: '',
     }
 
     this.$scope.updateLabels = {
       updatesAbove: 0,
-      updatesBelow: 0
+      updatesBelow: 0,
     }
 
     this.$scope.$watch('highlights', value => {
@@ -109,7 +109,7 @@ export default (HighlightsManager = class HighlightsManager {
     this._clearMarkers()
     this._clearLabels()
 
-    for (let annotation of Array.from(this.$scope.highlights || [])) {
+    for (const annotation of Array.from(this.$scope.highlights || [])) {
       ;(annotation => {
         const colorScheme = ColorManager.getColorScheme(
           annotation.hue,
@@ -125,7 +125,7 @@ export default (HighlightsManager = class HighlightsManager {
               annotation.cursor.column + 1
             ),
             colorScheme,
-            snapToStartOfRange: true
+            snapToStartOfRange: true,
           })
           return this._drawCursor(annotation, colorScheme)
         } else if (annotation.highlight != null) {
@@ -137,7 +137,7 @@ export default (HighlightsManager = class HighlightsManager {
               annotation.highlight.end.row,
               annotation.highlight.end.column
             ),
-            colorScheme
+            colorScheme,
           })
           return this._drawHighlight(annotation, colorScheme)
         } else if (annotation.strikeThrough != null) {
@@ -149,7 +149,7 @@ export default (HighlightsManager = class HighlightsManager {
               annotation.strikeThrough.end.row,
               annotation.strikeThrough.end.column
             ),
-            colorScheme
+            colorScheme,
           })
           return this._drawStrikeThrough(annotation, colorScheme)
         }
@@ -161,7 +161,7 @@ export default (HighlightsManager = class HighlightsManager {
 
   showAnnotationLabels(position) {
     let labelToShow = null
-    for (let label of Array.from(this.labels || [])) {
+    for (const label of Array.from(this.labels || [])) {
       if (label.range.contains(position.row, position.column)) {
         labelToShow = label
       }
@@ -235,7 +235,7 @@ export default (HighlightsManager = class HighlightsManager {
           bottom,
           top,
           backgroundColor: labelToShow.colorScheme.labelBackgroundColor,
-          text: labelToShow.text
+          text: labelToShow.text,
         })
       })
     }
@@ -252,7 +252,7 @@ export default (HighlightsManager = class HighlightsManager {
       let highlightsAfter = 0
       this.lastHiddenHighlightBefore = null
       this.firstHiddenHighlightAfter = null
-      for (let annotation of Array.from(this.$scope.highlights || [])) {
+      for (const annotation of Array.from(this.$scope.highlights || [])) {
         const range = annotation.highlight || annotation.strikeThrough
         if (range == null) {
           continue
@@ -272,7 +272,7 @@ export default (HighlightsManager = class HighlightsManager {
       return this.$scope.$apply(() => {
         return (this.$scope.updateLabels = {
           highlightsBefore,
-          highlightsAfter
+          highlightsAfter,
         })
       })
     }, 100)
@@ -281,7 +281,7 @@ export default (HighlightsManager = class HighlightsManager {
   scrollToFirstHighlight() {
     return (() => {
       const result = []
-      for (let annotation of Array.from(this.$scope.highlights || [])) {
+      for (const annotation of Array.from(this.$scope.highlights || [])) {
         const range = annotation.highlight || annotation.strikeThrough
         if (range == null) {
           continue
@@ -294,7 +294,7 @@ export default (HighlightsManager = class HighlightsManager {
   }
 
   _clearMarkers() {
-    for (let marker_id of Array.from(this.markerIds)) {
+    for (const marker_id of Array.from(this.markerIds)) {
       this.editor.getSession().removeMarker(marker_id)
     }
     return (this.markerIds = [])
@@ -369,7 +369,7 @@ export default (HighlightsManager = class HighlightsManager {
       this.editor.getSession().addMarker(
         range,
         klass,
-        function(html, range, left, top, config) {
+        function (html, range, left, top, config) {
           if (range.isMultiLine()) {
             return markerLayer.drawTextMarker(html, range, klass, config, style)
           } else {
@@ -387,7 +387,7 @@ export default (HighlightsManager = class HighlightsManager {
       )
     )
   }
-})
+}
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

@@ -18,11 +18,13 @@
  */
 import EventEmitter from '../../utils/EventEmitter'
 import ShareJs from 'libs/sharejs'
+import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 
 let ShareJsDoc
-const SINGLE_USER_FLUSH_DELAY = 1000 // ms
+const SINGLE_USER_FLUSH_DELAY = 2000 // ms
+const MULTI_USER_FLUSH_DELAY = 500 // ms
 
-export default (ShareJsDoc = (function() {
+export default ShareJsDoc = (function () {
   ShareJsDoc = class ShareJsDoc extends EventEmitter {
     static initClass() {
       this.prototype.INFLIGHT_OP_TIMEOUT = 5000 // Retry sending ops after 5 seconds without an ack
@@ -30,7 +32,14 @@ export default (ShareJsDoc = (function() {
 
       this.prototype.FATAL_OP_TIMEOUT = 30000
     }
-    constructor(doc_id, docLines, version, socket) {
+
+    constructor(
+      doc_id,
+      docLines,
+      version,
+      socket,
+      globalEditorWatchdogManager
+    ) {
       super()
       // Dencode any binary bits of data
       // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
@@ -78,24 +87,28 @@ export default (ShareJsDoc = (function() {
           )
         },
         state: 'ok',
-        id: this.socket.publicId
+        id: this.socket.publicId,
       }
 
       this._doc = new ShareJs.Doc(this.connection, this.doc_id, {
-        type: this.type
+        type: this.type,
       })
       this._doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
       this._doc.on('change', (...args) => {
         return this.trigger('change', ...Array.from(args))
       })
+      this.EditorWatchdogManager = new EditorWatchdogManager({
+        parent: globalEditorWatchdogManager,
+      })
       this._doc.on('acknowledge', () => {
         this.lastAcked = new Date() // note time of last ack from server for an op we sent
+        this.EditorWatchdogManager.onAck() // keep track of last ack globally
         return this.trigger('acknowledge')
       })
       this._doc.on('remoteop', (...args) => {
         // As soon as we're working with a collaborator, start sending
-        // ops as quickly as possible for low latency.
-        this._doc.setFlushDelay(0)
+        // ops more frequently for low latency.
+        this._doc.setFlushDelay(MULTI_USER_FLUSH_DELAY)
         return this.trigger('remoteop', ...Array.from(args))
       })
       this._doc.on('flipped_pending_to_inflight', () => {
@@ -113,7 +126,7 @@ export default (ShareJsDoc = (function() {
       this.processUpdateFromServer({
         open: true,
         v: version,
-        snapshot
+        snapshot,
       })
       this._removeCarriageReturnCharFromShareJsDoc()
     }
@@ -124,7 +137,7 @@ export default (ShareJsDoc = (function() {
         return
       }
       window._ide.pushEvent('remove-carriage-return-char', {
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
       let nextPos
       while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
@@ -158,7 +171,7 @@ export default (ShareJsDoc = (function() {
       }
       this.queuedMessages.push(message)
       // keep the queue in order, lowest version first
-      this.queuedMessages.sort(function(a, b) {
+      this.queuedMessages.sort(function (a, b) {
         return a.v - b.v
       })
     }
@@ -251,14 +264,17 @@ export default (ShareJsDoc = (function() {
     getSnapshot() {
       return this._doc.snapshot
     }
+
     getVersion() {
       return this._doc.version
     }
+
     getType() {
       return this.type
     }
 
     clearInflightAndPendingOps() {
+      this._clearFatalTimeoutTimer()
       this._doc.inflightOp = null
       this._doc.inflightCallbacks = []
       this._doc.pendingOp = null
@@ -287,9 +303,11 @@ export default (ShareJsDoc = (function() {
     getInflightOp() {
       return this._doc.inflightOp
     }
+
     getPendingOp() {
       return this._doc.pendingOp
     }
+
     getRecentAck() {
       // check if we have received an ack recently (within a factor of two of the single user flush delay)
       return (
@@ -297,11 +315,12 @@ export default (ShareJsDoc = (function() {
         new Date() - this.lastAcked < 2 * SINGLE_USER_FLUSH_DELAY
       )
     }
+
     getOpSize(op) {
       // compute size of an op from its components
       // (total number of characters inserted and deleted)
       let size = 0
-      for (let component of Array.from(op || [])) {
+      for (const component of Array.from(op || [])) {
         if ((component != null ? component.i : undefined) != null) {
           size += component.i.length
         }
@@ -312,23 +331,56 @@ export default (ShareJsDoc = (function() {
       return size
     }
 
-    attachToAce(ace) {
-      return this._doc.attach_ace(ace, false, window.maxDocLength)
+    _attachEditorWatchdogManager(editorName, editor) {
+      // end-to-end check for edits -> acks, for this very ShareJsdoc
+      // This will catch a broken connection and missing UX-blocker for the
+      //  user, allowing them to keep editing.
+      this._detachEditorWatchdogManager = this.EditorWatchdogManager.attachToEditor(
+        editorName,
+        editor
+      )
     }
+
+    _attachToEditor(editorName, editor, attachToShareJs) {
+      this._attachEditorWatchdogManager(editorName, editor)
+
+      attachToShareJs()
+    }
+
+    _maybeDetachEditorWatchdogManager() {
+      // a failed attach attempt may lead to a missing cleanup handler
+      if (this._detachEditorWatchdogManager) {
+        this._detachEditorWatchdogManager()
+        delete this._detachEditorWatchdogManager
+      }
+    }
+
+    attachToAce(ace) {
+      this._attachToEditor('Ace', ace, () => {
+        this._doc.attach_ace(ace, false, window.maxDocLength)
+      })
+    }
+
     detachFromAce() {
+      this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_ace === 'function'
         ? this._doc.detach_ace()
         : undefined
     }
 
     attachToCM(cm) {
-      return this._doc.attach_cm(cm, false)
+      this._attachToEditor('CM', cm, () => {
+        this._doc.attach_cm(cm, false)
+      })
     }
+
     detachFromCM() {
+      this._maybeDetachEditorWatchdogManager()
       return typeof this._doc.detach_cm === 'function'
         ? this._doc.detach_cm()
         : undefined
     } // If we're waiting for the project to join, try again in 0.5 seconds
+
     _startInflightOpTimeout(update) {
       this._startFatalTimeoutTimer(update)
       var retryOp = () => {
@@ -345,7 +397,7 @@ export default (ShareJsDoc = (function() {
           // one or more disconnects, or if it was submitted during the current session.
           update.dupIfSource = [
             this.connection.id,
-            ...Array.from(this._doc.inflightSubmittedIds)
+            ...Array.from(this._doc.inflightSubmittedIds),
           ]
 
           // We must be joined to a project for applyOtUpdate to work on the real-time
@@ -373,6 +425,7 @@ export default (ShareJsDoc = (function() {
         return clearTimeout(timer)
       }) // 30 seconds
     }
+
     _startFatalTimeoutTimer(update) {
       // If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
       // gone unrecoverably wrong (the op will have been retried multiple times)
@@ -419,7 +472,7 @@ export default (ShareJsDoc = (function() {
   }
   ShareJsDoc.initClass()
   return ShareJsDoc
-})())
+})()
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

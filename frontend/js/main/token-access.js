@@ -30,7 +30,7 @@ App.controller(
     $scope.post = () => {
       $scope.mode = 'accessAttempt'
       const textData = $('#overleaf-token-access-data').text()
-      let parsedData = JSON.parse(textData)
+      const parsedData = JSON.parse(textData)
       const { postUrl, csrfToken } = parsedData
       $scope.accessInFlight = true
 
@@ -38,8 +38,8 @@ App.controller(
         method: 'POST',
         url: postUrl,
         data: {
-          _csrf: csrfToken
-        }
+          _csrf: csrfToken,
+        },
       }).then(
         function successCallback(response) {
           $scope.accessInFlight = false

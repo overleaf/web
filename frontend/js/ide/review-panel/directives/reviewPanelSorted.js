@@ -19,7 +19,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
   link(scope, element, attrs) {
     let previous_focused_entry_index = 0
 
-    const layout = function(animate) {
+    const layout = function (animate) {
       let entry,
         height,
         i,
@@ -48,12 +48,12 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
 
       const entries = []
-      for (let el of Array.from(element.find('.rp-entry-wrapper'))) {
+      for (const el of Array.from(element.find('.rp-entry-wrapper'))) {
         entry = {
           $indicator_el: $(el).find('.rp-entry-indicator'),
           $box_el: $(el).find('.rp-entry'),
           $callout_el: $(el).find('.rp-entry-callout'),
-          scope: angular.element(el).scope()
+          scope: angular.element(el).scope(),
         }
         if (scope.ui.reviewPanelOpen) {
           entry.$layout_el = entry.$box_el
@@ -89,18 +89,18 @@ export default App.directive('reviewPanelSorted', $timeout => ({
 
       sl_console.log('focused_entry_index', focused_entry_index)
 
-      const positionLayoutEl = function($callout_el, original_top, top) {
+      const positionLayoutEl = function ($callout_el, original_top, top) {
         if (original_top <= top) {
           $callout_el.removeClass('rp-entry-callout-inverted')
           return $callout_el.css({
             top: original_top + line_height - 1,
-            height: top - original_top
+            height: top - original_top,
           })
         } else {
           $callout_el.addClass('rp-entry-callout-inverted')
           return $callout_el.css({
             top: top + line_height,
-            height: original_top - top
+            height: original_top - top,
           })
         }
       }
@@ -114,7 +114,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         top: focused_entry_top,
         // The entry element is invisible by default, to avoid flickering when positioning for
         // the first time. Here we make sure it becomes visible after having a "top" value.
-        visibility: 'visible'
+        visibility: 'visible',
       })
       focused_entry.$indicator_el.css({ top: focused_entry_top })
       positionLayoutEl(
@@ -133,7 +133,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           top,
           // The entry element is invisible by default, to avoid flickering when positioning for
           // the first time. Here we make sure it becomes visible after having a "top" value.
-          visibility: 'visible'
+          visibility: 'visible',
         })
         entry.$indicator_el.css({ top })
         positionLayoutEl(entry.$callout_el, original_top, top)
@@ -156,7 +156,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           top,
           // The entry element is invisible by default, to avoid flickering when positioning for
           // the first time. Here we make sure it becomes visible after having a "top" value.
-          visibility: 'visible'
+          visibility: 'visible',
         })
         entry.$indicator_el.css({ top })
         positionLayoutEl(entry.$callout_el, original_top, top)
@@ -171,13 +171,13 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
       return scope.$emit('review-panel:sizes', {
         overflowTop,
-        height: previousBottom + OVERVIEW_TOGGLE_HEIGHT
+        height: previousBottom + OVERVIEW_TOGGLE_HEIGHT,
       })
     }
 
     scope.$applyAsync(() => layout())
 
-    scope.$on('review-panel:layout', function(e, animate) {
+    scope.$on('review-panel:layout', function (e, animate) {
       if (animate == null) {
         animate = true
       }
@@ -198,7 +198,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     // noticeable, but keeps it perfectly in step with Ace.
     ace
       .require('ace/lib/event')
-      .addMouseWheelListener(scroller[0], function(e) {
+      .addMouseWheelListener(scroller[0], function (e) {
         const deltaY = e.wheelY
         const old_top = parseInt(list.css('top'))
         const top = old_top - deltaY * 4
@@ -211,7 +211,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     // when it overflows.
     let ignoreNextAceEvent = false
 
-    const scrollPanel = function(scrollTop, height) {
+    const scrollPanel = function (scrollTop, height) {
       if (ignoreNextAceEvent) {
         return (ignoreNextAceEvent = false)
       } else {
@@ -229,5 +229,5 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     scope.$on('$destroy', () => scope.reviewPanelEventsBridge.off('aceScroll'))
 
     return scope.reviewPanelEventsBridge.emit('refreshScrollPosition')
-  }
+  },
 }))

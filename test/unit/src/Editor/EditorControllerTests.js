@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 
 const modulePath = require('path').join(
@@ -22,11 +21,13 @@ const modulePath = require('path').join(
 )
 const MockClient = require('../helpers/MockClient')
 const assert = require('assert')
+const { ObjectId } = require('mongodb')
 
-describe('EditorController', function() {
-  beforeEach(function() {
+describe('EditorController', function () {
+  beforeEach(function () {
     this.project_id = 'test-project-id'
     this.source = 'dropbox'
+    this.user_id = new ObjectId()
 
     this.doc = { _id: (this.doc_id = 'test-doc-id') }
     this.docName = 'doc.tex'
@@ -45,40 +46,33 @@ describe('EditorController', function() {
     this.callback = sinon.stub()
 
     return (this.EditorController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
           setCompiler: sinon.stub().yields(),
           setImageName: sinon.stub().yields(),
-          setSpellCheckLanguage: sinon.stub().yields()
+          setSpellCheckLanguage: sinon.stub().yields(),
         }),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {
           setProjectDescription: sinon.stub().yields(),
           renameProject: sinon.stub().yields(),
-          setPublicAccessLevel: sinon.stub().yields()
+          setPublicAccessLevel: sinon.stub().yields(),
         }),
         '../Project/ProjectDeleter': (this.ProjectDeleter = {}),
         '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
           flushDocToMongo: sinon.stub().yields(),
-          setDocument: sinon.stub().yields()
+          setDocument: sinon.stub().yields(),
         }),
         './EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub()
+          emitToRoom: sinon.stub(),
         }),
-        'metrics-sharelatex': (this.Metrics = { inc: sinon.stub() }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          err: sinon.stub()
-        })
-      }
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
+      },
     }))
   })
 
-  describe('addDoc', function() {
-    beforeEach(function() {
+  describe('addDoc', function () {
+    beforeEach(function () {
       this.ProjectEntityUpdateHandler.addDocWithRanges = sinon
         .stub()
         .yields(null, this.doc, this.folder_id)
@@ -93,7 +87,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should add the doc using the project entity handler', function() {
+    it('should add the doc using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.addDocWithRanges
         .calledWith(
           this.project_id,
@@ -105,25 +99,26 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('should send the update out to the users in the project', function() {
+    it('should send the update out to the users in the project', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
           'reciveNewDoc',
           this.folder_id,
           this.doc,
-          this.source
+          this.source,
+          this.user_id
         )
         .should.equal(true)
     })
 
-    it('calls the callback', function() {
+    it('calls the callback', function () {
       return this.callback.calledWith(null, this.doc).should.equal(true)
     })
   })
 
-  describe('addFile', function() {
-    beforeEach(function() {
+  describe('addFile', function () {
+    beforeEach(function () {
       this.ProjectEntityUpdateHandler.addFile = sinon
         .stub()
         .yields(null, this.file, this.folder_id)
@@ -139,7 +134,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should add the folder using the project entity handler', function() {
+    it('should add the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.addFile
         .calledWith(
           this.project_id,
@@ -152,7 +147,7 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('should send the update of a new folder out to the users in the project', function() {
+    it('should send the update of a new folder out to the users in the project', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -160,18 +155,19 @@ describe('EditorController', function() {
           this.folder_id,
           this.file,
           this.source,
-          this.linkedFileData
+          this.linkedFileData,
+          this.user_id
         )
         .should.equal(true)
     })
 
-    it('calls the callback', function() {
+    it('calls the callback', function () {
       return this.callback.calledWith(null, this.file).should.equal(true)
     })
   })
 
-  describe('upsertDoc', function() {
-    beforeEach(function() {
+  describe('upsertDoc', function () {
+    beforeEach(function () {
       this.ProjectEntityUpdateHandler.upsertDoc = sinon
         .stub()
         .yields(null, this.doc, false)
@@ -186,7 +182,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('upserts the doc using the project entity handler', function() {
+    it('upserts the doc using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.upsertDoc
         .calledWith(
           this.project_id,
@@ -198,12 +194,12 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('returns the doc', function() {
+    it('returns the doc', function () {
       return this.callback.calledWith(null, this.doc).should.equal(true)
     })
 
-    describe('doc does not exist', function() {
-      beforeEach(function() {
+    describe('doc does not exist', function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.upsertDoc = sinon
           .stub()
           .yields(null, this.doc, true)
@@ -218,22 +214,23 @@ describe('EditorController', function() {
         )
       })
 
-      it('sends an update out to users in the project', function() {
+      it('sends an update out to users in the project', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
             'reciveNewDoc',
             this.folder_id,
             this.doc,
-            this.source
+            this.source,
+            this.user_id
           )
           .should.equal(true)
       })
     })
   })
 
-  describe('upsertFile', function() {
-    beforeEach(function() {
+  describe('upsertFile', function () {
+    beforeEach(function () {
       this.ProjectEntityUpdateHandler.upsertFile = sinon
         .stub()
         .yields(null, this.newFile, false, this.file)
@@ -249,7 +246,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('upserts the file using the project entity handler', function() {
+    it('upserts the file using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.upsertFile
         .calledWith(
           this.project_id,
@@ -262,12 +259,12 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('returns the file', function() {
+    it('returns the file', function () {
       return this.callback.calledWith(null, this.newFile).should.equal(true)
     })
 
-    describe('file does not exist', function() {
-      beforeEach(function() {
+    describe('file does not exist', function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.upsertFile = sinon
           .stub()
           .yields(null, this.file, true)
@@ -283,7 +280,7 @@ describe('EditorController', function() {
         )
       })
 
-      it('should send the update out to users in the project', function() {
+      it('should send the update out to users in the project', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
@@ -291,15 +288,16 @@ describe('EditorController', function() {
             this.folder_id,
             this.file,
             this.source,
-            this.linkedFileData
+            this.linkedFileData,
+            this.user_id
           )
           .should.equal(true)
       })
     })
   })
 
-  describe('upsertDocWithPath', function() {
-    beforeEach(function() {
+  describe('upsertDocWithPath', function () {
+    beforeEach(function () {
       this.docPath = '/folder/doc'
 
       this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
@@ -315,14 +313,14 @@ describe('EditorController', function() {
       )
     })
 
-    it('upserts the doc using the project entity handler', function() {
+    it('upserts the doc using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.upsertDocWithPath
         .calledWith(this.project_id, this.docPath, this.docLines, this.source)
         .should.equal(true)
     })
 
-    describe('doc does not exist', function() {
-      beforeEach(function() {
+    describe('doc does not exist', function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
           .stub()
           .yields(null, this.doc, true, [], this.folder)
@@ -336,24 +334,25 @@ describe('EditorController', function() {
         )
       })
 
-      it('should send the update for the doc out to users in the project', function() {
+      it('should send the update for the doc out to users in the project', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
             'reciveNewDoc',
             this.folder_id,
             this.doc,
-            this.source
+            this.source,
+            this.user_id
           )
           .should.equal(true)
       })
     })
 
-    describe('folders required for doc do not exist', function() {
-      beforeEach(function() {
+    describe('folders required for doc do not exist', function () {
+      beforeEach(function () {
         const folders = [
           (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 })
+          (this.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
         this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
           .stub()
@@ -368,7 +367,7 @@ describe('EditorController', function() {
         )
       })
 
-      it('should send the update for each folder to users in the project', function() {
+      it('should send the update for each folder to users in the project', function () {
         this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
@@ -389,8 +388,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('upsertFileWithPath', function() {
-    beforeEach(function() {
+  describe('upsertFileWithPath', function () {
+    beforeEach(function () {
       this.filePath = '/folder/file'
 
       this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
@@ -407,7 +406,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('upserts the file using the project entity handler', function() {
+    it('upserts the file using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.upsertFileWithPath
         .calledWith(
           this.project_id,
@@ -418,8 +417,8 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    describe('file does not exist', function() {
-      beforeEach(function() {
+    describe('file does not exist', function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
           .stub()
           .yields(null, this.file, true, undefined, [], this.folder)
@@ -434,7 +433,7 @@ describe('EditorController', function() {
         )
       })
 
-      it('should send the update for the file out to users in the project', function() {
+      it('should send the update for the file out to users in the project', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
@@ -442,17 +441,18 @@ describe('EditorController', function() {
             this.folder_id,
             this.file,
             this.source,
-            this.linkedFileData
+            this.linkedFileData,
+            this.user_id
           )
           .should.equal(true)
       })
     })
 
-    describe('folders required for file do not exist', function() {
-      beforeEach(function() {
+    describe('folders required for file do not exist', function () {
+      beforeEach(function () {
         const folders = [
           (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 })
+          (this.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
         this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
           .stub()
@@ -468,7 +468,7 @@ describe('EditorController', function() {
         )
       })
 
-      it('should send the update for each folder to users in the project', function() {
+      it('should send the update for each folder to users in the project', function () {
         this.EditorRealTimeController.emitToRoom
           .calledWith(
             this.project_id,
@@ -489,8 +489,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('addFolder', function() {
-    beforeEach(function() {
+  describe('addFolder', function () {
+    beforeEach(function () {
       this.EditorController._notifyProjectUsersOfNewFolder = sinon
         .stub()
         .yields()
@@ -502,35 +502,34 @@ describe('EditorController', function() {
         this.folder_id,
         this.folderName,
         this.source,
+        this.user_id,
         this.callback
       )
     })
 
-    it('should add the folder using the project entity handler', function() {
+    it('should add the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.addFolder
         .calledWith(this.project_id, this.folder_id, this.folderName)
         .should.equal(true)
     })
 
-    it('should notifyProjectUsersOfNewFolder', function() {
-      return this.EditorController._notifyProjectUsersOfNewFolder.calledWith(
-        this.project_id,
-        this.folder_id,
-        this.folder
-      )
+    it('should notifyProjectUsersOfNewFolder', function () {
+      return this.EditorController._notifyProjectUsersOfNewFolder
+        .calledWith(this.project_id, this.folder_id, this.folder, this.user_id)
+        .should.equal(true)
     })
 
-    it('should return the folder in the callback', function() {
+    it('should return the folder in the callback', function () {
       return this.callback.calledWith(null, this.folder).should.equal(true)
     })
   })
 
-  describe('mkdirp', function() {
-    beforeEach(function() {
+  describe('mkdirp', function () {
+    beforeEach(function () {
       this.path = 'folder1/folder2'
       this.folders = [
         (this.folderA = { _id: 2, parentFolder_id: 1 }),
-        (this.folderB = { _id: 3, parentFolder_id: 2 })
+        (this.folderB = { _id: 3, parentFolder_id: 2 }),
       ]
       this.EditorController._notifyProjectUsersOfNewFolders = sinon
         .stub()
@@ -545,28 +544,28 @@ describe('EditorController', function() {
       )
     })
 
-    it('should create the folder using the project entity handler', function() {
+    it('should create the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.mkdirp
         .calledWith(this.project_id, this.path)
         .should.equal(true)
     })
 
-    it('should notifyProjectUsersOfNewFolder', function() {
+    it('should notifyProjectUsersOfNewFolder', function () {
       return this.EditorController._notifyProjectUsersOfNewFolders.calledWith(
         this.project_id,
         this.folders
       )
     })
 
-    it('should return the folder in the callback', function() {
+    it('should return the folder in the callback', function () {
       return this.callback
         .calledWith(null, this.folders, this.folder)
         .should.equal(true)
     })
   })
 
-  describe('deleteEntity', function() {
-    beforeEach(function() {
+  describe('deleteEntity', function () {
+    beforeEach(function () {
       this.entity_id = 'entity_id_here'
       this.type = 'doc'
       this.ProjectEntityUpdateHandler.deleteEntity = sinon.stub().yields()
@@ -580,13 +579,13 @@ describe('EditorController', function() {
       )
     })
 
-    it('should delete the folder using the project entity handler', function() {
+    it('should delete the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.deleteEntity
         .calledWith(this.project_id, this.entity_id, this.type, this.user_id)
         .should.equal(true)
     })
 
-    it('notify users an entity has been deleted', function() {
+    it('notify users an entity has been deleted', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -598,8 +597,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('deleteEntityWithPath', function() {
-    beforeEach(function() {
+  describe('deleteEntityWithPath', function () {
+    beforeEach(function () {
       this.entity_id = 'entity_id_here'
       this.ProjectEntityUpdateHandler.deleteEntityWithPath = sinon
         .stub()
@@ -614,13 +613,13 @@ describe('EditorController', function() {
       )
     })
 
-    it('should delete the folder using the project entity handler', function() {
+    it('should delete the folder using the project entity handler', function () {
       return this.ProjectEntityUpdateHandler.deleteEntityWithPath
         .calledWith(this.project_id, this.path, this.user_id)
         .should.equal(true)
     })
 
-    it('notify users an entity has been deleted', function() {
+    it('notify users an entity has been deleted', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -632,8 +631,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('updateProjectDescription', function() {
-    beforeEach(function() {
+  describe('updateProjectDescription', function () {
+    beforeEach(function () {
       this.description = 'new description'
       return this.EditorController.updateProjectDescription(
         this.project_id,
@@ -642,13 +641,13 @@ describe('EditorController', function() {
       )
     })
 
-    it('should send the new description to the project details handler', function() {
+    it('should send the new description to the project details handler', function () {
       return this.ProjectDetailsHandler.setProjectDescription
         .calledWith(this.project_id, this.description)
         .should.equal(true)
     })
 
-    it('should notify the other clients about the updated description', function() {
+    it('should notify the other clients about the updated description', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -659,15 +658,15 @@ describe('EditorController', function() {
     })
   })
 
-  describe('deleteProject', function() {
-    beforeEach(function() {
+  describe('deleteProject', function () {
+    beforeEach(function () {
       this.err = 'errro'
       return (this.ProjectDeleter.deleteProject = sinon
         .stub()
         .callsArgWith(1, this.err))
     })
 
-    it('should call the project handler', function(done) {
+    it('should call the project handler', function (done) {
       return this.EditorController.deleteProject(this.project_id, err => {
         err.should.equal(this.err)
         this.ProjectDeleter.deleteProject
@@ -678,8 +677,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('renameEntity', function() {
-    beforeEach(function(done) {
+  describe('renameEntity', function () {
+    beforeEach(function (done) {
       this.entity_id = 'entity_id_here'
       this.entityType = 'doc'
       this.newName = 'bobsfile.tex'
@@ -695,7 +694,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should call the project handler', function() {
+    it('should call the project handler', function () {
       return this.ProjectEntityUpdateHandler.renameEntity
         .calledWith(
           this.project_id,
@@ -707,7 +706,7 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function() {
+    it('should emit the update to the room', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -719,8 +718,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('moveEntity', function() {
-    beforeEach(function() {
+  describe('moveEntity', function () {
+    beforeEach(function () {
       this.entity_id = 'entity_id_here'
       this.entityType = 'doc'
       this.ProjectEntityUpdateHandler.moveEntity = sinon.stub().yields()
@@ -734,7 +733,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should call the ProjectEntityUpdateHandler', function() {
+    it('should call the ProjectEntityUpdateHandler', function () {
       return this.ProjectEntityUpdateHandler.moveEntity
         .calledWith(
           this.project_id,
@@ -746,7 +745,7 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function() {
+    it('should emit the update to the room', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(
           this.project_id,
@@ -757,13 +756,13 @@ describe('EditorController', function() {
         .should.equal(true)
     })
 
-    it('calls the callback', function() {
+    it('calls the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('renameProject', function() {
-    beforeEach(function() {
+  describe('renameProject', function () {
+    beforeEach(function () {
       this.err = 'errro'
       this.newName = 'new name here'
       return this.EditorController.renameProject(
@@ -773,21 +772,21 @@ describe('EditorController', function() {
       )
     })
 
-    it('should call the EditorController', function() {
+    it('should call the EditorController', function () {
       return this.ProjectDetailsHandler.renameProject
         .calledWith(this.project_id, this.newName)
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function() {
+    it('should emit the update to the room', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(this.project_id, 'projectNameUpdated', this.newName)
         .should.equal(true)
     })
   })
 
-  describe('setCompiler', function() {
-    beforeEach(function() {
+  describe('setCompiler', function () {
+    beforeEach(function () {
       this.compiler = 'latex'
       return this.EditorController.setCompiler(
         this.project_id,
@@ -796,7 +795,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should send the new compiler and project id to the project options handler', function() {
+    it('should send the new compiler and project id to the project options handler', function () {
       this.ProjectOptionsHandler.setCompiler
         .calledWith(this.project_id, this.compiler)
         .should.equal(true)
@@ -806,8 +805,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('setImageName', function() {
-    beforeEach(function() {
+  describe('setImageName', function () {
+    beforeEach(function () {
       this.imageName = 'texlive-1234.5'
       return this.EditorController.setImageName(
         this.project_id,
@@ -816,7 +815,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should send the new imageName and project id to the project options handler', function() {
+    it('should send the new imageName and project id to the project options handler', function () {
       this.ProjectOptionsHandler.setImageName
         .calledWith(this.project_id, this.imageName)
         .should.equal(true)
@@ -826,8 +825,8 @@ describe('EditorController', function() {
     })
   })
 
-  describe('setSpellCheckLanguage', function() {
-    beforeEach(function() {
+  describe('setSpellCheckLanguage', function () {
+    beforeEach(function () {
       this.languageCode = 'fr'
       return this.EditorController.setSpellCheckLanguage(
         this.project_id,
@@ -836,7 +835,7 @@ describe('EditorController', function() {
       )
     })
 
-    it('should send the new languageCode and project id to the project options handler', function() {
+    it('should send the new languageCode and project id to the project options handler', function () {
       this.ProjectOptionsHandler.setSpellCheckLanguage
         .calledWith(this.project_id, this.languageCode)
         .should.equal(true)
@@ -850,9 +849,9 @@ describe('EditorController', function() {
     })
   })
 
-  describe('setPublicAccessLevel', function() {
-    describe('when setting to private', function() {
-      beforeEach(function() {
+  describe('setPublicAccessLevel', function () {
+    describe('when setting to private', function () {
+      beforeEach(function () {
         this.newAccessLevel = 'private'
         this.ProjectDetailsHandler.ensureTokensArePresent = sinon
           .stub()
@@ -864,35 +863,35 @@ describe('EditorController', function() {
         )
       })
 
-      it('should set the access level', function() {
+      it('should set the access level', function () {
         return this.ProjectDetailsHandler.setPublicAccessLevel
           .calledWith(this.project_id, this.newAccessLevel)
           .should.equal(true)
       })
 
-      it('should broadcast the access level change', function() {
+      it('should broadcast the access level change', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:publicAccessLevel:changed')
           .should.equal(true)
       })
 
-      it('should not ensure tokens are present for project', function() {
+      it('should not ensure tokens are present for project', function () {
         return this.ProjectDetailsHandler.ensureTokensArePresent
           .calledWith(this.project_id)
           .should.equal(false)
       })
 
-      it('should not broadcast a token change', function() {
+      it('should not broadcast a token change', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens
+            tokens: this.tokens,
           })
           .should.equal(false)
       })
     })
 
-    describe('when setting to tokenBased', function() {
-      beforeEach(function() {
+    describe('when setting to tokenBased', function () {
+      beforeEach(function () {
         this.newAccessLevel = 'tokenBased'
         this.tokens = { readOnly: 'aaa', readAndWrite: '42bbb' }
         this.ProjectDetailsHandler.ensureTokensArePresent = sinon
@@ -905,36 +904,36 @@ describe('EditorController', function() {
         )
       })
 
-      it('should set the access level', function() {
+      it('should set the access level', function () {
         return this.ProjectDetailsHandler.setPublicAccessLevel
           .calledWith(this.project_id, this.newAccessLevel)
           .should.equal(true)
       })
 
-      it('should broadcast the access level change', function() {
+      it('should broadcast the access level change', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:publicAccessLevel:changed')
           .should.equal(true)
       })
 
-      it('should ensure tokens are present for project', function() {
+      it('should ensure tokens are present for project', function () {
         return this.ProjectDetailsHandler.ensureTokensArePresent
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      it('should broadcast the token change too', function() {
+      it('should broadcast the token change too', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens
+            tokens: this.tokens,
           })
           .should.equal(true)
       })
     })
   })
 
-  describe('setRootDoc', function() {
-    beforeEach(function() {
+  describe('setRootDoc', function () {
+    beforeEach(function () {
       this.newRootDocID = '21312321321'
       this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
       return this.EditorController.setRootDoc(
@@ -944,13 +943,13 @@ describe('EditorController', function() {
       )
     })
 
-    it('should call the ProjectEntityUpdateHandler', function() {
+    it('should call the ProjectEntityUpdateHandler', function () {
       return this.ProjectEntityUpdateHandler.setRootDoc
         .calledWith(this.project_id, this.newRootDocID)
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function() {
+    it('should emit the update to the room', function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith(this.project_id, 'rootDocUpdated', this.newRootDocID)
         .should.equal(true)

@@ -15,11 +15,23 @@ let ProjectEditorHandler
 const _ = require('underscore')
 const Path = require('path')
 
+function mergeDeletedDocs(a, b) {
+  const docIdsInA = new Set(a.map(doc => doc._id.toString()))
+  return a.concat(b.filter(doc => !docIdsInA.has(doc._id.toString())))
+}
+
 module.exports = ProjectEditorHandler = {
   trackChangesAvailable: false,
 
-  buildProjectModelView(project, members, invites) {
+  buildProjectModelView(project, members, invites, deletedDocsFromDocstore) {
     let owner, ownerFeatures
+    if (!Array.isArray(project.deletedDocs)) {
+      project.deletedDocs = []
+    }
+    project.deletedDocs.forEach(doc => {
+      // The frontend does not use this field.
+      delete doc.deletedAt
+    })
     const result = {
       _id: project._id,
       name: project.name,
@@ -31,18 +43,25 @@ module.exports = ProjectEditorHandler = {
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
-      deletedDocs: project.deletedDocs,
+      deletedDocs: mergeDeletedDocs(
+        project.deletedDocs,
+        deletedDocsFromDocstore
+      ),
       members: [],
       invites,
       tokens: project.tokens,
       imageName:
-        project.imageName != null ? Path.basename(project.imageName) : undefined
+        project.imageName != null
+          ? Path.basename(project.imageName)
+          : undefined,
     }
 
     if (result.invites == null) {
       result.invites = []
     }
-
+    result.invites.forEach(invite => {
+      delete invite.token
+    })
     ;({ owner, ownerFeatures, members } = this.buildOwnerAndMembersViews(
       members
     ))
@@ -60,8 +79,12 @@ module.exports = ProjectEditorHandler = {
       referencesSearch: false,
       mendeley: false,
       trackChanges: false,
-      trackChangesVisible: ProjectEditorHandler.trackChangesAvailable
+      trackChangesVisible: ProjectEditorHandler.trackChangesAvailable,
     })
+
+    if (result.features.trackChanges) {
+      result.trackChangesState = project.track_changes || false
+    }
 
     // Originally these two feature flags were both signalled by the now-deprecated `references` flag.
     // For older users, the presence of the `references` feature flag should still turn on these features.
@@ -77,7 +100,7 @@ module.exports = ProjectEditorHandler = {
     let owner = null
     let ownerFeatures = null
     const filteredMembers = []
-    for (let member of Array.from(members || [])) {
+    for (const member of Array.from(members || [])) {
       if (member.privilegeLevel === 'owner') {
         ownerFeatures = member.user.features
         owner = this.buildUserModelView(member.user, 'owner')
@@ -90,7 +113,7 @@ module.exports = ProjectEditorHandler = {
     return {
       owner,
       ownerFeatures,
-      members: filteredMembers
+      members: filteredMembers,
     }
   },
 
@@ -101,7 +124,7 @@ module.exports = ProjectEditorHandler = {
       last_name: user.last_name,
       email: user.email,
       privileges,
-      signUpDate: user.signUpDate
+      signUpDate: user.signUpDate,
     }
   },
 
@@ -123,7 +146,7 @@ module.exports = ProjectEditorHandler = {
       })(),
       docs: Array.from(folder.docs || []).map(doc =>
         this.buildDocModelView(doc)
-      )
+      ),
     }
   },
 
@@ -132,14 +155,14 @@ module.exports = ProjectEditorHandler = {
       _id: file._id,
       name: file.name,
       linkedFileData: file.linkedFileData,
-      created: file.created
+      created: file.created,
     }
   },
 
   buildDocModelView(doc) {
     return {
       _id: doc._id,
-      name: doc.name
+      name: doc.name,
     }
-  }
+  },
 }

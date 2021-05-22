@@ -16,11 +16,11 @@ const ScriptLogger = {
   recordMismatch: (subscription, recurlySubscription) => {
     const mismatchReasons = {}
     if (subscription.planCode !== recurlySubscription.plan.plan_code) {
-      mismatchReasons['recurlyPlan'] = recurlySubscription.plan.plan_code
-      mismatchReasons['olPlan'] = subscription.planCode
+      mismatchReasons.recurlyPlan = recurlySubscription.plan.plan_code
+      mismatchReasons.olPlan = subscription.planCode
     }
     if (recurlySubscription.state === 'expired') {
-      mismatchReasons['state'] = 'expired'
+      mismatchReasons.state = 'expired'
     }
 
     if (!Object.keys(mismatchReasons).length) {
@@ -35,16 +35,14 @@ const ScriptLogger = {
       )
     } else {
       ScriptLogger.allMismatchReasons[mismatchReasonsString] = [
-        subscription._id
+        subscription._id,
       ]
     }
   },
 
   printProgress: () => {
     console.warn(
-      `Subscriptions checked: ${
-        ScriptLogger.checkedSubscriptionsCount
-      }. Mismatches: ${ScriptLogger.mismatchSubscriptionsCount}`
+      `Subscriptions checked: ${ScriptLogger.checkedSubscriptionsCount}. Mismatches: ${ScriptLogger.mismatchSubscriptionsCount}`
     )
   },
 
@@ -54,7 +52,7 @@ const ScriptLogger = {
       'Mismatch Subscriptions Count',
       ScriptLogger.mismatchSubscriptionsCount
     )
-  }
+  },
 }
 
 const slowCallback = callback => setTimeout(callback, 80)
@@ -107,7 +105,7 @@ const syncSubscriptions = (subscriptions, callback) => {
 
 const loopForSubscriptions = (skip, callback) => {
   Subscription.find({
-    recurlySubscription_id: { $exists: true, $ne: '' }
+    recurlySubscription_id: { $exists: true, $ne: '' },
   })
     .sort('_id')
     .skip(skip)

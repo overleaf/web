@@ -6,11 +6,9 @@ include _plans_page_tables
 block vars
 	- metadata = { viewport: true }
 
-block head-scripts
-	script(type='text/javascript').
-		window.recomendedCurrency = '#{recomendedCurrency}';
-		window.abCurrencyFlag = '#{abCurrencyFlag}';
-		window.groupPlans = !{StringHelper.stringifyJsonForScript(groupPlans)};
+block append meta
+	meta(name="ol-recomendedCurrency" content=recomendedCurrency)
+	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 
 block content
 	.content.content-alt
@@ -20,10 +18,10 @@ block content
 					li.notification-entry
 						.alert.alert-info
 							.notification-body
-								span To help you work from home throughout 2020 and beyond, we're providing a number of special initiatives.
+								span To help you work from home throughout 2021, we're providing discounted plans and special initiatives.
 							.notification-action
-								a.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2020") View
-		.content-page
+								a.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Plans-Banner") Upgrade
+		main.content-page
 			.plans(ng-controller="PlansController")
 				.container(ng-cloak)
 					.row
@@ -38,7 +36,7 @@ block content
 
 					.row.row-spaced-large.text-centered
 						.col-xs-12
-							p.text-centered !{translate('also_provides_free_plan', { appName:'{{settings.appName}}', registerLinkOpen: '<a href="/register">', registerLinkClose: '</a>' })}
+							p.text-centered !{translate('also_provides_free_plan', { appName:'{{settings.appName}}' }, [{ name: 'a', attrs: { href: '/register' }}])}
 							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
 							span.sr-only Mastercard accepted
 							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;

@@ -2,7 +2,7 @@ const AuthenticationManager = require('./AuthenticationManager')
 const OError = require('@overleaf/o-error')
 const LoginRateLimiter = require('../Security/LoginRateLimiter')
 const UserUpdater = require('../User/UserUpdater')
-const Metrics = require('metrics-sharelatex')
+const Metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const querystring = require('querystring')
 const Settings = require('settings-sharelatex')
@@ -17,8 +17,9 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const _ = require('lodash')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const {
-  acceptsJson
+  acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
 
 function send401WithChallenge(res) {
@@ -44,7 +45,7 @@ const AuthenticationController = {
       session_created: new Date().toISOString(),
       ip_address: user._login_req_ip,
       must_reconfirm: user.must_reconfirm,
-      v1_id: user.overleaf != null ? user.overleaf.id : undefined
+      v1_id: user.overleaf != null ? user.overleaf.id : undefined,
     }
     callback(null, lightUser)
   },
@@ -57,7 +58,7 @@ const AuthenticationController = {
     // This function is middleware which wraps the passport.authenticate middleware,
     // so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
     // and send a `{redir: ""}` response on success
-    passport.authenticate('local', function(err, user, info) {
+    passport.authenticate('local', function (err, user, info) {
       if (err) {
         return next(err)
       }
@@ -80,80 +81,96 @@ const AuthenticationController = {
     } // OAuth2 'state' mismatch
 
     const Modules = require('../../infrastructure/Modules')
-    Modules.hooks.fire('preFinishLogin', req, res, user, function(
-      error,
-      results
-    ) {
-      if (error) {
-        return next(error)
-      }
-      if (results.some(result => result && result.doNotFinish)) {
-        return
-      }
-
-      if (user.must_reconfirm) {
-        return AuthenticationController._redirectToReconfirmPage(req, res, user)
-      }
-
-      const redir =
-        AuthenticationController._getRedirectFromSession(req) || '/project'
-      _loginAsyncHandlers(req, user)
-      _afterLoginSessionSetup(req, user, function(err) {
-        if (err) {
-          return next(err)
+    Modules.hooks.fire(
+      'preFinishLogin',
+      req,
+      res,
+      user,
+      function (error, results) {
+        if (error) {
+          return next(error)
         }
-        AuthenticationController._clearRedirectFromSession(req)
-        AsyncFormHelper.redirect(req, res, redir)
-      })
-    })
+        if (results.some(result => result && result.doNotFinish)) {
+          return
+        }
+
+        if (user.must_reconfirm) {
+          return AuthenticationController._redirectToReconfirmPage(
+            req,
+            res,
+            user
+          )
+        }
+
+        const redir =
+          AuthenticationController._getRedirectFromSession(req) || '/project'
+        _loginAsyncHandlers(req, user)
+        const userId = user._id
+        UserAuditLogHandler.addEntry(userId, 'login', userId, req.ip, err => {
+          if (err) {
+            return next(err)
+          }
+          _afterLoginSessionSetup(req, user, function (err) {
+            if (err) {
+              return next(err)
+            }
+            AuthenticationController._clearRedirectFromSession(req)
+            AsyncFormHelper.redirect(req, res, redir)
+          })
+        })
+      }
+    )
   },
 
   doPassportLogin(req, username, password, done) {
     const email = username.toLowerCase()
     const Modules = require('../../infrastructure/Modules')
-    Modules.hooks.fire('preDoPassportLogin', req, email, function(
-      err,
-      infoList
-    ) {
-      if (err) {
-        return done(err)
-      }
-      const info = infoList.find(i => i != null)
-      if (info != null) {
-        return done(null, false, info)
-      }
-      LoginRateLimiter.processLoginRequest(email, function(err, isAllowed) {
+    Modules.hooks.fire(
+      'preDoPassportLogin',
+      req,
+      email,
+      function (err, infoList) {
         if (err) {
           return done(err)
         }
-        if (!isAllowed) {
-          logger.log({ email }, 'too many login requests')
-          return done(null, null, {
-            text: req.i18n.translate('to_many_login_requests_2_mins'),
-            type: 'error'
-          })
+        const info = infoList.find(i => i != null)
+        if (info != null) {
+          return done(null, false, info)
         }
-        AuthenticationManager.authenticate({ email }, password, function(
-          error,
-          user
-        ) {
-          if (error != null) {
-            return done(error)
+        LoginRateLimiter.processLoginRequest(email, function (err, isAllowed) {
+          if (err) {
+            return done(err)
           }
-          if (user != null) {
-            // async actions
-            done(null, user)
-          } else {
-            AuthenticationController._recordFailedLogin()
-            logger.log({ email }, 'failed log in')
-            done(null, false, {
-              text: req.i18n.translate('email_or_password_wrong_try_again'),
-              type: 'error'
+          if (!isAllowed) {
+            logger.log({ email }, 'too many login requests')
+            return done(null, null, {
+              text: req.i18n.translate('to_many_login_requests_2_mins'),
+              type: 'error',
             })
           }
+          AuthenticationManager.authenticate(
+            { email },
+            password,
+            function (error, user) {
+              if (error != null) {
+                return done(error)
+              }
+              if (user != null) {
+                // async actions
+                done(null, user)
+              } else {
+                AuthenticationController._recordFailedLogin()
+                logger.log({ email }, 'failed log in')
+                done(null, false, {
+                  text: req.i18n.translate('email_or_password_wrong_try_again'),
+                  type: 'error',
+                })
+              }
+            }
+          )
         })
-      })
-    })
+      }
+    )
   },
 
   ipMatchCheck(req, user) {
@@ -161,7 +178,7 @@ const AuthenticationController = {
       NotificationsBuilder.ipMatcherAffiliation(user._id).create(req.ip)
     }
     return UserUpdater.updateUser(user._id.toString(), {
-      $set: { lastLoginIp: req.ip }
+      $set: { lastLoginIp: req.ip },
     })
   },
 
@@ -170,7 +187,7 @@ const AuthenticationController = {
     if (!sessionUser) {
       return
     }
-    for (let key in props) {
+    for (const key in props) {
       const value = props[key]
       sessionUser[key] = value
     }
@@ -208,9 +225,9 @@ const AuthenticationController = {
   },
 
   requireLogin() {
-    const doRequest = function(req, res, next) {
+    const doRequest = function (req, res, next) {
       if (next == null) {
-        next = function() {}
+        next = function () {}
       }
       if (!AuthenticationController.isUserLoggedIn(req)) {
         if (acceptsJson(req)) return send401WithChallenge(res)
@@ -227,45 +244,47 @@ const AuthenticationController = {
   requireOauth() {
     // require this here because module may not be included in some versions
     const Oauth2Server = require('../../../../modules/oauth2-server/app/src/Oauth2Server')
-    return function(req, res, next) {
+    return function (req, res, next) {
       if (next == null) {
-        next = function() {}
+        next = function () {}
       }
       const request = new Oauth2Server.Request(req)
       const response = new Oauth2Server.Response(res)
-      return Oauth2Server.server.authenticate(request, response, {}, function(
-        err,
-        token
-      ) {
-        if (err) {
-          // use a 401 status code for malformed header for git-bridge
-          if (
-            err.code === 400 &&
-            err.message === 'Invalid request: malformed authorization header'
-          ) {
-            err.code = 401
+      return Oauth2Server.server.authenticate(
+        request,
+        response,
+        {},
+        function (err, token) {
+          if (err) {
+            // use a 401 status code for malformed header for git-bridge
+            if (
+              err.code === 400 &&
+              err.message === 'Invalid request: malformed authorization header'
+            ) {
+              err.code = 401
+            }
+            // send all other errors
+            return res
+              .status(err.code)
+              .json({ error: err.name, error_description: err.message })
           }
-          // send all other errors
-          return res
-            .status(err.code)
-            .json({ error: err.name, error_description: err.message })
+          req.oauth = { access_token: token.accessToken }
+          req.oauth_token = token
+          req.oauth_user = token.user
+          return next()
         }
-        req.oauth = { access_token: token.accessToken }
-        req.oauth_token = token
-        req.oauth_user = token.user
-        return next()
-      })
+      )
     }
   },
 
-  validateUserSession: function() {
+  validateUserSession: function () {
     // Middleware to check that the user's session is still good on key actions,
     // such as opening a a project. Could be used to check that session has not
     // exceeded a maximum lifetime (req.session.session_created), or for session
     // hijacking checks (e.g. change of ip address, req.session.ip_address). For
     // now, just check that the session has been loaded from the session store
     // correctly.
-    return function(req, res, next) {
+    return function (req, res, next) {
       // check that the session store is returning valid results
       if (req.session && !SessionStoreManager.hasValidationToken(req)) {
         // force user to update session
@@ -296,7 +315,7 @@ const AuthenticationController = {
       return next()
     }
 
-    if (req.headers['authorization'] != null) {
+    if (req.headers.authorization != null) {
       AuthenticationController.httpAuth(req, res, next)
     } else if (AuthenticationController.isUserLoggedIn(req)) {
       next()
@@ -327,7 +346,7 @@ const AuthenticationController = {
     if (email == null) {
       return next(
         new OError('[ValidateAdmin] Admin user without email address', {
-          userId: user._id
+          userId: user._id,
         })
       )
     }
@@ -335,15 +354,15 @@ const AuthenticationController = {
       return next(
         new OError('[ValidateAdmin] Admin user with invalid email domain', {
           email: email,
-          userId: user._id
+          userId: user._id,
         })
       )
     }
     return next()
   },
 
-  httpAuth: basicAuth(function(user, pass) {
-    let expectedPassword = Settings.httpAuthUsers[user]
+  httpAuth: basicAuth(function (user, pass) {
+    const expectedPassword = Settings.httpAuthUsers[user]
     const isValid =
       expectedPassword &&
       expectedPassword.length === pass.length &&
@@ -417,15 +436,15 @@ const AuthenticationController = {
 
   _recordSuccessfulLogin(userId, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     UserUpdater.updateUser(
       userId.toString(),
       {
         $set: { lastLoggedIn: new Date() },
-        $inc: { loginCount: 1 }
+        $inc: { loginCount: 1 },
       },
-      function(error) {
+      function (error) {
         if (error != null) {
           callback(error)
         }
@@ -453,47 +472,47 @@ const AuthenticationController = {
     if (req.session != null) {
       delete req.session.postLoginRedirect
     }
-  }
+  },
 }
 
 function _afterLoginSessionSetup(req, user, callback) {
   if (callback == null) {
-    callback = function() {}
+    callback = function () {}
   }
-  req.login(user, function(err) {
+  req.login(user, function (err) {
     if (err) {
       OError.tag(err, 'error from req.login', {
-        user_id: user._id
+        user_id: user._id,
       })
       return callback(err)
     }
     // Regenerate the session to get a new sessionID (cookie value) to
     // protect against session fixation attacks
     const oldSession = req.session
-    req.session.destroy(function(err) {
+    req.session.destroy(function (err) {
       if (err) {
         OError.tag(err, 'error when trying to destroy old session', {
-          user_id: user._id
+          user_id: user._id,
         })
         return callback(err)
       }
       req.sessionStore.generate(req)
       // Note: the validation token is not writable, so it does not get
       // transferred to the new session below.
-      for (let key in oldSession) {
+      for (const key in oldSession) {
         const value = oldSession[key]
-        if (key !== '__tmp') {
+        if (key !== '__tmp' && key !== 'csrfSecret') {
           req.session[key] = value
         }
       }
-      req.session.save(function(err) {
+      req.session.save(function (err) {
         if (err) {
           OError.tag(err, 'error saving regenerated session after login', {
-            user_id: user._id
+            user_id: user._id,
           })
           return callback(err)
         }
-        UserSessionsManager.trackSession(user, req.sessionID, function() {})
+        UserSessionsManager.trackSession(user, req.sessionID, function () {})
         callback(null)
       })
     })
@@ -508,7 +527,7 @@ function _loginAsyncHandlers(req, user) {
   LoginRateLimiter.recordSuccessfulLogin(user.email)
   AuthenticationController._recordSuccessfulLogin(user._id)
   AuthenticationController.ipMatchCheck(req, user)
-  Analytics.recordEvent(user._id, 'user-logged-in', { ip: req.ip })
+  Analytics.recordEvent(user._id, 'user-logged-in')
   Analytics.identifyUser(user._id, req.sessionID)
   logger.log(
     { email: user.email, user_id: user._id.toString() },

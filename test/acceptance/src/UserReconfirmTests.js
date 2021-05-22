@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -12,23 +12,22 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { expect } = require('chai')
-const should = require('chai').should()
 const async = require('async')
 const User = require('./helpers/User')
 
-describe('User Must Reconfirm', function() {
-  beforeEach(function(done) {
+describe('User Must Reconfirm', function () {
+  beforeEach(function (done) {
     this.user = new User()
     return async.series(
       [
         this.user.ensureUserExists.bind(this.user),
-        cb => this.user.mongoUpdate({ $set: { must_reconfirm: true } }, cb)
+        cb => this.user.mongoUpdate({ $set: { must_reconfirm: true } }, cb),
       ],
       done
     )
   })
 
-  it('should not allow sign in', function(done) {
+  it('should not allow sign in', function (done) {
     return this.user.login(err => {
       expect(err != null).to.equal(false)
       return this.user.isLoggedIn((err, isLoggedIn) => {
@@ -38,8 +37,8 @@ describe('User Must Reconfirm', function() {
     })
   })
 
-  describe('Requesting reconfirmation email', function() {
-    it('should return a success to client for existing account', function(done) {
+  describe('Requesting reconfirmation email', function () {
+    it('should return a success to client for existing account', function (done) {
       return this.user.reconfirmAccountRequest(
         this.user.email,
         (err, response) => {
@@ -50,7 +49,7 @@ describe('User Must Reconfirm', function() {
       )
     })
 
-    it('should return a 404 to client for non-existent account', function(done) {
+    it('should return a 404 to client for non-existent account', function (done) {
       return this.user.reconfirmAccountRequest(
         'fake@overleaf.com',
         (err, response) => {

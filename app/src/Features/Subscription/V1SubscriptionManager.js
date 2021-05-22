@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -26,7 +26,7 @@ module.exports = V1SubscriptionManager = {
   //   - 'v1_free'
   getPlanCodeFromV1(userId, callback) {
     if (callback == null) {
-      callback = function(err, planCode, v1Id) {}
+      callback = function (err, planCode, v1Id) {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -34,9 +34,9 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/plan_code`
-        }
+        },
       },
-      function(error, body, v1Id) {
+      function (error, body, v1Id) {
         if (error != null) {
           return callback(error)
         }
@@ -54,7 +54,7 @@ module.exports = V1SubscriptionManager = {
 
   getSubscriptionsFromV1(userId, callback) {
     if (callback == null) {
-      callback = function(err, subscriptions, v1Id) {}
+      callback = function (err, subscriptions, v1Id) {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -62,7 +62,7 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscriptions`
-        }
+        },
       },
       callback
     )
@@ -70,7 +70,7 @@ module.exports = V1SubscriptionManager = {
 
   getSubscriptionStatusFromV1(userId, callback) {
     if (callback == null) {
-      callback = function(err, status) {}
+      callback = function (err, status) {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -78,7 +78,7 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscription_status`
-        }
+        },
       },
       callback
     )
@@ -86,7 +86,7 @@ module.exports = V1SubscriptionManager = {
 
   cancelV1Subscription(userId, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -94,7 +94,7 @@ module.exports = V1SubscriptionManager = {
         method: 'DELETE',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscription`
-        }
+        },
       },
       callback
     )
@@ -102,22 +102,23 @@ module.exports = V1SubscriptionManager = {
 
   v1IdForUser(userId, callback) {
     if (callback == null) {
-      callback = function(err, v1Id) {}
+      callback = function (err, v1Id) {}
     }
-    return UserGetter.getUser(userId, { 'overleaf.id': 1 }, function(
-      err,
-      user
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      const v1Id = __guard__(
-        user != null ? user.overleaf : undefined,
-        x => x.id
-      )
+    return UserGetter.getUser(
+      userId,
+      { 'overleaf.id': 1 },
+      function (err, user) {
+        if (err != null) {
+          return callback(err)
+        }
+        const v1Id = __guard__(
+          user != null ? user.overleaf : undefined,
+          x => x.id
+        )
 
-      return callback(null, v1Id)
-    })
+        return callback(null, v1Id)
+      }
+    )
   },
 
   // v1 accounts created before migration to v2 had github and mendeley for free
@@ -140,13 +141,13 @@ module.exports = V1SubscriptionManager = {
 
   _v1Request(userId, options, callback) {
     if (callback == null) {
-      callback = function(err, body, v1Id) {}
+      callback = function (err, body, v1Id) {}
     }
     if (!settings.apis.v1.url) {
       return callback(null, null)
     }
 
-    return V1SubscriptionManager.v1IdForUser(userId, function(err, v1Id) {
+    return V1SubscriptionManager.v1IdForUser(userId, function (err, v1Id) {
       if (err != null) {
         return callback(err)
       }
@@ -162,17 +163,17 @@ module.exports = V1SubscriptionManager = {
           auth: {
             user: settings.apis.v1.user,
             pass: settings.apis.v1.pass,
-            sendImmediately: true
+            sendImmediately: true,
           },
           json: true,
-          timeout: 15 * 1000
+          timeout: 15 * 1000,
         },
-        function(error, response, body) {
+        function (error, response, body) {
           if (error != null) {
             return callback(
               new V1ConnectionError({
                 message: 'no v1 connection',
-                info: { url }
+                info: { url },
               }).withCause(error)
             )
           }
@@ -182,8 +183,8 @@ module.exports = V1SubscriptionManager = {
                 message: 'error from v1',
                 info: {
                   status: response.statusCode,
-                  body: body
-                }
+                  body: body,
+                },
               })
             )
           }
@@ -205,7 +206,7 @@ module.exports = V1SubscriptionManager = {
         }
       )
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

@@ -1,5 +1,5 @@
 # the base image is suitable for running web with /app bind mounted
-FROM node:10.22.1 as base
+FROM node:12.21.0 as base
 
 WORKDIR /app
 
@@ -10,6 +10,7 @@ RUN apt-get update \
 &&  apt-get install -y parallel \
 &&  rm -rf /var/lib/apt/lists/*
 
+RUN mkdir /app/node_modules && chown node:node /app/node_modules
 
 # the deps image is used for caching npm ci
 FROM base as deps

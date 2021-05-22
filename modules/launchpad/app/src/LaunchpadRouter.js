@@ -17,7 +17,7 @@ const AuthorizationMiddleware = require('../../../../app/src/Features/Authorizat
 
 module.exports = {
   apply(webRouter, apiRouter) {
-    if (Settings.disableModule['launchpad']) {
+    if (Settings.disableModule.launchpad) {
       logger.log({}, 'Skipping Init launchpad router')
       return
     }
@@ -54,5 +54,5 @@ module.exports = {
         '/launchpad/register_saml_admin'
       )
     }
-  }
+  },
 }

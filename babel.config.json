@@ -1,0 +1,24 @@
+{
+  "presets": [
+    "@babel/react",
+    ["@babel/env", {
+      "useBuiltIns": "usage",
+      "corejs": { "version": 3 }
+    }]
+  ],
+  "plugins": ["angularjs-annotate", "macros"],
+  // Target our current Node version in test environment, to transform and
+  // polyfill only what's necessary
+  "env": {
+    "test": {
+      "presets": [
+        "@babel/react",
+        ["@babel/env", {
+            "targets": {"node": "10.21"},
+            "useBuiltIns": "usage",
+            "corejs": { "version": 3 }
+          }]
+      ]
+    }
+  }
+}

@@ -10,7 +10,7 @@ const UserPagesController = {
   registerPage(req, res) {
     const sharedProjectData = {
       project_name: req.query.project_name,
-      user_first_name: req.query.user_first_name
+      user_first_name: req.query.user_first_name,
     }
 
     const newTemplateData = {}
@@ -22,8 +22,7 @@ const UserPagesController = {
       title: 'register',
       sharedProjectData,
       newTemplateData,
-      new_email: req.query.new_email || '',
-      samlBeta: req.session.samlBeta
+      samlBeta: req.session.samlBeta,
     })
   },
 
@@ -38,7 +37,6 @@ const UserPagesController = {
     }
     res.render('user/login', {
       title: 'login',
-      email: req.query.email
     })
   },
 
@@ -58,7 +56,7 @@ const UserPagesController = {
 
   renderReconfirmAccountPage(req, res) {
     const pageData = {
-      reconfirm_email: req.session.reconfirm_email
+      reconfirm_email: req.session.reconfirm_email,
     }
     // when a user must reconfirm their account
     res.render('user/reconfirm', pageData)
@@ -66,6 +64,7 @@ const UserPagesController = {
 
   settingsPage(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
+    const reconfirmationRemoveEmail = req.query.remove
     // SSO
     const ssoError = req.session.ssoError
     if (ssoError) {
@@ -77,24 +76,22 @@ const UserPagesController = {
       // copy object if exists because _.get does not
       institutionLinked = Object.assign(
         {
-          hasEntitlement: _.get(req.session, ['saml', 'hasEntitlement'])
+          hasEntitlement: _.get(req.session, ['saml', 'hasEntitlement']),
         },
         institutionLinked
       )
     }
-    const institutionLinkedToAnother = _.get(req.session, [
-      'saml',
-      'linkedToAnother'
-    ])
+    const samlError = _.get(req.session, ['saml', 'error'])
     const institutionEmailNonCanonical = _.get(req.session, [
       'saml',
-      'emailNonCanonical'
+      'emailNonCanonical',
     ])
     const institutionRequestedEmail = _.get(req.session, [
       'saml',
-      'requestedEmail'
+      'requestedEmail',
     ])
-    const institutionLinkingError = _.get(req.session, ['saml', 'error'])
+
+    const reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
     delete req.session.saml
     let shouldAllowEditingDetails = true
     if (Settings.ldap && Settings.ldap.updateUserDetailsOnLogin) {
@@ -122,15 +119,16 @@ const UserPagesController = {
         ),
         oauthUseV2: Settings.oauthUseV2 || false,
         institutionLinked,
-        institutionLinkedToAnother,
+        samlError,
         institutionEmailNonCanonical:
           institutionEmailNonCanonical && institutionRequestedEmail
             ? institutionEmailNonCanonical
             : undefined,
-        institutionLinkingError,
+        reconfirmedViaSAML,
+        reconfirmationRemoveEmail,
         samlBeta: req.session.samlBeta,
         ssoError: ssoError,
-        thirdPartyIds: UserPagesController._restructureThirdPartyIds(user)
+        thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
       })
     })
   },
@@ -144,13 +142,13 @@ const UserPagesController = {
       (err, sessions) => {
         if (err != null) {
           OError.tag(err, 'error getting all user sessions', {
-            userId: user._id
+            userId: user._id,
           })
           return next(err)
         }
         res.render('user/sessions', {
           title: 'sessions',
-          sessions
+          sessions,
         })
       }
     )
@@ -175,7 +173,7 @@ const UserPagesController = {
   _translateProviderDescriptions(providers, req) {
     const result = {}
     if (providers) {
-      for (let provider in providers) {
+      for (const provider in providers) {
         const data = providers[provider]
         data.description = req.i18n.translate(
           data.descriptionKey,
@@ -185,7 +183,7 @@ const UserPagesController = {
       }
     }
     return result
-  }
+  },
 }
 
 module.exports = UserPagesController

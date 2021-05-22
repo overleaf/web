@@ -13,20 +13,21 @@ const OError = require('@overleaf/o-error')
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 module.exports = {
-  upgradeInstitutionUsers(institutionId, callback) {
+  refreshInstitutionUsers(institutionId, notify, callback) {
+    const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
     async.waterfall(
       [
         cb => fetchInstitutionAndAffiliations(institutionId, cb),
-        function(institution, affiliations, cb) {
-          affiliations = _.map(affiliations, function(affiliation) {
+        function (institution, affiliations, cb) {
+          affiliations = _.map(affiliations, function (affiliation) {
             affiliation.institutionName = institution.name
             affiliation.institutionId = institutionId
             return affiliation
           })
-          async.eachLimit(affiliations, ASYNC_LIMIT, refreshFeatures, err =>
+          async.eachLimit(affiliations, ASYNC_LIMIT, refreshFunction, err =>
             cb(err)
           )
-        }
+        },
       ],
       callback
     )
@@ -49,7 +50,7 @@ module.exports = {
   },
 
   getInstitutionUsersSubscriptions(institutionId, callback) {
-    getInstitutionAffiliations(institutionId, function(error, affiliations) {
+    getInstitutionAffiliations(institutionId, function (error, affiliations) {
       if (error) {
         return callback(error)
       }
@@ -58,12 +59,12 @@ module.exports = {
       )
       Subscription.find({
         admin_id: userIds,
-        planCode: { $not: /trial/ }
+        planCode: { $not: /trial/ },
       })
         .populate('admin_id', 'email')
         .exec(callback)
     })
-  }
+  },
 }
 
 var fetchInstitutionAndAffiliations = (institutionId, callback) =>
@@ -78,18 +79,24 @@ var fetchInstitutionAndAffiliations = (institutionId, callback) =>
       (institution, cb) =>
         getInstitutionAffiliations(institutionId, (err, affiliations) =>
           cb(err, institution, affiliations)
-        )
+        ),
     ],
     callback
   )
 
-var refreshFeatures = function(affiliation, callback) {
+var refreshFeatures = function (affiliation, callback) {
+  const userId = ObjectId(affiliation.user_id)
+  FeaturesUpdater.refreshFeatures(userId, 'refresh-institution-users', callback)
+}
+
+var refreshFeaturesAndNotify = function (affiliation, callback) {
   const userId = ObjectId(affiliation.user_id)
   async.waterfall(
     [
       cb =>
         FeaturesUpdater.refreshFeatures(
           userId,
+          'refresh-institution-users',
           (err, features, featuresChanged) => cb(err, featuresChanged)
         ),
       (featuresChanged, cb) =>
@@ -97,7 +104,7 @@ var refreshFeatures = function(affiliation, callback) {
           cb(error, user, subscription, featuresChanged)
         ),
       (user, subscription, featuresChanged, cb) =>
-        notifyUser(user, affiliation, subscription, featuresChanged, cb)
+        notifyUser(user, affiliation, subscription, featuresChanged, cb),
     ],
     callback
   )
@@ -110,7 +117,7 @@ var getUserInfo = (userId, callback) =>
       (user, cb) =>
         SubscriptionLocator.getUsersSubscription(user, (err, subscription) =>
           cb(err, user, subscription)
-        )
+        ),
     ],
     callback
   )
@@ -118,7 +125,7 @@ var getUserInfo = (userId, callback) =>
 var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
   async.parallel(
     [
-      function(cb) {
+      function (cb) {
         if (featuresChanged) {
           NotificationsBuilder.featuresUpgradedByAffiliation(
             affiliation,
@@ -128,7 +135,7 @@ var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
           cb()
         }
       },
-      function(cb) {
+      function (cb) {
         if (
           subscription &&
           !subscription.planCode.match(/(free|trial)/) &&
@@ -141,28 +148,28 @@ var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
         } else {
           cb()
         }
-      }
+      },
     ],
     callback
   )
 
-var checkFeatures = function(institutionId, users) {
+var checkFeatures = function (institutionId, users) {
   const usersSummary = {
     confirmedEmailUsers: {
       total: users.length, // all users are confirmed email users
       totalProUsers: 0,
       totalNonProUsers: 0,
-      nonProUsers: []
+      nonProUsers: [],
     },
     entitledSSOUsers: {
       total: 0,
       totalProUsers: 0,
       totalNonProUsers: 0,
-      nonProUsers: []
-    }
+      nonProUsers: [],
+    },
   }
-  users.forEach(function(user) {
-    let isSSOEntitled = SAMLIdentityManager.userHasEntitlement(
+  users.forEach(function (user) {
+    const isSSOEntitled = SAMLIdentityManager.userHasEntitlement(
       user,
       institutionId
     )

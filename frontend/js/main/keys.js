@@ -1,5 +1,3 @@
-/* eslint-disable
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -21,5 +19,5 @@ export default App.constant('Keys', {
   RIGHT: 39,
   PERIOD: 190,
   COMMA: 188,
-  END: 35
+  END: 35,
 })

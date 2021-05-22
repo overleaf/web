@@ -58,24 +58,10 @@
 			a(href) #{translate("your_projects")}
 		li(ng-class="{active: (filter == 'shared')}", ng-click="filterProjects('shared')")
 			a(href) #{translate("shared_with_you")}
-		li.folders-menu-item-with-tooltip(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
-			a(href) #{translate("archived_projects")}
-			.folders-menu-tooltip-trigger(
-				href
-				tooltip=translate('archived_projects_info_note')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				stop-propagation="click"
-			) i
-		li.folders-menu-item-with-tooltip(ng-class="{active: (filter == 'trashed')}", ng-click="filterProjects('trashed')")
+		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
+			a(href) #{settings.overleaf ? translate("archived_projects") : translate("deleted_projects")}
+		li(ng-class="{active: (filter == 'trashed')}", ng-click="filterProjects('trashed')")
 			a(href) #{translate("trashed_projects")}
-			.folders-menu-tooltip-trigger(
-				href
-				tooltip=translate('trashed_projects_info_note')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				stop-propagation="click"
-			) i
 		li.separator
 			h2 #{translate("tags_slash_folders")}
 		li.tag(ng-cloak)
@@ -134,12 +120,12 @@
 			i.fa.fa-arrow-up.fa-2x(aria-hidden="true")
 		div
 			strong #{translate("create_your_first_project")}
-			
-- if (showUserDetailsArea)
+
+if (showUserDetailsArea)
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")
-			div(ng-show="userEmails.length > 0 && userAffiliations.length == 0", ng-cloak)
+			div(ng-hide="withAffiliations", ng-cloak)
 				hr
 				.text-centered.user-profile
 					p Are you affiliated with an institution?
@@ -158,10 +144,6 @@
 		//- 		a(href="/user/bonus" ng-click="share()") #{translate("sharing_sl")}.
 		.row-spaced(ng-if="hasProjects && userHasNoSubscription && !userOnPayingUniversity", ng-cloak).text-centered
 			hr
-			p.small To help you work from home throughout 2020 and beyond, we're providing a number of special initiatives.
+			p.small To help you work from home throughout 2021, we're providing discounted plans and special initiatives.
 			p
-				a(href="https://www.overleaf.com/events/wfh2020").btn.btn-primary View
-
-			
-script.
-	window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}
+				a(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Dash-Sidebar").btn.btn-primary Upgrade

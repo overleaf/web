@@ -7,11 +7,11 @@ const request = require('request')
 
 const PublisherSchema = new Schema({
   slug: { type: String, required: true },
-  managerIds: [{ type: ObjectId, ref: 'User' }]
+  managerIds: [{ type: ObjectId, ref: 'User' }],
 })
 
 // fetch publisher's (brand on v1) data from v1 API. Errors are ignored
-PublisherSchema.method('fetchV1Data', function(callback) {
+PublisherSchema.method('fetchV1Data', function (callback) {
   request(
     {
       baseUrl: settings.apis.v1.url,
@@ -20,8 +20,8 @@ PublisherSchema.method('fetchV1Data', function(callback) {
       auth: {
         user: settings.apis.v1.user,
         pass: settings.apis.v1.pass,
-        sendImmediately: true
-      }
+        sendImmediately: true,
+      },
     },
     (error, response, body) => {
       let parsedBody

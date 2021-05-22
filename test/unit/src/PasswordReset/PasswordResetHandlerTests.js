@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
     no-unused-vars,
@@ -15,53 +15,44 @@ const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
-const chai = require('chai')
+const { expect } = require('chai')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/PasswordReset/PasswordResetHandler'
 )
-const should = require('chai').should()
-chai.use(sinonChai)
-const { expect } = chai
 
-describe('PasswordResetHandler', function() {
-  beforeEach(function() {
+describe('PasswordResetHandler', function () {
+  beforeEach(function () {
     this.settings = { siteUrl: 'www.sharelatex.com' }
     this.OneTimeTokenHandler = {
       getNewToken: sinon.stub(),
-      getValueFromTokenAndExpire: sinon.stub()
+      getValueFromTokenAndExpire: sinon.stub(),
     }
     this.UserGetter = {
       getUserByMainEmail: sinon.stub(),
       getUser: sinon.stub(),
-      getUserByAnyEmail: sinon.stub()
+      getUserByAnyEmail: sinon.stub(),
     }
     this.EmailHandler = { sendEmail: sinon.stub() }
     this.AuthenticationManager = {
       setUserPasswordInV2: sinon.stub(),
       promises: {
-        setUserPassword: sinon.stub().resolves()
-      }
+        setUserPassword: sinon.stub().resolves(),
+      },
     }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
-      globals: { console: console },
       requires: {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
-            addEntry: sinon.stub().resolves()
-          }
+            addEntry: sinon.stub().resolves(),
+          },
         }),
         '../User/UserGetter': this.UserGetter,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
+      },
     })
     this.token = '12312321i'
     this.user_id = 'user_id_here'
@@ -72,12 +63,12 @@ describe('PasswordResetHandler', function() {
     this.settings.overleaf = true
   })
 
-  afterEach(function() {
+  afterEach(function () {
     this.settings.overleaf = false
   })
 
-  describe('generateAndEmailResetToken', function() {
-    it('should check the user exists', function() {
+  describe('generateAndEmailResetToken', function () {
+    it('should check the user exists', function () {
       this.UserGetter.getUserByAnyEmail.yields()
       this.PasswordResetHandler.generateAndEmailResetToken(
         this.user.email,
@@ -88,7 +79,7 @@ describe('PasswordResetHandler', function() {
       )
     })
 
-    it('should send the email with the token', function(done) {
+    it('should send the email with the token', function (done) {
       this.UserGetter.getUserByAnyEmail.yields(null, this.user)
       this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
       this.EmailHandler.sendEmail.yields()
@@ -109,8 +100,8 @@ describe('PasswordResetHandler', function() {
       )
     })
 
-    describe('when the email exists', function() {
-      beforeEach(function() {
+    describe('when the email exists', function () {
+      beforeEach(function () {
         this.UserGetter.getUserByAnyEmail.yields(null, this.user)
         this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
         this.EmailHandler.sendEmail.yields()
@@ -120,17 +111,17 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      it('should set the password token data to the user id and email', function() {
+      it('should set the password token data to the user id and email', function () {
         this.OneTimeTokenHandler.getNewToken.should.have.been.calledWith(
           'password',
           {
             email: this.email,
-            user_id: this.user._id
+            user_id: this.user._id,
           }
         )
       })
 
-      it('should send an email with the token', function() {
+      it('should send an email with the token', function () {
         this.EmailHandler.sendEmail.called.should.equal(true)
         const args = this.EmailHandler.sendEmail.args[0]
         args[0].should.equal('passwordResetRequested')
@@ -141,13 +132,13 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      it('should return status == true', function() {
+      it('should return status == true', function () {
         this.callback.calledWith(null, 'primary').should.equal(true)
       })
     })
 
-    describe("when the email doesn't exist", function() {
-      beforeEach(function() {
+    describe("when the email doesn't exist", function () {
+      beforeEach(function () {
         this.UserGetter.getUserByAnyEmail.yields(null, null)
         this.PasswordResetHandler.generateAndEmailResetToken(
           this.email,
@@ -155,21 +146,21 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      it('should not set the password token data', function() {
+      it('should not set the password token data', function () {
         this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
       })
 
-      it('should send an email with the token', function() {
+      it('should send an email with the token', function () {
         this.EmailHandler.sendEmail.called.should.equal(false)
       })
 
-      it('should return status == null', function() {
+      it('should return status == null', function () {
         this.callback.calledWith(null, null).should.equal(true)
       })
     })
 
-    describe('when the email is a secondary email', function() {
-      beforeEach(function() {
+    describe('when the email is a secondary email', function () {
+      beforeEach(function () {
         this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.user)
         this.PasswordResetHandler.generateAndEmailResetToken(
           'secondary@email.com',
@@ -177,30 +168,30 @@ describe('PasswordResetHandler', function() {
         )
       })
 
-      it('should not set the password token data', function() {
+      it('should not set the password token data', function () {
         this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
       })
 
-      it('should not send an email with the token', function() {
+      it('should not send an email with the token', function () {
         this.EmailHandler.sendEmail.called.should.equal(false)
       })
 
-      it('should return status == secondary', function() {
+      it('should return status == secondary', function () {
         this.callback.calledWith(null, 'secondary').should.equal(true)
       })
     })
   })
 
-  describe('setNewUserPassword', function() {
-    beforeEach(function() {
+  describe('setNewUserPassword', function () {
+    beforeEach(function () {
       this.auditLog = { ip: '0:0:0:0' }
     })
-    describe('when no data is found', function() {
-      beforeEach(function() {
+    describe('when no data is found', function () {
+      beforeEach(function () {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, null)
       })
 
-      it('should return found == false and reset == false', function() {
+      it('should return found == false and reset == false', function () {
         this.PasswordResetHandler.setNewUserPassword(
           this.token,
           this.password,
@@ -210,34 +201,34 @@ describe('PasswordResetHandler', function() {
             expect(result).to.deep.equal({
               found: false,
               reset: false,
-              userId: null
+              userId: null,
             })
           }
         )
       })
     })
 
-    describe('when the token has a user_id and email', function() {
-      beforeEach(function() {
+    describe('when the token has a user_id and email', function () {
+      beforeEach(function () {
         this.OneTimeTokenHandler.getValueFromTokenAndExpire
           .withArgs('password', this.token)
           .yields(null, {
             user_id: this.user._id,
-            email: this.email
+            email: this.email,
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
       })
 
-      describe('when no user is found with this email', function() {
-        beforeEach(function() {
+      describe('when no user is found with this email', function () {
+        beforeEach(function () {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, null)
         })
 
-        it('should return found == false and reset == false', function(done) {
+        it('should return found == false and reset == false', function (done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
@@ -253,14 +244,14 @@ describe('PasswordResetHandler', function() {
         })
       })
 
-      describe("when the email and user don't match", function() {
-        beforeEach(function() {
+      describe("when the email and user don't match", function () {
+        beforeEach(function () {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, { _id: 'not-the-same', email: this.email })
         })
 
-        it('should return found == false and reset == false', function(done) {
+        it('should return found == false and reset == false', function (done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
@@ -276,13 +267,13 @@ describe('PasswordResetHandler', function() {
         })
       })
 
-      describe('when the email and user match', function() {
-        describe('success', function() {
-          beforeEach(function() {
+      describe('when the email and user match', function () {
+        describe('success', function () {
+          beforeEach(function () {
             this.UserGetter.getUserByMainEmail.yields(null, this.user)
           })
 
-          it('should update the user audit log', function(done) {
+          it('should update the user audit log', function (done) {
             this.PasswordResetHandler.setNewUserPassword(
               this.token,
               this.password,
@@ -302,7 +293,7 @@ describe('PasswordResetHandler', function() {
             )
           })
 
-          it('should return reset == true and the user id', function(done) {
+          it('should return reset == true and the user id', function (done) {
             this.PasswordResetHandler.setNewUserPassword(
               this.token,
               this.password,
@@ -317,11 +308,11 @@ describe('PasswordResetHandler', function() {
             )
           })
 
-          describe('when logged in', function() {
-            beforeEach(function() {
+          describe('when logged in', function () {
+            beforeEach(function () {
               this.auditLog.initiatorId = this.user_id
             })
-            it('should update the user audit log with initiatorId', function(done) {
+            it('should update the user audit log with initiatorId', function (done) {
               this.PasswordResetHandler.setNewUserPassword(
                 this.token,
                 this.password,
@@ -343,9 +334,9 @@ describe('PasswordResetHandler', function() {
           })
         })
 
-        describe('errors', function() {
-          describe('via UserAuditLogHandler', function() {
-            beforeEach(function() {
+        describe('errors', function () {
+          describe('via UserAuditLogHandler', function () {
+            beforeEach(function () {
               this.PasswordResetHandler.promises.getUserForPasswordResetToken = sinon
                 .stub()
                 .withArgs(this.token)
@@ -354,7 +345,7 @@ describe('PasswordResetHandler', function() {
                 new Error('oops')
               )
             })
-            it('should return the error', function(done) {
+            it('should return the error', function (done) {
               this.PasswordResetHandler.setNewUserPassword(
                 this.token,
                 this.password,
@@ -375,28 +366,28 @@ describe('PasswordResetHandler', function() {
       })
     })
 
-    describe('when the token has a v1_user_id and email', function() {
-      beforeEach(function() {
+    describe('when the token has a v1_user_id and email', function () {
+      beforeEach(function () {
         this.user.overleaf = { id: 184 }
         this.OneTimeTokenHandler.getValueFromTokenAndExpire
           .withArgs('password', this.token)
           .yields(null, {
             v1_user_id: this.user.overleaf.id,
-            email: this.email
+            email: this.email,
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
       })
 
-      describe('when no user is reset with this email', function() {
-        beforeEach(function() {
+      describe('when no user is reset with this email', function () {
+        beforeEach(function () {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, null)
         })
 
-        it('should return reset == false', function(done) {
+        it('should return reset == false', function (done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
@@ -411,16 +402,16 @@ describe('PasswordResetHandler', function() {
         })
       })
 
-      describe("when the email and user don't match", function() {
-        beforeEach(function() {
+      describe("when the email and user don't match", function () {
+        beforeEach(function () {
           this.UserGetter.getUserByMainEmail.withArgs(this.email).yields(null, {
             _id: this.user._id,
             email: this.email,
-            overleaf: { id: 'not-the-same' }
+            overleaf: { id: 'not-the-same' },
           })
         })
 
-        it('should return reset == false', function(done) {
+        it('should return reset == false', function (done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,
@@ -435,14 +426,14 @@ describe('PasswordResetHandler', function() {
         })
       })
 
-      describe('when the email and user match', function() {
-        beforeEach(function() {
+      describe('when the email and user match', function () {
+        beforeEach(function () {
           this.UserGetter.getUserByMainEmail
             .withArgs(this.email)
             .yields(null, this.user)
         })
 
-        it('should return reset == true and the user id', function(done) {
+        it('should return reset == true and the user id', function (done) {
           this.PasswordResetHandler.setNewUserPassword(
             this.token,
             this.password,

@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -38,10 +38,10 @@ const SubscriptionGroupHandler = {
   },
 
   replaceUserReferencesInGroups(oldId, newId, callback) {
-    return Subscription.update(
+    return Subscription.updateOne(
       { admin_id: oldId },
       { admin_id: newId },
-      function(error) {
+      function (error) {
         if (error != null) {
           return callback(error)
         }
@@ -51,7 +51,7 @@ const SubscriptionGroupHandler = {
           'manager_ids',
           oldId,
           newId,
-          function(error) {
+          function (error) {
             if (error != null) {
               return callback(error)
             }
@@ -71,12 +71,12 @@ const SubscriptionGroupHandler = {
 
   isUserPartOfGroup(user_id, subscription_id, callback) {
     if (callback == null) {
-      callback = function(err, partOfGroup) {}
+      callback = function (err, partOfGroup) {}
     }
     return SubscriptionLocator.getSubscriptionByMemberIdAndId(
       user_id,
       subscription_id,
-      function(err, subscription) {
+      function (err, subscription) {
         let partOfGroup
         if (subscription != null) {
           partOfGroup = true
@@ -90,7 +90,7 @@ const SubscriptionGroupHandler = {
 
   getTotalConfirmedUsersInGroup(subscription_id, callback) {
     if (callback == null) {
-      callback = function(err, totalUsers) {}
+      callback = function (err, totalUsers) {}
     }
     return SubscriptionLocator.getSubscription(
       subscription_id,
@@ -103,10 +103,10 @@ const SubscriptionGroupHandler = {
           )
         )
     )
-  }
+  },
 }
 
-var replaceInArray = function(model, property, oldValue, newValue, callback) {
+var replaceInArray = function (model, property, oldValue, newValue, callback) {
   // Mongo won't let us pull and addToSet in the same query, so do it in
   // two. Note we need to add first, since the query is based on the old user.
   const query = {}
@@ -118,22 +118,12 @@ var replaceInArray = function(model, property, oldValue, newValue, callback) {
   const setOldValue = {}
   setOldValue[property] = oldValue
 
-  return model.update(
-    query,
-    { $addToSet: setNewValue },
-    { multi: true },
-    function(error) {
-      if (error != null) {
-        return callback(error)
-      }
-      return model.update(
-        query,
-        { $pull: setOldValue },
-        { multi: true },
-        callback
-      )
+  model.updateMany(query, { $addToSet: setNewValue }, function (error) {
+    if (error) {
+      return callback(error)
     }
-  )
+    model.updateMany(query, { $pull: setOldValue }, callback)
+  })
 }
 
 function __guard__(value, transform) {
@@ -146,7 +136,7 @@ SubscriptionGroupHandler.promises = {
   getTotalConfirmedUsersInGroup: promisify(
     SubscriptionGroupHandler.getTotalConfirmedUsersInGroup
   ),
-  isUserPartOfGroup: promisify(SubscriptionGroupHandler.isUserPartOfGroup)
+  isUserPartOfGroup: promisify(SubscriptionGroupHandler.isUserPartOfGroup),
 }
 
 module.exports = SubscriptionGroupHandler

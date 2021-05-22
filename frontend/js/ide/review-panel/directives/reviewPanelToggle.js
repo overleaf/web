@@ -20,20 +20,20 @@ export default App.directive('reviewPanelToggle', () => ({
     valWhenUndefined: '=?',
     isDisabled: '=?',
     onDisabledClick: '&?',
-    description: '@'
+    description: '@',
   },
   link(scope) {
     if (scope.disabled == null) {
       scope.disabled = false
     }
     scope.onChange = (...args) => scope.onToggle({ isOn: scope.localModel })
-    scope.handleClick = function() {
+    scope.handleClick = function () {
       if (scope.disabled && scope.onDisabledClick != null) {
         return scope.onDisabledClick()
       }
     }
     scope.localModel = scope.ngModel
-    return scope.$watch('ngModel', function(value) {
+    return scope.$watch('ngModel', function (value) {
       if (scope.valWhenUndefined != null && value == null) {
         value = scope.valWhenUndefined
       }
@@ -47,5 +47,5 @@ export default App.directive('reviewPanelToggle', () => ({
 <input id="rp-toggle-{{$id}}" ng-disabled="isDisabled" type="checkbox" class="rp-toggle-hidden-input" ng-model="localModel" ng-change="onChange()" />
 <label for="rp-toggle-{{$id}}" class="rp-toggle-btn"></label>
 </fieldset>\
-`
+`,
 }))

@@ -5,15 +5,15 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import MessageInput from '../../../../../frontend/js/features/chat/components/message-input'
 
-describe('<MessageInput />', function() {
+describe('<MessageInput />', function () {
   let resetUnreadMessages, sendMessage
 
-  beforeEach(function() {
+  beforeEach(function () {
     resetUnreadMessages = sinon.stub()
     sendMessage = sinon.stub()
   })
 
-  it('renders successfully', function() {
+  it('renders successfully', function () {
     render(
       <MessageInput
         sendMessage={sendMessage}
@@ -21,10 +21,10 @@ describe('<MessageInput />', function() {
       />
     )
 
-    screen.getByPlaceholderText('Your Message…')
+    screen.getByLabelText('Your Message')
   })
 
-  it('sends a message after typing and hitting enter', function() {
+  it('sends a message after typing and hitting enter', function () {
     render(
       <MessageInput
         sendMessage={sendMessage}
@@ -32,7 +32,7 @@ describe('<MessageInput />', function() {
       />
     )
 
-    const input = screen.getByPlaceholderText('Your Message…')
+    const input = screen.getByRole('textbox')
 
     fireEvent.change(input, { target: { value: 'hello world' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -40,7 +40,7 @@ describe('<MessageInput />', function() {
     expect(sendMessage).to.be.calledWith('hello world')
   })
 
-  it('resets the number of unread messages after clicking on the input', function() {
+  it('resets the number of unread messages after clicking on the input', function () {
     render(
       <MessageInput
         sendMessage={sendMessage}

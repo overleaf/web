@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     mocha/no-identical-title,
     no-path-concat,
@@ -26,21 +26,29 @@ const _ = require('underscore')
 
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 
-const MockDocStoreApi = require('./helpers/MockDocstoreApi')
-const MockFileStoreApi = require('./helpers/MockFileStoreApi')
 const request = require('./helpers/request')
 const User = require('./helpers/User')
 
-describe('ProjectDuplicateNames', function() {
-  beforeEach(function(done) {
+const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
+const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
+
+let MockDocstoreApi, MockFilestoreApi
+
+before(function () {
+  MockDocstoreApi = MockDocstoreApiClass.instance()
+  MockFilestoreApi = MockFilestoreApiClass.instance()
+})
+
+describe('ProjectDuplicateNames', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     this.owner.login(done)
     this.project = {}
     return (this.callback = sinon.stub())
   })
 
-  describe('creating a project from the example template', function() {
-    beforeEach(function(done) {
+  describe('creating a project from the example template', function () {
+    beforeEach(function (done) {
       return this.owner.createProject(
         'example-project',
         { template: 'example' },
@@ -70,8 +78,8 @@ describe('ProjectDuplicateNames', function() {
                 uri: `/project/${this.example_project_id}/folder`,
                 json: {
                   name: 'testfolder',
-                  parent_folder_id: this.rootFolderId
-                }
+                  parent_folder_id: this.rootFolderId,
+                },
               },
               (err, res, body) => {
                 this.testFolderId = body._id
@@ -83,31 +91,31 @@ describe('ProjectDuplicateNames', function() {
       )
     })
 
-    it('should create a project', function() {
+    it('should create a project', function () {
       expect(this.project.rootFolder[0].docs.length).to.equal(2)
       return expect(this.project.rootFolder[0].fileRefs.length).to.equal(1)
     })
 
-    it('should create two docs in the docstore', function() {
-      const docs = MockDocStoreApi.docs[this.example_project_id]
+    it('should create two docs in the docstore', function () {
+      const docs = MockDocstoreApi.docs[this.example_project_id]
       return expect(Object.keys(docs).length).to.equal(2)
     })
 
-    it('should create one file in the filestore', function() {
-      const files = MockFileStoreApi.files[this.example_project_id]
+    it('should create one file in the filestore', function () {
+      const files = MockFilestoreApi.files[this.example_project_id]
       return expect(Object.keys(files).length).to.equal(1)
     })
 
-    describe('for an existing doc', function() {
-      describe('trying to add a doc with the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing doc', function () {
+      describe('trying to add a doc with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
               json: {
                 name: 'main.tex',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -116,20 +124,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to add a folder with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to add a folder with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
               json: {
                 name: 'main.tex',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -138,20 +146,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to add a folder with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to add a folder with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
               json: {
                 name: 'main.tex',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -160,22 +168,22 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
     })
 
-    describe('for an existing file', function() {
-      describe('trying to add a doc with the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing file', function () {
+      describe('trying to add a doc with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
               json: {
                 name: 'universe.jpg',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -184,20 +192,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to add a folder with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to add a folder with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
               json: {
                 name: 'universe.jpg',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -206,20 +214,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to upload a file with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to upload a file with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/upload`,
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'universe.jpg'
+                qqfilename: 'universe.jpg',
               },
               formData: {
                 qqfile: {
@@ -228,10 +236,10 @@ describe('ProjectDuplicateNames', function() {
                   ),
                   options: {
                     filename: 'universe.jpg',
-                    contentType: 'image/jpeg'
-                  }
-                }
-              }
+                    contentType: 'image/jpeg',
+                  },
+                },
+              },
             },
             (err, res, body) => {
               this.body = body
@@ -242,23 +250,23 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should succeed (overwriting the file)', function() {
+        it('should succeed (overwriting the file)', function () {
           return expect(this.body.success).to.equal(true)
         })
       })
     })
     // at this point the @imageFile._id has changed
 
-    describe('for an existing folder', function() {
-      describe('trying to add a doc with the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing folder', function () {
+      describe('trying to add a doc with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/doc`,
               json: {
                 name: 'testfolder',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -267,20 +275,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to add a folder with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to add a folder with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/folder`,
               json: {
                 name: 'testfolder',
-                parent_folder_id: this.rootFolderId
-              }
+                parent_folder_id: this.rootFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -289,20 +297,20 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to upload a file with the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to upload a file with the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
               uri: `/project/${this.example_project_id}/upload`,
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'universe.jpg'
+                qqfilename: 'universe.jpg',
               },
               formData: {
                 qqfile: {
@@ -311,10 +319,10 @@ describe('ProjectDuplicateNames', function() {
                   ),
                   options: {
                     filename: 'testfolder',
-                    contentType: 'image/jpeg'
-                  }
-                }
-              }
+                    contentType: 'image/jpeg',
+                  },
+                },
+              },
             },
             (err, res, body) => {
               this.body = body
@@ -323,23 +331,21 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with failure status', function() {
+        it('should respond with failure status', function () {
           return expect(this.body.success).to.equal(false)
         })
       })
     })
 
-    describe('for an existing doc', function() {
-      describe('trying to rename a doc to the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing doc', function () {
+      describe('trying to rename a doc to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/doc/${
-                this.refBibDoc._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/doc/${this.refBibDoc._id}/rename`,
               json: {
-                name: 'main.tex'
-              }
+                name: 'main.tex',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -348,21 +354,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a folder to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a folder to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/folder/${
-                this.testFolderId
-              }/rename`,
+              uri: `/project/${this.example_project_id}/folder/${this.testFolderId}/rename`,
               json: {
-                name: 'main.tex'
-              }
+                name: 'main.tex',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -371,21 +375,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a file to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a file to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/file/${
-                this.imageFile._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/file/${this.imageFile._id}/rename`,
               json: {
-                name: 'main.tex'
-              }
+                name: 'main.tex',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -394,23 +396,21 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with failure status', function() {
+        it('should respond with failure status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
     })
 
-    describe('for an existing file', function() {
-      describe('trying to rename a doc to the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing file', function () {
+      describe('trying to rename a doc to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/doc/${
-                this.refBibDoc._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/doc/${this.refBibDoc._id}/rename`,
               json: {
-                name: 'universe.jpg'
-              }
+                name: 'universe.jpg',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -419,21 +419,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a folder to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a folder to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/folder/${
-                this.testFolderId
-              }/rename`,
+              uri: `/project/${this.example_project_id}/folder/${this.testFolderId}/rename`,
               json: {
-                name: 'universe.jpg'
-              }
+                name: 'universe.jpg',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -442,21 +440,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a file to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a file to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/file/${
-                this.imageFile._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/file/${this.imageFile._id}/rename`,
               json: {
-                name: 'universe.jpg'
-              }
+                name: 'universe.jpg',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -465,23 +461,21 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with failure status', function() {
+        it('should respond with failure status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
     })
 
-    describe('for an existing folder', function() {
-      describe('trying to rename a doc to the same name', function() {
-        beforeEach(function(done) {
+    describe('for an existing folder', function () {
+      describe('trying to rename a doc to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/doc/${
-                this.refBibDoc._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/doc/${this.refBibDoc._id}/rename`,
               json: {
-                name: 'testfolder'
-              }
+                name: 'testfolder',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -490,21 +484,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a folder to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a folder to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/folder/${
-                this.testFolderId
-              }/rename`,
+              uri: `/project/${this.example_project_id}/folder/${this.testFolderId}/rename`,
               json: {
-                name: 'testfolder'
-              }
+                name: 'testfolder',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -513,21 +505,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to rename a file to the same name', function() {
-        beforeEach(function(done) {
+      describe('trying to rename a file to the same name', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/file/${
-                this.imageFile._id
-              }/rename`,
+              uri: `/project/${this.example_project_id}/file/${this.imageFile._id}/rename`,
               json: {
-                name: 'testfolder'
-              }
+                name: 'testfolder',
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -536,21 +526,21 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with failure status', function() {
+        it('should respond with failure status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
     })
 
-    describe('for an existing folder with a file with the same name', function() {
-      beforeEach(function(done) {
+    describe('for an existing folder with a file with the same name', function () {
+      beforeEach(function (done) {
         return this.owner.request.post(
           {
             uri: `/project/${this.example_project_id}/doc`,
             json: {
               name: 'main.tex',
-              parent_folder_id: this.testFolderId
-            }
+              parent_folder_id: this.testFolderId,
+            },
           },
           (err, res, body) => {
             return this.owner.request.post(
@@ -558,8 +548,8 @@ describe('ProjectDuplicateNames', function() {
                 uri: `/project/${this.example_project_id}/doc`,
                 json: {
                   name: 'universe.jpg',
-                  parent_folder_id: this.testFolderId
-                }
+                  parent_folder_id: this.testFolderId,
+                },
               },
               (err, res, body) => {
                 return this.owner.request.post(
@@ -567,8 +557,8 @@ describe('ProjectDuplicateNames', function() {
                     uri: `/project/${this.example_project_id}/folder`,
                     json: {
                       name: 'otherFolder',
-                      parent_folder_id: this.testFolderId
-                    }
+                      parent_folder_id: this.testFolderId,
+                    },
                   },
                   (err, res, body) => {
                     this.subFolderId = body._id
@@ -577,8 +567,8 @@ describe('ProjectDuplicateNames', function() {
                         uri: `/project/${this.example_project_id}/folder`,
                         json: {
                           name: 'otherFolder',
-                          parent_folder_id: this.rootFolderId
-                        }
+                          parent_folder_id: this.rootFolderId,
+                        },
                       },
                       (err, res, body) => {
                         this.otherFolderId = body._id
@@ -593,16 +583,14 @@ describe('ProjectDuplicateNames', function() {
         )
       })
 
-      describe('trying to move a doc into the folder', function() {
-        beforeEach(function(done) {
+      describe('trying to move a doc into the folder', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/doc/${
-                this.mainTexDoc._id
-              }/move`,
+              uri: `/project/${this.example_project_id}/doc/${this.mainTexDoc._id}/move`,
               json: {
-                folder_id: this.testFolderId
-              }
+                folder_id: this.testFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -611,21 +599,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to move a file into the folder', function() {
-        beforeEach(function(done) {
+      describe('trying to move a file into the folder', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/file/${
-                this.imageFile._id
-              }/move`,
+              uri: `/project/${this.example_project_id}/file/${this.imageFile._id}/move`,
               json: {
-                folder_id: this.testFolderId
-              }
+                folder_id: this.testFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -634,21 +620,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to move a folder into the folder', function() {
-        beforeEach(function(done) {
+      describe('trying to move a folder into the folder', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/folder/${
-                this.otherFolderId
-              }/move`,
+              uri: `/project/${this.example_project_id}/folder/${this.otherFolderId}/move`,
               json: {
-                folder_id: this.testFolderId
-              }
+                folder_id: this.testFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -657,21 +641,19 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })
 
-      describe('trying to move a folder into a subfolder of itself', function() {
-        beforeEach(function(done) {
+      describe('trying to move a folder into a subfolder of itself', function () {
+        beforeEach(function (done) {
           return this.owner.request.post(
             {
-              uri: `/project/${this.example_project_id}/folder/${
-                this.testFolderId
-              }/move`,
+              uri: `/project/${this.example_project_id}/folder/${this.testFolderId}/move`,
               json: {
-                folder_id: this.subFolderId
-              }
+                folder_id: this.subFolderId,
+              },
             },
             (err, res, body) => {
               this.res = res
@@ -680,7 +662,7 @@ describe('ProjectDuplicateNames', function() {
           )
         })
 
-        it('should respond with 400 error status', function() {
+        it('should respond with 400 error status', function () {
           return expect(this.res.statusCode).to.equal(400)
         })
       })

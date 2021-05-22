@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -28,7 +28,7 @@ const {
   BadEntityTypeError,
   SourceFileNotFoundError,
   ProjectNotFoundError,
-  V1ProjectNotFoundError
+  V1ProjectNotFoundError,
 } = require('./LinkedFilesErrors')
 
 module.exports = ProjectFileAgent = {
@@ -73,7 +73,7 @@ module.exports = ProjectFileAgent = {
 
   _prepare(project_id, linkedFileData, user_id, callback) {
     if (callback == null) {
-      callback = function(err, linkedFileData) {}
+      callback = function (err, linkedFileData) {}
     }
     return this._checkAuth(
       project_id,
@@ -118,7 +118,7 @@ module.exports = ProjectFileAgent = {
               return DocstoreManager.getDoc(
                 source_project._id,
                 entity._id,
-                function(err, lines) {
+                function (err, lines) {
                   if (err != null) {
                     return callback(err)
                   }
@@ -129,7 +129,7 @@ module.exports = ProjectFileAgent = {
                     name,
                     parent_folder_id,
                     user_id,
-                    function(err, file) {
+                    function (err, file) {
                       if (err != null) {
                         return callback(err)
                       }
@@ -143,7 +143,7 @@ module.exports = ProjectFileAgent = {
                 source_project._id,
                 entity._id,
                 null,
-                function(err, fileStream) {
+                function (err, fileStream) {
                   if (err != null) {
                     return callback(err)
                   }
@@ -154,7 +154,7 @@ module.exports = ProjectFileAgent = {
                     name,
                     parent_folder_id,
                     user_id,
-                    function(err, file) {
+                    function (err, file) {
                       if (err != null) {
                         return callback(err)
                       }
@@ -174,18 +174,18 @@ module.exports = ProjectFileAgent = {
 
   _getEntity(linkedFileData, current_user_id, callback) {
     if (callback == null) {
-      callback = function(err, entity, type) {}
+      callback = function (err, entity, type) {}
     }
     callback = _.once(callback)
     const { source_entity_path } = linkedFileData
-    return this._getSourceProject(linkedFileData, function(err, project) {
+    return this._getSourceProject(linkedFileData, function (err, project) {
       if (err != null) {
         return callback(err)
       }
       const source_project_id = project._id
       return DocumentUpdaterHandler.flushProjectToMongo(
         source_project_id,
-        function(err) {
+        function (err) {
           if (err != null) {
             return callback(err)
           }
@@ -193,9 +193,9 @@ module.exports = ProjectFileAgent = {
             {
               project_id: source_project_id,
               path: source_entity_path,
-              exactCaseMatch: true
+              exactCaseMatch: true,
             },
-            function(err, entity, type) {
+            function (err, entity, type) {
               if (err != null) {
                 if (/^not found.*/.test(err.toString())) {
                   err = new SourceFileNotFoundError()
@@ -236,13 +236,13 @@ module.exports = ProjectFileAgent = {
 
   _checkAuth(project_id, data, current_user_id, callback) {
     if (callback == null) {
-      callback = function(error, allowed) {}
+      callback = function (error, allowed) {}
     }
     callback = _.once(callback)
     if (!ProjectFileAgent._validate(data)) {
       return callback(new BadDataError())
     }
-    return this._getSourceProject(data, function(err, project) {
+    return this._getSourceProject(data, function (err, project) {
       if (err != null) {
         return callback(err)
       }
@@ -250,7 +250,7 @@ module.exports = ProjectFileAgent = {
         current_user_id,
         project._id,
         null,
-        function(err, canRead) {
+        function (err, canRead) {
           if (err != null) {
             return callback(err)
           }
@@ -258,5 +258,5 @@ module.exports = ProjectFileAgent = {
         }
       )
     })
-  }
+  },
 }

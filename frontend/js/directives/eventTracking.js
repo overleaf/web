@@ -51,7 +51,7 @@ import _ from 'lodash'
 
 import App from '../base'
 
-const isInViewport = function(element) {
+const isInViewport = function (element) {
   const elTop = element.offset().top
   const elBtm = elTop + element.outerHeight()
 
@@ -64,7 +64,7 @@ const isInViewport = function(element) {
 export default App.directive('eventTracking', eventTracking => ({
   scope: {
     eventTracking: '@',
-    eventSegmentation: '=?'
+    eventSegmentation: '=?',
   },
   link(scope, element, attrs) {
     const sendGA = attrs.eventTrackingGa || false
@@ -74,7 +74,7 @@ export default App.directive('eventTracking', eventTracking => ({
     const segmentation = scope.eventSegmentation || {}
     segmentation.page = window.location.pathname
 
-    const sendEvent = function(scrollEvent) {
+    const sendEvent = function (scrollEvent) {
       /*
                       @param {boolean}		scrollEvent		Use to unbind scroll event
                   */
@@ -104,7 +104,7 @@ export default App.directive('eventTracking', eventTracking => ({
         timeoutAmt = parseInt(attrs.eventHoverAmt, 10)
       }
       return element
-        .on('mouseenter', function() {
+        .on('mouseenter', function () {
           timer = setTimeout(() => sendEvent(), timeoutAmt)
         })
         .on('mouseleave', () => clearTimeout(timer))
@@ -121,5 +121,5 @@ export default App.directive('eventTracking', eventTracking => ({
         }, 500)
       )
     }
-  }
+  },
 }))

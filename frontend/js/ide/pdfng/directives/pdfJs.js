@@ -20,14 +20,16 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     pdfSrc: '=',
     highlights: '=',
     position: '=',
-    dblClickCallback: '='
+    dblClickCallback: '=',
+    firstRenderDone: '=',
+    updateConsumedBandwidth: '=',
   },
   link(scope, element, attrs) {
     scope.loading = false
     scope.pleaseJumpTo = null
     scope.scale = null
     let initializedPosition = false
-    const initializePosition = function() {
+    const initializePosition = function () {
       let position, scale
       if (initializedPosition) {
         return
@@ -45,8 +47,8 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
           page: +position.page,
           offset: {
             top: +position.offset.top,
-            left: +position.offset.left
-          }
+            left: +position.offset.left,
+          },
         }
       }
 
@@ -62,25 +64,23 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     }
 
     const flashControls = () =>
-      scope.$evalAsync(function() {
+      scope.$evalAsync(function () {
         scope.flashControls = true
         return $timeout(() => (scope.flashControls = false), 1000)
       })
 
-    scope.$on(
-      'pdfDoubleClick',
-      (event, e) =>
-        typeof scope.dblClickCallback === 'function'
-          ? scope.dblClickCallback({
-              page: e.page - 1,
-              offset: { top: e.y, left: e.x }
-            })
-          : undefined
+    scope.$on('pdfDoubleClick', (event, e) =>
+      typeof scope.dblClickCallback === 'function'
+        ? scope.dblClickCallback({
+            page: e.page - 1,
+            offset: { top: e.y, left: e.x },
+          })
+        : undefined
     )
 
     scope.$on('flash-controls', () => flashControls())
 
-    scope.$watch('pdfSrc', function(url) {
+    scope.$watch('pdfSrc', function (url) {
       if (url) {
         scope.loading = true
         scope.loaded = false
@@ -90,35 +90,35 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
       }
     })
 
-    scope.$on('loaded', function() {
+    scope.$on('loaded', function () {
       scope.loaded = true
       scope.progress = 100
-      return $timeout(function() {
+      return $timeout(function () {
         scope.loading = false
         return delete scope.progress
       }, 500)
     })
 
-    scope.fitToHeight = function() {
+    scope.fitToHeight = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_fit_height'
       return (scope.scale = scale)
     }
 
-    scope.fitToWidth = function() {
+    scope.fitToWidth = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_fit_width'
       return (scope.scale = scale)
     }
 
-    scope.zoomIn = function() {
+    scope.zoomIn = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_value'
       scale.scale = scale.scale * 1.2
       return (scope.scale = scale)
     }
 
-    scope.zoomOut = function() {
+    scope.zoomOut = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_value'
       scale.scale = scale.scale / 1.2
@@ -126,14 +126,14 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     }
 
     if (attrs.resizeOn != null) {
-      for (let event of Array.from(attrs.resizeOn.split(','))) {
-        scope.$on(event, function(e) {})
+      for (const event of Array.from(attrs.resizeOn.split(','))) {
+        scope.$on(event, function (e) {})
       }
     }
     // console.log 'got a resize event', event, e
 
     scope.$on('progress', (event, progress) =>
-      scope.$apply(function() {
+      scope.$apply(function () {
         if (scope.loaded) {
           return
         }
@@ -147,12 +147,23 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
       })
     )
 
-    return scope.$on('$destroy', function() {})
+    return scope.$on('$destroy', function () {})
   },
   // console.log 'pdfjs destroy event'
 
   template: `\
-<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' please-jump-to='pleaseJumpTo'></div>
+<div
+    data-pdf-viewer
+    class="pdfjs-viewer"
+    pdf-src='pdfSrc'
+    position='position'
+    scale='scale'
+    highlights='highlights'
+    please-jump-to='pleaseJumpTo'
+    first-render-done="firstRenderDone"
+    update-consumed-bandwidth="updateConsumedBandwidth"
+>
+</div>
 <div class="pdfjs-controls" ng-class="{'flash': flashControls }">
   <div class="btn-group">
       <a href
@@ -196,5 +207,5 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
 <div class="progress-thin" ng-show="loading">
   <div class="progress-bar" ng-style="{ 'width': progress + '%' }"></div>
 </div>\
-`
+`,
 }))

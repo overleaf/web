@@ -1,30 +1,30 @@
-@rp-base-font-size : 12px;
-@rp-small-font-size : 10px;
-@rp-icon-large-size : 18px;
+@rp-base-font-size: 12px;
+@rp-small-font-size: 10px;
+@rp-icon-large-size: 18px;
 
-@rp-bg-blue : #dadfed;
-@rp-bg-dim-blue : #fafafa;
-@rp-highlight-blue : #8a96b5;
+@rp-bg-blue: #dadfed;
+@rp-bg-dim-blue: #fafafa;
+@rp-highlight-blue: #8a96b5;
 
-@rp-border-grey : #d9d9d9;
+@rp-border-grey: #d9d9d9;
 
-@rp-green : #2c8e30;
-@rp-green-on-dark : rgba(37, 107, 41, 0.5);
-@rp-red : #c5060b;
-@rp-yellow : #f3b111;
-@rp-yellow-on-dark : rgba(194, 93, 11, 0.5);
-@rp-grey : #aaaaaa;
+@rp-green: #2c8e30;
+@rp-green-on-dark: rgba(37, 107, 41, 0.5);
+@rp-red: #c5060b;
+@rp-yellow: #f3b111;
+@rp-yellow-on-dark: rgba(194, 93, 11, 0.5);
+@rp-grey: #aaaaaa;
 
-@rp-type-blue : #6b7797;
-@rp-type-darkgrey : #3f3f3f;
+@rp-type-blue: #6b7797;
+@rp-type-darkgrey: #3f3f3f;
 
-@rp-entry-ribbon-width : 4px;
-@rp-entry-arrow-width : 6px;
-@rp-semibold-weight : 600;
-@review-panel-width : 230px;
-@review-off-width : 22px;
+@rp-entry-ribbon-width: 4px;
+@rp-entry-arrow-width: 6px;
+@rp-semibold-weight: 600;
+@review-panel-width: 230px;
+@review-off-width: 22px;
 
-@rp-toolbar-height : 32px;
+@rp-toolbar-height: 32px;
 
 @rp-entry-animation-speed: 0.3s;
 
@@ -62,38 +62,6 @@
   &-on {
     transform: rotateZ(-90deg);
   }
-}
-
-.triangle(@_, @width, @height, @color) {
-  position: absolute;
-  border-color: transparent;
-  border-style: solid;
-  width: 0;
-  height: 0;
-}
-.triangle(top, @width, @height, @color) {
-  border-width: 0 @width / 2 @height @width / 2;
-  border-bottom-color: @color;
-  border-left-color: transparent;
-  border-right-color: transparent;
-}
-.triangle(bottom, @width, @height, @color) {
-  border-width: @height @width / 2 0 @width / 2;
-  border-top-color: @color;
-  border-left-color: transparent;
-  border-right-color: transparent;
-}
-.triangle(right, @width, @height, @color) {
-  border-width: @height / 2 0 @height / 2 @width;
-  border-left-color: @color;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-}
-.triangle(left, @width, @height, @color) {
-  border-width: @height / 2 @width @height / 2 0;
-  border-right-color: @color;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
 }
 
 #review-panel {
@@ -524,6 +492,7 @@
   margin: 0;
   color: @rp-type-darkgrey;
   overflow-x: auto; // Long words, like links can overflow without this.
+  white-space: pre-wrap;
 }
 
 .rp-comment-resolver {
@@ -974,24 +943,26 @@
 
 .review-icon {
   display: inline-block;
-  background: url('/img/review-icon-sprite-ol.png') top/30px no-repeat;
+  background: url('/img/ol-icons/review-icon-dark-theme.svg') top/30px no-repeat;
   width: 30px;
-  background-position-y: -30px;
 
   &::before {
     content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
   }
-
-  @media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
-    background-image: url('/img/review-icon-sprite-ol@2x.png');
-  }
 }
 
-.review-icon when (@is-overleaf-light = true) {
-  background-position-y: 0;
-  .toolbar .btn-full-height.active &,
-  .toolbar .btn-full-height:active & {
-    background-position-y: -30px;
+a when (@is-overleaf-light = true) {
+  .review-icon {
+    background: url('/img/ol-icons/review-icon-light-theme.svg') top/30px
+      no-repeat;
+  }
+
+  &.active,
+  &:active {
+    .review-icon {
+      background: url('/img/ol-icons/review-icon-dark-theme.svg') top/30px
+        no-repeat;
+    }
   }
 }
 

@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyLabelController = function($scope, $element, $attrs, $filter) {
+const historyLabelController = function ($scope, $element, $attrs, $filter) {
   const ctrl = this
   ctrl.$onInit = () => {
     if (ctrl.showTooltip == null) {
@@ -30,8 +30,8 @@ export default App.component('historyLabel', {
     isOwnedByCurrentUser: '<',
     isPseudoCurrentStateLabel: '<',
     onLabelDelete: '&',
-    showTooltip: '<?'
+    showTooltip: '<?',
   },
   controller: historyLabelController,
-  templateUrl: 'historyLabelTpl'
+  templateUrl: 'historyLabelTpl',
 })

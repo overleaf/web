@@ -28,7 +28,7 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 	span(ng-controller="PdfViewToggleController")
 		a.btn.btn-full-height.btn-full-height-no-border(
 			href,
-			ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
+			ng-show="ui.pdfLayout == 'flat'",
 			tooltip="PDF",
 			tooltip-placement="bottom",
 			tooltip-append-to-body="true",
@@ -119,11 +119,17 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		a.btn.btn-full-height(
 			href
 			ng-click="openShareProjectModal(permissions.admin);"
-			ng-controller="ShareController"
+			ng-controller=(showReactShareModal ? 'ReactShareProjectModalController': 'ShareController')
 		)
 			i.fa.fa-fw.fa-group
 			p.toolbar-label #{translate("share")}
 
+			if showReactShareModal
+				share-project-modal(
+					handle-hide="handleHide"
+					show="show"
+					is-admin="isAdmin"
+				)
 		!= moduleIncludes('publish:button', locals)
 
 		if !isRestrictedTokenMember

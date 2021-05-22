@@ -11,7 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const { assert } = require('chai')
 const modulePath =
@@ -19,35 +18,28 @@ const modulePath =
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 
-describe('ReferencesController', function() {
-  beforeEach(function() {
+describe('ReferencesController', function () {
+  beforeEach(function () {
     this.projectId = '2222'
     this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'settings-sharelatex': (this.settings = {
-          apis: { web: { url: 'http://some.url' } }
+          apis: { web: { url: 'http://some.url' } },
         }),
         './ReferencesHandler': (this.ReferencesHandler = {
           index: sinon.stub(),
-          indexAll: sinon.stub()
+          indexAll: sinon.stub(),
         }),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub()
-        })
-      }
+          emitToRoom: sinon.stub(),
+        }),
+      },
     })
     this.req = new MockRequest()
     this.req.params.Project_id = this.projectId
     this.req.body = {
       docIds: (this.docIds = ['aaa', 'bbb']),
-      shouldBroadcast: false
+      shouldBroadcast: false,
     }
     this.res = new MockResponse()
     this.res.json = sinon.stub()
@@ -55,12 +47,12 @@ describe('ReferencesController', function() {
     this.res.sendStatus = sinon.stub()
     return (this.fakeResponseData = {
       projectId: this.projectId,
-      keys: ['one', 'two', 'three']
+      keys: ['one', 'two', 'three'],
     })
   })
 
-  describe('indexAll', function() {
-    beforeEach(function() {
+  describe('indexAll', function () {
+    beforeEach(function () {
       this.req.body = { shouldBroadcast: false }
       this.ReferencesHandler.indexAll.callsArgWith(
         1,
@@ -73,7 +65,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       return this.call(() => {
         this.res.sendStatus.callCount.should.equal(0)
         this.res.sendStatus.calledWith(500).should.equal(false)
@@ -82,7 +74,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    it('should return data', function(done) {
+    it('should return data', function (done) {
       return this.call(() => {
         this.res.json.callCount.should.equal(1)
         this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -90,7 +82,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    it('should call ReferencesHandler.indexAll', function(done) {
+    it('should call ReferencesHandler.indexAll', function (done) {
       return this.call(() => {
         this.ReferencesHandler.indexAll.callCount.should.equal(1)
         this.ReferencesHandler.indexAll
@@ -100,8 +92,8 @@ describe('ReferencesController', function() {
       })
     })
 
-    describe('when shouldBroadcast is true', function() {
-      beforeEach(function() {
+    describe('when shouldBroadcast is true', function () {
+      beforeEach(function () {
         this.ReferencesHandler.index.callsArgWith(
           2,
           null,
@@ -110,14 +102,14 @@ describe('ReferencesController', function() {
         return (this.req.body.shouldBroadcast = true)
       })
 
-      it('should call EditorRealTimeController.emitToRoom', function(done) {
+      it('should call EditorRealTimeController.emitToRoom', function (done) {
         return this.call(() => {
           this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
           return done()
         })
       })
 
-      it('should not produce an error', function(done) {
+      it('should not produce an error', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(0)
           this.res.sendStatus.calledWith(500).should.equal(false)
@@ -126,7 +118,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should still return data', function(done) {
+      it('should still return data', function (done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -135,8 +127,8 @@ describe('ReferencesController', function() {
       })
     })
 
-    describe('when shouldBroadcast is false', function() {
-      beforeEach(function() {
+    describe('when shouldBroadcast is false', function () {
+      beforeEach(function () {
         this.ReferencesHandler.index.callsArgWith(
           2,
           null,
@@ -145,14 +137,14 @@ describe('ReferencesController', function() {
         return (this.req.body.shouldBroadcast = false)
       })
 
-      it('should not call EditorRealTimeController.emitToRoom', function(done) {
+      it('should not call EditorRealTimeController.emitToRoom', function (done) {
         return this.call(() => {
           this.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
           return done()
         })
       })
 
-      it('should not produce an error', function(done) {
+      it('should not produce an error', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(0)
           this.res.sendStatus.calledWith(500).should.equal(false)
@@ -161,7 +153,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should still return data', function(done) {
+      it('should still return data', function (done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -171,8 +163,8 @@ describe('ReferencesController', function() {
     })
   })
 
-  describe('there is no data', function() {
-    beforeEach(function() {
+  describe('there is no data', function () {
+    beforeEach(function () {
       this.ReferencesHandler.indexAll.callsArgWith(1)
       return (this.call = callback => {
         this.controller.indexAll(this.req, this.res)
@@ -180,14 +172,14 @@ describe('ReferencesController', function() {
       })
     })
 
-    it('should not call EditorRealTimeController.emitToRoom', function(done) {
+    it('should not call EditorRealTimeController.emitToRoom', function (done) {
       return this.call(() => {
         this.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
         return done()
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       return this.call(() => {
         this.res.sendStatus.callCount.should.equal(0)
         this.res.sendStatus.calledWith(500).should.equal(false)
@@ -196,7 +188,7 @@ describe('ReferencesController', function() {
       })
     })
 
-    it('should send a response with an empty keys list', function(done) {
+    it('should send a response with an empty keys list', function (done) {
       return this.call(() => {
         this.res.json.called.should.equal(true)
         this.res.json
@@ -207,16 +199,16 @@ describe('ReferencesController', function() {
     })
   })
 
-  describe('index', function() {
-    beforeEach(function() {
+  describe('index', function () {
+    beforeEach(function () {
       return (this.call = callback => {
         this.controller.index(this.req, this.res)
         return callback()
       })
     })
 
-    describe('with docIds as an array and shouldBroadcast as false', function() {
-      beforeEach(function() {
+    describe('with docIds as an array and shouldBroadcast as false', function () {
+      beforeEach(function () {
         return this.ReferencesHandler.index.callsArgWith(
           2,
           null,
@@ -224,7 +216,7 @@ describe('ReferencesController', function() {
         )
       })
 
-      it('should call ReferencesHandler.index', function(done) {
+      it('should call ReferencesHandler.index', function (done) {
         return this.call(() => {
           this.ReferencesHandler.index.callCount.should.equal(1)
           this.ReferencesHandler.index
@@ -234,7 +226,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should return data', function(done) {
+      it('should return data', function (done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -242,7 +234,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should not produce an error', function(done) {
+      it('should not produce an error', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(0)
           this.res.sendStatus.calledWith(500).should.equal(false)
@@ -251,15 +243,15 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should not call EditorRealTimController.emitToRoom', function(done) {
+      it('should not call EditorRealTimController.emitToRoom', function (done) {
         return this.call(() => {
           this.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
           return done()
         })
       })
 
-      describe('when ReferencesHandler.index produces an error', function() {
-        beforeEach(function() {
+      describe('when ReferencesHandler.index produces an error', function () {
+        beforeEach(function () {
           return this.ReferencesHandler.index.callsArgWith(
             2,
             new Error('woops'),
@@ -267,7 +259,7 @@ describe('ReferencesController', function() {
           )
         })
 
-        it('should produce an error response', function(done) {
+        it('should produce an error response', function (done) {
           return this.call(() => {
             this.res.sendStatus.callCount.should.equal(1)
             this.res.sendStatus.calledWith(500).should.equal(true)
@@ -277,8 +269,8 @@ describe('ReferencesController', function() {
       })
     })
 
-    describe('when shouldBroadcast is true', function() {
-      beforeEach(function() {
+    describe('when shouldBroadcast is true', function () {
+      beforeEach(function () {
         this.ReferencesHandler.index.callsArgWith(
           2,
           null,
@@ -287,14 +279,14 @@ describe('ReferencesController', function() {
         return (this.req.body.shouldBroadcast = true)
       })
 
-      it('should call EditorRealTimeController.emitToRoom', function(done) {
+      it('should call EditorRealTimeController.emitToRoom', function (done) {
         return this.call(() => {
           this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
           return done()
         })
       })
 
-      it('should not produce an error', function(done) {
+      it('should not produce an error', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(0)
           this.res.sendStatus.calledWith(500).should.equal(false)
@@ -303,7 +295,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should still return data', function(done) {
+      it('should still return data', function (done) {
         return this.call(() => {
           this.res.json.callCount.should.equal(1)
           this.res.json.calledWith(this.fakeResponseData).should.equal(true)
@@ -312,12 +304,12 @@ describe('ReferencesController', function() {
       })
     })
 
-    describe('with missing docIds', function() {
-      beforeEach(function() {
+    describe('with missing docIds', function () {
+      beforeEach(function () {
         return delete this.req.body.docIds
       })
 
-      it('should produce an error response', function(done) {
+      it('should produce an error response', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(1)
           this.res.sendStatus.calledWith(400).should.equal(true)
@@ -325,7 +317,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should not call ReferencesHandler.index', function(done) {
+      it('should not call ReferencesHandler.index', function (done) {
         return this.call(() => {
           this.ReferencesHandler.index.callCount.should.equal(0)
           return done()
@@ -333,12 +325,12 @@ describe('ReferencesController', function() {
       })
     })
 
-    describe('with invalid docIds', function() {
-      beforeEach(function() {
+    describe('with invalid docIds', function () {
+      beforeEach(function () {
         return (this.req.body.docIds = 42)
       })
 
-      it('should produce an error response', function(done) {
+      it('should produce an error response', function (done) {
         return this.call(() => {
           this.res.sendStatus.callCount.should.equal(1)
           this.res.sendStatus.calledWith(400).should.equal(true)
@@ -346,7 +338,7 @@ describe('ReferencesController', function() {
         })
       })
 
-      it('should not call ReferencesHandler.index', function(done) {
+      it('should not call ReferencesHandler.index', function (done) {
         return this.call(() => {
           this.ReferencesHandler.index.callCount.should.equal(0)
           return done()

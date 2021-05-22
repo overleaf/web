@@ -1,5 +1,3 @@
-/* eslint-disable
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -26,7 +24,7 @@ export default App.directive('fineUpload', $timeout => ({
     onCancelCallback: '=',
     autoUpload: '=',
     params: '=',
-    control: '='
+    control: '=',
   },
   link(scope, element, attrs) {
     let autoUpload, validation
@@ -42,12 +40,12 @@ export default App.directive('fineUpload', $timeout => ({
       validation.sizeLimit = scope.sizeLimit
     }
     const maxConnections = scope.maxConnections || 1
-    const onComplete = scope.onCompleteCallback || function() {}
-    const onUpload = scope.onUploadCallback || function() {}
-    const onError = scope.onErrorCallback || function() {}
-    const onValidateBatch = scope.onValidateBatch || function() {}
-    const onSubmit = scope.onSubmitCallback || function() {}
-    const onCancel = scope.onCancelCallback || function() {}
+    const onComplete = scope.onCompleteCallback || function () {}
+    const onUpload = scope.onUploadCallback || function () {}
+    const onError = scope.onErrorCallback || function () {}
+    const onValidateBatch = scope.onValidateBatch || function () {}
+    const onSubmit = scope.onSubmitCallback || function () {}
+    const onCancel = scope.onCancelCallback || function () {}
     if (scope.autoUpload == null) {
       autoUpload = true
     } else {
@@ -67,7 +65,7 @@ export default App.directive('fineUpload', $timeout => ({
         endpoint,
         forceMultipart: true,
         params,
-        paramsInBody: false
+        paramsInBody: false,
       },
       callbacks: {
         onComplete,
@@ -75,18 +73,18 @@ export default App.directive('fineUpload', $timeout => ({
         onValidateBatch,
         onError,
         onSubmit,
-        onCancel
+        onCancel,
       },
       template: templateId,
       failedUploadTextDisplay: {
         mode: 'custom',
-        responseProperty: 'error'
-      }
+        responseProperty: 'error',
+      },
     })
     window.q = q
     if (scope.control != null) {
       scope.control.q = q
     }
     return q
-  }
+  },
 }))

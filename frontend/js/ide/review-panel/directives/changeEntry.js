@@ -21,14 +21,14 @@ export default App.directive('changeEntry', $timeout => ({
     onAccept: '&',
     onReject: '&',
     onIndicatorClick: '&',
-    onBodyClick: '&'
+    onBodyClick: '&',
   },
   link(scope, element, attrs) {
     scope.contentLimit = 40
     scope.isCollapsed = true
     scope.needsCollapsing = false
 
-    element.on('click', function(e) {
+    element.on('click', function (e) {
       if (
         $(e.target).is(
           '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
@@ -38,7 +38,7 @@ export default App.directive('changeEntry', $timeout => ({
       }
     })
 
-    scope.toggleCollapse = function() {
+    scope.toggleCollapse = function () {
       scope.isCollapsed = !scope.isCollapsed
       return $timeout(() => scope.$emit('review-panel:layout'))
     }
@@ -48,5 +48,5 @@ export default App.directive('changeEntry', $timeout => ({
       contentLength =>
         (scope.needsCollapsing = contentLength > scope.contentLimit)
     )
-  }
+  },
 }))

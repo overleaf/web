@@ -1,212 +1,122 @@
-/* eslint-disable
-    handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
-const async = require('async')
-const UserClient = require('./helpers/User')
-const request = require('./helpers/request')
+const UserHelper = require('./helpers/UserHelper')
 const settings = require('settings-sharelatex')
 const { ObjectId } = require('mongodb')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const { User } = require('../../../app/src/models/User')
 const FeaturesUpdater = require('../../../app/src/Features/Subscription/FeaturesUpdater')
 
-const MockV1Api = require('./helpers/MockV1Api')
+const MockV1ApiClass = require('./mocks/MockV1Api')
 const logger = require('logger-sharelatex')
 logger.logger.level('error')
 
-const syncUserAndGetFeatures = function(user, callback) {
-  if (callback == null) {
-    callback = function(error, features) {}
-  }
-  return FeaturesUpdater.refreshFeatures(user._id, error => {
-    if (error != null) {
+let MockV1Api
+
+before(function () {
+  MockV1Api = MockV1ApiClass.instance()
+})
+
+const syncUserAndGetFeatures = function (user, callback) {
+  FeaturesUpdater.refreshFeatures(user._id, 'test', error => {
+    if (error) {
       return callback(error)
     }
-    return User.findById(user._id, (error, user) => {
-      if (error != null) {
+    User.findById(user._id, (error, user) => {
+      if (error) {
         return callback(error)
       }
       const { features } = user.toObject()
       delete features.$init // mongoose internals
-      return callback(null, features)
+      callback(null, features)
     })
   })
 }
 
-describe('FeatureUpdater.refreshFeatures', function() {
-  beforeEach(function(done) {
-    this.user = new UserClient()
-    return this.user.ensureUserExists(error => {
-      if (error != null) {
-        throw error
-      }
-      return done()
-    })
+describe('FeatureUpdater.refreshFeatures', function () {
+  let userHelper, user
+  beforeEach(async function () {
+    userHelper = await UserHelper.createUser()
+    user = userHelper.user
   })
 
-  describe('when user has no subscriptions', function() {
-    it('should set their features to the basic set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+  describe('when user has no subscriptions', function () {
+    it('should set their features to the basic set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         expect(features).to.deep.equal(settings.defaultFeatures)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user has an individual subscription', function() {
-    beforeEach(function() {
-      return Subscription.create({
-        admin_id: this.user._id,
-        manager_ids: [this.user._id],
+  describe('when the user has an individual subscription', function () {
+    beforeEach(function () {
+      Subscription.create({
+        admin_id: user._id,
+        manager_ids: [user._id],
         planCode: 'collaborator',
-        customAccount: true
+        customAccount: true,
       })
     }) // returns a promise
 
-    it('should set their features to the upgraded set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the upgraded set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         const plan = settings.plans.find(
           plan => plan.planCode === 'collaborator'
         )
         expect(features).to.deep.equal(plan.features)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user is in a group subscription', function() {
-    beforeEach(function() {
+  describe('when the user is in a group subscription', function () {
+    beforeEach(function () {
       const groupAdminId = ObjectId()
-      return Subscription.create({
+      Subscription.create({
         admin_id: groupAdminId,
         manager_ids: [groupAdminId],
-        member_ids: [this.user._id],
+        member_ids: [user._id],
         groupAccount: true,
         planCode: 'collaborator',
-        customAccount: true
+        customAccount: true,
       })
     }) // returns a promise
 
-    it('should set their features to the upgraded set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the upgraded set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         const plan = settings.plans.find(
           plan => plan.planCode === 'collaborator'
         )
         expect(features).to.deep.equal(plan.features)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user has bonus features', function() {
-    beforeEach(function() {
-      return User.update(
+  describe('when the user has bonus features', function () {
+    beforeEach(function () {
+      return User.updateOne(
         {
-          _id: this.user._id
-        },
-        {
-          refered_user_count: 10
-        }
-      )
-    }) // returns a promise
-
-    it('should set their features to the bonus set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
-          throw error
-        }
-        expect(features).to.deep.equal(
-          Object.assign(
-            {},
-            settings.defaultFeatures,
-            settings.bonus_features[9]
-          )
-        )
-        return done()
-      })
-    })
-  })
-
-  describe('when the user has affiliations', function() {
-    beforeEach(function() {
-      this.institutionPlan = settings.plans.find(
-        plan => plan.planCode === settings.institutionPlanCode
-      )
-      this.email = this.user.emails[0].email
-      return (this.affiliationData = {
-        email: this.email,
-        licence: 'pro_plus',
-        institution: { confirmed: true }
-      })
-    })
-
-    it('should not set their features if email is not confirmed', function(done) {
-      MockV1Api.setAffiliations([this.affiliationData])
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        expect(features).to.deep.equal(settings.defaultFeatures)
-        return done()
-      })
-    })
-
-    it('should set their features if email is confirmed', function(done) {
-      MockV1Api.setAffiliations([this.affiliationData])
-      return this.user.confirmEmail(this.email, error => {
-        return syncUserAndGetFeatures(this.user, (error, features) => {
-          expect(features).to.deep.equal(this.institutionPlan.features)
-          return done()
-        })
-      })
-    })
-
-    it('should not set their features if institution is not confirmed', function(done) {
-      this.affiliationData.institution.confirmed = false
-      MockV1Api.setAffiliations([this.affiliationData])
-      return this.user.confirmEmail(this.email, error => {
-        return syncUserAndGetFeatures(this.user, (error, features) => {
-          expect(features).to.deep.equal(settings.defaultFeatures)
-          return done()
-        })
-      })
-    })
-  })
-
-  describe('when the user is due bonus features and has extra features that no longer apply', function() {
-    beforeEach(function() {
-      return User.update(
-        {
-          _id: this.user._id
+          _id: user._id,
         },
         {
           refered_user_count: 10,
-          'features.github': true
         }
       )
     }) // returns a promise
 
-    it('should set their features to the bonus set and downgrade the extras', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the bonus set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         expect(features).to.deep.equal(
@@ -216,57 +126,140 @@ describe('FeatureUpdater.refreshFeatures', function() {
             settings.bonus_features[9]
           )
         )
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user has a v1 plan', function() {
-    beforeEach(function() {
-      MockV1Api.setUser(42, { plan_name: 'free' })
-      return User.update(
+  describe('when the user has affiliations', function () {
+    let email2, institutionId, hostname
+    beforeEach(async function () {
+      institutionId = MockV1Api.createInstitution({ commonsAccount: true })
+      hostname = 'institution.edu'
+      MockV1Api.addInstitutionDomain(institutionId, hostname, {
+        confirmed: true,
+      })
+      email2 = `${user._id}@${hostname}`
+      userHelper = await UserHelper.loginUser(
+        userHelper.getDefaultEmailPassword()
+      )
+      await userHelper.addEmail(email2)
+      this.institutionPlan = settings.plans.find(
+        plan => plan.planCode === settings.institutionPlanCode
+      )
+    })
+
+    it('should not set their features if email is not confirmed', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        expect(features).to.deep.equal(settings.defaultFeatures)
+        done()
+      })
+    })
+
+    describe('when email is confirmed', function () {
+      beforeEach(async function () {
+        await userHelper.confirmEmail(user._id, email2)
+      })
+
+      it('should set their features', function (done) {
+        syncUserAndGetFeatures(user, (error, features) => {
+          expect(features).to.deep.equal(this.institutionPlan.features)
+          done()
+        })
+      })
+
+      describe('when domain is not confirmed as part of institution', function () {
+        beforeEach(function () {
+          MockV1Api.updateInstitutionDomain(institutionId, hostname, {
+            confirmed: false,
+          })
+        })
+        it('should not set their features', function (done) {
+          syncUserAndGetFeatures(user, (error, features) => {
+            expect(features).to.deep.equal(settings.defaultFeatures)
+            done()
+          })
+        })
+      })
+    })
+  })
+
+  describe('when the user is due bonus features and has extra features that no longer apply', function () {
+    beforeEach(function () {
+      return User.updateOne(
         {
-          _id: this.user._id
+          _id: user._id,
         },
         {
-          overleaf: {
-            id: 42
-          }
+          refered_user_count: 10,
+          'features.github': true,
         }
       )
     }) // returns a promise
 
-    it('should set their features to the v1 plan', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the bonus set and downgrade the extras', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
+          throw error
+        }
+        expect(features).to.deep.equal(
+          Object.assign(
+            {},
+            settings.defaultFeatures,
+            settings.bonus_features[9]
+          )
+        )
+        done()
+      })
+    })
+  })
+
+  describe('when the user has a v1 plan', function () {
+    beforeEach(function () {
+      MockV1Api.setUser(42, { plan_name: 'free' })
+      return User.updateOne(
+        {
+          _id: user._id,
+        },
+        {
+          overleaf: {
+            id: 42,
+          },
+        }
+      )
+    }) // returns a promise
+
+    it('should set their features to the v1 plan', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         const plan = settings.plans.find(plan => plan.planCode === 'v1_free')
         expect(features).to.deep.equal(plan.features)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user has a v1 plan and bonus features', function() {
-    beforeEach(function() {
+  describe('when the user has a v1 plan and bonus features', function () {
+    beforeEach(function () {
       MockV1Api.setUser(42, { plan_name: 'free' })
-      return User.update(
+      return User.updateOne(
         {
-          _id: this.user._id
+          _id: user._id,
         },
         {
           overleaf: {
-            id: 42
+            id: 42,
           },
-          refered_user_count: 10
+          refered_user_count: 10,
         }
       )
     }) // returns a promise
 
-    it('should set their features to the best of the v1 plan and bonus features', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the best of the v1 plan and bonus features', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         const v1plan = settings.plans.find(plan => plan.planCode === 'v1_free')
@@ -276,34 +269,34 @@ describe('FeatureUpdater.refreshFeatures', function() {
           settings.bonus_features[9]
         )
         expect(features).to.deep.equal(expectedFeatures)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the user has a group and personal subscription', function() {
-    beforeEach(function(done) {
+  describe('when the user has a group and personal subscription', function () {
+    beforeEach(function (done) {
       const groupAdminId = ObjectId()
 
       Subscription.create(
         {
-          admin_id: this.user._id,
-          manager_ids: [this.user._id],
+          admin_id: user._id,
+          manager_ids: [user._id],
           planCode: 'professional',
-          customAccount: true
+          customAccount: true,
         },
         error => {
-          if (error != null) {
+          if (error) {
             throw error
           }
-          return Subscription.create(
+          Subscription.create(
             {
               admin_id: groupAdminId,
               manager_ids: [groupAdminId],
-              member_ids: [this.user._id],
+              member_ids: [user._id],
               groupAccount: true,
               planCode: 'collaborator',
-              customAccount: true
+              customAccount: true,
             },
             done
           )
@@ -311,79 +304,92 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     })
 
-    it('should set their features to the best set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the best set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
         const plan = settings.plans.find(
           plan => plan.planCode === 'professional'
         )
         expect(features).to.deep.equal(plan.features)
-        return done()
+        done()
       })
     })
   })
 
-  describe('when the notifyV1Flag is passed', function() {
-    beforeEach(function() {
-      return User.update(
+  describe('when the notifyV1Flag is passed', function () {
+    beforeEach(function () {
+      User.updateOne(
         {
-          _id: this.user._id
+          _id: user._id,
         },
         {
           overleaf: {
-            id: 42
-          }
+            id: 42,
+          },
         }
       )
     }) // returns a promise
   })
 
-  describe('when the user has features overrides', function() {
-    beforeEach(function() {
+  describe('when the user has features overrides', function () {
+    beforeEach(function () {
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 1)
-      return User.update(
+      return User.updateOne(
         {
-          _id: this.user._id
+          _id: user._id,
         },
         {
           featuresOverrides: [
             {
               features: {
-                github: true
-              }
+                github: true,
+              },
             },
             {
               features: {
-                dropbox: true
+                dropbox: true,
               },
-              expiresAt: new Date(1990, 12, 25)
+              expiresAt: new Date(1990, 12, 25),
             },
             {
               features: {
-                trackChanges: true
+                trackChanges: true,
               },
-              expiresAt: futureDate
-            }
-          ]
+              expiresAt: futureDate,
+            },
+          ],
         }
       )
     }) // returns a promise
 
-    it('should set their features to the overridden set', function(done) {
-      return syncUserAndGetFeatures(this.user, (error, features) => {
-        if (error != null) {
+    it('should set their features to the overridden set', function (done) {
+      syncUserAndGetFeatures(user, (error, features) => {
+        if (error) {
           throw error
         }
-        let expectedFeatures = Object.assign(settings.defaultFeatures, {
+        const expectedFeatures = Object.assign(settings.defaultFeatures, {
           github: true,
-          trackChanges: true
+          trackChanges: true,
         })
         expect(features).to.deep.equal(expectedFeatures)
-        return done()
+        done()
       })
     })
+  })
+
+  it('should update featuresUpdatedAt', async function () {
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    expect(user.featuresUpdatedAt).to.not.exist // no default set
+    await FeaturesUpdater.promises.refreshFeatures(user._id, 'test')
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    const featuresUpdatedAt = user.featuresUpdatedAt
+    expect(featuresUpdatedAt).to.exist
+    // refresh again
+    await FeaturesUpdater.promises.refreshFeatures(user._id, 'test')
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    expect(user.featuresUpdatedAt > featuresUpdatedAt).to.be.true
   })
 })

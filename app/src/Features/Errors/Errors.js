@@ -66,13 +66,27 @@ class NotInV2Error extends BackwardCompatibleError {}
 
 class SLInV2Error extends BackwardCompatibleError {}
 
-class SAMLIdentityExistsError extends BackwardCompatibleError {
-  constructor(arg) {
-    super(arg)
-    if (!this.message) {
-      this.message =
-        'provider and external id already linked to another account'
-    }
+class SAMLIdentityExistsError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_already_registered'
+  }
+}
+
+class SAMLAlreadyLinkedError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_already_linked'
+  }
+}
+
+class SAMLEmailNotAffiliatedError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_not_affiliated'
+  }
+}
+
+class SAMLEmailAffiliatedWithAnotherInstitutionError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_affiliated_with_another_institution'
   }
 }
 
@@ -89,7 +103,7 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
       universityId,
       universityName,
       externalUserId,
-      institutionEmail
+      institutionEmail,
     } = samlSession
 
     if (
@@ -105,9 +119,7 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
       samlSession.userEmailAttributeUnreliable
     ) {
       this.tryAgain = false
-      this.message = `Your account settings at your institution prevent us from accessing your email address. You will need to make your email address public at your institution in order to link with ${
-        settings.appName
-      }. Please contact your IT department if you have any questions.`
+      this.message = `Your account settings at your institution prevent us from accessing your email address. You will need to make your email address public at your institution in order to link with ${settings.appName}. Please contact your IT department if you have any questions.`
     } else if (!institutionEmail) {
       this.message =
         'Unable to confirm your institutional email address. The institutional identity provider did not provide an email address in the expected attribute. Please contact us if this keeps happening.'
@@ -170,9 +182,13 @@ class InvalidQueryError extends OErrorV2CompatibleError {
   }
 }
 
-class ProjectIsArchivedOrTrashedError extends BackwardCompatibleError {}
-
 class AffiliationError extends OError {}
+
+class InvalidInstitutionalEmailError extends OError {
+  get i18nKey() {
+    return 'invalid_institutional_email'
+  }
+}
 
 module.exports = {
   OError,
@@ -193,6 +209,9 @@ module.exports = {
   InvalidError,
   NotInV2Error,
   SAMLIdentityExistsError,
+  SAMLAlreadyLinkedError,
+  SAMLEmailNotAffiliatedError,
+  SAMLEmailAffiliatedWithAnotherInstitutionError,
   SAMLSessionDataMissing,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
@@ -203,6 +222,6 @@ module.exports = {
   UserNotCollaboratorError,
   DocHasRangesError,
   InvalidQueryError,
-  ProjectIsArchivedOrTrashedError,
-  AffiliationError
+  AffiliationError,
+  InvalidInstitutionalEmailError,
 }

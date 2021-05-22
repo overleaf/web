@@ -1,5 +1,5 @@
 const { callbackify, promisify } = require('util')
-const metrics = require('metrics-sharelatex')
+const metrics = require('@overleaf/metrics')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('lock')
 const logger = require('logger-sharelatex')
@@ -63,7 +63,7 @@ const LockManager = {
         logger.log('exceeded lock timeout', {
           namespace,
           id,
-          slowExecutionError
+          slowExecutionError,
         })
       }
       const exceededLockTimeout = setTimeout(
@@ -81,7 +81,7 @@ const LockManager = {
               namespace,
               id,
               timeTaken,
-              slowExecutionError
+              slowExecutionError,
             })
           }
 
@@ -190,7 +190,7 @@ const LockManager = {
         callback(null, result)
       }
     })
-  }
+  },
 }
 
 module.exports = LockManager
@@ -200,5 +200,5 @@ LockManager.promises = {
   runWithLock(namespace, id, runner) {
     const cbRunner = callbackify(runner)
     return promisifiedRunWithLock(namespace, id, cbRunner)
-  }
+  },
 }

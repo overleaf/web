@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-return-assign,
 */
@@ -20,7 +20,7 @@ import './controllers/OnlineUsersController'
 
 let OnlineUsersManager
 
-export default (OnlineUsersManager = (function() {
+export default OnlineUsersManager = (function () {
   OnlineUsersManager = class OnlineUsersManager {
     static initClass() {
       this.prototype.cursorUpdateInterval = 500
@@ -32,6 +32,7 @@ export default (OnlineUsersManager = (function() {
       this.$scope.onlineUsers = {}
       this.$scope.onlineUserCursorHighlights = {}
       this.$scope.onlineUsersArray = []
+      this.$scope.onlineUsersCount = 0
 
       this.$scope.$on('cursor:editor:update', (event, position) => {
         return this.sendCursorPositionUpdate(position)
@@ -42,7 +43,7 @@ export default (OnlineUsersManager = (function() {
           'clientTracking.getConnectedUsers',
           (error, connectedUsers) => {
             this.$scope.onlineUsers = {}
-            for (let user of Array.from(connectedUsers || [])) {
+            for (const user of Array.from(connectedUsers || [])) {
               if (user.client_id === this.ide.socket.publicId) {
                 // Don't store myself
                 continue
@@ -58,7 +59,7 @@ export default (OnlineUsersManager = (function() {
                   user.cursorData != null ? user.cursorData.doc_id : undefined,
                 row: user.cursorData != null ? user.cursorData.row : undefined,
                 column:
-                  user.cursorData != null ? user.cursorData.column : undefined
+                  user.cursorData != null ? user.cursorData.column : undefined,
               }
             }
             return this.refreshOnlineUsers()
@@ -115,6 +116,9 @@ export default (OnlineUsersManager = (function() {
         this.$scope.onlineUsersArray.push(user)
       }
 
+      // keep a count of the other online users
+      this.$scope.onlineUsersCount = this.$scope.onlineUsersArray.length
+
       this.$scope.onlineUserCursorHighlights = {}
       for (client_id in this.$scope.onlineUsers) {
         const client = this.$scope.onlineUsers[client_id]
@@ -129,9 +133,9 @@ export default (OnlineUsersManager = (function() {
           label: client.name,
           cursor: {
             row: client.row,
-            column: client.column
+            column: client.column,
           },
-          hue: ColorManager.getHueForUserId(client.user_id)
+          hue: ColorManager.getHueForUserId(client.user_id),
         })
       }
 
@@ -161,7 +165,7 @@ export default (OnlineUsersManager = (function() {
               this.$scope.currentPosition != null
                 ? this.$scope.currentPosition.column
                 : undefined,
-            doc_id
+            doc_id,
           })
 
           return delete this.cursorUpdateTimeout
@@ -171,4 +175,4 @@ export default (OnlineUsersManager = (function() {
   }
   OnlineUsersManager.initClass()
   return OnlineUsersManager
-})())
+})()

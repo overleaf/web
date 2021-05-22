@@ -4,7 +4,7 @@ const layoutOptions = {
   center: {
     paneSelector: '[vertical-resizable-top]',
     paneClass: 'vertical-resizable-top',
-    size: 'auto'
+    size: 'auto',
   },
   south: {
     paneSelector: '[vertical-resizable-bottom]',
@@ -17,16 +17,17 @@ const layoutOptions = {
     slidable: false,
     spacing_open: 6,
     spacing_closed: 6,
-    maxSize: '75%'
-  }
+    maxSize: '75%',
+  },
 }
 
-export default App.directive('verticalResizablePanes', localStorage => ({
+export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
   restrict: 'A',
   link(scope, element, attrs) {
     const name = attrs.verticalResizablePanes
     const minSize = attrs.verticalResizablePanesMinSize
     const maxSize = attrs.verticalResizablePanesMaxSize
+    const defaultSize = attrs.verticalResizablePanesDefaultSize
     let storedSize = null
     let manualResizeIncoming = false
 
@@ -41,6 +42,9 @@ export default App.directive('verticalResizablePanes', localStorage => ({
     }
 
     const toggledExternally = attrs.verticalResizablePanesToggledExternallyOn
+    const hiddenExternally = attrs.verticalResizablePanesHiddenExternallyOn
+    const hiddenInitially = attrs.verticalResizablePanesHiddenInitially
+    const resizeOn = attrs.verticalResizablePanesResizeOn
     const resizerDisabledClass = `${layoutOptions.south.resizerClass}-disabled`
 
     function enableResizer() {
@@ -81,12 +85,32 @@ export default App.directive('verticalResizablePanes', localStorage => ({
       })
     }
 
+    if (hiddenExternally) {
+      ide.$scope.$on(hiddenExternally, (e, open) => {
+        if (open) {
+          layoutHandle.show('south')
+        } else {
+          layoutHandle.hide('south')
+        }
+      })
+    }
+
+    if (resizeOn) {
+      scope.$on(resizeOn, () => {
+        layoutHandle.resizeAll()
+      })
+    }
+
     if (maxSize) {
       layoutOptions.south.maxSize = maxSize
     }
 
     if (minSize) {
       layoutOptions.south.minSize = minSize
+    }
+
+    if (defaultSize) {
+      layoutOptions.south.size = defaultSize
     }
 
     // The `drag` event fires only when the user manually resizes the panes; the `resize` event fires even when
@@ -99,5 +123,8 @@ export default App.directive('verticalResizablePanes', localStorage => ({
     layoutOptions.south.onresize = handleResize
 
     const layoutHandle = element.layout(layoutOptions)
-  }
+    if (hiddenInitially === 'true') {
+      layoutHandle.hide('south')
+    }
+  },
 }))

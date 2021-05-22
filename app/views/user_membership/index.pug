@@ -1,7 +1,12 @@
 extends ../layout
 
+block append meta
+	meta(name="ol-users", data-type="json", content=users)
+	meta(name="ol-paths", data-type="json", content=paths)
+	meta(name="ol-groupSize", data-type="json", content=groupSize)
+
 block content
-	.content.content-alt
+	main.content.content-alt
 		.container
 			.row
 				.col-md-10.col-md-offset-1
@@ -9,7 +14,7 @@ block content
 					.card(ng-controller="UserMembershipController")
 						.page-header
 							.pull-right(ng-cloak)
-								small(ng-show="groupSize && selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
+								small(ng-show="groupSize && selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:'{{ users.length }}', groupSize: '{{ groupSize }}'}, ['strong', 'strong'])}
 								a.btn.btn-danger(
 									href,
 									ng-show="selectedUsers.length > 0"
@@ -106,9 +111,3 @@ block content
 							.row
 								.col-xs-2.col-xs-offset-10(ng-if="paths.exportMembers", ng-cloak)
 									a(href=paths.exportMembers) #{translate('export_csv')}
-
-
-	script(type="text/javascript").
-		window.users = !{StringHelper.stringifyJsonForScript(users)};
-		window.paths = !{StringHelper.stringifyJsonForScript(paths)};
-		window.groupSize = #{groupSize || 'null'};

@@ -6,24 +6,22 @@ const base = require('./webpack.config')
 module.exports = merge(base, {
   mode: 'development',
 
-  // Enable source maps for dev (fast compilation, slow runtime)
-  devtool: 'cheap-module-eval-source-map',
+  // Enable accurate source maps for dev
+  devtool: 'source-map',
 
   plugins: [
     // Extract CSS to a separate file (rather than inlining to a <style> tag)
     new MiniCssExtractPlugin({
       // Output to public/stylesheets directory
-      filename: 'stylesheets/[name].css'
-    })
+      filename: 'stylesheets/[name].css',
+    }),
   ],
 
   devServer: {
-    // Disable webpack dev server auto-reload
-    inline: false,
-
-    // Expose dev server as localhost with dev box
+    // Expose dev server at www.dev-overleaf.com
     host: '0.0.0.0',
     port: 3808,
+    public: 'www.dev-overleaf.com:443',
 
     // Customise output to the (node) console
     stats: {
@@ -35,7 +33,7 @@ module.exports = merge(base, {
       chunks: false,
       modules: false,
       // Hide copied assets from output
-      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/]
-    }
-  }
+      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/],
+    },
+  },
 })

@@ -17,7 +17,7 @@ const Settings = require('settings-sharelatex')
 
 module.exports = CaptchaMiddleware = {
   validateCaptcha(action) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       if (
         (Settings.recaptcha != null ? Settings.recaptcha.siteKey : undefined) ==
         null
@@ -35,14 +35,14 @@ module.exports = CaptchaMiddleware = {
       const options = {
         form: {
           secret: Settings.recaptcha.secretKey,
-          response
+          response,
         },
-        json: true
+        json: true,
       }
       return request.post(
         'https://www.google.com/recaptcha/api/siteverify',
         options,
-        function(error, response, body) {
+        function (error, response, body) {
           if (error != null) {
             return next(error)
           }
@@ -55,8 +55,8 @@ module.exports = CaptchaMiddleware = {
               errorReason: 'cannot_verify_user_not_robot',
               message: {
                 text:
-                  'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.'
-              }
+                  'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
+              },
             })
           } else {
             return next()
@@ -64,5 +64,5 @@ module.exports = CaptchaMiddleware = {
         }
       )
     }
-  }
+  },
 }

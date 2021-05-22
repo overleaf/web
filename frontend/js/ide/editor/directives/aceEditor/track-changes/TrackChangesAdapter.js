@@ -16,9 +16,9 @@ class TrackChangesAdapter {
 
   clearAnnotations() {
     const session = this.editor.getSession()
-    for (let change_id in this.changeIdToMarkerIdMap) {
+    for (const change_id in this.changeIdToMarkerIdMap) {
       const markers = this.changeIdToMarkerIdMap[change_id]
-      for (let marker_name in markers) {
+      for (const marker_name in markers) {
         const marker_id = markers[marker_name]
         session.removeMarker(marker_id)
       }
@@ -49,7 +49,7 @@ class TrackChangesAdapter {
 
     this.changeIdToMarkerIdMap[change.id] = {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     }
   }
 
@@ -81,7 +81,7 @@ class TrackChangesAdapter {
 
     this.changeIdToMarkerIdMap[change.id] = {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     }
   }
 
@@ -91,7 +91,7 @@ class TrackChangesAdapter {
     }
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
     const session = this.editor.getSession()
@@ -105,7 +105,7 @@ class TrackChangesAdapter {
     }
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
 
@@ -150,7 +150,7 @@ class TrackChangesAdapter {
       )
       this.changeIdToMarkerIdMap[comment.id] = {
         background_marker_id,
-        callout_marker_id
+        callout_marker_id,
       }
     }
   }
@@ -168,7 +168,7 @@ class TrackChangesAdapter {
       // Resolved comments may not have marker ids
       const {
         background_marker_id,
-        callout_marker_id
+        callout_marker_id,
       } = this.changeIdToMarkerIdMap[comment.id]
       delete this.changeIdToMarkerIdMap[comment.id]
       const session = this.editor.getSession()
@@ -185,7 +185,7 @@ class TrackChangesAdapter {
     const markers = session.getMarkers()
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change_id]
     if (background_marker_id != null && markers[background_marker_id] != null) {
       const background_marker = markers[background_marker_id]
@@ -200,10 +200,7 @@ class TrackChangesAdapter {
   }
 
   shareJsOffsetToRowColumn(offset) {
-    const lines = this.editor
-      .getSession()
-      .getDocument()
-      .getAllLines()
+    const lines = this.editor.getSession().getDocument().getAllLines()
     return EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
   }
 
@@ -239,8 +236,8 @@ class TrackChangesAdapter {
     //  though. This is the code we need to trick:
     //   var range = marker.range.clipRows(config.firstRow, config.lastRow);
     //   if (range.isEmpty()) continue;
-    ace_range.clipRows = function(first_row, last_row) {
-      this.isEmpty = function() {
+    ace_range.clipRows = function (first_row, last_row) {
+      this.isEmpty = function () {
         return first_row > this.end.row || last_row < this.start.row
       }
       return this

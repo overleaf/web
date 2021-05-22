@@ -12,7 +12,7 @@ const BetaProgramController = {
     if (userId == null) {
       return next(new Error('no user id in session'))
     }
-    BetaProgramHandler.optIn(userId, function(err) {
+    BetaProgramHandler.optIn(userId, function (err) {
       if (err) {
         return next(err)
       }
@@ -26,7 +26,7 @@ const BetaProgramController = {
     if (userId == null) {
       return next(new Error('no user id in session'))
     }
-    BetaProgramHandler.optOut(userId, function(err) {
+    BetaProgramHandler.optOut(userId, function (err) {
       if (err) {
         return next(err)
       }
@@ -37,20 +37,20 @@ const BetaProgramController = {
   optInPage(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     logger.log({ user_id: userId }, 'showing beta participation page for user')
-    UserGetter.getUser(userId, function(err, user) {
+    UserGetter.getUser(userId, function (err, user) {
       if (err) {
         OError.tag(err, 'error fetching user', {
-          userId
+          userId,
         })
         return next(err)
       }
       res.render('beta_program/opt_in', {
         title: 'sharelatex_beta_program',
         user,
-        languages: Settings.languages
+        languages: Settings.languages,
       })
     })
-  }
+  },
 }
 
 module.exports = BetaProgramController

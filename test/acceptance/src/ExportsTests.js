@@ -11,19 +11,22 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
 const { expect } = require('chai')
-const request = require('./helpers/request')
-const _ = require('underscore')
-
 const User = require('./helpers/User')
-const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
-const ExportsHandler = require('../../../app/src/Features/Exports/ExportsHandler.js')
 
-const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
-const MockV1Api = require('./helpers/MockV1Api')
+const MockProjectHistoryApiClass = require('./mocks/MockProjectHistoryApi')
+const MockV1ApiClass = require('./mocks/MockV1Api')
 
-describe('Exports', function() {
-  beforeEach(function(done) {
+let MockProjectHistoryApi, MockV1Api
+
+before(function () {
+  MockV1Api = MockV1ApiClass.instance()
+  MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
+})
+
+describe('Exports', function () {
+  beforeEach(function (done) {
     this.brand_variation_id = '18'
     this.owner = new User()
     return this.owner.login(error => {
@@ -44,13 +47,12 @@ describe('Exports', function() {
     })
   })
 
-  describe('exporting a project', function() {
-    beforeEach(function(done) {
+  describe('exporting a project', function () {
+    beforeEach(function (done) {
       this.version = Math.floor(Math.random() * 10000)
       MockProjectHistoryApi.setProjectVersion(this.project_id, this.version)
       this.export_id = Math.floor(Math.random() * 10000)
       MockV1Api.setExportId(this.export_id)
-      MockV1Api.clearExportParams()
       return this.owner.request(
         {
           method: 'POST',
@@ -61,8 +63,8 @@ describe('Exports', function() {
             description: 'description',
             author: 'author',
             license: 'other',
-            showSource: true
-          }
+            showSource: true,
+          },
         },
         (error, response, body) => {
           if (error != null) {
@@ -75,12 +77,12 @@ describe('Exports', function() {
       )
     })
 
-    it('should have sent correct data to v1', function(done) {
+    it('should have sent correct data to v1', function (done) {
       const {
         project,
         user,
         destination,
-        options
+        options,
       } = MockV1Api.getLastExportParams()
       // project details should match
       expect(project.id).to.equal(this.project_id)
@@ -101,7 +103,7 @@ describe('Exports', function() {
       return done()
     })
 
-    it('should have returned the export ID provided by v1', function(done) {
+    it('should have returned the export ID provided by v1', function (done) {
       expect(this.exportResponseBody.export_v1_id).to.equal(this.export_id)
       return done()
     })

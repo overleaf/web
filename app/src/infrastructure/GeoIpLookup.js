@@ -27,7 +27,7 @@ const currencyMappings = {
   DK: 'DKK',
   NO: 'NOK',
   CA: 'CAD',
-  SE: 'SEK'
+  SE: 'SEK',
 }
 
 // Countries which would likely prefer Euro's
@@ -56,7 +56,7 @@ const EuroCountries = [
   'RO',
   'SK',
   'SI',
-  'ES'
+  'ES',
 ]
 
 _.each(EuroCountries, country => (currencyMappings[country] = 'EUR'))
@@ -71,10 +71,10 @@ module.exports = GeoIpLookup = {
     const opts = {
       url: URL.resolve(settings.apis.geoIpLookup.url, ip),
       timeout: 1000,
-      json: true
+      json: true,
     }
     logger.log({ ip, opts }, 'getting geo ip details')
-    return request.get(opts, function(err, res, ipDetails) {
+    return request.get(opts, function (err, res, ipDetails) {
       if (err != null) {
         logger.warn({ err, ip }, 'error getting ip details')
       }
@@ -83,7 +83,7 @@ module.exports = GeoIpLookup = {
   },
 
   getCurrencyCode(ip, callback) {
-    return GeoIpLookup.getDetails(ip, function(err, ipDetails) {
+    return GeoIpLookup.getDetails(ip, function (err, ipDetails) {
       if (err != null || ipDetails == null) {
         logger.err(
           { err, ip },
@@ -99,7 +99,7 @@ module.exports = GeoIpLookup = {
       logger.log({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
       return callback(err, currencyCode, countryCode)
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

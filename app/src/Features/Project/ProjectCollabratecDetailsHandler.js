@@ -1,6 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -25,7 +25,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     return ProjectCollabratecDetailsHandler.setCollabratecUsers(
       project_id,
@@ -36,7 +36,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
 
   isLinkedCollabratecUserProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function(err, isLinked) {}
+      callback = function (err, isLinked) {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -49,11 +49,11 @@ module.exports = ProjectCollabratecDetailsHandler = {
       _id: project_id,
       collabratecUsers: {
         $elemMatch: {
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
-    return Project.findOne(query, { _id: 1 }, function(err, project) {
+    return Project.findOne(query, { _id: 1 }, function (err, project) {
       if (err != null) {
         callback(err)
       }
@@ -68,7 +68,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -83,26 +83,26 @@ module.exports = ProjectCollabratecDetailsHandler = {
         $not: {
           $elemMatch: {
             collabratec_document_id,
-            user_id
-          }
-        }
-      }
+            user_id,
+          },
+        },
+      },
     }
     const update = {
       $push: {
         collabratecUsers: {
           collabratec_document_id,
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
-    return Project.update(query, update, callback)
+    return Project.updateOne(query, update, callback)
   },
 
   setCollabratecUsers(project_id, collabratec_users, callback) {
     let err
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -113,7 +113,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     if (!Array.isArray(collabratec_users)) {
       callback(new Error('collabratec_users must be array'))
     }
-    for (let collabratec_user of Array.from(collabratec_users)) {
+    for (const collabratec_user of Array.from(collabratec_users)) {
       try {
         collabratec_user.user_id = ObjectId(collabratec_user.user_id)
       } catch (error1) {
@@ -122,12 +122,12 @@ module.exports = ProjectCollabratecDetailsHandler = {
       }
     }
     const update = { $set: { collabratecUsers: collabratec_users } }
-    return Project.update({ _id: project_id }, update, callback)
+    return Project.updateOne({ _id: project_id }, update, callback)
   },
 
   unlinkCollabratecUserProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -140,16 +140,16 @@ module.exports = ProjectCollabratecDetailsHandler = {
     const update = {
       $pull: {
         collabratecUsers: {
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
-    return Project.update(query, update, callback)
+    return Project.updateOne(query, update, callback)
   },
 
   updateCollabratecUserIds(old_user_id, new_user_id, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     try {
       old_user_id = ObjectId(old_user_id)
@@ -160,7 +160,6 @@ module.exports = ProjectCollabratecDetailsHandler = {
     }
     const query = { 'collabratecUsers.user_id': old_user_id }
     const update = { $set: { 'collabratecUsers.$.user_id': new_user_id } }
-    const options = { multi: true }
-    return Project.update(query, update, options, callback)
-  }
+    return Project.updateMany(query, update, callback)
+  },
 }

@@ -1,5 +1,5 @@
 /* eslint-disable
-    handle-callback-err,
+    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -42,8 +42,8 @@ module.exports = ReferencesHandler = {
 
   _findBibFileIds(project) {
     const ids = []
-    var _process = function(folder) {
-      _.each(folder.fileRefs || [], function(file) {
+    var _process = function (folder) {
+      _.each(folder.fileRefs || [], function (file) {
         if (
           __guard__(file != null ? file.name : undefined, x1 =>
             x1.match(/^.*\.bib$/)
@@ -60,8 +60,8 @@ module.exports = ReferencesHandler = {
 
   _findBibDocIds(project) {
     const ids = []
-    var _process = function(folder) {
-      _.each(folder.docs || [], function(doc) {
+    var _process = function (folder) {
+      _.each(folder.docs || [], function (doc) {
         if (
           __guard__(doc != null ? doc.name : undefined, x1 =>
             x1.match(/^.*\.bib$/)
@@ -78,35 +78,36 @@ module.exports = ReferencesHandler = {
 
   _isFullIndex(project, callback) {
     if (callback == null) {
-      callback = function(err, result) {}
+      callback = function (err, result) {}
     }
-    return UserGetter.getUser(project.owner_ref, { features: true }, function(
-      err,
-      owner
-    ) {
-      if (err != null) {
-        return callback(err)
+    return UserGetter.getUser(
+      project.owner_ref,
+      { features: true },
+      function (err, owner) {
+        if (err != null) {
+          return callback(err)
+        }
+        const features = owner != null ? owner.features : undefined
+        return callback(
+          null,
+          (features != null ? features.references : undefined) === true ||
+            (features != null ? features.referencesSearch : undefined) === true
+        )
       }
-      const features = owner != null ? owner.features : undefined
-      return callback(
-        null,
-        (features != null ? features.references : undefined) === true ||
-          (features != null ? features.referencesSearch : undefined) === true
-      )
-    })
+    )
   },
 
   indexAll(projectId, callback) {
     if (callback == null) {
-      callback = function(err, data) {}
+      callback = function (err, data) {}
     }
     return ProjectGetter.getProject(
       projectId,
       { rootFolder: true, owner_ref: 1 },
-      function(err, project) {
+      function (err, project) {
         if (err) {
           OError.tag(err, 'error finding project', {
-            projectId
+            projectId,
           })
           return callback(err)
         }
@@ -126,15 +127,15 @@ module.exports = ReferencesHandler = {
 
   index(projectId, docIds, callback) {
     if (callback == null) {
-      callback = function(err, data) {}
+      callback = function (err, data) {}
     }
     return ProjectGetter.getProject(
       projectId,
       { rootFolder: true, owner_ref: 1 },
-      function(err, project) {
+      function (err, project) {
         if (err) {
           OError.tag(err, 'error finding project', {
-            projectId
+            projectId,
           })
           return callback(err)
         }
@@ -153,10 +154,10 @@ module.exports = ReferencesHandler = {
     if (!Features.hasFeature('references')) {
       return callback()
     }
-    return ReferencesHandler._isFullIndex(project, function(err, isFullIndex) {
+    return ReferencesHandler._isFullIndex(project, function (err, isFullIndex) {
       if (err) {
         OError.tag(err, 'error checking whether to do full index', {
-          projectId
+          projectId,
         })
         return callback(err)
       }
@@ -168,12 +169,12 @@ module.exports = ReferencesHandler = {
         docIds.map(docId => cb =>
           DocumentUpdaterHandler.flushDocToMongo(projectId, docId, cb)
         ),
-        function(err) {
+        function (err) {
           // continue
           if (err) {
             OError.tag(err, 'error flushing docs to mongo', {
               projectId,
-              docIds
+              docIds,
             })
             return callback(err)
           }
@@ -189,13 +190,13 @@ module.exports = ReferencesHandler = {
               url: `${settings.apis.references.url}/project/${projectId}/index`,
               json: {
                 docUrls: allUrls,
-                fullIndex: isFullIndex
-              }
+                fullIndex: isFullIndex,
+              },
             },
-            function(err, res, data) {
+            function (err, res, data) {
               if (err) {
                 OError.tag(err, 'error communicating with references api', {
-                  projectId
+                  projectId,
                 })
                 return callback(err)
               }
@@ -204,9 +205,7 @@ module.exports = ReferencesHandler = {
                 return callback(null, data)
               } else {
                 err = new Error(
-                  `references api responded with non-success code: ${
-                    res.statusCode
-                  }`
+                  `references api responded with non-success code: ${res.statusCode}`
                 )
                 return callback(err)
               }
@@ -215,7 +214,7 @@ module.exports = ReferencesHandler = {
         }
       )
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

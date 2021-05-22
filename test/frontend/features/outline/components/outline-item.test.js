@@ -5,17 +5,17 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import OutlineItem from '../../../../../frontend/js/features/outline/components/outline-item'
 
-describe('<OutlineItem />', function() {
+describe('<OutlineItem />', function () {
   const jumpToLine = sinon.stub()
 
-  afterEach(function() {
+  afterEach(function () {
     jumpToLine.reset()
   })
 
-  it('renders basic item', function() {
+  it('renders basic item', function () {
     const outlineItem = {
       title: 'Test Title',
-      line: 1
+      line: 1,
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
@@ -24,11 +24,11 @@ describe('<OutlineItem />', function() {
     expect(screen.queryByRole('button', { name: 'Collapse' })).to.not.exist
   })
 
-  it('collapses and expands', function() {
+  it('collapses and expands', function () {
     const outlineItem = {
       title: 'Parent',
       line: 1,
-      children: [{ title: 'Child', line: 2 }]
+      children: [{ title: 'Child', line: 2 }],
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
@@ -44,10 +44,10 @@ describe('<OutlineItem />', function() {
     expect(screen.queryByRole('button', { name: 'Child' })).to.not.exist
   })
 
-  it('highlights', function() {
+  it('highlights', function () {
     const outlineItem = {
       title: 'Parent',
-      line: 1
+      line: 1,
     }
 
     render(
@@ -61,11 +61,11 @@ describe('<OutlineItem />', function() {
     screen.getByRole('treeitem', { current: true })
   })
 
-  it('highlights when has collapsed highlighted child', function() {
+  it('highlights when has collapsed highlighted child', function () {
     const outlineItem = {
       title: 'Parent',
       line: 1,
-      children: [{ title: 'Child', line: 2 }]
+      children: [{ title: 'Child', line: 2 }],
     }
     render(
       <OutlineItem
@@ -83,10 +83,10 @@ describe('<OutlineItem />', function() {
     screen.getByRole('treeitem', { name: 'Parent', current: true })
   })
 
-  it('click and double-click jump to location', function() {
+  it('click and double-click jump to location', function () {
     const outlineItem = {
       title: 'Parent',
-      line: 1
+      line: 1,
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 

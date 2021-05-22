@@ -16,11 +16,17 @@ const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const request = require('./helpers/request')
 
-const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
 const User = require('./helpers/User')
+const MockProjectHistoryApiClass = require('./mocks/MockProjectHistoryApi')
 
-describe('Labels', function() {
-  beforeEach(function(done) {
+let MockProjectHistoryApi
+
+before(function () {
+  MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
+})
+
+describe('Labels', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {
@@ -40,25 +46,21 @@ describe('Labels', function() {
     })
   })
 
-  afterEach(function() {
-    return MockProjectHistoryApi.reset()
-  })
-
-  it('getting labels', function(done) {
+  it('getting labels', function (done) {
     const label_id = new ObjectId().toString()
     const comment = 'a label comment'
     const version = 3
     MockProjectHistoryApi.addLabel(this.project_id, {
       id: label_id,
       comment,
-      version
+      version,
     })
 
     return this.owner.request(
       {
         method: 'GET',
         url: `/project/${this.project_id}/labels`,
-        json: true
+        json: true,
       },
       (error, response, body) => {
         if (error != null) {
@@ -71,7 +73,7 @@ describe('Labels', function() {
     )
   })
 
-  it('creating a label', function(done) {
+  it('creating a label', function (done) {
     const comment = 'a label comment'
     const version = 3
 
@@ -79,7 +81,7 @@ describe('Labels', function() {
       {
         method: 'POST',
         url: `/project/${this.project_id}/labels`,
-        json: { comment, version }
+        json: { comment, version },
       },
       (error, response, body) => {
         if (error != null) {
@@ -88,28 +90,28 @@ describe('Labels', function() {
         expect(response.statusCode).to.equal(200)
         const { label_id } = body
         expect(MockProjectHistoryApi.getLabels(this.project_id)).to.deep.equal([
-          { id: label_id, comment, version }
+          { id: label_id, comment, version },
         ])
         return done()
       }
     )
   })
 
-  it('deleting a label', function(done) {
+  it('deleting a label', function (done) {
     const label_id = new ObjectId().toString()
     const comment = 'a label comment'
     const version = 3
     MockProjectHistoryApi.addLabel(this.project_id, {
       id: label_id,
       comment,
-      version
+      version,
     })
 
     return this.owner.request(
       {
         method: 'DELETE',
         url: `/project/${this.project_id}/labels/${label_id}`,
-        json: true
+        json: true,
       },
       (error, response, body) => {
         if (error != null) {

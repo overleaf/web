@@ -6,7 +6,7 @@ const logger = require('logger-sharelatex')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const Errors = require('../Errors/Errors')
-const ProjectTokenGenerator = require('./ProjectTokenGenerator')
+const TokenGenerator = require('../TokenGenerator/TokenGenerator')
 const ProjectHelper = require('./ProjectHelper')
 const settings = require('settings-sharelatex')
 const { callbackify } = require('util')
@@ -34,8 +34,8 @@ module.exports = {
     generateUniqueName,
     setPublicAccessLevel,
     ensureTokensArePresent,
-    clearTokens
-  }
+    clearTokens,
+  },
 }
 
 async function getDetails(projectId) {
@@ -47,7 +47,7 @@ async function getDetails(projectId) {
       compiler: true,
       features: true,
       owner_ref: true,
-      overleaf: true
+      overleaf: true,
     })
   } catch (err) {
     logger.warn({ err, projectId }, 'error getting project')
@@ -64,7 +64,7 @@ async function getDetails(projectId) {
     features:
       user != null && user.features != null
         ? user.features
-        : settings.defaultFeatures
+        : settings.defaultFeatures,
   }
   if (project.overleaf != null) {
     details.overleaf = project.overleaf
@@ -74,7 +74,7 @@ async function getDetails(projectId) {
 
 async function getProjectDescription(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
-    description: true
+    description: true,
   })
   if (project == null) {
     return undefined
@@ -90,7 +90,7 @@ async function setProjectDescription(projectId, description) {
     'setting project description'
   )
   try {
-    await Project.update(conditions, update).exec()
+    await Project.updateOne(conditions, update).exec()
   } catch (err) {
     logger.warn({ err }, 'something went wrong setting project description')
     throw err
@@ -111,11 +111,11 @@ async function renameProject(projectId, newName) {
     return
   }
   const oldProjectName = project.name
-  await Project.update({ _id: projectId }, { name: newName }).exec()
+  await Project.updateOne({ _id: projectId }, { name: newName }).exec()
   await TpdsUpdateSender.promises.moveEntity({
     project_id: projectId,
     project_name: oldProjectName,
-    newProjectName: newName
+    newProjectName: newName,
   })
 }
 
@@ -192,12 +192,12 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
         PublicAccessLevels.READ_ONLY,
         PublicAccessLevels.READ_AND_WRITE,
         PublicAccessLevels.PRIVATE,
-        PublicAccessLevels.TOKEN_BASED
+        PublicAccessLevels.TOKEN_BASED,
       ],
       newAccessLevel
     )
   ) {
-    await Project.update(
+    await Project.updateOne(
       { _id: projectId },
       { publicAccesLevel: newAccessLevel }
     ).exec()
@@ -206,7 +206,7 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
 
 async function ensureTokensArePresent(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
-    tokens: 1
+    tokens: 1,
   })
   if (
     project.tokens != null &&
@@ -216,7 +216,7 @@ async function ensureTokensArePresent(projectId) {
     return project.tokens
   }
   await _generateTokens(project)
-  await Project.update(
+  await Project.updateOne(
     { _id: projectId },
     { $set: { tokens: project.tokens } }
   ).exec()
@@ -224,7 +224,7 @@ async function ensureTokensArePresent(projectId) {
 }
 
 async function clearTokens(projectId) {
-  await Project.update(
+  await Project.updateOne(
     { _id: projectId },
     { $unset: { tokens: 1 }, $set: { publicAccesLevel: 'private' } }
   ).exec()
@@ -236,11 +236,11 @@ async function _generateTokens(project, callback) {
   }
   const { tokens } = project
   if (tokens.readAndWrite == null) {
-    const { token, numericPrefix } = ProjectTokenGenerator.readAndWriteToken()
+    const { token, numericPrefix } = TokenGenerator.readAndWriteToken()
     tokens.readAndWrite = token
     tokens.readAndWritePrefix = numericPrefix
   }
   if (tokens.readOnly == null) {
-    tokens.readOnly = await ProjectTokenGenerator.promises.generateUniqueReadOnlyToken()
+    tokens.readOnly = await TokenGenerator.promises.generateUniqueReadOnlyToken()
   }
 }

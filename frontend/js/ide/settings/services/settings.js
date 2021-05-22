@@ -15,12 +15,12 @@ import App from '../../../base'
 export default App.factory('settings', (ide, eventTracking) => ({
   saveSettings(data) {
     // Tracking code.
-    for (let key of Array.from(Object.keys(data))) {
+    for (const key of Array.from(Object.keys(data))) {
       const changedSetting = key
       const changedSettingVal = data[key]
       eventTracking.sendMB('setting-changed', {
         changedSetting,
-        changedSettingVal
+        changedSettingVal,
       })
     }
     // End of tracking code.
@@ -37,5 +37,5 @@ export default App.factory('settings', (ide, eventTracking) => ({
   saveProjectAdminSettings(data) {
     data._csrf = window.csrfToken
     return ide.$http.post(`/project/${ide.project_id}/settings/admin`, data)
-  }
+  },
 }))

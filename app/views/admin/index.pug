@@ -8,8 +8,8 @@ block content
 					.card
 						.page-header
 							h1 Admin Panel
-						tabset(ng-cloak)
-							tab(heading="System Messages")
+						tabset(bookmarkable-tabset ng-cloak)
+							tab(heading="System Messages" bookmarkable-tab="system-messages")
 								each message in systemMessages
 									.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
 								hr
@@ -25,7 +25,7 @@ block content
 									button.btn.btn-danger(type="submit") Clear all messages
 
 
-							tab(heading="Open Sockets")
+							tab(heading="Open Sockets" bookmarkable-tab="open-sockets")
 								.row-spaced
 									ul
 										each agents, url in openSockets
@@ -34,20 +34,29 @@ block content
 													each agent in agents
 														li(ng-non-bindable) #{agent}
 
-							tab(heading="Close Editor")
-								.row-spaced
-									form(method='post',action='/admin/closeEditor')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-danger(type="submit") Close Editor
-									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+							tab(heading="Open/Close Editor" bookmarkable-tab="open-close-editor")
+								if hasFeature('saas')
+									| The "Open/Close Editor" feature is not available in SAAS.
+								else
+									.row-spaced
+										form(method='post',action='/admin/closeEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Close Editor
+										p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
 
-								.row-spaced
-									form(method='post',action='/admin/dissconectAllUsers')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-danger(type="submit") Disconnect all users
-									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
+									.row-spaced
+										form(method='post',action='/admin/disconnectAllUsers')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Disconnect all users
+										p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
 
-							tab(heading="TPDS/Dropbox Management")
+									.row-spaced
+										form(method='post',action='/admin/openEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Reopen Editor
+										p.small Will reopen the editor after closing.
+
+							tab(heading="TPDS/Dropbox Management" bookmarkable-tab="tpds")
 								h3 Flush project to TPDS
 								.row
 									form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
