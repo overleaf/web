@@ -742,7 +742,7 @@
   "manage_subscription": "管理订购",
   "activate_account": "激活账户",
   "yes_please": "是",
-  "nearly_activated": "还有一步您的账户 your __appName__ account 就会被激活了！",
+  "nearly_activated": "还有一步您的 __appName__ 账户就会被激活了！",
   "please_set_a_password": "请设置密码",
   "activation_token_expired": "您的激活码已经过期，您需要另外一个",
   "activate": "激活",
