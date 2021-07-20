@@ -18,7 +18,12 @@ const AuditLogEntrySchema = new Schema({
 })
 
 const UserSchema = new Schema({
-  email: { type: String, default: '', maxlength: MAX_EMAIL_LENGTH },
+  email: {
+    type: String,
+    default: '',
+    maxlength: MAX_EMAIL_LENGTH,
+    unique: true
+  },
   emails: [
     {
       email: { type: String, default: '', maxlength: MAX_EMAIL_LENGTH },
